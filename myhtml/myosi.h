@@ -32,6 +32,8 @@ typedef struct myhtml_thread_list myhtml_thread_list_t;
 typedef struct myhtml_thread myhtml_thread_t;
 
 // tree
+typedef struct myhtml_tree_indexes myhtml_tree_indexes_t;
+
 typedef size_t myhtml_tree_index_t;
 
 typedef struct myhtml_tree_node myhtml_tree_node_t;
@@ -63,6 +65,10 @@ typedef struct myhtml_token_node myhtml_token_node_t;
 typedef struct myhtml_token myhtml_token_t;
 
 // tags
+typedef struct mytags_index_tag_node mytags_index_tag_node_t;
+typedef struct mytags_index_tag mytags_index_tag_t;
+typedef struct mytags_index mytags_index_t;
+
 typedef size_t mytags_ctx_index_t;
 typedef size_t mytags_tag_id_t;
 

@@ -20,7 +20,7 @@ myhtml_t * myhtml_init(size_t thread_count)
     myhtml_rules_init(myhtml);
     
     // and last, create threads
-    myhtml_thread_init(myhtml, "lastmac", 4, thread_count, myhtml_tree_stream, myhtml_tree_worker);
+    myhtml_thread_init(myhtml, "lastmac", 4, thread_count, myhtml_tree_stream, myhtml_tree_worker, myhtml_tree_index);
     
     myhtml_clean(myhtml);
     

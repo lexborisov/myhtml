@@ -24,7 +24,8 @@
 
 #define MyHTML_THREAD_MASTER_ID 0
 #define MyHTML_THREAD_STREAM_ID 1
-#define MyHTML_THREAD_WORKERS_BEGIN_ID 2
+#define MyHTML_THREAD_INDEX_ID  2
+#define MyHTML_THREAD_WORKERS_BEGIN_ID 3
 
 #define MyHTML_THREAD_SEM_NAME "/myhtmlthread"
 #define MyHTML_THREAD_SEM_MAX_NAME 128
@@ -75,7 +76,7 @@ struct myhtml_thread {
 };
 
 void myhtml_thread_init(myhtml_t* myhtml, const char* sem_prefix, size_t sem_prefix_length, size_t thread_count,
-                        myhtml_thread_f stream_func, myhtml_thread_f worker_func);
+                        myhtml_thread_f stream_func, myhtml_thread_f worker_func, myhtml_thread_f index_func);
 void myhtml_thread_clean(myhtml_thread_t* thread, size_t start_pos);
 void myhtml_thread_destroy(myhtml_t* myhtml);
 

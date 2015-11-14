@@ -54,6 +54,89 @@ mytags_t * mytags_destroy(mytags_t* mytags)
     return NULL;
 }
 
+mytags_index_t * mytags_index_create(mytags_t* mytags)
+{
+    mytags_index_t* idx_tags = (mytags_index_t*)calloc(1, sizeof(mytags_index_t));
+    return idx_tags;
+}
+
+void mytags_index_init(mytags_t* mytags, mytags_index_t* idx_tags)
+{
+    idx_tags->tag_nodes_obj = mcobject_create((4096 * 2), sizeof(mytags_index_tag_node_t), &idx_tags->nodes);
+    
+    idx_tags->tags_size = mytags->context_size;
+    idx_tags->tags_length = 0;
+    idx_tags->tags = (mytags_index_tag_t*)calloc(idx_tags->tags_size, sizeof(mytags_index_tag_t));
+}
+
+void mytags_index_tag_check_releadet_size(mytags_t* mytags, mytags_index_t* idx_tags)
+{
+    if(idx_tags->tags_size != mytags->context_size) {
+        idx_tags->tags_size = mytags->context_size;
+        
+        idx_tags->tags = (mytags_index_tag_t*)realloc(idx_tags->tags,
+                                                      sizeof(mytags_index_tag_t) *
+                                                      idx_tags->tags_size);
+    }
+}
+
+void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx, myhtml_token_index_t token_idx)
+{
+    mytags_index_tag_check_releadet_size(mytags, idx_tags);
+    
+    mytags_index_tag_t* tag = &idx_tags->tags[tag_ctx_idx];
+    mytags_index_tag_node_t* nodes = idx_tags->nodes;
+    
+    size_t node_idx = mcobject_malloc(idx_tags->tag_nodes_obj);
+    mytags_index_tag_clean(idx_tags, node_idx);
+    
+    if(tag->first == 0) {
+        tag->first = node_idx;
+        
+        nodes[node_idx].prev = 0;
+    }
+    else {
+        nodes[tag->last].next = node_idx;
+        nodes[node_idx].prev = tag->last;
+    }
+    
+    nodes[node_idx].next = 0;
+    nodes[node_idx].token_idx = token_idx;
+    
+    tag->last = node_idx;
+}
+
+size_t mytags_index_tag_get_first(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx)
+{
+    return idx_tags->tags[tag_ctx_idx].first;
+}
+
+size_t mytags_index_tag_get_last(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx)
+{
+    return idx_tags->tags[tag_ctx_idx].last;
+}
+
+size_t mytags_index_tag_get_from_node_id(mytags_index_t* idx_tags, size_t node_id, long long offset)
+{
+    mytags_index_tag_node_t* nodes = idx_tags->nodes;
+    
+    if(offset < 0)
+    {
+        while(offset && node_id) {
+            node_id = nodes[node_id].prev;
+            offset++;
+        }
+    }
+    else {
+        while(offset && node_id) {
+            node_id = nodes[node_id].next;
+            offset++;
+        }
+    }
+    
+    return node_id;
+}
+
 mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size, enum myhtml_parse_state data_parser)
 {
     // cache set

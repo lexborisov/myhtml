@@ -60,6 +60,10 @@ enum myhtml_tree_doctype_id {
     MyHTML_TREE_DOCTYPE_ID_PUBLIC = 0x02
 };
 
+struct myhtml_tree_indexes {
+    mytags_index_t* tags;
+};
+
 struct myhtml_tree {
     myhtml_token_t* token;
     myhtml_token_index_t token_current;
@@ -67,6 +71,8 @@ struct myhtml_tree {
     
     myhtml_tree_node_t* nodes;
     mcobject_t* nodes_obj; // myhtml_tree_node_t
+    
+    myhtml_tree_indexes_t* indexes;
     
     myhtml_tree_index_t current;
     myhtml_tree_index_t document;
@@ -87,8 +93,11 @@ myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree);
 
 void myhtml_tree_node_clean(myhtml_tree_node_t* tree_node);
 
+void myhtml_tree_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx);
 void myhtml_tree_stream(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx);
 void myhtml_tree_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx);
+
+myhtml_tree_indexes_t * myhtml_tree_index_create(myhtml_tree_t* tree, mytags_t* mytags);
 
 myhtml_tree_index_t myhtml_tree_node_create(myhtml_tree_t* tree);
 void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_index_t idx);

@@ -486,6 +486,7 @@ size_t myhtml_parse_state_data(myhtml_tree_t* tree, const char* html, size_t htm
                 myhtml_parse_queue_create_text_node_if_need(tree, html, html_offset - 1);
                 
                 mh_state_set(tree) = MyHTML_PARSE_STATE_TAG_OPEN;
+                mh_tree_token_current(tag_begin)     = html_offset - 1;
                 mh_tree_token_current(tagname_begin) = html_offset;
                 
                 html_offset++;

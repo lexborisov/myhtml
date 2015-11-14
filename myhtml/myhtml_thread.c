@@ -10,7 +10,7 @@
 
 // private functions
 void myhtml_thread_create_sem(myhtml_thread_t* thread, const char* sem_prefix, size_t sem_prefix_length, myhtml_thread_index_t thr_idx);
-void myhtml_thread_create_stream(myhtml_t* myhtml, const char* sem_prefix, size_t sem_prefix_length, myhtml_thread_f func);
+void myhtml_thread_create_stream(myhtml_t* myhtml, size_t ptr_id, const char* sem_prefix, size_t sem_prefix_length, myhtml_thread_f func);
 void myhtml_thread_create_master(myhtml_t* myhtml, const char* sem_prefix, size_t sem_prefix_length);
 void myhtml_thread_create_worker(myhtml_t* myhtml, myhtml_thread_index_t thr_idx, const char* sem_prefix, size_t sem_prefix_length, myhtml_thread_f func);
 
@@ -20,7 +20,7 @@ void myhtml_thread_stream_function(void* arg);
 
 // global functions
 void myhtml_thread_init(myhtml_t* myhtml, const char* sem_prefix, size_t sem_prefix_length, size_t thread_count,
-                        myhtml_thread_f stream_func, myhtml_thread_f worker_func)
+                        myhtml_thread_f stream_func, myhtml_thread_f worker_func, myhtml_thread_f index_func)
 {
     myhtml_thread_t* thread = (myhtml_thread_t*)malloc(sizeof(myhtml_thread_t));
     myhtml->thread = thread;
@@ -47,7 +47,8 @@ void myhtml_thread_init(myhtml_t* myhtml, const char* sem_prefix, size_t sem_pre
     }
     
     myhtml_thread_create_master(myhtml, sem_prefix, sem_prefix_length);
-    myhtml_thread_create_stream(myhtml, sem_prefix, sem_prefix_length, stream_func);
+    myhtml_thread_create_stream(myhtml, MyHTML_THREAD_STREAM_ID, sem_prefix, sem_prefix_length, stream_func);
+    myhtml_thread_create_stream(myhtml, MyHTML_THREAD_INDEX_ID , sem_prefix, sem_prefix_length, index_func);
 }
 
 void myhtml_thread_clean(myhtml_thread_t* thread, size_t start_pos)
@@ -96,32 +97,27 @@ void myhtml_thread_wait_all_for_done(myhtml_t* myhtml)
     myhtml_thread_t* thread = myhtml->thread;
     
     //const struct timespec tomeout = {0, 4000};
-    size_t counter = 0;
-    
-    while(myhtml_thread_master_get(thread, queue_pos) < myhtml->queue->nodes_length) {
-        counter++;
-        
-        if(counter > 100) {
-            counter = 0;
-        }
-    }
-    
-    while(myhtml_thread_stream_get(thread, queue_pos) < myhtml->queue->nodes_length) {
-        counter++;
-        
-        if(counter > 100) {
-            counter = 0;
-        }
-    }
-    
+    volatile size_t counter = 0;
     size_t i = 0;
-    for(counter = MyHTML_THREAD_WORKERS_BEGIN_ID; counter < thread->pth_list_length; counter++)
+    
+    for(i = MyHTML_THREAD_MASTER_ID; i < MyHTML_THREAD_WORKERS_BEGIN_ID; i++)
     {
-        while(myhtml_thread_get(thread, counter, queue_pos)) {
-            i++;
+        while(myhtml_thread_get(thread, i, queue_pos) < myhtml->queue->nodes_length) {
+            counter++;
             
             if(counter > 100) {
-                i = 0;
+                counter = 0;
+            }
+        }
+    }
+    
+    for(i = MyHTML_THREAD_WORKERS_BEGIN_ID; i < thread->pth_list_length; i++)
+    {
+        while(myhtml_thread_get(thread, i, queue_pos)) {
+            counter++;
+            
+            if(counter > 100) {
+                counter = 0;
             }
         }
     }
@@ -137,13 +133,12 @@ void myhtml_thread_stream_function(void* arg)
     myhtml_thread_t* thread = myhtml->thread;
     
     const struct timespec tomeout = {0, 4000};
+    volatile size_t counter = 0;
     
     sem_wait(myhtml_thread_stream_get(thread, sem));
     
     //TODO: nanosleep? must be removed
     do {
-        size_t counter = 0;
-        
         while(ctx->queue_pos >= myhtml->queue->nodes_length)
         {
             if(thread->is_quit)
@@ -189,7 +184,7 @@ void myhtml_thread_master_function(void* arg)
     
     //TODO: nanosleep, not sure it's right
     do {
-        size_t counter = 0;
+        volatile size_t counter = 0;
         
         while(ctx->queue_pos >= myhtml->queue->nodes_length)
         {
@@ -237,7 +232,7 @@ void myhtml_thread_master_function(void* arg)
         mh_queue_last(is_system) = mytrue;
         mh_queue_last(opt) = MyHTML_QUEUE_OPT_QUIT;
         
-        size_t counter = 0;
+        volatile size_t counter = 0;
         
         while(myhtml_thread_get(thread, i, queue_pos)) {
             counter++;
@@ -265,7 +260,7 @@ void myhtml_thread_worker_function(void* arg)
     
     while (1)
     {
-        size_t counter = 0;
+        volatile size_t counter = 0;
         
         while(ctx->queue_pos == 0) {
             counter++;
@@ -311,19 +306,19 @@ void myhtml_thread_create_sem(myhtml_thread_t* thread, const char* sem_prefix, s
     }
 }
 
-void myhtml_thread_create_stream(myhtml_t* myhtml, const char* sem_prefix, size_t sem_prefix_length, myhtml_thread_f func)
+void myhtml_thread_create_stream(myhtml_t* myhtml, size_t ptr_id, const char* sem_prefix, size_t sem_prefix_length, myhtml_thread_f func)
 {
-    myhtml_thread_stream_set(myhtml->thread, id       ) = MyHTML_THREAD_STREAM_ID;
-    myhtml_thread_stream_set(myhtml->thread, myhtml   ) = myhtml;
-    myhtml_thread_stream_set(myhtml->thread, queue_pos) = myhtml->queue->nodes_length;
-    myhtml_thread_stream_set(myhtml->thread, is_done  ) = mytrue;
-    myhtml_thread_stream_set(myhtml->thread, func     ) = func;
+    myhtml_thread_set(myhtml->thread, ptr_id, id       ) = ptr_id;
+    myhtml_thread_set(myhtml->thread, ptr_id, myhtml   ) = myhtml;
+    myhtml_thread_set(myhtml->thread, ptr_id, queue_pos) = myhtml->queue->nodes_length;
+    myhtml_thread_set(myhtml->thread, ptr_id, is_done  ) = mytrue;
+    myhtml_thread_set(myhtml->thread, ptr_id, func     ) = func;
     
-    myhtml_thread_create_sem(myhtml->thread, sem_prefix, sem_prefix_length, MyHTML_THREAD_STREAM_ID);
+    myhtml_thread_create_sem(myhtml->thread, sem_prefix, sem_prefix_length, ptr_id);
     
-    pthread_create(&myhtml_thread_stream(myhtml->thread, pth), &myhtml->thread->attr,
+    pthread_create(&myhtml_thread(myhtml->thread, ptr_id, pth), &myhtml->thread->attr,
                    (void*)myhtml_thread_stream_function,
-                   (void*)(&myhtml_thread_stream(myhtml->thread, data)));
+                   (void*)(&myhtml_thread(myhtml->thread, ptr_id, data)));
 }
 
 void myhtml_thread_create_master(myhtml_t* myhtml, const char* sem_prefix, size_t sem_prefix_length)

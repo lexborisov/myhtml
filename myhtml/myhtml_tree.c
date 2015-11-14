@@ -15,6 +15,7 @@ myhtml_tree_t * myhtml_tree_init(myhtml_t* myhtml)
     
     tree->nodes_obj   = mcobject_create(4096, sizeof(myhtml_tree_node_t), &tree->nodes);
     tree->token       = myhtml_token_create(4096 * 4);
+    tree->indexes     = myhtml_tree_index_create(tree, myhtml->tags);
     
     myhtml_tree_clean(tree);
     
@@ -66,6 +67,30 @@ void myhtml_tree_node_clean(myhtml_tree_node_t* tree_node)
     tree_node->parent        = 0;
     tree_node->last_child    = 0;
     tree_node->token         = 0;
+}
+
+myhtml_tree_indexes_t * myhtml_tree_index_create(myhtml_tree_t* tree, mytags_t* mytags)
+{
+    myhtml_tree_indexes_t* indexes = (myhtml_tree_indexes_t*)malloc(sizeof(myhtml_tree_indexes_t));
+    
+    indexes->tags = mytags_index_create(mytags);
+    mytags_index_init(mytags, indexes->tags);
+    
+    return indexes;
+}
+
+void myhtml_tree_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx)
+{
+    myhtml_t* myhtml = tree->myhtml;
+    mytags_t* mytags = myhtml->tags;
+    myhtml_tree_indexes_t* indexes = tree->indexes;
+    
+    myhtml_token_node_t* token = &tree->token->nodes[token_idx];
+    
+    mytags_index_tag_add(mytags, indexes->tags, token->tag_ctx_idx, token_idx);
+    
+    //tree->myhtml->insertion_func[tree->insert_mode](tree, qnode_idx);
+    //myhtml_token_print_by_idx(tree, token_idx, stdout);
 }
 
 void myhtml_tree_stream(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx)
