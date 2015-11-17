@@ -246,7 +246,7 @@ void myhtml_thread_master_function(void* arg)
         myhtml_thread_set(thread, i, queue_pos) = myhtml->queue->nodes_length;
         sem_post(myhtml_thread_get(thread, i, sem));
         
-        myhtml_queue_node_malloc(myhtml->queue, 0, 0, mytrue, MyHTML_QUEUE_OPT_QUIT, 0);
+        myhtml_queue_node_malloc(myhtml->queue, 0, 0, 0, mytrue, MyHTML_QUEUE_OPT_QUIT, 0);
     }
 }
 

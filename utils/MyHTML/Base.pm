@@ -58,6 +58,23 @@ sub read_tmpl {
         \@data;
 }
 
+sub format_list_text {
+        my ($self, $list, $join_val) = @_;
+        
+        my ($max, $len) = (0, 0);
+        foreach my $struct (@$list) {
+                $len = length($struct->[0]);
+                $max = $len if $len > $max;
+        }
+        
+        my @res;
+        foreach my $struct (@$list) {
+                $len = $max - length($struct->[0]);
+                push @res, sprintf("%s%$len"."s %s%s", $struct->[0], ($len ? " " : ""), $join_val, $struct->[1]);
+        }
+        
+        \@res;
+}
 
 1;
 

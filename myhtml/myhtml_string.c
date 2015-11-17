@@ -55,7 +55,7 @@ mybool_t myhtml_string_check(myhtml_string_t* str, size_t length, size_t up_to)
             up_to = 128;
         
         str->size = length + up_to;
-        char* tmp = (char*)realloc(str->data, str->size);
+        char* tmp = (char*)myrealloc(str->data, str->size);
         
         if(tmp)
             str->data = tmp;
@@ -63,16 +63,26 @@ mybool_t myhtml_string_check(myhtml_string_t* str, size_t length, size_t up_to)
             return myfalse;
     }
     
+    str->length = length;
+    
     return mytrue;
 }
 
 void myhtml_string_append(myhtml_string_t* str, const char* buff, size_t length)
 {
+    size_t begin = str->length;
     myhtml_string_check(str, length, (4096 * 20));
     
-    memcpy(&str->data[str->length], buff, (sizeof(char) * length));
+    memcpy(&str->data[begin], buff, (sizeof(char) * length));
+}
+
+void myhtml_string_append_with_null(myhtml_string_t* str, const char* buff, size_t length)
+{
+    size_t begin = str->length;
+    myhtml_string_check(str, (length + 1), (4096 * 20));
     
-    str->length += length;
+    memcpy(&str->data[begin], buff, (sizeof(char) * length));
+    str->data[length] = '\0';
 }
 
 void myhtml_string_append_one_without_check(myhtml_string_t* str, const char buff)
@@ -87,5 +97,19 @@ void myhtml_string_append_one(myhtml_string_t* str, const char buff)
     
     str->data[str->length] = buff;
     str->length++;
+}
+
+void myhtml_string_append_lowercase_with_null(myhtml_string_t* str, const char* buff, size_t length)
+{
+    size_t begin = str->length;
+    myhtml_string_check(str, (length + 1), (4096 * 20));
+    
+    char* cache = &str->data[begin];
+    
+    size_t i;
+    for(i = 0; i < length; i++) {
+        cache[i] = buff[i] > 0x40 && buff[i] < 0x5b ? (buff[i]|0x60) : buff[i];
+    }
+    cache[i] = '\0';
 }
 

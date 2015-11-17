@@ -16,11 +16,14 @@ myhtml_t * myhtml_init(size_t thread_count)
     myhtml->tags     = mytags_init();
     myhtml->queue    = myhtml_queue_create(4096);
     
-    myhtml_parse_state_init(myhtml);
+    myhtml_tokenizer_state_init(myhtml);
     myhtml_rules_init(myhtml);
     
     // and last, create threads
-    myhtml_thread_init(myhtml, "lastmac", 4, thread_count, myhtml_tree_stream, myhtml_tree_worker, myhtml_tree_index);
+    myhtml_thread_init(myhtml, "lastmac", 4, thread_count,
+                       myhtml_parser_stream,
+                       myhtml_parser_worker,
+                       myhtml_parser_index);
     
     myhtml_clean(myhtml);
     
@@ -39,7 +42,7 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
         return NULL;
     
     myhtml_thread_destroy(myhtml);
-    myhtml_parse_state_destroy(myhtml);
+    myhtml_tokenizer_state_destroy(myhtml);
     
     myhtml->tags  = mytags_destroy(myhtml->tags);
     myhtml->queue = myhtml_queue_destroy(myhtml->queue);
@@ -53,31 +56,32 @@ myhtml_tree_t * myhtml_parse(myhtml_t* myhtml, const char* html, size_t html_siz
 {
     myhtml_tree_t* tree = myhtml_tree_init(myhtml);
     
-    myhtml_parse_begin(myhtml, tree, html, html_size);
-    myhtml_parse_end(myhtml, tree);
+    myhtml_tokenizer_begin(myhtml, tree, html, html_size);
+    myhtml_tokenizer_end(myhtml, tree);
     
     return tree;
 }
 
-void myhtml_parse_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length)
+void myhtml_tokenizer_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length)
 {
     myhtml_queue_node_index_t qnode_idx = myhtml_queue_node_current(myhtml->queue);
     
     mh_queue_set(qnode_idx, html)        = html;
     mh_queue_set(qnode_idx, myhtml_tree) = tree;
+    
     mh_tree_set(queue) = myhtml_queue_node_current(myhtml->queue);
     
-    myhtml_parse_continue(myhtml, tree, html, html_length);
+    myhtml_tokenizer_continue(myhtml, tree, html, html_length);
 }
 
-void myhtml_parse_end(myhtml_t* myhtml, myhtml_tree_t* tree)
+void myhtml_tokenizer_end(myhtml_t* myhtml, myhtml_tree_t* tree)
 {
     myhtml_thread_wait_all_for_done(myhtml);
 }
 
-void myhtml_parse_continue(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length)
+void myhtml_tokenizer_continue(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length)
 {
-    myhtml_parse_state_f* state_f = myhtml->parse_state_func;
+    myhtml_tokenizer_state_f* state_f = myhtml->parse_state_func;
     
     mh_thread_master_done(myfalse);
     mh_thread_master_post();
@@ -87,18 +91,20 @@ void myhtml_parse_continue(myhtml_t* myhtml, myhtml_tree_t* tree, const char* ht
     
     size_t offset = 0;
     
+    myhtml_queue_t* queue = myhtml->queue;
+    
     while (offset < html_length) {
-        offset = state_f[tree->state](tree, html, offset, html_length);
+        offset = state_f[tree->state](tree, &queue->nodes[tree->queue], html, offset, html_length);
     }
 }
 
-void myhtml_parse_wait(myhtml_t* myhtml)
+void myhtml_tokenizer_wait(myhtml_t* myhtml)
 {
     mh_thread_master_done(mytrue);
     mh_thread_stream_done(mytrue);
 }
 
-void myhtml_parse_post(myhtml_t* myhtml)
+void myhtml_tokenizer_post(myhtml_t* myhtml)
 {
     mh_thread_master_done(myfalse);
     mh_thread_stream_done(myfalse);

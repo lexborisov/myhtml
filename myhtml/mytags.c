@@ -62,7 +62,7 @@ mytags_index_t * mytags_index_create(mytags_t* mytags)
 
 void mytags_index_init(mytags_t* mytags, mytags_index_t* idx_tags)
 {
-    idx_tags->tag_nodes_obj = mcobject_create((4096 * 2), sizeof(mytags_index_tag_node_t), &idx_tags->nodes);
+    idx_tags->tag_nodes_obj = mcobject_create((4096 * 2), sizeof(mytags_index_tag_node_t), &idx_tags->nodes, NULL);
     
     idx_tags->tags_size = mytags->context_size;
     idx_tags->tags_length = 0;
@@ -74,7 +74,7 @@ void mytags_index_tag_check_releadet_size(mytags_t* mytags, mytags_index_t* idx_
     if(idx_tags->tags_size != mytags->context_size) {
         idx_tags->tags_size = mytags->context_size;
         
-        idx_tags->tags = (mytags_index_tag_t*)realloc(idx_tags->tags,
+        idx_tags->tags = (mytags_index_tag_t*)myrealloc(idx_tags->tags,
                                                       sizeof(mytags_index_tag_t) *
                                                       idx_tags->tags_size);
     }
@@ -137,7 +137,7 @@ size_t mytags_index_tag_get_from_node_id(mytags_index_t* idx_tags, size_t node_i
     return node_id;
 }
 
-mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size, enum myhtml_parse_state data_parser)
+mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size, enum myhtml_tokenizer_state data_parser)
 {
     // cache set
     size_t cache_begin = mytags->cache_name_length;
@@ -146,7 +146,7 @@ mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size
     
     if(mytags->cache_name_length >= mytags->cache_name_size) {
         mytags->cache_name_size = mytags->cache_name_length + (4096 * 12);
-        mytags->cache_name = (char*)realloc(mytags->cache_name, // char is always 1
+        mytags->cache_name = (char*)myrealloc(mytags->cache_name, // char is always 1
                                             sizeof(char) * mytags->cache_name_size);
     }
     

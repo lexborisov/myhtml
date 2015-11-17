@@ -13,7 +13,7 @@
 
 #include "mctree.h"
 #include "mytags_const.h"
-#include "myhtml_parse.h"
+#include "myhtml_tokenizer.h"
 #include "mcobject.h"
 
 #define mytags_get(__mytags__, __idx__, __attr__) __mytags__->context[__idx__].__attr__
@@ -23,13 +23,13 @@
 #define mytags_context_clean(__mytags__, __idx__)                        \
     __mytags__->context[__idx__].id          = 0;                        \
     __mytags__->context[__idx__].mctree_id   = 0;                        \
-    __mytags__->context[__idx__].data_parser = MyHTML_PARSE_STATE_DATA;
+    __mytags__->context[__idx__].data_parser = MyHTML_TOKENIZER_STATE_DATA;
 
 #define mytags_context_add(__mytags__)                                         \
     __mytags__->context_length++;                                              \
     if(__mytags__->context_length == __mytags__->context_size) {               \
         __mytags__->context_size += 4096;                                      \
-        __mytags__->context = (mytags_context_t*)realloc(__mytags__->context,  \
+        __mytags__->context = (mytags_context_t*)myrealloc(__mytags__->context,  \
             sizeof(mytags_context_t) * __mytags__->context_size);              \
     }                                                                          \
     mytags_context_clean(__mytags__, __mytags__->context_length)
@@ -90,7 +90,7 @@ void mytags_init_tags(mytags_t* tags);
 void mytags_clean(mytags_t* mytags);
 mytags_t * mytags_destroy(mytags_t* mytags);
 
-mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size, enum myhtml_parse_state data_parser);
+mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size, enum myhtml_tokenizer_state data_parser);
 
 mytags_index_t * mytags_index_create(mytags_t* mytags);
 void mytags_index_init(mytags_t* mytags, mytags_index_t* idx_tags);

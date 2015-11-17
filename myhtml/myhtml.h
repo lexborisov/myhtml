@@ -14,7 +14,8 @@
 #include "mctree.h"
 #include "mytags.h"
 #include "myhtml_def.h"
-#include "myhtml_parse.h"
+#include "myhtml_parser.h"
+#include "myhtml_tokenizer.h"
 #include "myhtml_thread.h"
 #include "myhtml_tree.h"
 #include "myhtml_rules.h"
@@ -48,11 +49,13 @@
 #define mh_queue_last(__attr__) myhtml->queue->nodes[myhtml_queue_node_current(myhtml->queue)].__attr__
 #define mh_queue_get(__idx__, __attr__) myhtml->queue->nodes[__idx__].__attr__
 #define mh_queue_set(__idx__, __attr__) mh_queue_get(__idx__, __attr__)
+#define mh_queue_current_get(__attr__) mh_queue_get(mh_queue_current(), __attr__)
+#define mh_queue_current_set(__attr__) mh_queue_current_get(__attr__)
 
-#define mh_queue_add(__tree__, __html__, __qnode_idx__, __tag_begin__)                                  \
-    mh_queue_set(__qnode_idx__, token_idx) = mh_tree_token_current_index();                             \
-    myhtml_token_node_malloc(__tree__->token, __tag_begin__, mh_tree_token_current_index());            \
-    myhtml_queue_node_malloc(myhtml->queue, __html__, mh_tree_token_current_index(), myfalse, 0, tree); \
+#define mh_queue_add(__tree__, __html__, __qnode_idx__, __begin__)                                                 \
+    mh_queue_set(__qnode_idx__, token_idx) = mh_tree_token_current_index();                                        \
+    myhtml_token_node_malloc(__tree__->token, mh_tree_token_current_index());                                      \
+    myhtml_queue_node_malloc(myhtml->queue, __html__, __begin__, mh_tree_token_current_index(), myfalse, 0, tree); \
     __qnode_idx__ = myhtml_queue_node_current(myhtml->queue)
 
 #define mh_token_get(__idx__, __attr__) tree->token->nodes[__idx__].__attr__
@@ -92,7 +95,7 @@ struct myhtml {
     myhtml_queue_t    *queue;
     myhtml_thread_t   *thread;
     
-    myhtml_parse_state_f* parse_state_func;
+    myhtml_tokenizer_state_f* parse_state_func;
     myhtml_insertion_f* insertion_func;
 };
 
@@ -102,11 +105,11 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml);
 
 myhtml_tree_t * myhtml_parse(myhtml_t* myhtml, const char* html, size_t html_size);
 
-void myhtml_parse_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length);
-void myhtml_parse_end(myhtml_t* myhtml, myhtml_tree_t* tree);
-void myhtml_parse_continue(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length);
-void myhtml_parse_wait(myhtml_t* myhtml);
-void myhtml_parse_post(myhtml_t* myhtml);
+void myhtml_tokenizer_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length);
+void myhtml_tokenizer_end(myhtml_t* myhtml, myhtml_tree_t* tree);
+void myhtml_tokenizer_continue(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length);
+void myhtml_tokenizer_wait(myhtml_t* myhtml);
+void myhtml_tokenizer_post(myhtml_t* myhtml);
 
 mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 

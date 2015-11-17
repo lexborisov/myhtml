@@ -30,8 +30,11 @@ struct res_html load_html(const char* filename)
     return res;
 }
 
-void print_token_by_index(mytags_t* tags, myhtml_token_t* token, myhtml_tree_indexes_t* indexes, mytags_ctx_index_t tag_ctx_idx)
+void print_token_by_index(myhtml_tree_t* tree, mytags_ctx_index_t tag_ctx_idx)
 {
+    mytags_t* tags = tree->myhtml->tags;
+    myhtml_tree_indexes_t* indexes = tree->indexes;
+    
     mctree_node_t* mctree_nodes = tags->tree->nodes;
     size_t mctree_id = mytags_get(tags, tag_ctx_idx, mctree_id);
     size_t tag_name_size = mctree_nodes[mctree_id].str_size;
@@ -44,19 +47,7 @@ void print_token_by_index(mytags_t* tags, myhtml_token_t* token, myhtml_tree_ind
     {
         size_t token_idx = mytags_index_tag_node_attr(indexes->tags, node_id, token_idx);
         
-        printf("\tbegin: %lu; length: %lu",
-               token->nodes[token_idx].tag_begin,
-               token->nodes[token_idx].tag_length);
-        
-        if(myhtml_token_node_get(token, token_idx, type) == MyHTML_TOKEN_TYPE_CLOSE) {
-            printf("; close\n");
-        }
-        else if(myhtml_token_node_get(token, token_idx, type) == MyHTML_TOKEN_TYPE_CLOSE_SELF) {
-            printf("; close self\n");
-        }
-        else {
-            printf("\n");
-        }
+        myhtml_token_print_by_idx(tree, token_idx, stdout);
         
         node_id = mytags_index_tag_node_attr(indexes->tags, node_id, next);
     }
@@ -68,10 +59,10 @@ int main(int argc, const char * argv[])
     
     myhtml_t* myhtml = myhtml_init(4);
     
-    //struct res_html res = load_html("/new/C/myhtml/test/test.html");
-    //struct res_html res = load_html("/new/C/myhtml/test/broken.html");
-    struct res_html res = load_html("/new/C/myhtml/test/test_full.html");
-    //struct res_html res = load_html("/new/C/myhtml/test/script.html");
+    //struct res_html res = load_html("/new/C-git/myhtml/test/test.html");
+    //struct res_html res = load_html("/new/C-git/myhtml/test/broken.html");
+    struct res_html res = load_html("/new/C-git/myhtml/test/test_full.html");
+    //struct res_html res = load_html("/new/C-git/myhtml/test/script.html");
     
     uint64_t all_start = myhtml_rdtsc();
     
@@ -84,8 +75,8 @@ int main(int argc, const char * argv[])
     
     for(size_t i = 1; i < 2; i++)
     {
-        myhtml_parse_begin(myhtml, tree, res.html, res.size);
-        myhtml_parse_end(myhtml, tree);
+        myhtml_tokenizer_begin(myhtml, tree, res.html, res.size);
+        myhtml_tokenizer_end(myhtml, tree);
         
         //myhtml_tree_t* tree = myhtml_parse(myhtml, res.html, res.size);
         //myhtml_tree_destroy(tree);
@@ -97,7 +88,7 @@ int main(int argc, const char * argv[])
     uint64_t parse_stop = myhtml_rdtsc();
     uint64_t all_stop = myhtml_rdtsc();
     
-    print_token_by_index(myhtml->tags, tree->token, tree->indexes, MyTAGS_TAG_A);
+    print_token_by_index(tree, MyTAGS_TAG__TEXT);
     
     printf("\n\nInformation:\n");
     printf("Timer:\n");
@@ -105,10 +96,6 @@ int main(int argc, const char * argv[])
     myhtml_rdtsc_print("\tParse html", parse_start, parse_stop);
     myhtml_rdtsc_print("\tTotal", all_start, all_stop);
     printf("\n");
-    
-    //usleep(999126226);
-    
-    //usleep(5000000000);
     
     myhtml_destroy(myhtml);
     free(res.html);

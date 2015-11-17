@@ -26,7 +26,7 @@ void myhtml_queue_clean(myhtml_queue_t* queue)
     queue->nodes_length = 0;
     myhtml_queue_node_clean(&queue->nodes[myhtml_queue_node_current(queue)]);
     
-    myhtml_queue_node_malloc(queue, 0, 0, myfalse, 0, 0);
+    myhtml_queue_node_malloc(queue, 0, 0, 0, myfalse, 0, 0);
     queue->nodes_root = myhtml_queue_node_current(queue);
 }
 
@@ -45,6 +45,8 @@ void myhtml_queue_node_clean(myhtml_queue_node_t* qnode)
 {
     qnode->html           = NULL;
     qnode->token_idx      = 0;
+    qnode->begin          = 0;
+    qnode->length         = 0;
     qnode->is_system      = myfalse;
     qnode->opt            = MyHTML_QUEUE_OPT_CLEAN;
     qnode->myhtml_tree    = NULL;

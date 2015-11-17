@@ -11,9 +11,8 @@ my $data_const = $utils->read_tmpl("mytags_const.h");
 my $tags = $utils->read_tmpl("mytags.txt");
 
 my @body;
-my @body_const;
 
-my $count = 0;
+my $count = 0; my @list;
 foreach my $line (@$tags) {
         next unless $line;
         
@@ -30,23 +29,24 @@ foreach my $line (@$tags) {
         push @body, "\t". qq~mytags_add(tags, "$tagname", ~. length($tagname) .qq~, $parse_tag_data);~;
         
         if($tagname eq "!--") {
-                push @body_const, "// comment tag <!-->";
                 $tagname = "_comment";
         }
         
         $tagname =~ s/[\-!?]/_/g;
         $tagname = uc($tagname);
         
-        push @body_const, "\t". qq~MyTAGS_TAG_$tagname = $count~;
+        push @list, ["MyTAGS_TAG_$tagname", sprintf("0x%03x", $count)];
 }
 
 $count++;
 
-push @body_const, "\t". "MyTAGS_TAG_FIRST_ENTRY = 1";
-push @body_const, "\t". "MyTAGS_TAG_LAST_ENTRY = $count";
+push @list, ["MyTAGS_TAG_FIRST_ENTRY", $list[0]->[0]];
+push @list, ["MyTAGS_TAG_LAST_ENTRY", sprintf("0x%03x", $count)];
+
+my $res = $utils->format_list_text(\@list, "= ");
 
 my $args = {BODY => \@body};
-my $args_const = {BODY => join ",\n", @body_const};
+my $args_const = {BODY => "\t". join ",\n\t", @$res};
 
 $utils->save_src("mytags_const.h", $data_const, $args_const);
 $utils->save_src("mytags_init.c", $data, $args);

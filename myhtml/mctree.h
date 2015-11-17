@@ -9,6 +9,7 @@
 #ifndef __mchtml__mctree__
 #define __mchtml__mctree__
 
+#include "myosi.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -27,7 +28,7 @@
     __mctree__->nodes_length++;                                         \
     if(__mctree__->nodes_length == __mctree__->nodes_size) {            \
         __mctree__->nodes_size += 4096;                                 \
-        __mctree__->nodes = (mctree_node_t*)realloc(__mctree__->nodes,  \
+        __mctree__->nodes = (mctree_node_t*)myrealloc(__mctree__->nodes,  \
             sizeof(mctree_node_t) * __mctree__->nodes_size);            \
     }                                                                   \
     mctree_node_clean(__mctree__, __mctree__->nodes_length)
