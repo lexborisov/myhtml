@@ -21,8 +21,7 @@ void myhtml_parser_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_id
 
 void myhtml_parser_stream(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx)
 {
-    //tree->myhtml->insertion_func[tree->insert_mode](tree, qnode_idx);
-    //myhtml_token_print_by_idx(tree, token_idx, stdout);
+    while(tree->myhtml->insertion_func[tree->insert_mode](tree, token_idx)){}
 }
 
 void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx)
@@ -90,9 +89,9 @@ void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_i
         }
     }
     
-    pthread_mutex_lock(&tree->myhtml->thread->global_mutex);
-    myhtml_token_print_by_idx(tree, token_idx, stdout);
-    pthread_mutex_unlock(&tree->myhtml->thread->global_mutex);
+//    pthread_mutex_lock(&tree->myhtml->thread->global_mutex);
+//    myhtml_token_print_by_idx(tree, token_idx, stdout);
+//    pthread_mutex_unlock(&tree->myhtml->thread->global_mutex);
 }
 
 

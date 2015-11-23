@@ -21,6 +21,8 @@
 #define myhtml_tree_token_current(__tree__) myhtml_tree_get(__tree__, token_current)
 #define myhtml_tree_token_attr_current(__tree__) myhtml_tree_get(__tree__, attr_current)
 
+#define myhtml_tree_node_get(__tree__, __node_id__, __attr__) __tree__->nodes[__node_id__].__attr__
+
 enum myhtml_tree_node_type {
     MyHTML_TYPE_NONE    = 0,
     MyHTML_TYPE_BLOCK   = 1,
@@ -38,6 +40,8 @@ enum myhtml_close_type {
 };
 
 struct myhtml_tree_node {
+    mytags_ctx_index_t tag_idx;
+    
     myhtml_tree_index_t prev;                // предыдущий ид элемента этого же уровня
     myhtml_tree_index_t next;                // следеющий ид эелента этого же уровня
     myhtml_tree_index_t child;               // ид чилда
@@ -58,6 +62,12 @@ enum myhtml_tree_doctype_id {
     MyHTML_TREE_DOCTYPE_ID_NAME   = 0x00,
     MyHTML_TREE_DOCTYPE_ID_SYSTEM = 0x01,
     MyHTML_TREE_DOCTYPE_ID_PUBLIC = 0x02
+};
+
+enum myhtml_tree_flags {
+    MyHTML_TREE_FLAGS_CLEAN        = 0x00,
+    MyHTML_TREE_FLAGS_SCRIPT       = 0x01,
+    MyHTML_TREE_FLAGS_FRAMESET_OK  = 0x02
 };
 
 struct myhtml_tree_indexes {
@@ -82,7 +92,9 @@ struct myhtml_tree {
     
     enum myhtml_tokenizer_state state;
     enum myhtml_insertion_mode insert_mode;
+    enum myhtml_insertion_mode orig_insert_mode;
     enum myhtml_tree_compat_mode compat_mode;
+    enum myhtml_tree_flags flags;
     
     myhtml_t* myhtml;
     mytags_ctx_index_t tmp_tag_id;
@@ -99,6 +111,8 @@ myhtml_tree_indexes_t * myhtml_tree_index_create(myhtml_tree_t* tree, mytags_t* 
 
 myhtml_tree_index_t myhtml_tree_node_create(myhtml_tree_t* tree);
 void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_index_t idx);
+
+void myhtml_tree_print_by_tree_idx(myhtml_tree_t* tree, myhtml_tree_index_t idx, FILE* out, size_t inc);
 
 void myhtml_tree_node_add_child(myhtml_tree_t* myhtml_tree, myhtml_tree_index_t root, myhtml_tree_index_t idx);
 void myhtml_tree_node_insert_before(myhtml_tree_t* myhtml_tree, myhtml_tree_index_t root, myhtml_tree_index_t idx);

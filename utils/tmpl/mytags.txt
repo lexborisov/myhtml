@@ -19,7 +19,7 @@ bgsound:
 big: 
 blink: 
 blockquote: 
-body: 
+body:
 br: 
 button: 
 canvas: 
@@ -35,7 +35,8 @@ datalist:
 dd: 
 del: 
 details: 
-dfn: 
+dfn:
+dialog:
 dir: 
 div: 
 dl: 
@@ -62,7 +63,8 @@ hgroup:
 hr: 
 html: 
 i: 
-iframe: 
+iframe:
+image:
 img: 
 input: 
 ins: 
@@ -72,18 +74,22 @@ keygen:
 label: 
 legend: 
 li: 
-link: 
+link:
+listing:
+main:
 map: 
 mark: 
 marquee: 
-menu: 
-meta: 
-meter: 
+menu:
+menuitem:
+meta:
+meter:
+math:
 nav: 
 nobr: 
 noembed: 
-noframes: MyHTML_PARSE_STATE_RAWTEXT
-noscript: MyHTML_PARSE_STATE_RAWTEXT
+noframes: MyHTML_TOKENIZER_STATE_RAWTEXT
+noscript: MyHTML_TOKENIZER_STATE_RAWTEXT
 object: 
 ol: 
 optgroup: 
@@ -91,16 +97,18 @@ option:
 output: 
 p: 
 param: 
-plaintext: MyHTML_PARSE_STATE_PLAINTEXT
+plaintext: MyHTML_TOKENIZER_STATE_PLAINTEXT
 pre: 
 progress: 
-q: 
+q:
+rb:
 rp: 
-rt: 
+rt:
+rtc:
 ruby: 
-s: 
-samp: 
-script: MyHTML_PARSE_STATE_SCRIPT_DATA
+s:
+samp:
+script: MyHTML_TOKENIZER_STATE_SCRIPT_DATA
 section: 
 select: 
 small: 
@@ -108,19 +116,21 @@ source:
 span: 
 strike: 
 strong: 
-style: MyHTML_PARSE_STATE_RAWTEXT
+style: MyHTML_TOKENIZER_STATE_RAWTEXT
 sub: 
 summary: 
-sup: 
+sup:
+svg:
 table: 
 tbody: 
-td: 
-textarea: MyHTML_PARSE_STATE_RCDATA
+td:
+template:
+textarea: MyHTML_TOKENIZER_STATE_RCDATA
 tfoot: 
 th: 
 thead: 
 time: 
-title: MyHTML_PARSE_STATE_RCDATA
+title: MyHTML_TOKENIZER_STATE_RCDATA
 tr: 
 track: 
 tt: 

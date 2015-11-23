@@ -28,14 +28,19 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
 {
     mcobject_clean(tree->nodes_obj);
     
+    // null root
+    myhtml_tree_node_create(tree);
+    
     tree->current  = myhtml_tree_node_create(tree);
     tree->document = tree->current;
     
-    tree->state       = MyHTML_TOKENIZER_STATE_DATA;
-    tree->insert_mode = MyHTML_INSERTION_MODE_INITIAL;
-    tree->queue       = 0;
-    tree->compat_mode = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
-    tree->tmp_tag_id  = 0;
+    tree->state            = MyHTML_TOKENIZER_STATE_DATA;
+    tree->insert_mode      = MyHTML_INSERTION_MODE_INITIAL;
+    tree->orig_insert_mode = MyHTML_INSERTION_MODE_INITIAL;
+    tree->queue            = 0;
+    tree->compat_mode      = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
+    tree->tmp_tag_id       = 0;
+    tree->flags            = MyHTML_TREE_FLAGS_CLEAN;
     
     myhtml_token_clean(tree->token);
     
@@ -61,6 +66,7 @@ myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree)
 
 void myhtml_tree_node_clean(myhtml_tree_node_t* tree_node)
 {
+    tree_node->tag_idx       = 0;
     tree_node->prev          = 0;
     tree_node->next          = 0;
     tree_node->child         = 0;
@@ -150,5 +156,23 @@ void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_index_t idx)
         mcobject_free(tree->nodes_obj, idx);
     }
 }
+
+void myhtml_tree_print_by_tree_idx(myhtml_tree_t* tree, myhtml_tree_index_t idx, FILE* out, size_t inc)
+{
+    size_t i;
+    
+    while(idx)
+    {
+        for(i = 0; i < inc; i++)
+            fprintf(out, "\t");
+        
+        myhtml_token_print_by_idx(tree, tree->nodes[idx].token, out);
+        myhtml_tree_print_by_tree_idx(tree, tree->nodes[idx].child, out, (inc + 1));
+        
+        idx = tree->nodes[idx].next;
+    }
+}
+
+
 
 

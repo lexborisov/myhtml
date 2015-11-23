@@ -48,6 +48,7 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "del", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "details", 7, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "dfn", 3, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "dialog", 6, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "dir", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "div", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "dl", 2, MyHTML_TOKENIZER_STATE_DATA);
@@ -75,6 +76,7 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "html", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "i", 1, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "iframe", 6, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "image", 5, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "img", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "input", 5, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "ins", 3, MyHTML_TOKENIZER_STATE_DATA);
@@ -85,12 +87,16 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "legend", 6, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "li", 2, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "link", 4, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "listing", 7, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "main", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "map", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "mark", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "marquee", 7, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "menu", 4, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "menuitem", 8, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "meta", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "meter", 5, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "math", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "nav", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "nobr", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "noembed", 7, MyHTML_TOKENIZER_STATE_DATA);
@@ -107,8 +113,10 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "pre", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "progress", 8, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "q", 1, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "rb", 2, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "rp", 2, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "rt", 2, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "rtc", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "ruby", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "s", 1, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "samp", 4, MyHTML_TOKENIZER_STATE_DATA);
@@ -124,9 +132,11 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "sub", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "summary", 7, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "sup", 3, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "svg", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "table", 5, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "tbody", 5, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "td", 2, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "template", 8, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "textarea", 8, MyHTML_TOKENIZER_STATE_RCDATA);
 	mytags_add(tags, "tfoot", 5, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "th", 2, MyHTML_TOKENIZER_STATE_DATA);

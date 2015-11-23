@@ -186,7 +186,7 @@ typedef size_t (*myhtml_tokenizer_state_f)(myhtml_tree_t* tree, myhtml_queue_nod
 typedef void (*myhtml_thread_f)(myhtml_tree_t* tree, myhtml_queue_node_index_t qnode_idx, myhtml_token_index_t token_idx);
 
 // parser insertion mode function
-typedef void (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_index_t token_idx);
+typedef mybool_t (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_index_t token_idx);
 
 void* myrealloc(void* dst, size_t size);
 

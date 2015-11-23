@@ -16,7 +16,7 @@ my $count = 0; my @list;
 foreach my $line (@$tags) {
         next unless $line;
         
-        my $parse_tag_data = "MyHTML_PARSE_STATE_DATA";
+        my $parse_tag_data = "MyHTML_TOKENIZER_STATE_DATA";
         
         my ($tagname, $args) = split /\:\s*/, $line, 2;
         my @options = split /\s*,\s*/, $args;
