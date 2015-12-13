@@ -21,7 +21,7 @@ struct res_html load_html(const char* filename)
     long l = ftell(f); // именно такой размер у файла
     fseek(f, 0L, SEEK_SET);
     
-    char *html = (char*)malloc(l);
+    char *html = (char*)mymalloc(l);
     fread(html, 1, l, f);
     
     fclose(f);
@@ -45,9 +45,9 @@ void print_token_by_index(myhtml_tree_t* tree, mytags_ctx_index_t tag_ctx_idx)
     size_t node_id = mytags_index_tag_get_first(indexes->tags, tag_ctx_idx);
     while (node_id)
     {
-        size_t token_idx = mytags_index_tag_node_attr(indexes->tags, node_id, token_idx);
+        myhtml_token_node_t* token = mytags_index_tag_node_attr(indexes->tags, node_id, token);
         
-        myhtml_token_print_by_idx(tree, token_idx, stdout);
+        myhtml_token_print_by_idx(tree, token, stdout);
         
         node_id = mytags_index_tag_node_attr(indexes->tags, node_id, next);
     }
@@ -57,11 +57,11 @@ int main(int argc, const char * argv[])
 {
     setbuf(stdout, 0);
     
-    myhtml_t* myhtml = myhtml_init(4);
+    myhtml_t* myhtml = myhtml_init(1);
     
     //struct res_html res = load_html("/new/C-git/myhtml/test/test.html");
-    //struct res_html res = load_html("/new/C-git/myhtml/test/broken.html");
-    struct res_html res = load_html("/new/C-git/myhtml/test/test_full.html");
+    struct res_html res = load_html("/new/C-git/myhtml/test/broken.html");
+    //struct res_html res = load_html("/new/C-git/myhtml/test/test_full.html");
     //struct res_html res = load_html("/new/C-git/myhtml/test/script.html");
     
     uint64_t all_start = myhtml_rdtsc();
@@ -81,14 +81,15 @@ int main(int argc, const char * argv[])
         //myhtml_tree_t* tree = myhtml_parse(myhtml, res.html, res.size);
         //myhtml_tree_destroy(tree);
         
+        //print_token_by_index(tree, MyTAGS_TAG__TEXT);
+        myhtml_tree_print_by_tree_idx(tree, tree->document->child, stdout, 0);
+        
         myhtml_clean(myhtml);
         myhtml_tree_clean(tree);
     }
     
     uint64_t parse_stop = myhtml_rdtsc();
     uint64_t all_stop = myhtml_rdtsc();
-    
-    print_token_by_index(tree, MyTAGS_TAG__TEXT);
     
     printf("\n\nInformation:\n");
     printf("Timer:\n");
@@ -102,5 +103,7 @@ int main(int argc, const char * argv[])
     
     return 0;
 }
+
+
 
 

@@ -11,18 +11,19 @@
 
 mytags_t * mytags_init(void)
 {
-    mytags_t* mytags = (mytags_t*)malloc(sizeof(mytags_t));
+    mytags_t* mytags = (mytags_t*)mymalloc(sizeof(mytags_t));
     
     mytags->context_size = 4096;
-    mytags->context = (mytags_context_t*)malloc(sizeof(mytags_context_t) * mytags->context_size);
+    mytags->context = (mytags_context_t*)mymalloc(sizeof(mytags_context_t) * mytags->context_size);
     
     mytags->cache_name_size = mytags->context_size * 12;
-    mytags->cache_name = (char*)malloc(sizeof(char) * mytags->cache_name_size);
+    mytags->cache_name = (char*)mymalloc(sizeof(char) * mytags->cache_name_size);
     
     mytags->tree = mctree_create(32);
     
     mytags_clean(mytags);
     mytags_init_tags(mytags);
+    mytags_init_tags_categories(mytags);
     
     return mytags;
 }
@@ -80,11 +81,11 @@ void mytags_index_tag_check_releadet_size(mytags_t* mytags, mytags_index_t* idx_
     }
 }
 
-void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx, myhtml_token_index_t token_idx)
+void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, myhtml_token_node_t* token)
 {
     mytags_index_tag_check_releadet_size(mytags, idx_tags);
     
-    mytags_index_tag_t* tag = &idx_tags->tags[tag_ctx_idx];
+    mytags_index_tag_t* tag = &idx_tags->tags[token->tag_ctx_idx];
     mytags_index_tag_node_t* nodes = idx_tags->nodes;
     
     size_t node_idx = mcobject_malloc(idx_tags->tag_nodes_obj);
@@ -101,7 +102,7 @@ void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, mytags_ctx
     }
     
     nodes[node_idx].next = 0;
-    nodes[node_idx].token_idx = token_idx;
+    nodes[node_idx].token = token;
     
     tag->last = node_idx;
 }
@@ -137,7 +138,8 @@ size_t mytags_index_tag_get_from_node_id(mytags_index_t* idx_tags, size_t node_i
     return node_id;
 }
 
-mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size, enum myhtml_tokenizer_state data_parser)
+mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size,
+                              enum myhtml_tokenizer_state data_parser)
 {
     // cache set
     size_t cache_begin = mytags->cache_name_length;
@@ -147,7 +149,7 @@ mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size
     if(mytags->cache_name_length >= mytags->cache_name_size) {
         mytags->cache_name_size = mytags->cache_name_length + (4096 * 12);
         mytags->cache_name = (char*)myrealloc(mytags->cache_name, // char is always 1
-                                            sizeof(char) * mytags->cache_name_size);
+                                              sizeof(char) * mytags->cache_name_size);
     }
     
     char* cache = &mytags->cache_name[cache_begin];
@@ -165,9 +167,19 @@ mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size
     mytags->context[new_ctx_id].mctree_id   = mctree_insert(mytags->tree, cache, key_size, (void *)new_ctx_id, NULL);
     mytags->context[new_ctx_id].data_parser = data_parser;
     
+    memset(mytags->context[new_ctx_id].cats, 0,
+           sizeof(enum mytags_categories) *
+           MyHTML_NAMESPACE_LAST_ENTRY);
+    
     mytags_context_add(mytags);
     
     return new_ctx_id;
+}
+
+void mytags_set_category(mytags_t* mytags, mytags_ctx_index_t tag_idx,
+                                       enum myhtml_namespace my_namespace, enum mytags_categories cats)
+{
+    mytags->context[tag_idx].cats[my_namespace] = cats;
 }
 
 void mytags_print(mytags_t* mytags, FILE* fh)

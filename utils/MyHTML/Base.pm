@@ -48,7 +48,8 @@ sub read_tmpl {
 
         while (my $line = <$fh>)
         {
-                chop $line;
+                $line =~ s/\s+$//;
+                $line =~ s/^\s+//;
                 
                 push @data, $line;
         }

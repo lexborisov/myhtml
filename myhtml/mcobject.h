@@ -26,7 +26,7 @@ struct mcobject {
     
     size_t* cache;
     size_t  cache_length;
-    size_t  last_length;
+    volatile size_t last_length;
     
     size_t  struct_size;
     
@@ -40,6 +40,10 @@ mcobject_t * mcobject_destroy(mcobject_t* mcobject);
 size_t mcobject_malloc(mcobject_t* mcobject);
 void mcobject_free(mcobject_t* mcobject, size_t idx);
 
+void mcobject_malloc_segment(mcobject_t* mcobject, size_t *list, size_t count);
+void mcobject_free_segment(mcobject_t* mcobject, size_t *list, size_t length);
+
+void mcobject_call_callback_new(mcobject_t* mcobject, size_t idx);
 size_t mcobject_length(mcobject_t* mcobject);
 
 #endif /* mcobject_h */

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E0923121C03D45A0020BCBD /* mcsync.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E0923101C03D45A0020BCBD /* mcsync.c */; };
+		0E0923151C05128D0020BCBD /* mcobject_async.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E0923131C05128D0020BCBD /* mcobject_async.c */; };
 		0E7BC5511BF98B5400178C69 /* myosi.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E7BC5501BF98B5400178C69 /* myosi.c */; };
 		0E7BC5541BFB254500178C69 /* myhtml_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E7BC5521BFB254500178C69 /* myhtml_parser.c */; };
 		0EE004B61BEFF0850084C362 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EE004B51BEFF0850084C362 /* main.c */; };
@@ -39,6 +41,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0E0923101C03D45A0020BCBD /* mcsync.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mcsync.c; sourceTree = "<group>"; };
+		0E0923111C03D45A0020BCBD /* mcsync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mcsync.h; sourceTree = "<group>"; };
+		0E0923131C05128D0020BCBD /* mcobject_async.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mcobject_async.c; sourceTree = "<group>"; };
+		0E0923141C05128D0020BCBD /* mcobject_async.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mcobject_async.h; sourceTree = "<group>"; };
 		0E7BC5501BF98B5400178C69 /* myosi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = myosi.c; sourceTree = "<group>"; };
 		0E7BC5521BFB254500178C69 /* myhtml_parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = myhtml_parser.c; sourceTree = "<group>"; };
 		0E7BC5531BFB254500178C69 /* myhtml_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myhtml_parser.h; sourceTree = "<group>"; };
@@ -157,8 +163,12 @@
 			children = (
 				0EE004E61BEFF1140084C362 /* mcobject.h */,
 				0EE004E51BEFF1140084C362 /* mcobject.c */,
+				0E0923141C05128D0020BCBD /* mcobject_async.h */,
+				0E0923131C05128D0020BCBD /* mcobject_async.c */,
 				0EE004E81BEFF1140084C362 /* mctree.h */,
 				0EE004E71BEFF1140084C362 /* mctree.c */,
+				0E0923111C03D45A0020BCBD /* mcsync.h */,
+				0E0923101C03D45A0020BCBD /* mcsync.c */,
 			);
 			name = utils;
 			path = myhtml;
@@ -228,10 +238,12 @@
 				0EE004E31BEFF0F40084C362 /* mytags.c in Sources */,
 				0EE004E91BEFF1140084C362 /* mcobject.c in Sources */,
 				0EE004B61BEFF0850084C362 /* main.c in Sources */,
+				0E0923151C05128D0020BCBD /* mcobject_async.c in Sources */,
 				0EE004DF1BEFF0F40084C362 /* myhtml_token.c in Sources */,
 				0E7BC5541BFB254500178C69 /* myhtml_parser.c in Sources */,
 				0E7BC5511BF98B5400178C69 /* myosi.c in Sources */,
 				0EE004D81BEFF0F40084C362 /* myhtml_tokenizer_doctype.c in Sources */,
+				0E0923121C03D45A0020BCBD /* mcsync.c in Sources */,
 				0EE004DD1BEFF0F40084C362 /* myhtml_string.c in Sources */,
 				0EE004DC1BEFF0F40084C362 /* myhtml_rules.c in Sources */,
 				0EE004E11BEFF0F40084C362 /* myhtml.c in Sources */,
@@ -326,6 +338,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_LIBTOOLFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -333,6 +346,7 @@
 		0EE004BB1BEFF0850084C362 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				OTHER_LIBTOOLFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

@@ -11,7 +11,7 @@
 
 myhtml_t * myhtml_init(size_t thread_count)
 {
-    myhtml_t* myhtml = (myhtml_t*)malloc(sizeof(myhtml_t));
+    myhtml_t* myhtml = (myhtml_t*)mymalloc(sizeof(myhtml_t));
     
     myhtml->tags     = mytags_init();
     myhtml->queue    = myhtml_queue_create(4096);
@@ -70,6 +70,7 @@ void myhtml_tokenizer_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* h
     mh_queue_set(qnode_idx, myhtml_tree) = tree;
     
     mh_tree_set(queue) = myhtml_queue_node_current(myhtml->queue);
+    myhtml_token_node_malloc(tree->token, mh_queue_get(qnode_idx, token));
     
     myhtml_tokenizer_continue(myhtml, tree, html, html_length);
 }
@@ -89,6 +90,9 @@ void myhtml_tokenizer_continue(myhtml_t* myhtml, myhtml_tree_t* tree, const char
     mh_thread_stream_done(myfalse);
     mh_thread_stream_post();
     
+    mh_thread_done(MyHTML_THREAD_INDEX_ID, myfalse);
+    mh_thread_post(MyHTML_THREAD_INDEX_ID);
+    
     size_t offset = 0;
     
     myhtml_queue_t* queue = myhtml->queue;
@@ -102,15 +106,18 @@ void myhtml_tokenizer_wait(myhtml_t* myhtml)
 {
     mh_thread_master_done(mytrue);
     mh_thread_stream_done(mytrue);
+    mh_thread_done(MyHTML_THREAD_INDEX_ID, mytrue);
 }
 
 void myhtml_tokenizer_post(myhtml_t* myhtml)
 {
     mh_thread_master_done(myfalse);
     mh_thread_stream_done(myfalse);
+    mh_thread_done(MyHTML_THREAD_INDEX_ID, myfalse);
     
     mh_thread_master_post();
     mh_thread_stream_post();
+    mh_thread_post(MyHTML_THREAD_INDEX_ID);
 }
 
 mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size)

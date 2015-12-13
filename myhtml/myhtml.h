@@ -25,6 +25,10 @@
 #define mh_thread_get(__idx__, __attr__) myhtml_thread_get(myhtml->thread, __idx__, __attr__)
 #define mh_thread_set(__idx__, __attr__) myhtml_thread_set(myhtml->thread, __idx__, __attr__)
 
+#define mh_thread_post(__idx__) sem_post(myhtml_thread_get(myhtml->thread, __idx__, sem))
+#define mh_thread_wait(__idx__) sem_wait(myhtml_thread_get(myhtml->thread, __idx__, sem))
+#define mh_thread_done(__idx__, __bool__) myhtml_thread_set(myhtml->thread, __idx__, is_done) = __bool__;
+
 #define mh_thread_master_get(__attr__) myhtml_thread_master_get(myhtml->thread, __attr__)
 #define mh_thread_master_set(__attr__) myhtml_thread_master_set(myhtml->thread, __attr__)
 
@@ -52,25 +56,21 @@
 #define mh_queue_current_get(__attr__) mh_queue_get(mh_queue_current(), __attr__)
 #define mh_queue_current_set(__attr__) mh_queue_current_get(__attr__)
 
-#define mh_queue_add(__tree__, __html__, __qnode_idx__, __begin__)                                                 \
-    mh_queue_set(__qnode_idx__, token_idx) = mh_tree_token_current_index();                                        \
-    myhtml_token_node_malloc(__tree__->token, mh_tree_token_current_index());                                      \
-    myhtml_queue_node_malloc(myhtml->queue, __html__, __begin__, mh_tree_token_current_index(), myfalse, 0, tree); \
-    __qnode_idx__ = myhtml_queue_node_current(myhtml->queue)
+#define mh_queue_add(__tree__, __html__, __qnode_idx__, __begin__)                                             \
+    __qnode_idx__ = myhtml_queue_node_malloc(myhtml->queue, __html__, __begin__, myfalse, 0, tree);            \
+    myhtml_token_node_malloc(__tree__->token, myhtml->queue->nodes[__qnode_idx__].token)
 
 #define mh_token_get(__idx__, __attr__) tree->token->nodes[__idx__].__attr__
 #define mh_token_set(__idx__, __attr__) mh_token_get(__idx__, __attr__)
 
 #define mh_tree_token_current(__attr__) mh_token_get(myhtml_tree_token_current(tree), __attr__)
-#define mh_tree_token_current_index() myhtml_tree_token_current(tree)
 #define mh_tree_token_attr_current(__attr__) mh_token_get(myhtml_tree_token_attr_current(tree), __attr__)
-#define mh_tree_token_attr_current_index() myhtml_tree_token_attr_current(tree)
 
 #define mh_token_attr_get(__idx__, __attr__) tree->token->attr[__idx__].__attr__
 #define mh_token_attr_set(__idx__, __attr__) mh_token_attr_get(__idx__, __attr__)
 #define mh_token_attr_current(__idx__) mh_token_get(__idx__, attr_last)
 
-#define mh_queue_token_get(__idx__, __attr__) mh_token_get(mh_queue_get(__idx__, token_idx), __attr__)
+#define mh_queue_token_get(__idx__, __attr__) mh_token_get(mh_queue_get(__idx__, token), __attr__)
 #define mh_queue_token_set(__idx__, __attr__) mh_queue_token_get(__idx__, __attr__)
 
 // space, tab, LF, FF, CR

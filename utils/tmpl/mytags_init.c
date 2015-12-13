@@ -13,3 +13,8 @@ void mytags_init_tags(mytags_t* tags)
 %BODY%
 }
 
+void mytags_init_tags_categories(mytags_t* tags)
+{
+%CATS%
+}
+

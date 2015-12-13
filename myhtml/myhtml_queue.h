@@ -15,15 +15,6 @@
 
 #define myhtml_queue_node_get(__queue__, __idx__, __patam__) __queue__->nodes[__idx__].__patam__
 
-#define myhtml_queue_node_malloc(__queue__, __html__, __begin__, __token__, __sys__, __opt__, __tree__)  \
-    myhtml_base_add(__queue__, nodes, nodes_length, nodes_size, myhtml_queue_node_t, 4096)    \
-    __queue__->nodes[__queue__->nodes_length].html           = __html__;                      \
-    __queue__->nodes[__queue__->nodes_length].begin          = __begin__;                     \
-    __queue__->nodes[__queue__->nodes_length].token_idx      = __token__;                     \
-    __queue__->nodes[__queue__->nodes_length].is_system      = __sys__;                       \
-    __queue__->nodes[__queue__->nodes_length].opt            = __opt__;                       \
-    __queue__->nodes[__queue__->nodes_length].myhtml_tree    = __tree__
-
 #define myhtml_queue_node_current(__queue__) __queue__->nodes_length
 #define myhtml_queue_attr_node_current(__queue__) __queue__->attr_nodes_length
 
@@ -34,7 +25,7 @@
     myhtml_base_add(__queue__, attr_nodes, attr_nodes_length, attr_nodes_size, myhtml_token_attr_t, 4096)
 
 struct myhtml_queue_node {
-    myhtml_token_index_t token_idx;
+    myhtml_token_node_t* token;
     
     size_t begin;
     size_t length;
@@ -59,5 +50,8 @@ void myhtml_queue_clean(myhtml_queue_t* queue);
 myhtml_queue_t * myhtml_queue_destroy(myhtml_queue_t* token);
 
 void myhtml_queue_node_clean(myhtml_queue_node_t* qnode);
+
+size_t myhtml_queue_node_malloc(myhtml_queue_t* queue, const char* html, size_t begin,
+                                mybool_t is_system, enum myhtml_queue_node_opt opt, myhtml_tree_t* tree);
 
 #endif /* myhtml_queue_h */

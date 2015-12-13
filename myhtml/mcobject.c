@@ -11,14 +11,14 @@
 
 mcobject_t * mcobject_create(size_t size, size_t struct_size, void* obj, mcobject_callback_new_f callback_new)
 {
-    mcobject_t* mcobject = (mcobject_t*)malloc(sizeof(mcobject_t));
+    mcobject_t* mcobject = (mcobject_t*)mymalloc(sizeof(mcobject_t));
     
     mcobject->struct_size = struct_size;
     mcobject->nodes_size = size;
     
     mcobject->new_func    = callback_new;
-    mcobject->nodes       = malloc(size * struct_size);
-    mcobject->cache       = (size_t*)malloc(size * sizeof(size_t));
+    mcobject->nodes       = calloc(size, struct_size);
+    mcobject->cache       = (size_t*)mymalloc(size * sizeof(size_t));
     mcobject->obj         = obj;
     
     *mcobject->obj = mcobject->nodes;
@@ -26,7 +26,6 @@ mcobject_t * mcobject_create(size_t size, size_t struct_size, void* obj, mcobjec
     mcobject_clean(mcobject);
     
     mcobject->last_length = mcobject->nodes_length;
-    memset(&mcobject->nodes[mcobject->nodes_length], 0, mcobject->struct_size);
     
     return mcobject;
 }
@@ -54,6 +53,14 @@ mcobject_t * mcobject_destroy(mcobject_t* mcobject)
 size_t mcobject_length(mcobject_t* mcobject)
 {
     return mcobject->nodes_length;
+}
+
+void mcobject_call_callback_new(mcobject_t* mcobject, size_t idx)
+{
+    if(mcobject->new_func && mcobject->last_length < idx) {
+        mcobject->last_length = idx;
+        mcobject->new_func(mcobject, idx);
+    }
 }
 
 size_t mcobject_malloc(mcobject_t* mcobject)
@@ -87,10 +94,61 @@ size_t mcobject_malloc(mcobject_t* mcobject)
     return set_idx;
 }
 
+void mcobject_malloc_segment(mcobject_t* mcobject, size_t *list, size_t count)
+{
+    size_t need_size = (mcobject->nodes_length + count);
+    
+    if(need_size >= mcobject->nodes_size)
+    {
+        if(mcobject->cache_length >= count) {
+            mcobject->cache_length -= count;
+            
+            memcpy(list, &mcobject->cache[mcobject->cache_length],
+                   sizeof(size_t) * count);
+            
+            return;
+        }
+        else if(mcobject->cache_length)
+        {
+            memcpy(list, mcobject->cache, sizeof(size_t) * mcobject->cache_length);
+            
+            mcobject->cache_length = 0;
+            count -= mcobject->cache_length;
+        }
+        
+        // TODO: (4096 * 2) -- is strange
+        mcobject->nodes_size = (need_size + (4096 * 2));
+        mcobject->nodes = myrealloc(mcobject->nodes,
+                                    mcobject->nodes_size * mcobject->struct_size);
+        
+        mcobject->cache = (size_t*)myrealloc(mcobject->cache,
+                                             mcobject->nodes_size * sizeof(size_t));
+        
+        *mcobject->obj = mcobject->nodes;
+    }
+    
+    size_t i;
+    for (i = 0; i < count; i++) {
+        list[i] = mcobject->nodes_length;
+        mcobject->nodes_length++;
+    }
+    
+    return;
+}
+
 void mcobject_free(mcobject_t* mcobject, size_t idx)
 {
     mcobject->cache[ mcobject->cache_length ] = idx;
     mcobject->cache_length++;
 }
+
+void mcobject_free_segment(mcobject_t* mcobject, size_t *list, size_t length)
+{
+    memcpy(&mcobject->cache[mcobject->cache_length],
+           list, sizeof(size_t) * length);
+    mcobject->cache_length += length;
+}
+
+
 
 

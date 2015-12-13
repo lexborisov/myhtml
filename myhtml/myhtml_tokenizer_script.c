@@ -108,8 +108,8 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
-                mh_tree_token_current(tag_ctx_idx) = MyTAGS_TAG_SCRIPT;
-                mh_tree_token_current(type) = MyHTML_TOKEN_TYPE_CLOSE;
+                qnode->token->tag_ctx_idx = MyTAGS_TAG_SCRIPT;
+                qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
@@ -128,8 +128,8 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
-                mh_tree_token_current(tag_ctx_idx) = MyTAGS_TAG_SCRIPT;
-                mh_tree_token_current(type) = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
+                qnode->token->tag_ctx_idx = MyTAGS_TAG_SCRIPT;
+                qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
                 
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
@@ -148,8 +148,8 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
-                mh_tree_token_current(tag_ctx_idx) = MyTAGS_TAG_SCRIPT;
-                mh_tree_token_current(type) = MyHTML_TOKEN_TYPE_CLOSE;
+                qnode->token->tag_ctx_idx = MyTAGS_TAG_SCRIPT;
+                qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 html_offset++;
                 mh_queue_add(tree, html, mh_queue_current(), html_offset);
@@ -247,8 +247,8 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
-                mh_tree_token_current(tag_ctx_idx) = MyTAGS_TAG_SCRIPT;
-                mh_tree_token_current(type) = MyHTML_TOKEN_TYPE_CLOSE;
+                qnode->token->tag_ctx_idx = MyTAGS_TAG_SCRIPT;
+                qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
@@ -267,8 +267,8 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
-                mh_tree_token_current(tag_ctx_idx) = MyTAGS_TAG_SCRIPT;
-                mh_tree_token_current(type) = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
+                qnode->token->tag_ctx_idx = MyTAGS_TAG_SCRIPT;
+                qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
                 
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
@@ -287,8 +287,8 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
-                mh_tree_token_current(tag_ctx_idx) = MyTAGS_TAG_SCRIPT;
-                mh_tree_token_current(type) = MyHTML_TOKEN_TYPE_CLOSE;
+                qnode->token->tag_ctx_idx = MyTAGS_TAG_SCRIPT;
+                qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
                 

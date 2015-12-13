@@ -63,7 +63,7 @@ size_t myhtml_tokenizer_state_doctype_name(myhtml_tree_t* tree, myhtml_queue_nod
     {
         if(html[html_offset] == '>')
         {
-            myhtml_parser_queue_set_attr();
+            myhtml_parser_queue_set_attr(tree, qnode);
             
             tree->queue_attr->name_begin = name_begin;
             tree->queue_attr->name_length = html_offset - name_begin;
@@ -79,7 +79,7 @@ size_t myhtml_tokenizer_state_doctype_name(myhtml_tree_t* tree, myhtml_queue_nod
         }
         else if(myhtml_whithspace(html[html_offset], ==, ||))
         {
-            myhtml_parser_queue_set_attr();
+            myhtml_parser_queue_set_attr(tree, qnode);
             
             tree->queue_attr->name_begin = name_begin;
             tree->queue_attr->name_length = html_offset - name_begin;
@@ -125,7 +125,7 @@ size_t myhtml_tokenizer_state_after_doctype_name(myhtml_tree_t* tree, myhtml_que
     }
     
     if(strncasecmp(&html[html_offset], "PUBLIC", 6) == 0) {
-        myhtml_parser_queue_set_attr();
+        myhtml_parser_queue_set_attr(tree, qnode);
         
         tree->queue_attr->name_begin  = html_offset;
         tree->queue_attr->name_length = 6;
@@ -137,7 +137,7 @@ size_t myhtml_tokenizer_state_after_doctype_name(myhtml_tree_t* tree, myhtml_que
         html_offset = html_offset_n + 1;
     }
     else if(strncasecmp(&html[html_offset], "SYSTEM", 6) == 0) {
-        myhtml_parser_queue_set_attr();
+        myhtml_parser_queue_set_attr(tree, qnode);
         
         tree->queue_attr->name_begin  = html_offset;
         tree->queue_attr->name_length = 6;
@@ -201,7 +201,7 @@ size_t myhtml_tokenizer_doctype_public_identifier_dsq(myhtml_tree_t* tree, myhtm
     {
         if(html[html_offset] == quote)
         {
-            myhtml_parser_queue_set_attr();
+            myhtml_parser_queue_set_attr(tree, qnode);
             
             tree->queue_attr->name_begin  = id_begin;
             tree->queue_attr->name_length = html_offset - id_begin;
@@ -218,7 +218,7 @@ size_t myhtml_tokenizer_doctype_public_identifier_dsq(myhtml_tree_t* tree, myhtm
             tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
             
             if(id_begin < html_size) {
-                myhtml_parser_queue_set_attr();
+                myhtml_parser_queue_set_attr(tree, qnode);
                 
                 tree->queue_attr->name_begin  = id_begin;
                 tree->queue_attr->name_length = html_offset - id_begin;
@@ -300,7 +300,7 @@ size_t myhtml_tokenizer_doctype_system_identifier_dsq(myhtml_tree_t* tree, myhtm
     {
         if(html[html_offset] == quote)
         {
-            myhtml_parser_queue_set_attr();
+            myhtml_parser_queue_set_attr(tree, qnode);
             
             tree->queue_attr->name_begin  = id_begin;
             tree->queue_attr->name_length = html_offset - id_begin;
@@ -317,7 +317,7 @@ size_t myhtml_tokenizer_doctype_system_identifier_dsq(myhtml_tree_t* tree, myhtm
             tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
             
             if(id_begin < html_size) {
-                myhtml_parser_queue_set_attr();
+                myhtml_parser_queue_set_attr(tree, qnode);
                 
                 tree->queue_attr->name_begin = id_begin;
                 tree->queue_attr->name_length = html_offset - id_begin;

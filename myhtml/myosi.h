@@ -32,9 +32,10 @@ typedef struct myhtml_thread_list myhtml_thread_list_t;
 typedef struct myhtml_thread myhtml_thread_t;
 
 // tree
+typedef struct myhtml_tree_insertion_list myhtml_tree_insertion_list_t;
+typedef struct myhtml_tree_token_list myhtml_tree_token_list_t;
+typedef struct myhtml_tree_list myhtml_tree_list_t;
 typedef struct myhtml_tree_indexes myhtml_tree_indexes_t;
-
-typedef size_t myhtml_tree_index_t;
 
 typedef struct myhtml_tree_node myhtml_tree_node_t;
 typedef struct myhtml_tree myhtml_tree_t;
@@ -65,6 +66,18 @@ typedef struct myhtml_token_node myhtml_token_node_t;
 typedef struct myhtml_token myhtml_token_t;
 
 // tags
+enum mytags_categories {
+    MyTAGS_CATEGORIES_UNDEF            = 0x000,
+    MyTAGS_CATEGORIES_ORDINARY         = 0x001,
+    MyTAGS_CATEGORIES_SPECIAL          = 0x002,
+    MyTAGS_CATEGORIES_FORMATTING       = 0x004,
+    MyTAGS_CATEGORIES_SCOPE            = 0x008,
+    MyTAGS_CATEGORIES_SCOPE_LIST_ITEM  = 0x010,
+    MyTAGS_CATEGORIES_SCOPE_BUTTON     = 0x020,
+    MyTAGS_CATEGORIES_SCOPE_TABLE      = 0x040,
+    MyTAGS_CATEGORIES_SCOPE_SELECT     = 0x080
+};
+
 typedef struct mytags_index_tag_node mytags_index_tag_node_t;
 typedef struct mytags_index_tag mytags_index_tag_t;
 typedef struct mytags_index mytags_index_t;
@@ -176,6 +189,16 @@ enum myhtml_insertion_mode {
 };
 
 // base
+enum myhtml_namespace {
+    MyHTML_NAMESPACE_HTML       = 0x00,
+    MyHTML_NAMESPACE_MATHML     = 0x01,
+    MyHTML_NAMESPACE_SVG        = 0x02,
+    MyHTML_NAMESPACE_XLINK      = 0x03,
+    MyHTML_NAMESPACE_XML        = 0x04,
+    MyHTML_NAMESPACE_XMLNS      = 0x05,
+    MyHTML_NAMESPACE_LAST_ENTRY = 0x06
+};
+
 typedef struct myhtml myhtml_t;
 
 
@@ -183,12 +206,14 @@ typedef struct myhtml myhtml_t;
 typedef size_t (*myhtml_tokenizer_state_f)(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);
 
 // parser stream function
-typedef void (*myhtml_thread_f)(myhtml_tree_t* tree, myhtml_queue_node_index_t qnode_idx, myhtml_token_index_t token_idx);
+typedef void (*myhtml_thread_f)(myhtml_tree_t* tree, myhtml_queue_node_index_t qnode_idx, myhtml_token_node_t* token);
 
 // parser insertion mode function
-typedef mybool_t (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_index_t token_idx);
+typedef mybool_t (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_node_t* token);
 
-void* myrealloc(void* dst, size_t size);
+void * mymalloc(size_t size);
+void * myrealloc(void* dst, size_t size);
+void * mycalloc(size_t num, size_t size);
 
 #endif
 

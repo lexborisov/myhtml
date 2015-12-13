@@ -8,35 +8,30 @@
 
 #include "myhtml_parser.h"
 
-
-void myhtml_parser_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx)
+void myhtml_parser_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)
 {
     myhtml_t* myhtml = tree->myhtml;
     mytags_t* mytags = myhtml->tags;
     myhtml_tree_indexes_t* indexes = tree->indexes;
     
-    myhtml_token_node_t* token = &tree->token->nodes[token_idx];
-    mytags_index_tag_add(mytags, indexes->tags, token->tag_ctx_idx, token_idx);
+    mytags_index_tag_add(mytags, indexes->tags, token);
 }
 
-void myhtml_parser_stream(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx)
+void myhtml_parser_stream(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)
 {
-    while(tree->myhtml->insertion_func[tree->insert_mode](tree, token_idx)){}
+    while(tree->myhtml->insertion_func[tree->insert_mode](tree, token)){}
 }
 
-void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_index_t token_idx)
+void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)
 {
     myhtml_t* myhtml                = tree->myhtml;
-    myhtml_token_node_t* token      = &tree->token->nodes[token_idx];
     myhtml_queue_t* queue           = myhtml->queue;
     myhtml_queue_node_t* queue_node = &queue->nodes[queue_idx];
     
     if(token->tag_ctx_idx == MyTAGS_TAG__TEXT ||
        token->tag_ctx_idx == MyTAGS_TAG__COMMENT)
     {
-        if(token->entry.data == NULL) {
-            myhtml_string_init(&token->entry, (queue_node->length + 512));
-        }
+        myhtml_string_init(&token->entry, (queue_node->length + 512));
         
         myhtml_string_t* string = &token->entry;
         
@@ -51,20 +46,16 @@ void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_i
     }
     else if(token->attr_first)
     {
-        if(token->entry.data == NULL) {
-            myhtml_string_init(&token->entry, 512);
-        }
+        myhtml_string_init(&token->entry, 512);
         
         token->begin  = 0;
         token->length = 0;
         
-        size_t attr_id = token->attr_first;
+        myhtml_token_attr_t* attr = token->attr_first;
+        myhtml_string_t* string = &token->entry;
         
-        while(attr_id)
+        while(attr)
         {
-            myhtml_string_t* string = &token->entry;
-            myhtml_token_attr_t* attr = &myhtml_token_attr(tree->token, attr_id);
-            
             if(attr->name_length)
             {
                 size_t begin = attr->name_begin;
@@ -85,13 +76,15 @@ void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_i
                                                attr->value_length);
             }
             
-            attr_id = attr->next;
+            attr = attr->next;
         }
     }
     
-//    pthread_mutex_lock(&tree->myhtml->thread->global_mutex);
-//    myhtml_token_print_by_idx(tree, token_idx, stdout);
-//    pthread_mutex_unlock(&tree->myhtml->thread->global_mutex);
+    token->is_done = mytrue;
+    
+    //pthread_mutex_lock(&tree->myhtml->thread->global_mutex);
+    //myhtml_token_print_by_idx(tree, token, stdout);
+    //pthread_mutex_unlock(&tree->myhtml->thread->global_mutex);
 }
 
 

@@ -8,10 +8,24 @@
 
 #include "myosi.h"
 
-// see who's call realloc
-void* myrealloc(void* dst, size_t size)
+void * mymalloc(size_t size)
 {
+    //printf("Call malloc\n");
+    return malloc(size);
+}
+
+// see who's call realloc
+void * myrealloc(void* dst, size_t size)
+{
+    printf("Call realloc\n");
     return realloc(dst, size);
 }
+
+void * mycalloc(size_t num, size_t size)
+{
+    //printf("Call calloc\n");
+    return calloc(num, size);
+}
+
 
 

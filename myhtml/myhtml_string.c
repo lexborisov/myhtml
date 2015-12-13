@@ -10,18 +10,21 @@
 
 myhtml_string_t * myhtml_string_create(size_t size)
 {
-    myhtml_string_t* str = (myhtml_string_t*)malloc(sizeof(myhtml_string_t));
+    myhtml_string_t* str = (myhtml_string_t*)mymalloc(sizeof(myhtml_string_t));
     myhtml_string_init(str, size);
     return str;
 }
 
 void myhtml_string_init(myhtml_string_t* str, size_t size)
 {
+    if(str->data)
+        return;
+    
     if(size < 128)
         size = 128;
     
     str->size = size;
-    str->data = (char*)malloc(sizeof(char) * size); // char allways 1
+    str->data = (char*)mymalloc(sizeof(char) * size); // char allways 1
     
     myhtml_string_clean(str);
 }
@@ -81,8 +84,10 @@ void myhtml_string_append_with_null(myhtml_string_t* str, const char* buff, size
     size_t begin = str->length;
     myhtml_string_check(str, (length + 1), (4096 * 20));
     
-    memcpy(&str->data[begin], buff, (sizeof(char) * length));
-    str->data[length] = '\0';
+    char* cache = &str->data[begin];
+    
+    memcpy(cache, buff, (sizeof(char) * length));
+    cache[length] = '\0';
 }
 
 void myhtml_string_append_one_without_check(myhtml_string_t* str, const char buff)
@@ -112,4 +117,11 @@ void myhtml_string_append_lowercase_with_null(myhtml_string_t* str, const char* 
     }
     cache[i] = '\0';
 }
+
+void myhtml_string_copy(myhtml_string_t* target, myhtml_string_t* dest)
+{
+    myhtml_string_append(dest, target->data, target->length);
+}
+
+
 

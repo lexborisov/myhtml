@@ -53,7 +53,7 @@ struct mytags_index_tag_node {
     size_t next;
     size_t prev;
     
-    myhtml_token_index_t token_idx;
+    myhtml_token_node_t* token;
 };
 
 struct mytags_index {
@@ -69,7 +69,8 @@ struct mytags_context {
     size_t id;
     mctree_index_t mctree_id;
     
-    int data_parser;
+    enum myhtml_tokenizer_state data_parser;
+    enum mytags_categories cats[MyHTML_NAMESPACE_LAST_ENTRY];
 }
 typedef mytags_context_t;
 
@@ -87,14 +88,19 @@ struct mytags {
 
 mytags_t * mytags_init(void);
 void mytags_init_tags(mytags_t* tags);
+void mytags_init_tags_categories(mytags_t* tags);
 void mytags_clean(mytags_t* mytags);
 mytags_t * mytags_destroy(mytags_t* mytags);
 
-mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size, enum myhtml_tokenizer_state data_parser);
+mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size,
+                              enum myhtml_tokenizer_state data_parser);
+
+void mytags_set_category(mytags_t* mytags, mytags_ctx_index_t tag_idx,
+                         enum myhtml_namespace my_namespace, enum mytags_categories cats);
 
 mytags_index_t * mytags_index_create(mytags_t* mytags);
 void mytags_index_init(mytags_t* mytags, mytags_index_t* idx_tags);
-void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx, myhtml_token_index_t token_idx);
+void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, myhtml_token_node_t* token);
 size_t mytags_index_tag_get_first(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
 size_t mytags_index_tag_get_last(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
 size_t mytags_index_tag_get_from_node_id(mytags_index_t* idx_tags, size_t node_id, long long offset);

@@ -22,14 +22,14 @@ void myhtml_thread_stream_function(void* arg);
 void myhtml_thread_init(myhtml_t* myhtml, const char* sem_prefix, size_t sem_prefix_length, size_t thread_count,
                         myhtml_thread_f stream_func, myhtml_thread_f worker_func, myhtml_thread_f index_func)
 {
-    myhtml_thread_t* thread = (myhtml_thread_t*)malloc(sizeof(myhtml_thread_t));
+    myhtml_thread_t* thread = (myhtml_thread_t*)mymalloc(sizeof(myhtml_thread_t));
     myhtml->thread = thread;
     
     if(thread_count > MyHTML_THREAD_MAX_THREADS)
         thread_count = MyHTML_THREAD_MAX_THREADS;
     
     thread->pth_list_length = thread_count + MyHTML_THREAD_WORKERS_BEGIN_ID;
-    thread->pth_list = (myhtml_thread_list_t*)malloc(sizeof(myhtml_thread_list_t) * thread->pth_list_length);
+    thread->pth_list = (myhtml_thread_list_t*)mymalloc(sizeof(myhtml_thread_list_t) * thread->pth_list_length);
     
     thread->is_quit      = myfalse;
     thread->thread_next  = myhtml->queue->nodes_length; // queue start
@@ -135,7 +135,7 @@ void myhtml_thread_stream_function(void* arg)
     const struct timespec tomeout = {0, 4000};
     volatile size_t counter = 0;
     
-    sem_wait(myhtml_thread_stream_get(thread, sem));
+    sem_wait(ctx->sem);
     
     //TODO: nanosleep? must be removed
     do {
@@ -144,8 +144,8 @@ void myhtml_thread_stream_function(void* arg)
             if(thread->is_quit)
                 return;
             
-            if(myhtml_thread_stream_get(thread, is_done)) {
-                sem_wait(myhtml_thread_stream_get(thread, sem));
+            if(ctx->is_done) {
+                sem_wait(ctx->sem);
             }
             
             counter++;
@@ -156,7 +156,7 @@ void myhtml_thread_stream_function(void* arg)
         }
         
         if(mh_queue_get(ctx->queue_pos, is_system) == myfalse) {
-            ctx->func(mh_queue_get(ctx->queue_pos, myhtml_tree), ctx->queue_pos, mh_queue_get(ctx->queue_pos, token_idx));
+            ctx->func(mh_queue_get(ctx->queue_pos, myhtml_tree), ctx->queue_pos, mh_queue_get(ctx->queue_pos, token));
         }
         
         // code here
@@ -246,7 +246,7 @@ void myhtml_thread_master_function(void* arg)
         myhtml_thread_set(thread, i, queue_pos) = myhtml->queue->nodes_length;
         sem_post(myhtml_thread_get(thread, i, sem));
         
-        myhtml_queue_node_malloc(myhtml->queue, 0, 0, 0, mytrue, MyHTML_QUEUE_OPT_QUIT, 0);
+        myhtml_queue_node_malloc(myhtml->queue, 0, 0, mytrue, MyHTML_QUEUE_OPT_QUIT, 0);
     }
 }
 
@@ -256,7 +256,7 @@ void myhtml_thread_worker_function(void* arg)
     myhtml_t* myhtml = ctx->myhtml;
     //myhtml_thread_t* thread = myhtml->thread;
     
-    const struct timespec tomeout = {0, 400};
+    const struct timespec tomeout = {0, 4000};
     
     while (1)
     {
@@ -282,7 +282,8 @@ void myhtml_thread_worker_function(void* arg)
             }
         }
         else {
-            ctx->func(mh_queue_get(ctx->queue_pos, myhtml_tree), ctx->queue_pos, mh_queue_get(ctx->queue_pos, token_idx));
+            myhtml_token_node_t* token = mh_queue_get(ctx->queue_pos, token);
+            ctx->func(mh_queue_get(ctx->queue_pos, myhtml_tree), ctx->queue_pos, token);
         }
         
         ctx->queue_pos = 0;

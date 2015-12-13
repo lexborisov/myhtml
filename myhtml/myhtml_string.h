@@ -34,6 +34,7 @@ void myhtml_string_append_with_null(myhtml_string_t* str, const char* buff, size
 void myhtml_string_append_one(myhtml_string_t* str, const char buff);
 void myhtml_string_append_one_without_check(myhtml_string_t* str, const char buff);
 void myhtml_string_append_lowercase_with_null(myhtml_string_t* str, const char* buff, size_t length);
+void myhtml_string_copy(myhtml_string_t* target, myhtml_string_t* dest);
 
 mybool_t myhtml_string_check(myhtml_string_t* str, size_t length, size_t up_to);
 
