@@ -189,6 +189,17 @@ myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_t* tree, myhtml_tree_nod
     return new_node;
 }
 
+void myhtml_tree_node_insert_by_mode(myhtml_tree_t* tree, myhtml_tree_node_t* adjusted_location,
+                                                     myhtml_tree_node_t* node, enum myhtml_tree_insertion_mode mode)
+{
+    if(mode == MyHTML_TREE_INSERTION_MODE_DEFAULT)
+        myhtml_tree_node_add_child(tree, adjusted_location, node);
+    else if(mode == MyHTML_TREE_INSERTION_MODE_BEFORE)
+        myhtml_tree_node_insert_before(tree, adjusted_location, node);
+    else
+        myhtml_tree_node_insert_after(tree, adjusted_location, node);
+}
+
 myhtml_tree_node_t * myhtml_tree_node_insert_by_token(myhtml_tree_t* tree, myhtml_token_node_t* token,
                                                      enum myhtml_namespace my_namespace)
 {
@@ -198,8 +209,10 @@ myhtml_tree_node_t * myhtml_tree_node_insert_by_token(myhtml_tree_t* tree, myhtm
     node->token     = token;
     node->namespace = my_namespace;
     
-    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL);
-    myhtml_tree_node_add_child(tree, adjusted_location, node);
+    enum myhtml_tree_insertion_mode mode;
+    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
+    myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
+    
     myhtml_tree_open_elements_append(tree, node);
     
     return node;
@@ -214,8 +227,10 @@ myhtml_tree_node_t * myhtml_tree_node_insert(myhtml_tree_t* tree, mytags_ctx_ind
     node->tag_idx   = tag_idx;
     node->namespace = my_namespace;
     
-    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL);
-    myhtml_tree_node_add_child(tree, adjusted_location, node);
+    enum myhtml_tree_insertion_mode mode;
+    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
+    myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
+    
     myhtml_tree_open_elements_append(tree, node);
     
     return node;
@@ -228,11 +243,12 @@ myhtml_tree_node_t * myhtml_tree_node_insert_comment(myhtml_tree_t* tree, myhtml
     node->token     = token;
     node->tag_idx   = MyTAGS_TAG__COMMENT;
     
+    enum myhtml_tree_insertion_mode mode = 0;
     if(parent == NULL) {
-        parent = myhtml_tree_appropriate_place_inserting(tree, NULL);
+        parent = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
     }
     
-    myhtml_tree_node_add_child(tree, parent, node);
+    myhtml_tree_node_insert_by_mode(tree, parent, node, mode);
     node->namespace = parent->namespace;
     
     return node;
@@ -271,7 +287,8 @@ myhtml_tree_node_t * myhtml_tree_node_insert_root(myhtml_tree_t* tree, myhtml_to
 
 myhtml_tree_node_t * myhtml_tree_node_insert_text(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
-    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL);
+    enum myhtml_tree_insertion_mode mode;
+    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
     
     if(adjusted_location == tree->document)
         return NULL;
@@ -282,16 +299,17 @@ myhtml_tree_node_t * myhtml_tree_node_insert_text(myhtml_tree_t* tree, myhtml_to
     node->token     = token;
     node->namespace = adjusted_location->namespace;
     
-    myhtml_tree_node_add_child(tree, adjusted_location, node);
+    myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     
     return node;
 }
 
 myhtml_tree_node_t * myhtml_tree_node_insert_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 {
-    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL);
+    enum myhtml_tree_insertion_mode mode;
+    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
+    myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     
-    myhtml_tree_node_add_child(tree, adjusted_location, node);
     myhtml_tree_open_elements_append(tree, node);
     
     return node;
@@ -299,14 +317,16 @@ myhtml_tree_node_t * myhtml_tree_node_insert_by_node(myhtml_tree_t* tree, myhtml
 
 myhtml_tree_node_t * myhtml_tree_node_insert_foreign_element(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
-    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL);
+    enum myhtml_tree_insertion_mode mode;
+    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
+    
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
     node->tag_idx   = token->tag_ctx_idx;
     node->token     = token;
     node->namespace = adjusted_location->namespace;
     
-    myhtml_tree_node_add_child(tree, adjusted_location, node);
+    myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_open_elements_append(tree, node);
     
     return node;
@@ -314,14 +334,16 @@ myhtml_tree_node_t * myhtml_tree_node_insert_foreign_element(myhtml_tree_t* tree
 
 myhtml_tree_node_t * myhtml_tree_node_insert_html_element(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
-    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL);
+    enum myhtml_tree_insertion_mode mode;
+    myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
+    
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
     node->tag_idx   = token->tag_ctx_idx;
     node->token     = token;
     node->namespace = MyHTML_NAMESPACE_HTML;
     
-    myhtml_tree_node_add_child(tree, adjusted_location, node);
+    myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_open_elements_append(tree, node);
     
     return node;
@@ -949,13 +971,16 @@ void myhtml_tree_active_formatting_up_to_last_marker(myhtml_tree_t* tree)
     if(tree->active_formatting->length)
         tree->active_formatting->length--;
     
+    if(myhtml_tree_active_formatting_is_marker(tree, list[tree->active_formatting->length]))
+        return;
+    
     while(tree->active_formatting->length)
     {
         tree->active_formatting->length--;
         
         if(myhtml_tree_active_formatting_is_marker(tree, list[ tree->active_formatting->length ])) {
             // include marker
-            //tree->active_formatting->length++;
+            tree->active_formatting->length++;
             break;
         }
     }
@@ -1191,8 +1216,9 @@ void myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_index
             myhtml_tree_node_remove(tree, last);
         
         // step 14
-        common_ancestor = myhtml_tree_appropriate_place_inserting(tree, common_ancestor);
-        myhtml_tree_node_add_child(tree, common_ancestor, last);
+        enum myhtml_tree_insertion_mode insert_mode;
+        common_ancestor = myhtml_tree_appropriate_place_inserting(tree, common_ancestor, &insert_mode);
+        myhtml_tree_node_insert_by_mode(tree, common_ancestor, last, insert_mode);
         
         // step 15
         myhtml_tree_node_t* new_formatting_element = myhtml_tree_node_clone(tree, formatting_element, 1);
@@ -1232,8 +1258,11 @@ void myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_index
     }
 }
 
-myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree, myhtml_tree_node_t* override_target)
+myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree, myhtml_tree_node_t* override_target,
+                                                             enum myhtml_tree_insertion_mode* mode)
 {
+    *mode = MyHTML_TREE_INSERTION_MODE_DEFAULT;
+    
     // step 1
     myhtml_tree_node_t* target = override_target ? override_target : myhtml_tree_current_node(tree);
     
@@ -1252,7 +1281,7 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree
                 
                 // step 2.1-2
                 myhtml_tree_node_t* last_template = myhtml_tree_open_elements_find_by_tag_idx(tree, MyTAGS_TAG_TEMPLATE, &idx_template);
-                myhtml_tree_node_t* last_table = myhtml_tree_open_elements_find_by_tag_idx(tree, MyTAGS_TAG_TEMPLATE, &idx_table);
+                myhtml_tree_node_t* last_table = myhtml_tree_open_elements_find_by_tag_idx(tree, MyTAGS_TAG_TABLE, &idx_table);
                 
                 // step 2.3
                 if(last_template && (last_table == NULL || idx_template > idx_table))
@@ -1271,7 +1300,17 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree
                 // step 2.5
                 else if(last_table->parent)
                 {
-                    adjusted_location = last_table->parent;
+                    //adjusted_location = last_table->parent;
+                    
+                    if(last_table->prev) {
+                        adjusted_location = last_table->prev;
+                        *mode = MyHTML_TREE_INSERTION_MODE_AFTER;
+                    }
+                    else {
+                        adjusted_location = last_table;
+                        *mode = MyHTML_TREE_INSERTION_MODE_BEFORE;
+                    }
+                    
                     break;
                 }
                 

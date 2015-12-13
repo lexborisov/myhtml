@@ -290,7 +290,9 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
             case MyTAGS_TAG_SCRIPT:
             {
                 // state 1
-                myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL);
+                enum myhtml_tree_insertion_mode insert_mode;
+                myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &insert_mode);
+                
                 // state 2
                 myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
                 
@@ -299,7 +301,7 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
                 node->namespace = MyHTML_NAMESPACE_HTML;
                 node->flags     = MyHTML_TREE_NODE_PARSER_INSERTED|MyHTML_TREE_NODE_BLOCKING;
                 
-                myhtml_tree_node_add_child(tree, adjusted_location, node);
+                myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, insert_mode);
                 
                 tree->orig_insert_mode = tree->insert_mode;
                 tree->insert_mode = MyHTML_INSERTION_MODE_TEXT;

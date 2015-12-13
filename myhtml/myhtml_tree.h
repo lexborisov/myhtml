@@ -83,6 +83,12 @@ enum myhtml_tree_flags {
     MyHTML_TREE_FLAGS_FRAGMENT       = 0x08
 };
 
+enum myhtml_tree_insertion_mode {
+    MyHTML_TREE_INSERTION_MODE_DEFAULT     = 0x00,
+    MyHTML_TREE_INSERTION_MODE_BEFORE      = 0x01,
+    MyHTML_TREE_INSERTION_MODE_AFTER       = 0x02
+};
+
 struct myhtml_tree_indexes {
     mytags_index_t* tags;
 };
@@ -204,7 +210,7 @@ myhtml_tree_node_t * myhtml_tree_element_in_scope(myhtml_tree_t* tree, mytags_ct
 mybool_t myhtml_tree_element_in_scope_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, enum mytags_categories category);
 void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, mytags_ctx_index_t exclude_tag_idx);
 void myhtml_tree_generate_all_implied_end_tags(myhtml_tree_t* tree, mytags_ctx_index_t exclude_tag_idx);
-myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree, myhtml_tree_node_t* override_target);
+myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree, myhtml_tree_node_t* override_target, enum myhtml_tree_insertion_mode* mode);
 
 // template insertion
 myhtml_tree_insertion_list_t * myhtml_tree_template_insertion_init(myhtml_tree_t* tree);
@@ -230,6 +236,7 @@ void myhtml_tree_print_by_tree_idx(myhtml_tree_t* tree, myhtml_tree_node_t* idx,
 void myhtml_tree_node_add_child(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
 void myhtml_tree_node_insert_before(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
 void myhtml_tree_node_insert_after(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
+void myhtml_tree_node_insert_by_mode(myhtml_tree_t* tree, myhtml_tree_node_t* adjusted_location, myhtml_tree_node_t* node, enum myhtml_tree_insertion_mode mode);
 void myhtml_tree_node_remove(myhtml_tree_t* tree, myhtml_tree_node_t* idx);
 
 myhtml_tree_node_t * myhtml_tree_node_insert_html_element(myhtml_tree_t* tree, myhtml_token_node_t* token);
