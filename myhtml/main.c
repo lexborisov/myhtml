@@ -60,8 +60,8 @@ int main(int argc, const char * argv[])
     myhtml_t* myhtml = myhtml_init(1);
     
     //struct res_html res = load_html("/new/C-git/myhtml/test/test.html");
-    struct res_html res = load_html("/new/C-git/myhtml/test/broken.html");
-    //struct res_html res = load_html("/new/C-git/myhtml/test/test_full.html");
+    //struct res_html res = load_html("/new/C-git/myhtml/test/broken.html");
+    struct res_html res = load_html("/new/C-git/myhtml/test/test_full.html");
     //struct res_html res = load_html("/new/C-git/myhtml/test/script.html");
     
     uint64_t all_start = myhtml_rdtsc();
@@ -82,7 +82,7 @@ int main(int argc, const char * argv[])
         //myhtml_tree_destroy(tree);
         
         //print_token_by_index(tree, MyTAGS_TAG__TEXT);
-        myhtml_tree_print_by_tree_idx(tree, tree->document->child, stdout, 0);
+        //myhtml_tree_print_by_tree_idx(tree, tree->document->child, stdout, 0);
         
         myhtml_clean(myhtml);
         myhtml_tree_clean(tree);

@@ -76,11 +76,12 @@ enum myhtml_tree_doctype_id {
 };
 
 enum myhtml_tree_flags {
-    MyHTML_TREE_FLAGS_CLEAN          = 0x00,
-    MyHTML_TREE_FLAGS_SCRIPT         = 0x01,
-    MyHTML_TREE_FLAGS_FRAMESET_OK    = 0x02,
-    MyHTML_TREE_FLAGS_IFRAME_SRCDOC  = 0x04,
-    MyHTML_TREE_FLAGS_FRAGMENT       = 0x08
+    MyHTML_TREE_FLAGS_CLEAN           = 0x00,
+    MyHTML_TREE_FLAGS_SCRIPT          = 0x01,
+    MyHTML_TREE_FLAGS_FRAMESET_OK     = 0x02,
+    MyHTML_TREE_FLAGS_IFRAME_SRCDOC   = 0x04,
+    MyHTML_TREE_FLAGS_FRAGMENT        = 0x08,
+    MyHTML_TREE_FLAGS_ALREADY_STARTED = 0x10
 };
 
 enum myhtml_tree_insertion_mode {
@@ -121,6 +122,7 @@ struct myhtml_tree {
     
     myhtml_tree_node_t* current;
     myhtml_tree_node_t* document;
+    myhtml_tree_node_t* fragment;
     
     myhtml_tree_node_t* node_head;
     myhtml_tree_node_t* node_form;
@@ -195,6 +197,7 @@ void myhtml_tree_open_elements_clean(myhtml_tree_t* tree);
 myhtml_tree_list_t * myhtml_tree_open_elements_destroy(myhtml_tree_t* tree);
 
 myhtml_tree_node_t* myhtml_tree_current_node(myhtml_tree_t* tree);
+myhtml_tree_node_t * myhtml_tree_adjusted_current_node(myhtml_tree_t* tree);
 
 void myhtml_tree_open_elements_append(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 void myhtml_tree_open_elements_append_after_index(myhtml_tree_t* tree, myhtml_tree_node_t* node, size_t index);
@@ -222,7 +225,7 @@ void myhtml_tree_template_insertion_pop(myhtml_tree_t* tree);
 
 void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree);
 
-void myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_index_t subject_tag_idx);
+mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_index_t subject_tag_idx);
 size_t myhtml_tree_template_insertion_length(myhtml_tree_t* tree);
 
 // other for a tree
@@ -260,7 +263,8 @@ void myhtml_tree_clear_stack_back_table_body_context(myhtml_tree_t* tree);
 void myhtml_tree_clear_stack_back_table_row_context(myhtml_tree_t* tree);
 void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_node);
 
-
+mybool_t myhtml_tree_is_mathml_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node);
+mybool_t myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 
 #endif /* myhtml_tree_h */
 

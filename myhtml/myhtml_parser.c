@@ -19,7 +19,7 @@ void myhtml_parser_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_id
 
 void myhtml_parser_stream(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)
 {
-    while(tree->myhtml->insertion_func[tree->insert_mode](tree, token)){}
+    while(myhtml_rules_tree_dispatcher(tree, token)){}
 }
 
 void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)

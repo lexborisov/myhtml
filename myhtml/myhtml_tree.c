@@ -42,8 +42,9 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     // null root
     myhtml_tree_node_create(tree);
     
-    tree->current   = myhtml_tree_node_create(tree);
-    tree->document  = tree->current;
+    tree->current   = NULL;
+    tree->document  = myhtml_tree_node_create(tree);
+    tree->fragment  = NULL;
     tree->node_head = 0;
     tree->node_form = 0;
     
@@ -413,7 +414,7 @@ void myhtml_tree_list_clean(myhtml_tree_list_t* list)
 myhtml_tree_list_t * myhtml_tree_list_destroy(myhtml_tree_list_t* list, mybool_t destroy_self)
 {
     if(list->list)
-        free(list);
+        free(list->list);
     
     if(destroy_self && list) {
         free(list);
@@ -491,6 +492,14 @@ myhtml_tree_node_t * myhtml_tree_current_node(myhtml_tree_t* tree)
         return 0;
     
     return tree->open_elements->list[ tree->open_elements->length - 1 ];
+}
+
+myhtml_tree_node_t * myhtml_tree_adjusted_current_node(myhtml_tree_t* tree)
+{
+    if(tree->open_elements->length == 1 && tree->fragment)
+        return tree->fragment;
+    
+    return myhtml_tree_current_node(tree);
 }
 
 void myhtml_tree_open_elements_append(myhtml_tree_t* tree, myhtml_tree_node_t* node)
@@ -1047,10 +1056,10 @@ void myhtml_tree_active_formatting_reconstruction(myhtml_tree_t* tree)
     }
 }
 
-void myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_index_t subject_tag_idx)
+mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_index_t subject_tag_idx)
 {
     if(tree->open_elements->length == 0)
-        return;
+        return myfalse;
     
     size_t oel_curr_index = tree->open_elements->length - 1;
     
@@ -1064,7 +1073,7 @@ void myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_index
        myhtml_tree_active_formatting_find(tree, current_node, NULL) == myfalse)
     {
         myhtml_tree_open_elements_pop(tree);
-        return;
+        return myfalse;
     }
     
     // step 2, 3
@@ -1081,8 +1090,9 @@ void myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_index
         
         // TODO: If there is no such element, then abort these steps and instead act as described in the
         // ===> "any other end tag" entry above.
-        if(formatting_element == NULL)
-            break;
+        if(formatting_element == NULL) {
+            return mytrue;
+        }
         
         // step 6
         size_t oel_format_el_idx;
@@ -1256,6 +1266,8 @@ void myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_index
             // parse error
             fprintf(stderr, "ERROR: adoption agency algorithm; State 19; can't find furthest_block in open elements");
     }
+    
+    return myfalse;
 }
 
 myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree, myhtml_tree_node_t* override_target,
@@ -1403,10 +1415,10 @@ void myhtml_tree_print_by_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node, FIL
     if(node->tag_idx == MyTAGS_TAG__TEXT ||
        node->tag_idx == MyTAGS_TAG__COMMENT)
     {
-        if(node->token)
-            fprintf(out, "<%.*s>: %.*s\n", (int)tag_name_size, mctree_nodes[mctree_id].str,
-                    (int)node->token->length, &node->token->entry.data[node->token->begin]);
-        else
+//        if(node->token)
+//            fprintf(out, "<%.*s>: %.*s\n", (int)tag_name_size, mctree_nodes[mctree_id].str,
+//                    (int)node->token->length, &node->token->entry.data[node->token->begin]);
+//        else
             fprintf(out, "<%.*s>\n", (int)tag_name_size, mctree_nodes[mctree_id].str);
     }
     else
@@ -1457,7 +1469,7 @@ void myhtml_tree_token_list_clean(myhtml_tree_token_list_t* list)
 myhtml_tree_token_list_t * myhtml_tree_token_list_destroy(myhtml_tree_token_list_t* list, mybool_t destroy_self)
 {
     if(list->list)
-        free(list);
+        free(list->list);
     
     if(destroy_self && list) {
         free(list);
@@ -1594,4 +1606,39 @@ void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_no
     tree->insert_mode = MyHTML_INSERTION_MODE_IN_ROW;
 }
 
+mybool_t myhtml_tree_is_mathml_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node)
+{
+    if(node->namespace == MyHTML_NAMESPACE_MATHML &&
+       (node->tag_idx == MyTAGS_TAG_MI ||
+        node->tag_idx == MyTAGS_TAG_MO ||
+        node->tag_idx == MyTAGS_TAG_MN ||
+        node->tag_idx == MyTAGS_TAG_MS ||
+        node->tag_idx == MyTAGS_TAG_MTEXT)
+       )
+        return mytrue;
+        
+    return myfalse;
+}
+
+mybool_t myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node)
+{
+    if(node->namespace == MyHTML_NAMESPACE_SVG &&
+       (node->tag_idx == MyTAGS_TAG_FOREIGNOBJECT ||
+        node->tag_idx == MyTAGS_TAG_DESC ||
+        node->tag_idx == MyTAGS_TAG_TITLE)
+       )
+        return mytrue;
+    
+    if(node->namespace == MyHTML_NAMESPACE_MATHML &&
+       node->tag_idx == MyTAGS_TAG_ANNOTATION_XML && node->token)
+    {
+        myhtml_token_node_wait_for_done(node->token);
+        myhtml_token_attr_t* attr = myhtml_token_attr_match_case(tree->token, node->token,
+                                                            "encoding", 8, "application/xhtml+xml", 21);
+        if(attr)
+            return mytrue;
+    }
+    
+    return myfalse;
+}
 

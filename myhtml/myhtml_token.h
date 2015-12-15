@@ -30,6 +30,23 @@
     __token_node__ = (myhtml_token_node_t*)mcobject_async_malloc(__token__->nodes_obj, 0);  \
     myhtml_token_node_clean(__token_node__)
 
+struct myhtml_token_replacement_entry {
+    char* from;
+    size_t from_size;
+    
+    char* to;
+    size_t to_size;
+};
+
+struct myhtml_token_namespace_replacement {
+    char* from;
+    size_t from_size;
+    
+    char* to;
+    size_t to_size;
+    
+    enum myhtml_namespace namespace;
+};
 
 struct myhtml_token_attr {
     myhtml_token_attr_t* next;
@@ -39,6 +56,8 @@ struct myhtml_token_attr {
     size_t name_length;
     size_t value_begin;
     size_t value_length;
+    
+    enum myhtml_namespace namespace;
 };
 
 struct myhtml_token_node {
@@ -73,9 +92,15 @@ void myhtml_token_node_wait_for_done(myhtml_token_node_t* node);
 mybool_t myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* node);
 
 myhtml_token_node_t * myhtml_token_clone(myhtml_token_t* token, myhtml_token_node_t* node, size_t thread_idx);
+myhtml_token_attr_t * myhtml_token_attr_match(myhtml_token_t* token, myhtml_token_node_t* target, const char* key, size_t key_size, const char* value, size_t value_size);
+myhtml_token_attr_t * myhtml_token_attr_match_case(myhtml_token_t* token, myhtml_token_node_t* target, const char* key, size_t key_size, const char* value, size_t value_size);
+
+void myhtml_token_adjust_mathml_attributes(myhtml_token_node_t* target);
+void myhtml_token_adjust_svg_attributes(myhtml_token_node_t* target);
+void myhtml_token_adjust_foreign_attributes(myhtml_token_node_t* target);
 
 void myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx);
-myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_t* token, myhtml_token_node_t* node, const char* name, size_t name_size);
+myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const char* name, size_t name_size);
 mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_node_t* dest);
 
 void myhtml_token_print_param_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out);

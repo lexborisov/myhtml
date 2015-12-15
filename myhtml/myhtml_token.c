@@ -8,6 +8,84 @@
 
 #include "myhtml_token.h"
 
+// all key size == value size
+static const myhtml_token_replacement_entry_t myhtml_token_attr_svg_replacement[] = {
+    {"attributename", 13, "attributeName", 13},
+    {"attributetype", 13, "attributeType", 13},
+    {"basefrequency", 13, "baseFrequency", 13},
+    {"baseprofile", 11, "baseProfile", 11},
+    {"calcmode", 8, "calcMode", 8},
+    {"clippathunits", 13, "clipPathUnits", 13},
+    {"diffuseconstant", 15, "diffuseConstant", 15},
+    {"edgemode", 8, "edgeMode", 8},
+    {"filterunits", 11, "filterUnits", 11},
+    {"glyphref", 8, "glyphRef", 8},
+    {"gradienttransform", 17, "gradientTransform", 17},
+    {"gradientunits", 13, "gradientUnits", 13},
+    {"kernelmatrix", 12, "kernelMatrix", 12},
+    {"kernelunitlength", 16, "kernelUnitLength", 16},
+    {"keypoints", 9, "keyPoints", 9},
+    {"keysplines", 10, "keySplines", 10},
+    {"keytimes", 8, "keyTimes", 8},
+    {"lengthadjust", 12, "lengthAdjust", 12},
+    {"limitingconeangle", 17, "limitingConeAngle", 17},
+    {"markerheight", 12, "markerHeight", 12},
+    {"markerunits", 11, "markerUnits", 11},
+    {"markerwidth", 11, "markerWidth", 11},
+    {"maskcontentunits", 16, "maskContentUnits", 16},
+    {"maskunits", 9, "maskUnits", 9},
+    {"numoctaves", 10, "numOctaves", 10},
+    {"pathlength", 10, "pathLength", 10},
+    {"patterncontentunits", 19, "patternContentUnits", 19},
+    {"patterntransform", 16, "patternTransform", 16},
+    {"patternunits", 12, "patternUnits", 12},
+    {"pointsatx", 9, "pointsAtX", 9},
+    {"pointsaty", 9, "pointsAtY", 9},
+    {"pointsatz", 9, "pointsAtZ", 9},
+    {"preservealpha", 13, "preserveAlpha", 13},
+    {"preserveaspectratio", 19, "preserveAspectRatio", 19},
+    {"primitiveunits", 14, "primitiveUnits", 14},
+    {"refx", 4, "refX", 4},
+    {"refy", 4, "refY", 4},
+    {"repeatcount", 11, "repeatCount", 11},
+    {"repeatdur", 9, "repeatDur", 9},
+    {"requiredextensions", 18, "requiredExtensions", 18},
+    {"requiredfeatures", 16, "requiredFeatures", 16},
+    {"specularconstant", 16, "specularConstant", 16},
+    {"specularexponent", 16, "specularExponent", 16},
+    {"spreadmethod", 12, "spreadMethod", 12},
+    {"startoffset", 11, "startOffset", 11},
+    {"stddeviation", 12, "stdDeviation", 12},
+    {"stitchtiles", 11, "stitchTiles", 11},
+    {"surfacescale", 12, "surfaceScale", 12},
+    {"systemlanguage", 14, "systemLanguage", 14},
+    {"tablevalues", 11, "tableValues", 11},
+    {"targetx", 7, "targetX", 7},
+    {"targety", 7, "targetY", 7},
+    {"textlength", 10, "textLength", 10},
+    {"viewbox", 7, "viewBox", 7},
+    {"viewtarget", 10, "viewTarget", 10},
+    {"xchannelselector", 16, "xChannelSelector", 16},
+    {"ychannelselector", 16, "yChannelSelector", 16},
+    {"zoomandpan", 10, "zoomAndPan", 10}
+};
+
+// all key size > value size
+static const myhtml_token_namespace_replacement_t myhtml_token_attr_namespace_replacement[] = {
+    {"xlink:actuate", 13, "actuate", 7, MyHTML_NAMESPACE_XLINK},
+    {"xlink:arcrole", 13, "arcrole", 7, MyHTML_NAMESPACE_XLINK},
+    {"xlink:href", 10, "href", 4, MyHTML_NAMESPACE_XLINK},
+    {"xlink:role", 10, "role", 4, MyHTML_NAMESPACE_XLINK},
+    {"xlink:show", 10, "show", 4, MyHTML_NAMESPACE_XLINK},
+    {"xlink:title", 11, "title", 5, MyHTML_NAMESPACE_XLINK},
+    {"xlink:type", 10, "type", 4, MyHTML_NAMESPACE_XLINK},
+    {"xml:lang", 8, "lang", 4, MyHTML_NAMESPACE_XML},
+    {"xml:space", 9, "space", 5, MyHTML_NAMESPACE_XML},
+    {"xmlns", 5, "xmlns", 5, MyHTML_NAMESPACE_XMLNS},
+    {"xmlns:xlink", 11, "xlink", 5, MyHTML_NAMESPACE_XMLNS}
+};
+
+
 void myhtml_token_callback_for_new(mcobject_async_t* mcobj_async, size_t idx)
 {
     myhtml_token_node_t* nodes = (myhtml_token_node_t*)mcobj_async->mem;
@@ -76,6 +154,7 @@ void myhtml_token_attr_clean(myhtml_token_attr_t* attr)
     attr->name_length  = 0;
     attr->value_begin  = 0;
     attr->value_length = 0;
+    attr->namespace    = MyHTML_NAMESPACE_UNDEF;
 }
 
 void myhtml_token_node_wait_for_done(myhtml_token_node_t* node)
@@ -160,6 +239,113 @@ void myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, 
     }
 }
 
+myhtml_token_attr_t * myhtml_token_attr_match(myhtml_token_t* token, myhtml_token_node_t* target,
+                                              const char* key, size_t key_size, const char* value, size_t value_size)
+{
+    myhtml_string_t* targ_string = &target->entry;
+    myhtml_token_attr_t* attr = target->attr_first;
+    
+    while (attr)
+    {
+        if(attr->name_length == key_size && attr->value_length == value_size)
+        {
+            if((strncmp(key, &targ_string->data[attr->name_begin], key_size) == 0)) {
+               if((strncmp(value, &targ_string->data[attr->value_begin], value_size) == 0)) {
+                   return attr;
+               }
+               else {
+                   return NULL;
+               }
+            }
+        }
+        
+        attr = attr->next;
+    }
+    
+    return NULL;
+}
+
+// TODO: copy/past but...
+myhtml_token_attr_t * myhtml_token_attr_match_case(myhtml_token_t* token, myhtml_token_node_t* target,
+                                              const char* key, size_t key_size, const char* value, size_t value_size)
+{
+    myhtml_string_t* targ_string = &target->entry;
+    myhtml_token_attr_t* attr = target->attr_first;
+    
+    while (attr)
+    {
+        if(attr->name_length == key_size && attr->value_length == value_size)
+        {
+            if((strncmp(key, &targ_string->data[attr->name_begin], key_size) == 0)) {
+                if((strncasecmp(value, &targ_string->data[attr->value_begin], value_size) == 0)) {
+                    return attr;
+                }
+                else {
+                    return NULL;
+                }
+            }
+        }
+        
+        attr = attr->next;
+    }
+    
+    return NULL;
+}
+
+void myhtml_token_adjust_mathml_attributes(myhtml_token_node_t* target)
+{
+    myhtml_token_attr_t* attr = myhtml_token_attr_by_name(target, "definitionurl", 13);
+    
+    if(attr) {
+        myhtml_string_t* targ_string = &target->entry;
+        memcpy(&targ_string->data[attr->name_begin], "definitionURL", 13);
+    }
+}
+
+// oh
+// TODO: see this code
+void myhtml_token_adjust_svg_attributes(myhtml_token_node_t* target)
+{
+    size_t count = sizeof(myhtml_token_attr_svg_replacement) / sizeof(myhtml_token_replacement_entry_t);
+    
+    for (size_t i = 0; i < count; i++)
+    {
+        myhtml_token_attr_t* attr = myhtml_token_attr_by_name(target, myhtml_token_attr_svg_replacement[i].from,
+                                                              myhtml_token_attr_svg_replacement[i].from_size);
+        
+        if(attr) {
+            myhtml_string_t* targ_string = &target->entry;
+            memcpy(&targ_string->data[attr->name_begin],
+                   myhtml_token_attr_svg_replacement[i].to,
+                   myhtml_token_attr_svg_replacement[i].from_size);
+            // from_size == to_size, but i use from_size for copy
+        }
+    }
+}
+
+void myhtml_token_adjust_foreign_attributes(myhtml_token_node_t* target)
+{
+    size_t count = sizeof(myhtml_token_attr_namespace_replacement) / sizeof(myhtml_token_namespace_replacement_t);
+    
+    for (size_t i = 0; i < count; i++)
+    {
+        myhtml_token_attr_t* attr = myhtml_token_attr_by_name(target, myhtml_token_attr_namespace_replacement[i].from,
+                                                              myhtml_token_attr_namespace_replacement[i].from_size);
+        
+        if(attr) {
+            myhtml_string_t* targ_string = &target->entry;
+            memcpy(&targ_string->data[attr->name_begin],
+                   myhtml_token_attr_namespace_replacement[i].to,
+                   myhtml_token_attr_namespace_replacement[i].to_size);
+            
+            attr->name_length = myhtml_token_attr_namespace_replacement[i].to_size;
+            targ_string->data[attr->name_length] = '\0';
+            
+            attr->namespace = myhtml_token_attr_namespace_replacement[i].namespace;
+        }
+    }
+}
+
 mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_node_t* dest)
 {
     if(target == NULL || dest == NULL)
@@ -195,7 +381,7 @@ mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_nod
     return myfalse;
 }
 
-myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_t* token, myhtml_token_node_t* node, const char* name, size_t name_length)
+myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const char* name, size_t name_length)
 {
     myhtml_token_attr_t* attr = node->attr_first;
     char* buff = node->entry.data;

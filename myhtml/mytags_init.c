@@ -92,6 +92,7 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "link", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "listing", 7, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "main", 4, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "malignmark", 10, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "map", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "mark", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "marquee", 7, MyHTML_TOKENIZER_STATE_DATA);
@@ -101,6 +102,7 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "merror", 6, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "meta", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "meter", 5, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "mglyph", 6, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "mi", 2, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "mo", 2, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "mn", 2, MyHTML_TOKENIZER_STATE_DATA);
@@ -161,6 +163,7 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "video", 5, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "wbr", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "xmp", 3, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "-end-of-file", 12, MyHTML_TOKENIZER_STATE_DATA);
 }
 
 void mytags_init_tags_categories(mytags_t* tags)
@@ -247,6 +250,7 @@ void mytags_init_tags_categories(mytags_t* tags)
 	mytags_set_category(tags, MyTAGS_TAG_LINK, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_SPECIAL);
 	mytags_set_category(tags, MyTAGS_TAG_LISTING, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_SPECIAL);
 	mytags_set_category(tags, MyTAGS_TAG_MAIN, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_SPECIAL);
+	mytags_set_category(tags, MyTAGS_TAG_MALIGNMARK, MyHTML_NAMESPACE_MATHML, MyTAGS_CATEGORIES_ORDINARY);
 	mytags_set_category(tags, MyTAGS_TAG_MAP, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_ORDINARY);
 	mytags_set_category(tags, MyTAGS_TAG_MARK, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_ORDINARY);
 	mytags_set_category(tags, MyTAGS_TAG_MARQUEE, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_SPECIAL|MyTAGS_CATEGORIES_SCOPE|MyTAGS_CATEGORIES_SCOPE_LIST_ITEM|MyTAGS_CATEGORIES_SCOPE_BUTTON);
@@ -256,6 +260,7 @@ void mytags_init_tags_categories(mytags_t* tags)
 	mytags_set_category(tags, MyTAGS_TAG_MERROR, MyHTML_NAMESPACE_MATHML, MyTAGS_CATEGORIES_ORDINARY);
 	mytags_set_category(tags, MyTAGS_TAG_META, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_SPECIAL);
 	mytags_set_category(tags, MyTAGS_TAG_METER, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_ORDINARY);
+	mytags_set_category(tags, MyTAGS_TAG_MGLYPH, MyHTML_NAMESPACE_MATHML, MyTAGS_CATEGORIES_ORDINARY);
 	mytags_set_category(tags, MyTAGS_TAG_MI, MyHTML_NAMESPACE_MATHML, MyTAGS_CATEGORIES_SPECIAL|MyTAGS_CATEGORIES_SCOPE|MyTAGS_CATEGORIES_SCOPE_LIST_ITEM|MyTAGS_CATEGORIES_SCOPE_BUTTON);
 	mytags_set_category(tags, MyTAGS_TAG_MO, MyHTML_NAMESPACE_MATHML, MyTAGS_CATEGORIES_SPECIAL|MyTAGS_CATEGORIES_SCOPE|MyTAGS_CATEGORIES_SCOPE_LIST_ITEM|MyTAGS_CATEGORIES_SCOPE_BUTTON);
 	mytags_set_category(tags, MyTAGS_TAG_MN, MyHTML_NAMESPACE_MATHML, MyTAGS_CATEGORIES_SPECIAL|MyTAGS_CATEGORIES_SCOPE|MyTAGS_CATEGORIES_SCOPE_LIST_ITEM|MyTAGS_CATEGORIES_SCOPE_BUTTON);
@@ -317,5 +322,6 @@ void mytags_init_tags_categories(mytags_t* tags)
 	mytags_set_category(tags, MyTAGS_TAG_VIDEO, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_ORDINARY);
 	mytags_set_category(tags, MyTAGS_TAG_WBR, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_SPECIAL);
 	mytags_set_category(tags, MyTAGS_TAG_XMP, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_SPECIAL);
+	mytags_set_category(tags, MyTAGS_TAG__END_OF_FILE, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_ORDINARY);
 }
 

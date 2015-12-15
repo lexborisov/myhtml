@@ -60,6 +60,8 @@ typedef struct myhtml_queue myhtml_queue_t;
 // token
 typedef size_t myhtml_token_index_t;
 typedef size_t myhtml_token_attr_index_t;
+typedef struct myhtml_token_replacement_entry myhtml_token_replacement_entry_t;
+typedef struct myhtml_token_namespace_replacement myhtml_token_namespace_replacement_t;
 
 typedef struct myhtml_token_attr myhtml_token_attr_t;
 typedef struct myhtml_token_node myhtml_token_node_t;
@@ -190,13 +192,14 @@ enum myhtml_insertion_mode {
 
 // base
 enum myhtml_namespace {
-    MyHTML_NAMESPACE_HTML       = 0x00,
-    MyHTML_NAMESPACE_MATHML     = 0x01,
-    MyHTML_NAMESPACE_SVG        = 0x02,
-    MyHTML_NAMESPACE_XLINK      = 0x03,
-    MyHTML_NAMESPACE_XML        = 0x04,
-    MyHTML_NAMESPACE_XMLNS      = 0x05,
-    MyHTML_NAMESPACE_LAST_ENTRY = 0x06
+    MyHTML_NAMESPACE_UNDEF      = 0x00,
+    MyHTML_NAMESPACE_HTML       = 0x01,
+    MyHTML_NAMESPACE_MATHML     = 0x02,
+    MyHTML_NAMESPACE_SVG        = 0x03,
+    MyHTML_NAMESPACE_XLINK      = 0x04,
+    MyHTML_NAMESPACE_XML        = 0x05,
+    MyHTML_NAMESPACE_XMLNS      = 0x06,
+    MyHTML_NAMESPACE_LAST_ENTRY = 0x07
 };
 
 typedef struct myhtml myhtml_t;

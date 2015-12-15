@@ -302,6 +302,7 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
                 node->flags     = MyHTML_TREE_NODE_PARSER_INSERTED|MyHTML_TREE_NODE_BLOCKING;
                 
                 myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, insert_mode);
+                myhtml_tree_open_elements_append(tree, node);
                 
                 tree->orig_insert_mode = tree->insert_mode;
                 tree->insert_mode = MyHTML_INSERTION_MODE_TEXT;
@@ -491,6 +492,33 @@ mybool_t myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return mytrue;
             }
+        }
+    }
+    
+    return myfalse;
+}
+
+mybool_t myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_token_node_t* token)
+{
+    mytags_context_t* tags_context = tree->myhtml->tags->context;
+    
+    // step 1
+    size_t i = tree->open_elements->length;
+    while(i) {
+        i--;
+        
+        myhtml_tree_node_t* node = tree->open_elements->list[i];
+        
+        // step 2
+        while (node->tag_idx == token->tag_ctx_idx) {
+            myhtml_tree_generate_implied_end_tags(tree, token->tag_ctx_idx);
+            myhtml_tree_open_elements_pop_until_by_node(tree, node, myfalse);
+            
+            return myfalse;
+        }
+        
+        if(tags_context[node->tag_idx].cats[node->namespace] & MyTAGS_CATEGORIES_SPECIAL) {
+            break;
         }
     }
     
@@ -809,7 +837,9 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
             case MyTAGS_TAG_TT:
             case MyTAGS_TAG_U:
             {
-                myhtml_tree_adoption_agency_algorithm(tree, token->tag_ctx_idx);
+                if(myhtml_tree_adoption_agency_algorithm(tree, token->tag_ctx_idx))
+                    myhtml_insertion_mode_in_body_other_end_tag(tree, token);
+                
                 break;
             }
                 
@@ -853,29 +883,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 
             default:
             {
-                mytags_context_t* tags_context = tree->myhtml->tags->context;
-                
-                // step 1
-                size_t i = tree->open_elements->length;
-                while(i) {
-                    i--;
-                    
-                    myhtml_tree_node_t* node = tree->open_elements->list[i];
-                    
-                    // step 2
-                    while (node->namespace == token->tag_ctx_idx) {
-                        myhtml_tree_generate_implied_end_tags(tree, token->tag_ctx_idx);
-                        myhtml_tree_open_elements_pop_until_by_node(tree, node, myfalse);
-                        
-                        return myfalse;
-                    }
-                    
-                    if(tags_context[node->tag_idx].cats[node->namespace] & MyTAGS_CATEGORIES_SPECIAL) {
-                        break;
-                    }
-                }
-                
-                break;
+                return myhtml_insertion_mode_in_body_other_end_tag(tree, token);
             }
         }
     }
@@ -963,6 +971,31 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_tree_node_insert_html_element(tree, token);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_FRAMESET;
+                break;
+            }
+                
+            case MyTAGS_TAG__END_OF_FILE:
+            {
+                if(tree->template_insertion->length)
+                    return myhtml_insertion_mode_in_template(tree, token);
+                
+                myhtml_tree_node_t** list = tree->open_elements->list;
+                for(size_t i = 0; i < tree->open_elements->length; i++) {
+                    if(list[i]->tag_idx != MyTAGS_TAG_DD     && list[i]->tag_idx != MyTAGS_TAG_DT       &&
+                       list[i]->tag_idx != MyTAGS_TAG_LI     && list[i]->tag_idx != MyTAGS_TAG_OPTGROUP &&
+                       list[i]->tag_idx != MyTAGS_TAG_OPTION && list[i]->tag_idx != MyTAGS_TAG_P        &&
+                       list[i]->tag_idx != MyTAGS_TAG_RB     && list[i]->tag_idx != MyTAGS_TAG_RP       &&
+                       list[i]->tag_idx != MyTAGS_TAG_RT     && list[i]->tag_idx != MyTAGS_TAG_RTC      &&
+                       list[i]->tag_idx != MyTAGS_TAG_TBODY  && list[i]->tag_idx != MyTAGS_TAG_TD       &&
+                       list[i]->tag_idx != MyTAGS_TAG_TFOOT  && list[i]->tag_idx != MyTAGS_TAG_TH       &&
+                       list[i]->tag_idx != MyTAGS_TAG_THEAD  && list[i]->tag_idx != MyTAGS_TAG_TR       &&
+                       list[i]->tag_idx != MyTAGS_TAG_BODY   && list[i]->tag_idx != MyTAGS_TAG_HTML)
+                    {
+                        // parse error
+                    }
+                }
+                
+                myhtml_rules_stop_parsing(tree);
                 break;
             }
                 
@@ -1554,6 +1587,19 @@ mybool_t myhtml_insertion_mode_text(myhtml_tree_t* tree, myhtml_token_node_t* to
         }
     }
     else {
+        if(token->tag_ctx_idx == MyTAGS_TAG__END_OF_FILE)
+        {
+            myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+            
+            if(current_node->tag_idx == MyTAGS_TAG_SCRIPT)
+                current_node->flags |= MyHTML_TREE_FLAGS_ALREADY_STARTED;
+            
+            myhtml_tree_open_elements_pop(tree);
+            
+            tree->insert_mode = tree->orig_insert_mode;
+            return mytrue;
+        }
+        
         myhtml_tree_node_insert_text(tree, token);
     }
     
@@ -1739,6 +1785,9 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
                 
                 myhtml_tree_open_elements_pop(tree);
             }
+                
+            case MyTAGS_TAG__END_OF_FILE:
+                return myhtml_insertion_mode_in_body(tree, token);
                 
             default:
             {
@@ -1959,6 +2008,9 @@ mybool_t myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token
             {
                 return myhtml_insertion_mode_in_head(tree, token);
             }
+                
+            case MyTAGS_TAG__END_OF_FILE:
+                return myhtml_insertion_mode_in_body(tree, token);
                 
             default:
             {
@@ -2289,11 +2341,214 @@ mybool_t myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t*
 
 mybool_t myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
+    if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
+    {
+        switch (token->tag_ctx_idx) {
+            case MyTAGS_TAG_OPTGROUP:
+            {
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                
+                if(current_node->tag_idx == MyTAGS_TAG_OPTION)
+                {
+                    if(tree->open_elements->length > 1) {
+                        if(tree->open_elements->list[ tree->open_elements->length - 2 ]->tag_idx == MyTAGS_TAG_OPTGROUP)
+                            myhtml_tree_open_elements_pop(tree);
+                    }
+                    else
+                        fprintf(stderr, "ERROR: in select state; open elements length < 2");
+                }
+                
+                current_node = myhtml_tree_current_node(tree);
+                
+                if(current_node->tag_idx == MyTAGS_TAG_OPTGROUP)
+                    myhtml_tree_open_elements_pop(tree);
+                else
+                    // parse error
+                    break;
+                
+                break;
+            }
+                
+            case MyTAGS_TAG_OPTION:
+            {
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                
+                if(current_node->tag_idx == MyTAGS_TAG_OPTION)
+                    myhtml_tree_open_elements_pop(tree);
+                else
+                    // parse error
+                    break;
+                
+                break;
+            }
+                
+            case MyTAGS_TAG_SELECT:
+            {
+                // parse error
+                myhtml_tree_node_t* select_node = myhtml_tree_element_in_scope(tree, MyTAGS_TAG_SELECT, MyTAGS_CATEGORIES_SCOPE_SELECT);
+                
+                if(select_node == NULL)
+                    // parse error
+                    break;
+                
+                myhtml_tree_open_elements_pop_until_by_node(tree, select_node, myfalse);
+                myhtml_tree_reset_insertion_mode_appropriately(tree);
+                
+                break;
+            }
+                
+            case MyTAGS_TAG_TEMPLATE:
+                return myhtml_insertion_mode_in_head(tree, token);
+                
+            default:
+                // parse error
+                break;
+        }
+    }
+    else {
+        switch (token->tag_ctx_idx)
+        {
+            case MyTAGS_TAG__TEXT:
+                myhtml_tree_node_insert_text(tree, token);
+                break;
+                
+            case MyTAGS_TAG__COMMENT:
+                myhtml_tree_node_insert_comment(tree, token, NULL);
+                break;
+                
+            case MyTAGS_TAG__DOCTYPE:
+                break;
+                
+            case MyTAGS_TAG_HTML:
+                return myhtml_insertion_mode_in_body(tree, token);
+                
+            case MyTAGS_TAG_OPTION:
+            {
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                
+                if(current_node->tag_idx == token->tag_ctx_idx)
+                    myhtml_tree_open_elements_pop(tree);
+                
+                myhtml_tree_node_insert_html_element(tree, token);
+                break;
+            }
+                
+            case MyTAGS_TAG_OPTGROUP:
+            {
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                
+                if(current_node->tag_idx == MyTAGS_TAG_OPTION)
+                    myhtml_tree_open_elements_pop(tree);
+                
+                current_node = myhtml_tree_current_node(tree);
+                
+                if(current_node->tag_idx == token->tag_ctx_idx)
+                    myhtml_tree_open_elements_pop(tree);
+                
+                myhtml_tree_node_insert_html_element(tree, token);
+                break;
+            }
+                
+            case MyTAGS_TAG_SELECT:
+            {
+                // parse error
+                myhtml_tree_node_t* select_node = myhtml_tree_element_in_scope(tree, MyTAGS_TAG_SELECT, MyTAGS_CATEGORIES_SCOPE_SELECT);
+                
+                if(select_node == NULL)
+                    break;
+                
+                myhtml_tree_open_elements_pop_until_by_node(tree, select_node, myfalse);
+                myhtml_tree_reset_insertion_mode_appropriately(tree);
+                
+                break;
+            }
+                
+            case MyTAGS_TAG_INPUT:
+            case MyTAGS_TAG_KEYGEN:
+            case MyTAGS_TAG_TEXTAREA:
+            {
+                // parse error
+                myhtml_tree_node_t* select_node = myhtml_tree_element_in_scope(tree, MyTAGS_TAG_SELECT, MyTAGS_CATEGORIES_SCOPE_SELECT);
+                
+                if(select_node == NULL)
+                    break;
+                
+                myhtml_tree_open_elements_pop_until_by_node(tree, select_node, myfalse);
+                myhtml_tree_reset_insertion_mode_appropriately(tree);
+                
+                return mytrue;
+            }
+                
+            case MyTAGS_TAG_SCRIPT:
+            case MyTAGS_TAG_TEMPLATE:
+                return myhtml_insertion_mode_in_head(tree, token);
+                
+            case MyTAGS_TAG__END_OF_FILE:
+                return myhtml_insertion_mode_in_body(tree, token);
+                
+            default:
+                // parse error
+                break;
+        }
+    }
+    
     return myfalse;
 }
 
 mybool_t myhtml_insertion_mode_in_select_in_table(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
+    if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
+    {
+        switch (token->tag_ctx_idx) {
+            case MyTAGS_TAG_CAPTION:
+            case MyTAGS_TAG_TABLE:
+            case MyTAGS_TAG_TBODY:
+            case MyTAGS_TAG_TFOOT:
+            case MyTAGS_TAG_THEAD:
+            case MyTAGS_TAG_TR:
+            case MyTAGS_TAG_TD:
+            case MyTAGS_TAG_TH:
+            {
+                // parse error
+                myhtml_tree_node_t* some_node = myhtml_tree_element_in_scope(tree, token->tag_ctx_idx, MyTAGS_CATEGORIES_SCOPE_TABLE);
+                
+                if(some_node == NULL)
+                    break;
+                
+                myhtml_tree_open_elements_pop_until(tree, MyTAGS_TAG_SELECT, myfalse);
+                myhtml_tree_reset_insertion_mode_appropriately(tree);
+                
+                return mytrue;
+            }
+                
+            default:
+                return myhtml_insertion_mode_in_select(tree, token);
+        }
+    }
+    else {
+        switch (token->tag_ctx_idx)
+        {
+            case MyTAGS_TAG_CAPTION:
+            case MyTAGS_TAG_TABLE:
+            case MyTAGS_TAG_TBODY:
+            case MyTAGS_TAG_TFOOT:
+            case MyTAGS_TAG_THEAD:
+            case MyTAGS_TAG_TR:
+            case MyTAGS_TAG_TD:
+            case MyTAGS_TAG_TH:
+            {
+                // parse error
+                myhtml_tree_open_elements_pop_until(tree, MyTAGS_TAG_SELECT, myfalse);
+                myhtml_tree_reset_insertion_mode_appropriately(tree);
+                
+                return mytrue;
+            }
+            
+            default:
+                return myhtml_insertion_mode_in_select(tree, token);
+        }
+    }
+    
     return myfalse;
 }
 
@@ -2362,6 +2617,24 @@ mybool_t myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_nod
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_ROW;
                 break;
                 
+            case MyTAGS_TAG__END_OF_FILE:
+            {
+                myhtml_tree_node_t* node = myhtml_tree_open_elements_find_by_tag_idx(tree, MyTAGS_TAG_TEMPLATE, NULL);
+                
+                if(node == NULL) {
+                    myhtml_rules_stop_parsing(tree);
+                    break;
+                }
+                
+                // parse error
+                myhtml_tree_open_elements_pop_until_by_node(tree, node, myfalse);
+                myhtml_tree_active_formatting_up_to_last_marker(tree);
+                myhtml_tree_template_insertion_pop(tree);
+                myhtml_tree_reset_insertion_mode_appropriately(tree);
+                
+                return mytrue;
+            }
+                
              default:
                 myhtml_tree_template_insertion_pop(tree);
                 myhtml_tree_template_insertion_append(tree, MyHTML_INSERTION_MODE_IN_BODY);
@@ -2376,27 +2649,537 @@ mybool_t myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_nod
 
 mybool_t myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
+    if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
+    {
+        switch (token->tag_ctx_idx) {
+            case MyTAGS_TAG_HTML:
+            {
+                if(tree->flags & MyHTML_TREE_FLAGS_FRAGMENT) {
+                    // parse error
+                    break;
+                }
+                
+                tree->insert_mode = MyHTML_INSERTION_MODE_AFTER_AFTER_BODY;
+                break;
+            }
+                
+            default:
+                tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
+                return mytrue;
+        }
+    }
+    else {
+        switch (token->tag_ctx_idx)
+        {
+            case MyTAGS_TAG__TEXT:
+            {
+                myhtml_token_node_wait_for_done(token);
+                if(myhtml_token_is_whithspace(tree, token))
+                {
+                    return myhtml_insertion_mode_in_body(tree, token);
+                }
+                
+                tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
+                return mytrue;
+            }
+                
+            case MyTAGS_TAG__COMMENT:
+            {
+                if(tree->open_elements->length == 0) {
+                    fprintf(stderr, "ERROR: after body state; open_elements length < 1\n");
+                    break;
+                }
+                
+                myhtml_tree_node_t* adjusted_location = tree->open_elements->list[0];
+                
+                // state 2
+                myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
+                
+                node->tag_idx   = MyTAGS_TAG__COMMENT;
+                node->token     = token;
+                node->namespace = adjusted_location->namespace;
+                
+                myhtml_tree_node_add_child(tree, adjusted_location, node);
+                
+                break;
+            }
+                
+            case MyTAGS_TAG__DOCTYPE:
+                // parse error
+                break;
+                
+            case MyTAGS_TAG_HTML:
+                return myhtml_insertion_mode_in_body(tree, token);
+                
+            case MyTAGS_TAG__END_OF_FILE:
+                myhtml_rules_stop_parsing(tree);
+                break;
+                
+            default:
+                tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
+                return mytrue;
+        }
+    }
+    
     return myfalse;
 }
 
 mybool_t myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
+    if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
+    {
+        switch (token->tag_ctx_idx) {
+            case MyTAGS_TAG_FRAMESET:
+            {
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                
+                if(current_node->tag_idx == MyTAGS_TAG_HTML)
+                    // parse error
+                    break;
+                
+                myhtml_tree_open_elements_pop(tree);
+                
+                current_node = myhtml_tree_current_node(tree);
+                
+                if((tree->flags & MyHTML_TREE_FLAGS_FRAGMENT) == 0 &&
+                   current_node->tag_idx != MyTAGS_TAG_FRAMESET)
+                {
+                    tree->insert_mode = MyHTML_INSERTION_MODE_AFTER_FRAMESET;
+                }
+                
+                break;
+            }
+                
+            default:
+                break;
+        }
+    }
+    else {
+        switch (token->tag_ctx_idx)
+        {
+            case MyTAGS_TAG__TEXT:
+            {
+                myhtml_token_node_wait_for_done(token);
+                if(myhtml_token_is_whithspace(tree, token))
+                {
+                    myhtml_tree_node_insert_text(tree, token);
+                    break;
+                }
+                
+                // parse error
+                break;
+            }
+                
+            case MyTAGS_TAG__COMMENT:
+            {
+                myhtml_tree_node_insert_comment(tree, token, NULL);
+                break;
+            }
+                
+            case MyTAGS_TAG__DOCTYPE:
+                // parse error
+                break;
+                
+            case MyTAGS_TAG_HTML:
+                return myhtml_insertion_mode_in_body(tree, token);
+                
+            case MyTAGS_TAG_FRAMESET:
+                myhtml_tree_node_insert_html_element(tree, token);
+                break;
+                
+            case MyTAGS_TAG_FRAME:
+                myhtml_tree_node_insert_html_element(tree, token);
+                myhtml_tree_open_elements_pop(tree);
+                break;
+                
+            case MyTAGS_TAG_NOFRAMES:
+                return myhtml_insertion_mode_in_head(tree, token);
+                
+            case MyTAGS_TAG__END_OF_FILE:
+            {
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                
+                if(current_node->tag_idx != MyTAGS_TAG_HTML) {
+                    // parse error
+                }
+                
+                myhtml_rules_stop_parsing(tree);
+                break;
+            }
+                
+            default:
+                break;
+        }
+    }
+    
     return myfalse;
 }
 
 mybool_t myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
+    if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
+    {
+        switch (token->tag_ctx_idx) {
+            case MyTAGS_TAG_HTML:
+                tree->insert_mode = MyHTML_INSERTION_MODE_AFTER_AFTER_FRAMESET;
+                break;
+                
+            default:
+                break;
+        }
+    }
+    else {
+        switch (token->tag_ctx_idx)
+        {
+            case MyTAGS_TAG__TEXT:
+            {
+                myhtml_token_node_wait_for_done(token);
+                if(myhtml_token_is_whithspace(tree, token))
+                {
+                    myhtml_tree_node_insert_text(tree, token);
+                    break;
+                }
+                
+                // parse error
+                break;
+            }
+                
+            case MyTAGS_TAG__COMMENT:
+            {
+                myhtml_tree_node_insert_comment(tree, token, NULL);
+                break;
+            }
+                
+            case MyTAGS_TAG__DOCTYPE:
+                // parse error
+                break;
+                
+            case MyTAGS_TAG_HTML:
+                return myhtml_insertion_mode_in_body(tree, token);
+                
+            case MyTAGS_TAG_NOFRAMES:
+                return myhtml_insertion_mode_in_head(tree, token);
+                
+            case MyTAGS_TAG__END_OF_FILE:
+                myhtml_rules_stop_parsing(tree);
+                break;
+                
+            default:
+                break;
+        }
+    }
+    
     return myfalse;
 }
 
 mybool_t myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
+    if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
+    {
+        tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
+        return mytrue;
+    }
+    else {
+        switch (token->tag_ctx_idx)
+        {
+            case MyTAGS_TAG__COMMENT:
+            {
+                myhtml_tree_node_t* adjusted_location = tree->document;
+                myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
+                
+                node->tag_idx   = MyTAGS_TAG__COMMENT;
+                node->token     = token;
+                node->namespace = adjusted_location->namespace;
+                
+                myhtml_tree_node_add_child(tree, adjusted_location, node);
+                break;
+            }
+                
+            case MyTAGS_TAG__TEXT:
+            {
+                myhtml_token_node_wait_for_done(token);
+                if(myhtml_token_is_whithspace(tree, token))
+                {
+                    return myhtml_insertion_mode_in_body(tree, token);
+                }
+                
+                tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
+                return mytrue;
+            }
+                
+            case MyTAGS_TAG_HTML:
+            case MyTAGS_TAG__DOCTYPE:
+                return myhtml_insertion_mode_in_body(tree, token);
+                
+            case MyTAGS_TAG__END_OF_FILE:
+                myhtml_rules_stop_parsing(tree);
+                break;
+                
+            default:
+                tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
+                return mytrue;
+        }
+    }
+    
     return myfalse;
 }
 
 mybool_t myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
+    if(token->type & MyHTML_TOKEN_TYPE_CLOSE) {
+        return myfalse;
+    }
+    else {
+        switch (token->tag_ctx_idx)
+        {
+            case MyTAGS_TAG__COMMENT:
+            {
+                myhtml_tree_node_t* adjusted_location = tree->document;
+                myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
+                
+                node->tag_idx   = MyTAGS_TAG__COMMENT;
+                node->token     = token;
+                node->namespace = adjusted_location->namespace;
+                
+                myhtml_tree_node_add_child(tree, adjusted_location, node);
+                break;
+            }
+                
+            case MyTAGS_TAG__TEXT:
+            {
+                myhtml_token_node_wait_for_done(token);
+                if(myhtml_token_is_whithspace(tree, token))
+                {
+                    return myhtml_insertion_mode_in_body(tree, token);
+                }
+                
+                // parse error
+                break;
+            }
+                
+            case MyTAGS_TAG_HTML:
+            case MyTAGS_TAG__DOCTYPE:
+                return myhtml_insertion_mode_in_body(tree, token);
+                
+            case MyTAGS_TAG__END_OF_FILE:
+                myhtml_rules_stop_parsing(tree);
+                break;
+                
+            case MyTAGS_TAG_NOFRAMES:
+                return myhtml_insertion_mode_in_head(tree, token);
+                
+            default:
+                // parse error
+                break;
+        }
+    }
+    
     return myfalse;
+}
+
+mybool_t myhtml_insertion_mode_in_foreign_content_end_other(myhtml_tree_t* tree, myhtml_tree_node_t* current_node, myhtml_token_node_t* token)
+{
+    if(current_node->tag_idx != token->tag_ctx_idx) {
+        // parse error
+    }
+    
+    if(tree->open_elements->length)
+    {
+        myhtml_tree_node_t** list = tree->open_elements->list;
+        size_t i = tree->open_elements->length - 1;
+        
+        while (i > 1)
+        {
+            current_node = list[i];
+            
+            if(current_node->tag_idx == token->tag_ctx_idx) {
+                myhtml_tree_open_elements_pop_until_by_node(tree, current_node, myfalse);
+                return myfalse;
+            }
+            
+            i--;
+            
+            if(list[i]->namespace == MyHTML_NAMESPACE_HTML)
+                break;
+        }
+    }
+    
+    return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
+}
+
+mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_node_t* token)
+{
+    if(token->type & MyHTML_TOKEN_TYPE_CLOSE) {
+        myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+        
+        if(token->tag_ctx_idx == MyTAGS_TAG_SCRIPT &&
+           current_node->tag_idx == MyTAGS_TAG_SCRIPT &&
+           current_node->namespace == MyHTML_NAMESPACE_SVG)
+        {
+            myhtml_tree_open_elements_pop(tree);
+            // TODO: now script is disable, skip this
+            return myfalse;
+        }
+        
+        return myhtml_insertion_mode_in_foreign_content_end_other(tree, current_node, token);
+    }
+    else {
+        switch (token->tag_ctx_idx)
+        {
+            case MyTAGS_TAG__TEXT:
+            {
+                myhtml_tree_node_insert_text(tree, token);
+                
+                myhtml_token_node_wait_for_done(token);
+                if(myhtml_token_is_whithspace(tree, token) == myfalse)
+                    tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
+                
+                break;
+            }
+                
+            case MyTAGS_TAG__COMMENT:
+                myhtml_tree_node_insert_comment(tree, token, NULL);
+                break;
+                
+            case MyTAGS_TAG__DOCTYPE:
+                break;
+                
+            case MyTAGS_TAG_B:
+            case MyTAGS_TAG_BIG:
+            case MyTAGS_TAG_BLOCKQUOTE:
+            case MyTAGS_TAG_BODY:
+            case MyTAGS_TAG_BR:
+            case MyTAGS_TAG_CENTER:
+            case MyTAGS_TAG_CODE:
+            case MyTAGS_TAG_DD:
+            case MyTAGS_TAG_DIV:
+            case MyTAGS_TAG_DL:
+            case MyTAGS_TAG_DT:
+            case MyTAGS_TAG_EM:
+            case MyTAGS_TAG_EMBED:
+            case MyTAGS_TAG_H1:
+            case MyTAGS_TAG_H2:
+            case MyTAGS_TAG_H3:
+            case MyTAGS_TAG_H4:
+            case MyTAGS_TAG_H5:
+            case MyTAGS_TAG_H6:
+            case MyTAGS_TAG_HEAD:
+            case MyTAGS_TAG_HR:
+            case MyTAGS_TAG_I:
+            case MyTAGS_TAG_IMG:
+            case MyTAGS_TAG_LI:
+            case MyTAGS_TAG_LISTING:
+            case MyTAGS_TAG_MENU:
+            case MyTAGS_TAG_META:
+            case MyTAGS_TAG_NOBR:
+            case MyTAGS_TAG_OL:
+            case MyTAGS_TAG_P:
+            case MyTAGS_TAG_PRE:
+            case MyTAGS_TAG_RUBY:
+            case MyTAGS_TAG_S:
+            case MyTAGS_TAG_SMALL:
+            case MyTAGS_TAG_SPAN:
+            case MyTAGS_TAG_STRONG:
+            case MyTAGS_TAG_STRIKE:
+            case MyTAGS_TAG_SUB:
+            case MyTAGS_TAG_SUP:
+            case MyTAGS_TAG_TABLE:
+            case MyTAGS_TAG_TT:
+            case MyTAGS_TAG_U:
+            case MyTAGS_TAG_UL:
+            case MyTAGS_TAG_VAR:
+            {
+                // parse error
+                
+                if((tree->flags & MyHTML_TREE_FLAGS_FRAGMENT) == 0) {
+                    myhtml_tree_node_t* current_node;
+                    
+                    do {
+                        myhtml_tree_open_elements_pop(tree);
+                        current_node = myhtml_tree_current_node(tree);
+                    }
+                    while(current_node && !(myhtml_tree_is_mathml_integration_point(tree, current_node) ||
+                                            myhtml_tree_is_html_integration_point(tree, current_node) ||
+                                            current_node->namespace == MyHTML_NAMESPACE_HTML));
+                    
+                    return mytrue;
+                }
+            }
+                
+            default:
+            {
+                myhtml_tree_node_t* adjusted_node = myhtml_tree_adjusted_current_node(tree);
+                
+                myhtml_token_node_wait_for_done(token);
+                
+                if(adjusted_node->namespace == MyHTML_NAMESPACE_MATHML) {
+                    myhtml_token_adjust_mathml_attributes(token);
+                }
+                else if(adjusted_node->namespace == MyHTML_NAMESPACE_SVG) {
+                    myhtml_token_adjust_svg_attributes(token);
+                }
+                
+                myhtml_token_adjust_foreign_attributes(token);
+                
+                myhtml_tree_node_t* node = myhtml_tree_node_insert_foreign_element(tree, token);
+                node->namespace = adjusted_node->namespace;
+                
+                if(token->type & MyHTML_TOKEN_TYPE_CLOSE_SELF)
+                {
+                    if(token->tag_ctx_idx == MyTAGS_TAG_SCRIPT &&
+                       node->namespace == MyHTML_NAMESPACE_SVG)
+                    {
+                        return myhtml_insertion_mode_in_foreign_content_end_other(tree, myhtml_tree_current_node(tree), token);
+                    }
+                    else {
+                        myhtml_tree_open_elements_pop(tree);
+                        break;
+                    }
+                }
+                
+                break;
+            }
+        }
+    }
+    
+    return myfalse;
+}
+
+void myhtml_rules_stop_parsing(myhtml_tree_t* tree)
+{
+    
+}
+
+mybool_t myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* token)
+{
+    myhtml_tree_node_t* adjusted_node = myhtml_tree_adjusted_current_node(tree);
+    
+    if(tree->open_elements->length == 0 || adjusted_node->namespace == MyHTML_NAMESPACE_HTML) {
+        return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
+    }
+    else if(myhtml_tree_is_mathml_integration_point(tree, adjusted_node))
+    {
+        if(token->tag_ctx_idx == MyTAGS_TAG__TEXT ||
+           (token->tag_ctx_idx != MyTAGS_TAG_MGLYPH && token->tag_ctx_idx != MyTAGS_TAG_MALIGNMARK)) {
+            return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
+        }
+    }
+    
+    if(adjusted_node->tag_idx == MyTAGS_TAG_ANNOTATION_XML &&
+       adjusted_node->namespace == MyHTML_NAMESPACE_MATHML &&
+       token->tag_ctx_idx != MyTAGS_TAG_SVG)
+    {
+        return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
+    }
+    else if(myhtml_tree_is_html_integration_point(tree, adjusted_node) &&
+            (token->type & MyHTML_TOKEN_TYPE_OPEN || token->tag_ctx_idx == MyTAGS_TAG__TEXT))
+    {
+        return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
+    }
+    else if(token->tag_ctx_idx == MyTAGS_TAG__END_OF_FILE)
+        return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
+    
+    return myhtml_insertion_mode_in_foreign_content(tree, token);
 }
 
 void myhtml_rules_init(myhtml_t* myhtml)
