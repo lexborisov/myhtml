@@ -90,6 +90,13 @@ enum myhtml_tree_insertion_mode {
     MyHTML_TREE_INSERTION_MODE_AFTER       = 0x02
 };
 
+struct myhtml_tree_doctype {
+    mybool_t is_html;
+    char* name;
+    char* public;
+    char* system;
+};
+
 struct myhtml_tree_indexes {
     mytags_index_t* tags;
 };
@@ -123,6 +130,7 @@ struct myhtml_tree {
     myhtml_tree_node_t* current;
     myhtml_tree_node_t* document;
     myhtml_tree_node_t* fragment;
+    myhtml_tree_doctype_t doctype;
     
     myhtml_tree_node_t* node_head;
     myhtml_tree_node_t* node_form;

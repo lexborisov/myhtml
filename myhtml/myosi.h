@@ -36,6 +36,7 @@ typedef struct myhtml_tree_insertion_list myhtml_tree_insertion_list_t;
 typedef struct myhtml_tree_token_list myhtml_tree_token_list_t;
 typedef struct myhtml_tree_list myhtml_tree_list_t;
 typedef struct myhtml_tree_indexes myhtml_tree_indexes_t;
+typedef struct myhtml_tree_doctype myhtml_tree_doctype_t;
 
 typedef struct myhtml_tree_node myhtml_tree_node_t;
 typedef struct myhtml_tree myhtml_tree_t;
@@ -217,6 +218,7 @@ typedef mybool_t (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_node_t*
 void * mymalloc(size_t size);
 void * myrealloc(void* dst, size_t size);
 void * mycalloc(size_t num, size_t size);
+void myfree(void* dst);
 
 #endif
 

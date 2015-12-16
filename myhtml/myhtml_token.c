@@ -177,66 +177,147 @@ myhtml_token_node_t * myhtml_token_clone(myhtml_token_t* token, myhtml_token_nod
     new_node->length      = node->length;
     
     myhtml_string_init(&new_node->entry, node->entry.size);
-    myhtml_token_attr_copy(token, node, new_node, thread_idx);
+    myhtml_token_node_attr_copy(token, node, new_node, thread_idx);
     
     return new_node;
 }
 
+void myhtml_token_node_text_append(myhtml_token_t* token, myhtml_token_node_t* dest, const char* text, size_t text_len)
+{
+    myhtml_string_init(&dest->entry, (text_len + 512));
+    
+    myhtml_string_t* string = &dest->entry;
+    
+    dest->begin  = myhtml_string_len(string);
+    dest->length = text_len;
+    
+    myhtml_string_append_with_null(string, text, text_len);
+}
+
+myhtml_token_attr_t * myhtml_token_node_attr_append(myhtml_token_t* token, myhtml_token_node_t* dest,
+                                   const char* key, size_t key_len,
+                                   const char* value, size_t value_len, size_t thread_idx)
+{
+    myhtml_string_t* dest_string = &dest->entry;
+    
+    myhtml_string_init(&dest->entry, (key_len + value_len + 512));
+    
+    myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx);
+    new_attr->next = 0;
+    
+    if(key_len)
+    {
+        new_attr->name_begin = myhtml_string_len(dest_string);
+        new_attr->name_length = key_len;
+        
+        myhtml_string_append_lowercase_with_null(dest_string,
+                                                 key,
+                                                 key_len);
+    }
+    else {
+        new_attr->name_begin  = 0;
+        new_attr->name_length = 0;
+    }
+    
+    if(value_len)
+    {
+        new_attr->value_begin = myhtml_string_len(dest_string);
+        new_attr->value_length = value_len;
+        
+        myhtml_string_append_lowercase_with_null(dest_string,
+                                                 value,
+                                                 value_len);
+    }
+    else {
+        new_attr->value_begin  = 0;
+        new_attr->value_length = 0;
+    }
+    
+    if(dest->attr_first == NULL) {
+        new_attr->prev = 0;
+        
+        dest->attr_first = new_attr;
+        dest->attr_last = new_attr;
+    }
+    else {
+        dest->attr_last->next = new_attr;
+        new_attr->prev = dest->attr_last;
+        
+        dest->attr_last = new_attr;
+    }
+    
+    return new_attr;
+}
+
 // TODO: use tree for this
-void myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx)
+void myhtml_token_node_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx)
+{
+    myhtml_token_attr_t* attr = target->attr_first;
+    
+    while (attr)
+    {
+        myhtml_token_attr_copy(token, target, attr, dest, thread_idx);
+        attr = attr->next;
+    }
+}
+
+mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_attr_t* attr,
+                            myhtml_token_node_t* dest, size_t thread_idx)
 {
     myhtml_string_t* targ_string = &target->entry;
     myhtml_string_t* dest_string = &dest->entry;
     
-    myhtml_token_attr_t* attr = target->attr_first;
+//    if(myhtml_token_attr_by_name(target, &targ_string->data[attr->name_begin], attr->name_length)) {
+//        return myfalse;
+//    }
     
-    while (attr) {
-        myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx);
-        new_attr->next = 0;
+    myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx);
+    new_attr->next = 0;
+    
+    myhtml_string_init(&dest->entry, 512 + attr->name_length + attr->value_begin);
+    
+    if(attr->name_length)
+    {
+        new_attr->name_begin = myhtml_string_len(dest_string);
+        new_attr->name_length = attr->name_length;
         
-        if(attr->name_length)
-        {
-            new_attr->name_begin = myhtml_string_len(dest_string);
-            new_attr->name_length = attr->name_length;
-            
-            myhtml_string_append_lowercase_with_null(dest_string,
-                                                     &targ_string->data[attr->name_begin],
-                                                     attr->name_length);
-        }
-        else {
-            attr->name_begin  = 0;
-            attr->name_length = 0;
-        }
-        
-        if(attr->value_length)
-        {
-            new_attr->value_begin = myhtml_string_len(dest_string);
-            new_attr->value_length = attr->value_length;
-            
-            myhtml_string_append_lowercase_with_null(dest_string,
-                                                     &targ_string->data[attr->value_begin],
-                                                     attr->value_length);
-        }
-        else {
-            attr->value_begin  = 0;
-            attr->value_length = 0;
-        }
-        
-        if(dest->attr_first == NULL) {
-            new_attr->prev = 0;
-            
-            dest->attr_first = new_attr;
-            dest->attr_last = new_attr;
-        }
-        else {
-            dest->attr_last->next = new_attr;
-            new_attr->prev = dest->attr_last;
-            
-            dest->attr_last = new_attr;
-        }
-        
-        attr = attr->next;
+        myhtml_string_append_lowercase_with_null(dest_string,
+                                                 &targ_string->data[attr->name_begin],
+                                                 attr->name_length);
     }
+    else {
+        new_attr->name_begin  = 0;
+        new_attr->name_length = 0;
+    }
+    
+    if(attr->value_length)
+    {
+        new_attr->value_begin = myhtml_string_len(dest_string);
+        new_attr->value_length = attr->value_length;
+        
+        myhtml_string_append_lowercase_with_null(dest_string,
+                                                 &targ_string->data[attr->value_begin],
+                                                 attr->value_length);
+    }
+    else {
+        new_attr->value_begin  = 0;
+        new_attr->value_length = 0;
+    }
+    
+    if(dest->attr_first == NULL) {
+        new_attr->prev = 0;
+        
+        dest->attr_first = new_attr;
+        dest->attr_last = new_attr;
+    }
+    else {
+        dest->attr_last->next = new_attr;
+        new_attr->prev = dest->attr_last;
+        
+        dest->attr_last = new_attr;
+    }
+    
+    return mytrue;
 }
 
 myhtml_token_attr_t * myhtml_token_attr_match(myhtml_token_t* token, myhtml_token_node_t* target,
@@ -300,6 +381,172 @@ void myhtml_token_adjust_mathml_attributes(myhtml_token_node_t* target)
         myhtml_string_t* targ_string = &target->entry;
         memcpy(&targ_string->data[attr->name_begin], "definitionURL", 13);
     }
+}
+
+void _myhtml_token_create_copy_srt(const char* from, size_t from_size, char** to)
+{
+    if(*to)
+        myfree(*to);
+    
+    *to = mymalloc(from_size + 2);
+    
+    strcpy(*to, from);
+}
+
+void myhtml_token_strict_doctype_by_token(myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)
+{
+    myhtml_string_t* targ_string = &target->entry;
+    myhtml_token_attr_t* attr = target->attr_first;
+    
+    const char* data = targ_string->data;
+    
+    if(attr && attr->name_length) {
+        _myhtml_token_create_copy_srt(&data[attr->name_begin], attr->name_length, &return_doctype->name);
+        
+        if(strcmp("html", return_doctype->name))
+             return_doctype->is_html = myfalse;
+        else
+             return_doctype->is_html = mytrue;
+    }
+    else {
+        return_doctype->is_html = myfalse;
+        
+        if(return_doctype->name)
+            myfree(return_doctype->name);
+        return_doctype->name = NULL;
+        
+        if(return_doctype->public)
+            myfree(return_doctype->public);
+        return_doctype->public = NULL;
+        
+        if(return_doctype->system)
+            myfree(return_doctype->system);
+        return_doctype->system = NULL;
+        
+        return;
+    }
+    
+    attr = attr->next;
+    
+    if(attr && attr->name_length)
+    {
+        if(strcmp("PUBLIC", &data[attr->name_begin]) == 0)
+        {
+            // try see public
+            attr = attr->next;
+            
+            if(attr && attr->name_length) {
+                _myhtml_token_create_copy_srt(&data[attr->name_begin], attr->name_length, &return_doctype->public);
+                
+                // try see system
+                attr = attr->next;
+                
+                if(attr && attr->name_length) {
+                    _myhtml_token_create_copy_srt(&data[attr->name_begin], attr->name_length, &return_doctype->system);
+                }
+                else {
+                    if(return_doctype->system)
+                        myfree(return_doctype->system);
+                    return_doctype->system = NULL;
+                }
+            }
+            else {
+                if(return_doctype->public)
+                    myfree(return_doctype->public);
+                return_doctype->public = NULL;
+                
+                if(return_doctype->system)
+                    myfree(return_doctype->system);
+                return_doctype->system = NULL;
+            }
+        }
+        else if(strcmp("SYSTEM", &data[attr->name_begin]) == 0)
+        {
+            attr = attr->next;
+            
+            if(attr && attr->name_length) {
+                _myhtml_token_create_copy_srt(&data[attr->name_begin], attr->name_length, &return_doctype->system);
+            }
+            else {
+                if(return_doctype->public)
+                    myfree(return_doctype->public);
+                return_doctype->public = NULL;
+                
+                if(return_doctype->system)
+                    myfree(return_doctype->system);
+                return_doctype->system = NULL;
+            }
+        }
+        else {
+            if(return_doctype->public)
+                myfree(return_doctype->public);
+            return_doctype->public = NULL;
+            
+            if(return_doctype->system)
+                myfree(return_doctype->system);
+            return_doctype->system = NULL;
+        }
+    }
+}
+
+mybool_t myhtml_token_doctype_check_html_4_0(myhtml_tree_doctype_t* return_doctype)
+{
+    return strcmp(return_doctype->public, "-//W3C//DTD HTML 4.0//EN") &&
+    (return_doctype->system == NULL || strcmp(return_doctype->system, "http://www.w3.org/TR/REC-html40/strict.dtd"));
+}
+
+mybool_t myhtml_token_doctype_check_html_4_01(myhtml_tree_doctype_t* return_doctype)
+{
+    if(return_doctype->system == NULL)
+        return mytrue;
+    
+    return strcmp(return_doctype->public, "-//W3C//DTD HTML 4.01//EN") &&
+    (return_doctype->system == NULL || strcmp(return_doctype->system, "http://www.w3.org/TR/html4/strict.dtd"));
+}
+
+mybool_t myhtml_token_doctype_check_xhtml_1_0(myhtml_tree_doctype_t* return_doctype)
+{
+    if(return_doctype->system == NULL)
+        return mytrue;
+    
+    return strcmp(return_doctype->public, "-//W3C//DTD XHTML 1.0 Strict//EN") &&
+    strcmp(return_doctype->system, "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd");
+}
+
+mybool_t myhtml_token_doctype_check_xhtml_1_1(myhtml_tree_doctype_t* return_doctype)
+{
+    return strcmp(return_doctype->public, "-//W3C//DTD XHTML 1.1//EN") &&
+    strcmp(return_doctype->system, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
+}
+
+mybool_t myhtml_token_release_and_check_doctype_attributes(myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)
+{
+    if(return_doctype == NULL)
+        return myfalse;
+    
+    myhtml_token_strict_doctype_by_token(target, return_doctype);
+    
+    if(return_doctype->name == NULL)
+        return myfalse;
+    
+    if((return_doctype->is_html ||
+       return_doctype->public ||
+       (return_doctype->system && strcmp(return_doctype->system, "about:legacy-compat"))))
+    {
+        if(return_doctype->public == NULL)
+            return myfalse;
+        
+        if(return_doctype->is_html &&
+           myhtml_token_doctype_check_html_4_0(return_doctype) &&
+           myhtml_token_doctype_check_html_4_01(return_doctype) &&
+           myhtml_token_doctype_check_xhtml_1_0(return_doctype) &&
+           myhtml_token_doctype_check_xhtml_1_1(return_doctype))
+        {
+            return myfalse;
+        }
+    }
+    
+    return mytrue;
 }
 
 // oh
@@ -389,7 +636,7 @@ myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const
     while (attr)
     {
         if(name_length == attr->name_length) {
-            if(strncasecmp(name, &buff[attr->name_begin], name_length) == 0)
+            if(strncmp(name, &buff[attr->name_begin], name_length) == 0)
                 break;
         }
         
@@ -402,6 +649,32 @@ myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const
 void myhtml_token_delete(myhtml_token_t* token, myhtml_token_node_t* node)
 {
     mcobject_async_free(token->nodes_obj, 0, node);
+}
+
+myhtml_token_attr_t * myhtml_token_attr_remove_by_name(myhtml_token_node_t* node, const char* name, size_t name_length)
+{
+    myhtml_token_attr_t* attr = myhtml_token_attr_by_name(node, name, name_length);
+    
+    if(attr)
+    {
+        if(node->attr_first == attr)
+            node->attr_first = attr->next;
+        
+        if(node->attr_last == attr)
+            node->attr_last = attr->prev;
+        
+        if(attr->next) {
+            attr->next->prev = attr->prev;
+            attr->next = NULL;
+        }
+        
+        if(attr->prev) {
+            attr->prev->next = attr->next;
+            attr->prev = NULL;
+        }
+    }
+    
+    return attr;
 }
 
 mybool_t myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* node)

@@ -58,7 +58,7 @@
 
 #define mh_queue_add(__tree__, __html__, __qnode_idx__, __begin__)                                             \
     __qnode_idx__ = myhtml_queue_node_malloc(myhtml->queue, __html__, __begin__, myfalse, 0, tree);            \
-    myhtml_token_node_malloc(__tree__->token, myhtml->queue->nodes[__qnode_idx__].token)
+    myhtml_token_node_malloc(__tree__->token, myhtml->queue->nodes[__qnode_idx__].token, 0)
 
 #define mh_token_get(__idx__, __attr__) tree->token->nodes[__idx__].__attr__
 #define mh_token_set(__idx__, __attr__) mh_token_get(__idx__, __attr__)

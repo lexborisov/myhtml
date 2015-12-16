@@ -57,7 +57,7 @@ int main(int argc, const char * argv[])
 {
     setbuf(stdout, 0);
     
-    myhtml_t* myhtml = myhtml_init(1);
+    myhtml_t* myhtml = myhtml_init(4);
     
     //struct res_html res = load_html("/new/C-git/myhtml/test/test.html");
     //struct res_html res = load_html("/new/C-git/myhtml/test/broken.html");
@@ -78,10 +78,7 @@ int main(int argc, const char * argv[])
         myhtml_tokenizer_begin(myhtml, tree, res.html, res.size);
         myhtml_tokenizer_end(myhtml, tree);
         
-        //myhtml_tree_t* tree = myhtml_parse(myhtml, res.html, res.size);
-        //myhtml_tree_destroy(tree);
-        
-        //print_token_by_index(tree, MyTAGS_TAG__TEXT);
+        //print_token_by_index(tree, MyTAGS_TAG__DOCTYPE); -- now is not work
         //myhtml_tree_print_by_tree_idx(tree, tree->document->child, stdout, 0);
         
         myhtml_clean(myhtml);

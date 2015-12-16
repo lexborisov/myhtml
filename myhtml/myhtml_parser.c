@@ -14,7 +14,7 @@ void myhtml_parser_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_id
     mytags_t* mytags = myhtml->tags;
     myhtml_tree_indexes_t* indexes = tree->indexes;
     
-    mytags_index_tag_add(mytags, indexes->tags, token);
+    //mytags_index_tag_add(mytags, indexes->tags, token);
 }
 
 void myhtml_parser_stream(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)
@@ -43,6 +43,41 @@ void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_i
         myhtml_string_append_with_null(string,
                                        &queue_node->html[queue_node->begin],
                                        queue_node->length);
+    }
+    else if(token->tag_ctx_idx == MyTAGS_TAG__DOCTYPE)
+    {
+        myhtml_string_init(&token->entry, 512);
+        
+        token->begin  = 0;
+        token->length = 0;
+        
+        myhtml_token_attr_t* attr = token->attr_first;
+        myhtml_string_t* string = &token->entry;
+        
+        while(attr)
+        {
+            if(attr->name_length)
+            {
+                size_t begin = attr->name_begin;
+                attr->name_begin = myhtml_string_len(string);
+                
+                myhtml_string_append_with_null(string,
+                                               &queue_node->html[begin],
+                                               attr->name_length);
+            }
+            
+            if(attr->value_length)
+            {
+                size_t begin = attr->value_begin;
+                attr->value_begin = myhtml_string_len(string);
+                
+                myhtml_string_append_with_null(string,
+                                               &queue_node->html[begin],
+                                               attr->value_length);
+            }
+            
+            attr = attr->next;
+        }
     }
     else if(token->attr_first)
     {

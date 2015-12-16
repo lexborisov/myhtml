@@ -127,8 +127,8 @@ size_t myhtml_tokenizer_state_after_doctype_name(myhtml_tree_t* tree, myhtml_que
     if(strncasecmp(&html[html_offset], "PUBLIC", 6) == 0) {
         myhtml_parser_queue_set_attr(tree, qnode);
         
-        tree->queue_attr->name_begin  = html_offset;
-        tree->queue_attr->name_length = 6;
+        tree->queue_attr->name_begin   = html_offset;
+        tree->queue_attr->name_length  = 6;
         
         myhtml_token_attr_malloc(tree->token, tree->attr_current);
         
@@ -149,6 +149,7 @@ size_t myhtml_tokenizer_state_after_doctype_name(myhtml_tree_t* tree, myhtml_que
         html_offset = html_offset_n + 1;
     }
     else {
+        tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BOGUS_DOCTYPE;
     }
     
@@ -182,6 +183,7 @@ size_t myhtml_tokenizer_state_before_doctype_public_identifier(myhtml_tree_t* tr
         return html_offset;
     }
     else {
+        tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BOGUS_DOCTYPE;
     }
     

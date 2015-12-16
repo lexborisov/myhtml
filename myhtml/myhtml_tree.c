@@ -45,6 +45,12 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->current   = NULL;
     tree->document  = myhtml_tree_node_create(tree);
     tree->fragment  = NULL;
+    
+    tree->doctype.is_html = myfalse;
+    tree->doctype.name    = NULL;
+    tree->doctype.public  = NULL;
+    tree->doctype.system  = NULL;
+    
     tree->node_head = 0;
     tree->node_form = 0;
     

@@ -70,7 +70,7 @@ void myhtml_tokenizer_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* h
     mh_queue_set(qnode_idx, myhtml_tree) = tree;
     
     mh_tree_set(queue) = myhtml_queue_node_current(myhtml->queue);
-    myhtml_token_node_malloc(tree->token, mh_queue_get(qnode_idx, token));
+    myhtml_token_node_malloc(tree->token, mh_queue_get(qnode_idx, token), 0);
     
     myhtml_tokenizer_continue(myhtml, tree, html, html_length);
 }

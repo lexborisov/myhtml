@@ -27,5 +27,10 @@ void * mycalloc(size_t num, size_t size)
     return calloc(num, size);
 }
 
+void myfree(void* dst)
+{
+    //printf("Call free\n");
+    free(dst);
+}
 
 
