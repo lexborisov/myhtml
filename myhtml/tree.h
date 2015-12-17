@@ -11,11 +11,10 @@
 
 #include "myosi.h"
 #include "myhtml.h"
-#include "myhtml_token.h"
-#include "myhtml_string.h"
-#include "mcobject.h"
-#include "mcsync.h"
-#include "mcobject_async.h"
+#include "token.h"
+#include "string.h"
+#include "utils/mcsync.h"
+#include "utils/mcobject_async.h"
 
 #define myhtml_tree_get(__tree__, __attr__) __tree__->__attr__
 #define myhtml_tree_set(__tree__, __attr__) __tree__->__attr__
@@ -80,8 +79,7 @@ enum myhtml_tree_flags {
     MyHTML_TREE_FLAGS_SCRIPT          = 0x01,
     MyHTML_TREE_FLAGS_FRAMESET_OK     = 0x02,
     MyHTML_TREE_FLAGS_IFRAME_SRCDOC   = 0x04,
-    MyHTML_TREE_FLAGS_FRAGMENT        = 0x08,
-    MyHTML_TREE_FLAGS_ALREADY_STARTED = 0x10
+    MyHTML_TREE_FLAGS_ALREADY_STARTED = 0x08
 };
 
 enum myhtml_tree_insertion_mode {
@@ -150,6 +148,7 @@ struct myhtml_tree {
     enum myhtml_insertion_mode orig_insert_mode;
     enum myhtml_tree_compat_mode compat_mode;
     enum myhtml_tree_flags flags;
+    enum myhtml_namespace namespace;
     mybool_t foster_parenting;
     
     myhtml_t* myhtml;

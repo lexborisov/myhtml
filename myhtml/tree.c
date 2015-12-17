@@ -6,7 +6,7 @@
 //  Copyright © 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_tree.h"
+#include "tree.h"
 
 
 myhtml_tree_t * myhtml_tree_init(myhtml_t* myhtml)
@@ -62,6 +62,7 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->tmp_tag_id       = 0;
     tree->flags            = MyHTML_TREE_FLAGS_CLEAN;
     tree->foster_parenting = myfalse;
+    tree->namespace        = MyHTML_NAMESPACE_HTML;
     
     myhtml_token_clean(tree->token);
     myhtml_tree_active_formatting_clean(tree);
@@ -711,43 +712,57 @@ void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree)
     if(tree->open_elements->length == 0)
         return;
     
-    size_t i = tree->open_elements->length - 1;
+    size_t i = tree->open_elements->length;
     
+    // step 1
     mybool_t last = myfalse;
     myhtml_tree_node_t** list = tree->open_elements->list;
     
-    for(;;)
+    // step 3
+    while(i)
     {
+        i--;
+        
+        // step 2
+        myhtml_tree_node_t* node = list[i];
+        
         if(i == 0) {
             last = mytrue;
             
-            // TODO: If node is the first node in the stack of open elements,
-            // then set last to true, and, if the parser was originally created
-            // as part of the HTML fragment parsing algorithm (fragment case),
-            // set node to the context element passed to that algorithm.
+            if(tree->fragment) {
+                node = tree->fragment;
+            }
         }
         
-        if(list[i]->tag_idx == MyTAGS_TAG_SELECT)
+        // step 4
+        if(node->tag_idx == MyTAGS_TAG_SELECT)
         {
+            // step 4.1
             if(last) {
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_SELECT;
                 break;
             }
             
+            // step 4.2
             size_t ancestor = i;
             
             while(1)
             {
+                // step 4.3
                 if(ancestor == 0) {
-                    break;
+                    tree->insert_mode = MyHTML_INSERTION_MODE_IN_SELECT;
+                    return;
                 }
                 
+                // step 4.4
                 ancestor--;
                 
+                // step 4.5
                 if(list[ancestor]->tag_idx == MyTAGS_TAG_TEMPLATE) {
                     tree->insert_mode = MyHTML_INSERTION_MODE_IN_SELECT;
                     return;
                 }
+                // step 4.6
                 else if(list[ancestor]->tag_idx == MyTAGS_TAG_TABLE) {
                     tree->insert_mode = MyHTML_INSERTION_MODE_IN_SELECT_IN_TABLE;
                     return;
@@ -755,7 +770,8 @@ void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree)
             }
         }
         
-        switch (list[i]->tag_idx) {
+        // step 5-15
+        switch (node->tag_idx) {
             case MyTAGS_TAG_TD:
             case MyTAGS_TAG_TH:
                 if(last == myfalse) {
@@ -820,12 +836,13 @@ void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree)
                 break;
         }
         
+        // step 16
         if(last) {
             tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
             break;
         }
         
-        i--;
+        // step 17
     }
 }
 
@@ -1094,7 +1111,7 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_i
         size_t afe_index;
         myhtml_tree_node_t* formatting_element = myhtml_tree_active_formatting_between_last_marker(tree, subject_tag_idx, &afe_index);
         
-        // TODO: If there is no such element, then abort these steps and instead act as described in the
+        // If there is no such element, then abort these steps and instead act as described in the
         // ===> "any other end tag" entry above.
         if(formatting_element == NULL) {
             return mytrue;
@@ -1421,10 +1438,10 @@ void myhtml_tree_print_by_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node, FIL
     if(node->tag_idx == MyTAGS_TAG__TEXT ||
        node->tag_idx == MyTAGS_TAG__COMMENT)
     {
-//        if(node->token)
-//            fprintf(out, "<%.*s>: %.*s\n", (int)tag_name_size, mctree_nodes[mctree_id].str,
-//                    (int)node->token->length, &node->token->entry.data[node->token->begin]);
-//        else
+        if(node->token)
+            fprintf(out, "<%.*s>: %.*s\n", (int)tag_name_size, mctree_nodes[mctree_id].str,
+                    (int)node->token->length, &node->token->entry.data[node->token->begin]);
+        else
             fprintf(out, "<%.*s>\n", (int)tag_name_size, mctree_nodes[mctree_id].str);
     }
     else

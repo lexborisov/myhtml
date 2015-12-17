@@ -13,14 +13,14 @@
 
 #include "mctree.h"
 #include "mytags.h"
-#include "myhtml_def.h"
-#include "myhtml_parser.h"
-#include "myhtml_tokenizer.h"
-#include "myhtml_thread.h"
-#include "myhtml_tree.h"
-#include "myhtml_rules.h"
-#include "myhtml_token.h"
-#include "myhtml_queue.h"
+#include "def.h"
+#include "parser.h"
+#include "tokenizer.h"
+#include "thread.h"
+#include "tree.h"
+#include "rules.h"
+#include "token.h"
+#include "queue.h"
 
 #define mh_thread_get(__idx__, __attr__) myhtml_thread_get(myhtml->thread, __idx__, __attr__)
 #define mh_thread_set(__idx__, __attr__) myhtml_thread_set(myhtml->thread, __idx__, __attr__)
@@ -104,12 +104,15 @@ void myhtml_clean(myhtml_t* myhtml);
 myhtml_t* myhtml_destroy(myhtml_t* myhtml);
 
 myhtml_tree_t * myhtml_parse(myhtml_t* myhtml, const char* html, size_t html_size);
+myhtml_tree_t * myhtml_parse_fragment(myhtml_t* myhtml, const char* html, size_t html_size);
 
 void myhtml_tokenizer_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length);
 void myhtml_tokenizer_end(myhtml_t* myhtml, myhtml_tree_t* tree);
 void myhtml_tokenizer_continue(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length);
 void myhtml_tokenizer_wait(myhtml_t* myhtml);
 void myhtml_tokenizer_post(myhtml_t* myhtml);
+
+myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, mytags_ctx_index_t tag_idx, enum myhtml_namespace my_namespace);
 
 mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 

@@ -11,7 +11,7 @@
 
 #include "myosi.h"
 #include "myhtml.h"
-#include "myhtml_token.h"
+#include "token.h"
 
 #define myhtml_queue_node_get(__queue__, __idx__, __patam__) __queue__->nodes[__idx__].__patam__
 

@@ -12,9 +12,9 @@
 #include "myosi.h"
 #include "mytags.h"
 #include "myhtml.h"
-#include "mcobject_async.h"
-#include "myhtml_string.h"
-#include "mcsync.h"
+#include "string.h"
+#include "utils/mcobject_async.h"
+#include "utils/mcsync.h"
 
 // attr
 #define myhtml_token_attr(__token__, __idx__) __token__->attr[__idx__]

@@ -13,8 +13,8 @@
 
 #include "mctree.h"
 #include "mytags_const.h"
-#include "myhtml_tokenizer.h"
-#include "mcobject.h"
+#include "tokenizer.h"
+#include "utils/mcobject.h"
 
 #define mytags_get(__mytags__, __idx__, __attr__) __mytags__->context[__idx__].__attr__
 

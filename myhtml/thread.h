@@ -20,7 +20,7 @@
 
 #include "myosi.h"
 #include "myhtml.h"
-#include "myhtml_tree.h"
+#include "tree.h"
 
 #define MyHTML_THREAD_MASTER_ID 0
 #define MyHTML_THREAD_STREAM_ID 1
@@ -31,7 +31,7 @@
 #define MyHTML_THREAD_SEM_MAX_NAME 128
 
 #define MyHTML_THREAD_MIN_THREADS 1
-#define MyHTML_THREAD_MAX_THREADS 100
+#define MyHTML_THREAD_MAX_THREADS 10
 
 #define myhtml_thread(__thread__, __idx__, __attr__) __thread__->pth_list[__idx__].__attr__
 #define myhtml_thread_master(__thread__, __attr__) __thread__->pth_list[MyHTML_THREAD_MASTER_ID].__attr__

@@ -6,7 +6,7 @@
 //  Copyright © 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_tokenizer_doctype.h"
+#include "tokenizer_doctype.h"
 
 /////////////////////////////////////////////////////////
 //// BEFORE DOCTYPE NAME

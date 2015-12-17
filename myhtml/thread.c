@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_thread.h"
+#include "thread.h"
 
 // private functions
 void myhtml_thread_create_sem(myhtml_thread_t* thread, const char* sem_prefix, size_t sem_prefix_length, myhtml_thread_index_t thr_idx);

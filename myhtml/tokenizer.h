@@ -12,9 +12,9 @@
 #include "myosi.h"
 #include "myhtml.h"
 #include "mytags.h"
-#include "myhtml_thread.h"
-#include "myhtml_tokenizer_doctype.h"
-#include "myhtml_tokenizer_script.h"
+#include "thread.h"
+#include "tokenizer_doctype.h"
+#include "tokenizer_script.h"
 
 #define myhtml_tokenizer_inc_html_offset(__offset__, __size__)   \
     __offset__++;                                            \

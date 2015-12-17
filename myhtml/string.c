@@ -6,7 +6,7 @@
 //  Copyright © 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_string.h"
+#include "string.h"
 
 myhtml_string_t * myhtml_string_create(size_t size)
 {

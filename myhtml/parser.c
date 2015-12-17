@@ -6,7 +6,7 @@
 //  Copyright © 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_parser.h"
+#include "parser.h"
 
 void myhtml_parser_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)
 {

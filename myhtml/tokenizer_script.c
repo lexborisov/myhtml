@@ -6,7 +6,7 @@
 //  Copyright © 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_tokenizer_script.h"
+#include "tokenizer_script.h"
 
 
 size_t myhtml_tokenizer_state_script_data(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)

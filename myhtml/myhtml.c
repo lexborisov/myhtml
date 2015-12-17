@@ -62,6 +62,38 @@ myhtml_tree_t * myhtml_parse(myhtml_t* myhtml, const char* html, size_t html_siz
     return tree;
 }
 
+myhtml_tree_t * myhtml_parse_fragment(myhtml_t* myhtml, const char* html, size_t html_size)
+{
+    myhtml_tree_t* tree = myhtml_tree_init(myhtml);
+    
+    myhtml_tokenizer_fragment_init(tree, MyTAGS_TAG_DIV, MyHTML_NAMESPACE_HTML);
+    
+    myhtml_tokenizer_begin(myhtml, tree, html, html_size);
+    myhtml_tokenizer_end(myhtml, tree);
+    
+    return tree;
+}
+
+myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, mytags_ctx_index_t tag_idx, enum myhtml_namespace my_namespace)
+{
+    // step 3
+    tree->fragment = myhtml_tree_node_create(tree);
+    tree->fragment->namespace = my_namespace;
+    tree->fragment->tag_idx = tag_idx;
+    
+    // skip step 4, is already done
+    
+    // step 5-7
+    myhtml_tree_node_t* root = myhtml_tree_node_insert_root(tree, NULL, my_namespace);
+    
+    if(tag_idx == MyTAGS_TAG_TEMPLATE)
+        myhtml_tree_template_insertion_append(tree, MyHTML_INSERTION_MODE_IN_TEMPLATE);
+    
+    myhtml_tree_reset_insertion_mode_appropriately(tree);
+    
+    return root;
+}
+
 void myhtml_tokenizer_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length)
 {
     myhtml_queue_node_index_t qnode_idx = myhtml_queue_node_current(myhtml->queue);

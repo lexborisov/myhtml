@@ -6,7 +6,7 @@
 //  Copyright © 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_rules.h"
+#include "rules.h"
 
 mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
@@ -2768,7 +2768,7 @@ mybool_t myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node
         switch (token->tag_ctx_idx) {
             case MyTAGS_TAG_HTML:
             {
-                if(tree->flags & MyHTML_TREE_FLAGS_FRAGMENT) {
+                if(tree->fragment) {
                     // parse error
                     break;
                 }
@@ -2855,7 +2855,7 @@ mybool_t myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_nod
                 
                 current_node = myhtml_tree_current_node(tree);
                 
-                if((tree->flags & MyHTML_TREE_FLAGS_FRAGMENT) == 0 &&
+                if(tree->fragment == NULL &&
                    current_node->tag_idx != MyTAGS_TAG_FRAMESET)
                 {
                     tree->insert_mode = MyHTML_INSERTION_MODE_AFTER_FRAMESET;
@@ -3121,6 +3121,39 @@ mybool_t myhtml_insertion_mode_in_foreign_content_end_other(myhtml_tree_t* tree,
     return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
 }
 
+mybool_t myhtml_insertion_mode_in_foreign_content_start_other(myhtml_tree_t* tree, myhtml_token_node_t* token)
+{
+    myhtml_tree_node_t* adjusted_node = myhtml_tree_adjusted_current_node(tree);
+    
+    myhtml_token_node_wait_for_done(token);
+    
+    if(adjusted_node->namespace == MyHTML_NAMESPACE_MATHML) {
+        myhtml_token_adjust_mathml_attributes(token);
+    }
+    else if(adjusted_node->namespace == MyHTML_NAMESPACE_SVG) {
+        myhtml_token_adjust_svg_attributes(token);
+    }
+    
+    myhtml_token_adjust_foreign_attributes(token);
+    
+    myhtml_tree_node_t* node = myhtml_tree_node_insert_foreign_element(tree, token);
+    node->namespace = adjusted_node->namespace;
+    
+    if(token->type & MyHTML_TOKEN_TYPE_CLOSE_SELF)
+    {
+        if(token->tag_ctx_idx == MyTAGS_TAG_SCRIPT &&
+           node->namespace == MyHTML_NAMESPACE_SVG)
+        {
+            return myhtml_insertion_mode_in_foreign_content_end_other(tree, myhtml_tree_current_node(tree), token);
+        }
+        else {
+            myhtml_tree_open_elements_pop(tree);
+        }
+    }
+    
+    return myfalse;
+}
+
 mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE) {
@@ -3202,10 +3235,20 @@ mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_to
             case MyTAGS_TAG_U:
             case MyTAGS_TAG_UL:
             case MyTAGS_TAG_VAR:
+            case MyTAGS_TAG_FONT:
             {
                 // parse error
+                if(token->tag_ctx_idx == MyTAGS_TAG_FONT)
+                {
+                    myhtml_token_node_wait_for_done(token);
+                    
+                    if(myhtml_token_attr_by_name(token, "color", 5) == NULL &&
+                       myhtml_token_attr_by_name(token, "face" , 4) == NULL &&
+                       myhtml_token_attr_by_name(token, "size" , 4) == NULL)
+                        return myhtml_insertion_mode_in_foreign_content_start_other(tree, token);
+                }
                 
-                if((tree->flags & MyHTML_TREE_FLAGS_FRAGMENT) == 0) {
+                if(tree->fragment == NULL) {
                     myhtml_tree_node_t* current_node;
                     
                     do {
@@ -3221,38 +3264,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_to
             }
                 
             default:
-            {
-                myhtml_tree_node_t* adjusted_node = myhtml_tree_adjusted_current_node(tree);
-                
-                myhtml_token_node_wait_for_done(token);
-                
-                if(adjusted_node->namespace == MyHTML_NAMESPACE_MATHML) {
-                    myhtml_token_adjust_mathml_attributes(token);
-                }
-                else if(adjusted_node->namespace == MyHTML_NAMESPACE_SVG) {
-                    myhtml_token_adjust_svg_attributes(token);
-                }
-                
-                myhtml_token_adjust_foreign_attributes(token);
-                
-                myhtml_tree_node_t* node = myhtml_tree_node_insert_foreign_element(tree, token);
-                node->namespace = adjusted_node->namespace;
-                
-                if(token->type & MyHTML_TOKEN_TYPE_CLOSE_SELF)
-                {
-                    if(token->tag_ctx_idx == MyTAGS_TAG_SCRIPT &&
-                       node->namespace == MyHTML_NAMESPACE_SVG)
-                    {
-                        return myhtml_insertion_mode_in_foreign_content_end_other(tree, myhtml_tree_current_node(tree), token);
-                    }
-                    else {
-                        myhtml_tree_open_elements_pop(tree);
-                        break;
-                    }
-                }
-                
-                break;
-            }
+                return myhtml_insertion_mode_in_foreign_content_start_other(tree, token);
         }
     }
     
@@ -3261,7 +3273,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_to
 
 void myhtml_rules_stop_parsing(myhtml_tree_t* tree)
 {
-    
+    // THIS! IS! -(SPARTA!)- STOP PARSING
 }
 
 mybool_t myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* token)

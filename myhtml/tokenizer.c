@@ -6,7 +6,10 @@
 //  Copyright (c) 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_tokenizer.h"
+#include "tokenizer.h"
+
+#define __myhtml_tokenizer_check_namespace()
+
 
 void myhtml_check_tag_parser(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t* html_offset, size_t html_size)
 {
@@ -21,10 +24,35 @@ void myhtml_check_tag_parser(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, co
     
     if(idx) {
         qnode->token->tag_ctx_idx = (mytags_ctx_index_t)(tags_tree->nodes[idx].value);
+        
+        // parser is multi-threaded, and the specification requires the definition namespace for parsing cdata sections
+        // but namespace we see after build tree, that is unacceptable to us
+        // so this code here
+        //
+        // if there is an adjusted current node and it is not an element in the HTML namespace and
+        // the next seven characters are a case-sensitive match for the string "[CDATA["
+        // (the five uppercase letters "CDATA" with a U+005B LEFT SQUARE BRACKET character before and after),
+        // then consume those characters and switch to the CDATA section state.
+        if(tree->namespace != MyHTML_NAMESPACE_HTML)
+        {
+            if(tags->context[ qnode->token->tag_ctx_idx ].cats[ tree->namespace ] == MyTAGS_CATEGORIES_UNDEF)
+            {
+                if(qnode->token->tag_ctx_idx == MyTAGS_TAG_MATH)
+                    tree->namespace = MyHTML_NAMESPACE_MATHML;
+                else if(qnode->token->tag_ctx_idx == MyTAGS_TAG_SVG)
+                    tree->namespace = MyHTML_NAMESPACE_SVG;
+                else
+                    tree->namespace = MyHTML_NAMESPACE_HTML;
+            }
+        }
+        else if(qnode->token->tag_ctx_idx == MyTAGS_TAG_MATH)
+                tree->namespace = MyHTML_NAMESPACE_MATHML;
+        else if(qnode->token->tag_ctx_idx == MyTAGS_TAG_SVG)
+            tree->namespace = MyHTML_NAMESPACE_SVG;
     }
     else {
         qnode->token->tag_ctx_idx = mytags_add(tags, &html[tagname_begin], qnode->length, MyHTML_TOKENIZER_STATE_DATA);
-        mytags_set_category(tags, qnode->token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, MyTAGS_CATEGORIES_ORDINARY);
+        mytags_set_category(tags, qnode->token->tag_ctx_idx, tree->namespace, MyTAGS_CATEGORIES_ORDINARY);
     }
 }
 
@@ -329,7 +357,7 @@ size_t myhtml_tokenizer_state_cdata_section(myhtml_tree_t* tree, myhtml_queue_no
     {
         if(html[html_offset] == '>' && html[html_offset - 1] == ']' && html[html_offset - 2] == ']')
         {
-            qnode->length = (html_offset - qnode->begin) + 1;
+            qnode->length = ((html_offset - 2) - qnode->begin);
             
             html_offset++;
             mh_queue_add(tree, html, mh_queue_current(), html_offset);
@@ -409,24 +437,26 @@ size_t myhtml_tokenizer_state_data(myhtml_tree_t* tree, myhtml_queue_node_t* qno
                 }
                 
                 // TODO: for a CDATA; CDATA sections can only be used in foreign content (MathML or SVG)
-//                {
-//                    html_offset_n = html_offset + 7;
-//                    
-//                    if(html_offset_n >= html_size)
-//                        return html_offset_n; // parse exit
-//                    
-//                    if(strncmp(&html[html_offset], "[CDATA[", 7) == 0)
-//                    {
-//                        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_CDATA_SECTION;
-//                        
-//                        qnode->begin  = html_offset;
-//                        qnode->length = 7;
-//                        qnode->token->tag_ctx_idx)    = MyTAGS_TAG__COMMENT;
-//                        
-//                        html_offset = html_offset_n + 1;
-//                        break;
-//                    }
-//                }
+                if(tree->namespace != MyHTML_NAMESPACE_HTML)
+                {
+                    html_offset_n = html_offset + 7;
+                    
+                    if(html_offset_n >= html_size)
+                        return html_offset_n; // parse exit
+                    
+                    if(strncmp(&html[html_offset], "[CDATA[", 7) == 0)
+                    {
+                        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_CDATA_SECTION;
+                        
+                        html_offset = html_offset_n;
+                        
+                        qnode->begin  = html_offset;
+                        qnode->length = 0;
+                        qnode->token->tag_ctx_idx = MyTAGS_TAG__TEXT;
+                        
+                        break;
+                    }
+                }
                 
                 // for a DOCTYPE
                 {

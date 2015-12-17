@@ -6,7 +6,7 @@
 //  Copyright © 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_token.h"
+#include "token.h"
 
 // all key size == value size
 static const myhtml_token_replacement_entry_t myhtml_token_attr_svg_replacement[] = {

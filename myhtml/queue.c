@@ -6,7 +6,7 @@
 //  Copyright © 2015 Alexander Borisov. All rights reserved.
 //
 
-#include "myhtml_queue.h"
+#include "queue.h"
 
 
 myhtml_queue_t * myhtml_queue_create(size_t size)

@@ -68,15 +68,17 @@ int main(int argc, const char * argv[])
     
     uint64_t tree_init_start = myhtml_rdtsc();
     // init once for N html
-    myhtml_tree_t* tree = myhtml_tree_init(myhtml);
+    //myhtml_tree_t* tree = myhtml_tree_init(myhtml);
     uint64_t tree_init_stop = myhtml_rdtsc();
     
     uint64_t parse_start = myhtml_rdtsc();
     
     for(size_t i = 1; i < 2; i++)
     {
-        myhtml_tokenizer_begin(myhtml, tree, res.html, res.size);
-        myhtml_tokenizer_end(myhtml, tree);
+        //myhtml_tokenizer_begin(myhtml, tree, res.html, res.size);
+        //myhtml_tokenizer_end(myhtml, tree);
+        
+        myhtml_tree_t* tree = myhtml_parse_fragment(myhtml, res.html, res.size);
         
         //print_token_by_index(tree, MyTAGS_TAG__DOCTYPE); -- now is not work
         //myhtml_tree_print_by_tree_idx(tree, tree->document->child, stdout, 0);

@@ -11,7 +11,7 @@
 
 #include "myosi.h"
 #include "myhtml.h"
-#include "myhtml_tokenizer.h"
+#include "tokenizer.h"
 
 size_t myhtml_tokenizer_state_script_data(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);
 size_t myhtml_tokenizer_state_script_data_less_than_sign(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);

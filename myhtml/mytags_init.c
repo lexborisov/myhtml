@@ -78,7 +78,7 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "hr", 2, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "html", 4, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "i", 1, MyHTML_TOKENIZER_STATE_DATA);
-	mytags_add(tags, "iframe", 6, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "iframe", 6, MyHTML_TOKENIZER_STATE_RAWTEXT);
 	mytags_add(tags, "image", 5, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "img", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "input", 5, MyHTML_TOKENIZER_STATE_DATA);
@@ -110,7 +110,7 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "mtext", 5, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "nav", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "nobr", 4, MyHTML_TOKENIZER_STATE_DATA);
-	mytags_add(tags, "noembed", 7, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "noembed", 7, MyHTML_TOKENIZER_STATE_RAWTEXT);
 	mytags_add(tags, "noframes", 8, MyHTML_TOKENIZER_STATE_RAWTEXT);
 	mytags_add(tags, "noscript", 8, MyHTML_TOKENIZER_STATE_RAWTEXT);
 	mytags_add(tags, "object", 6, MyHTML_TOKENIZER_STATE_DATA);
@@ -162,7 +162,7 @@ void mytags_init_tags(mytags_t* tags)
 	mytags_add(tags, "var", 3, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "video", 5, MyHTML_TOKENIZER_STATE_DATA);
 	mytags_add(tags, "wbr", 3, MyHTML_TOKENIZER_STATE_DATA);
-	mytags_add(tags, "xmp", 3, MyHTML_TOKENIZER_STATE_DATA);
+	mytags_add(tags, "xmp", 3, MyHTML_TOKENIZER_STATE_RAWTEXT);
 	mytags_add(tags, "-end-of-file", 12, MyHTML_TOKENIZER_STATE_DATA);
 }
 

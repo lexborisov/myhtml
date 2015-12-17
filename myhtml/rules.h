@@ -11,7 +11,7 @@
 
 #include "myosi.h"
 #include "myhtml.h"
-#include "myhtml_tree.h"
+#include "tree.h"
 
 
 void myhtml_rules_init(myhtml_t* myhtml);
