@@ -8,118 +8,118 @@
 
 #include "parser.h"
 
-void myhtml_parser_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)
+void myhtml_parser_index(mythread_id_t thread_id, mythread_queue_node_t *qnode)
 {
-    myhtml_t* myhtml = tree->myhtml;
-    mytags_t* mytags = myhtml->tags;
-    myhtml_tree_indexes_t* indexes = tree->indexes;
+}
+
+void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
+{
+    while(myhtml_rules_tree_dispatcher(qnode->tree, qnode->token)){}
+}
+
+void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
+{
+    myhtml_token_node_t* token = qnode->token;
     
-    //mytags_index_tag_add(mytags, indexes->tags, token);
-}
-
-void myhtml_parser_stream(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)
-{
-    while(myhtml_rules_tree_dispatcher(tree, token)){}
-}
-
-void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token)
-{
-    myhtml_t* myhtml                = tree->myhtml;
-    myhtml_queue_t* queue           = myhtml->queue;
-    myhtml_queue_node_t* queue_node = &queue->nodes[queue_idx];
+    size_t mchar_node_id = qnode->tree->async_args[thread_id].mchar_node_id;
     
     if(token->tag_ctx_idx == MyTAGS_TAG__TEXT ||
        token->tag_ctx_idx == MyTAGS_TAG__COMMENT)
     {
-        myhtml_string_init(&token->entry, (queue_node->length + 512));
+        myhtml_string_init(&token->my_str_tm, qnode->tree->mchar, mchar_node_id, (qnode->length + 32));
         
-        myhtml_string_t* string = &token->entry;
+        myhtml_string_t* string = &token->my_str_tm;
         
-        token->begin      = myhtml_string_len(string);
-        token->length     = queue_node->length;
-        token->attr_first = 0;
-        token->attr_last  = 0;
+        token->begin      = string->length;
+        token->length     = qnode->length;
+        token->attr_first = NULL;
+        token->attr_last  = NULL;
         
         myhtml_string_append_with_null(string,
-                                       &queue_node->html[queue_node->begin],
-                                       queue_node->length);
-    }
-    else if(token->tag_ctx_idx == MyTAGS_TAG__DOCTYPE)
-    {
-        myhtml_string_init(&token->entry, 512);
-        
-        token->begin  = 0;
-        token->length = 0;
-        
-        myhtml_token_attr_t* attr = token->attr_first;
-        myhtml_string_t* string = &token->entry;
-        
-        while(attr)
-        {
-            if(attr->name_length)
-            {
-                size_t begin = attr->name_begin;
-                attr->name_begin = myhtml_string_len(string);
-                
-                myhtml_string_append_with_null(string,
-                                               &queue_node->html[begin],
-                                               attr->name_length);
-            }
-            
-            if(attr->value_length)
-            {
-                size_t begin = attr->value_begin;
-                attr->value_begin = myhtml_string_len(string);
-                
-                myhtml_string_append_with_null(string,
-                                               &queue_node->html[begin],
-                                               attr->value_length);
-            }
-            
-            attr = attr->next;
-        }
+                                       &qnode->text[qnode->begin],
+                                       qnode->length);
     }
     else if(token->attr_first)
     {
-        myhtml_string_init(&token->entry, 512);
+        token->my_str_tm.data     = NULL;
+        token->my_str_tm.mchar    = NULL;
+        token->my_str_tm.node_idx = 0;
+        token->my_str_tm.length   = 0;
+        token->my_str_tm.size     = 0;
         
         token->begin  = 0;
         token->length = 0;
         
         myhtml_token_attr_t* attr = token->attr_first;
-        myhtml_string_t* string = &token->entry;
         
         while(attr)
         {
+            myhtml_string_init(&attr->entry, qnode->tree->mchar, mchar_node_id, (attr->name_length + attr->value_length + 32));
+            
             if(attr->name_length)
             {
                 size_t begin = attr->name_begin;
-                attr->name_begin = myhtml_string_len(string);
+                attr->name_begin = attr->entry.length;
                 
-                myhtml_string_append_lowercase_with_null(string,
-                                                         &queue_node->html[begin],
-                                                         attr->name_length);
+                size_t len = attr->name_length;
+                
+                myhtml_string_append_lowercase_with_null(&attr->entry,
+                                                         &qnode->text[begin],
+                                                         len);
             }
             
             if(attr->value_length)
             {
                 size_t begin = attr->value_begin;
-                attr->value_begin = myhtml_string_len(string);
+                attr->value_begin = attr->entry.length;
                 
-                myhtml_string_append_with_null(string,
-                                               &queue_node->html[begin],
+                myhtml_string_append_with_null(&attr->entry,
+                                               &qnode->text[begin],
                                                attr->value_length);
             }
             
             attr = attr->next;
         }
     }
+    else {
+        token->begin      = 0;
+        token->length     = 0;
+        token->attr_first = NULL;
+        token->attr_last  = NULL;
+        
+        token->my_str_tm.data     = NULL;
+        token->my_str_tm.mchar    = NULL;
+        token->my_str_tm.node_idx = 0;
+        token->my_str_tm.length   = 0;
+        token->my_str_tm.size     = 0;
+    }
     
-    token->is_done = mytrue;
-    
-    //pthread_mutex_lock(&tree->myhtml->thread->global_mutex);
-    //myhtml_token_print_by_idx(tree, token, stdout);
-    //pthread_mutex_unlock(&tree->myhtml->thread->global_mutex);
+    token->type |= MyHTML_TOKEN_TYPE_DONE;
+}
+
+void myhtml_parser_worker_index_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
+{
+    myhtml_parser_worker(thread_id, qnode);
+    myhtml_parser_index(thread_id, qnode);
+    myhtml_parser_stream(thread_id, qnode);
+}
+
+void myhtml_parser_worker_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
+{
+    myhtml_parser_worker(thread_id, qnode);
+    myhtml_parser_stream(thread_id, qnode);
+}
+
+void myhtml_parser_worker_index(mythread_id_t thread_id, mythread_queue_node_t *qnode)
+{
+    myhtml_parser_worker(thread_id, qnode);
+    myhtml_parser_index(thread_id, qnode);
+}
+
+void myhtml_parser_stream_index(mythread_id_t thread_id, mythread_queue_node_t *qnode)
+{
+    myhtml_parser_stream(thread_id, qnode);
+    myhtml_parser_index(thread_id, qnode);
 }
 
 

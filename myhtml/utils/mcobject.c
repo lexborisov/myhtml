@@ -47,6 +47,8 @@ mcobject_t * mcobject_destroy(mcobject_t* mcobject)
     if(mcobject->cache)
         free(mcobject->cache);
     
+    free(mcobject);
+    
     return NULL;
 }
 

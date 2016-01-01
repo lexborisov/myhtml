@@ -16,8 +16,13 @@
 #include "string.h"
 #include "utils/mcobject.h"
 
-void myhtml_parser_index(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token);
-void myhtml_parser_stream(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token);
-void myhtml_parser_worker(myhtml_tree_t* tree, myhtml_queue_node_index_t queue_idx, myhtml_token_node_t* token);
+void myhtml_parser_index(mythread_id_t thread_id, mythread_queue_node_t *qnode);
+void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode);
+void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode);
+
+void myhtml_parser_worker_index_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode);
+void myhtml_parser_worker_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode);
+void myhtml_parser_worker_index(mythread_id_t thread_id, mythread_queue_node_t *qnode);
+void myhtml_parser_stream_index(mythread_id_t thread_id, mythread_queue_node_t *qnode);
 
 #endif /* myhtml_parser_h */

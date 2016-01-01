@@ -54,6 +54,8 @@ $count++;
 push @list, ["MyTAGS_TAG_FIRST_ENTRY", $list[0]->[0]];
 push @list, ["MyTAGS_TAG_LAST_ENTRY", sprintf("0x%03x", $count)];
 
+unshift @list, ["MyTAGS_TAG__UNDEF", "0x000"];
+
 my $res = $utils->format_list_text(\@list, "= ");
 
 my $args = {BODY => \@body, CATS => \@cats};

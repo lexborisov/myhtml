@@ -13,7 +13,7 @@ mytags_t * mytags_init(void)
 {
     mytags_t* mytags = (mytags_t*)mymalloc(sizeof(mytags_t));
     
-    mytags->context_size = 4096;
+    mytags->context_size = 4096 * 50;
     mytags->context = (mytags_context_t*)mymalloc(sizeof(mytags_context_t) * mytags->context_size);
     
     mytags->cache_name_size = mytags->context_size * 12;
@@ -24,6 +24,8 @@ mytags_t * mytags_init(void)
     mytags_clean(mytags);
     mytags_init_tags(mytags);
     mytags_init_tags_categories(mytags);
+    
+    mytags->index_nodes = mcobject_async_create(128, 4096, sizeof(mytags_index_tag_node_t));
     
     return mytags;
 }
@@ -49,6 +51,7 @@ mytags_t * mytags_destroy(mytags_t* mytags)
         free(mytags->cache_name);
     
     mytags->tree = mctree_destroy(mytags->tree);
+    mytags->index_nodes = mcobject_async_destroy(mytags->index_nodes, mytrue);
     
     free(mytags);
     
@@ -63,79 +66,90 @@ mytags_index_t * mytags_index_create(mytags_t* mytags)
 
 void mytags_index_init(mytags_t* mytags, mytags_index_t* idx_tags)
 {
-    idx_tags->tag_nodes_obj = mcobject_create((4096 * 2), sizeof(mytags_index_tag_node_t), &idx_tags->nodes, NULL);
+    idx_tags->index_id = mcobject_async_node_add(mytags->index_nodes);
     
     idx_tags->tags_size = mytags->context_size;
     idx_tags->tags_length = 0;
     idx_tags->tags = (mytags_index_tag_t*)calloc(idx_tags->tags_size, sizeof(mytags_index_tag_t));
 }
 
-void mytags_index_tag_check_releadet_size(mytags_t* mytags, mytags_index_t* idx_tags)
+void mytags_index_clean(mytags_t* mytags, mytags_index_t* index_tags)
 {
-    if(idx_tags->tags_size != mytags->context_size) {
-        idx_tags->tags_size = mytags->context_size;
+    mcobject_async_node_clean(mytags->index_nodes, index_tags->index_id);
+    memset(index_tags->tags, 0, sizeof(mytags_index_tag_t) * mytags->context_length);
+}
+
+mytags_index_t * mytags_index_destroy(mytags_t* mytags, mytags_index_t* index_tags)
+{
+    if(index_tags == NULL)
+        return NULL;
+    
+    mcobject_async_node_delete(mytags->index_nodes, index_tags->index_id);
+    
+    if(index_tags->tags) {
+        free(index_tags->tags);
+        index_tags->tags = NULL;
+    }
+    
+    free(index_tags);
+    
+    return NULL;
+}
+
+void mytags_index_tag_check_size(mytags_t* mytags, mytags_index_t* index_tags)
+{
+    if(index_tags->tags_size < mytags->context_size) {
+        index_tags->tags = (mytags_index_tag_t*)myrealloc(index_tags->tags,
+                                                          sizeof(mytags_index_tag_t) *
+                                                          mytags->context_size);
         
-        idx_tags->tags = (mytags_index_tag_t*)myrealloc(idx_tags->tags,
-                                                      sizeof(mytags_index_tag_t) *
-                                                      idx_tags->tags_size);
+        memset(&index_tags->tags[index_tags->tags_size], 0, sizeof(mytags_index_tag_t)
+               * (mytags->context_size - index_tags->tags_size));
+        
+        index_tags->tags_size = mytags->context_size;
     }
 }
 
-void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, myhtml_token_node_t* token)
+void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, myhtml_tree_node_t* node)
 {
-    mytags_index_tag_check_releadet_size(mytags, idx_tags);
+    mytags_index_tag_check_size(mytags, idx_tags);
     
-    mytags_index_tag_t* tag = &idx_tags->tags[token->tag_ctx_idx];
-    mytags_index_tag_node_t* nodes = idx_tags->nodes;
+    mytags_index_tag_t* tag = &idx_tags->tags[node->tag_idx];
     
-    size_t node_idx = mcobject_malloc(idx_tags->tag_nodes_obj);
-    mytags_index_tag_clean(idx_tags, node_idx);
+    mytags_index_tag_node_t* new_node = mcobject_async_malloc(mytags->index_nodes, idx_tags->index_id);
+    mytags_index_tag_clean(new_node);
     
-    if(tag->first == 0) {
-        tag->first = node_idx;
+    if(tag->first == NULL) {
+        tag->first = new_node;
         
-        nodes[node_idx].prev = 0;
+        new_node->prev = NULL;
     }
     else {
-        nodes[tag->last].next = node_idx;
-        nodes[node_idx].prev = tag->last;
+        tag->last->next = new_node;
+        new_node->prev = tag->last;
     }
     
-    nodes[node_idx].next = 0;
-    nodes[node_idx].token = token;
+    new_node->next = NULL;
+    new_node->node = node;
     
-    tag->last = node_idx;
+    tag->last = new_node;
+    
+    tag->count++;
 }
 
-size_t mytags_index_tag_get_first(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx)
+mytags_index_tag_t * mytags_index_tag_get(mytags_index_t* idx_tags, mytags_ctx_index_t tag_idx)
+{
+    return &idx_tags->tags[tag_idx];
+}
+
+mytags_index_tag_node_t * mytags_index_tag_get_first(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx)
 {
     return idx_tags->tags[tag_ctx_idx].first;
 }
 
-size_t mytags_index_tag_get_last(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx)
+mytags_index_tag_node_t * mytags_index_tag_get_last(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx)
 {
     return idx_tags->tags[tag_ctx_idx].last;
-}
-
-size_t mytags_index_tag_get_from_node_id(mytags_index_t* idx_tags, size_t node_id, long long offset)
-{
-    mytags_index_tag_node_t* nodes = idx_tags->nodes;
-    
-    if(offset < 0)
-    {
-        while(offset && node_id) {
-            node_id = nodes[node_id].prev;
-            offset++;
-        }
-    }
-    else {
-        while(offset && node_id) {
-            node_id = nodes[node_id].next;
-            offset++;
-        }
-    }
-    
-    return node_id;
 }
 
 mytags_ctx_index_t mytags_add(mytags_t* mytags, const char* key, size_t key_size,

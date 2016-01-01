@@ -10,6 +10,7 @@
 #define myhtml_mytags_const_h
 
 enum mytags_tag {
+	MyTAGS_TAG__UNDEF         = 0x000,
 	MyTAGS_TAG__TEXT          = 0x001,
 	MyTAGS_TAG__COMMENT       = 0x002,
 	MyTAGS_TAG__DOCTYPE       = 0x003,

@@ -14,6 +14,7 @@
 #include "token.h"
 #include "string.h"
 #include "utils/mcsync.h"
+#include "utils/mchar_async.h"
 #include "utils/mcobject_async.h"
 
 #define myhtml_tree_get(__tree__, __attr__) __tree__->__attr__
@@ -88,6 +89,10 @@ enum myhtml_tree_insertion_mode {
     MyHTML_TREE_INSERTION_MODE_AFTER       = 0x02
 };
 
+struct myhtml_async_args {
+    size_t mchar_node_id;
+};
+
 struct myhtml_tree_doctype {
     mybool_t is_html;
     char* name;
@@ -118,46 +123,56 @@ struct myhtml_tree_insertion_list {
 };
 
 struct myhtml_tree {
-    myhtml_token_t* token;
-    myhtml_token_attr_t* attr_current;
+    // ref
+    myhtml_t*             myhtml;
+    mchar_async_t*        mchar;
+    myhtml_token_t*       token;
+    mcobject_async_t*     tree_obj;
+    mcsync_t*             sync;
     
-    mcobject_async_t* nodes_obj; // myhtml_tree_node_t
+    // init id's
+    size_t                mcasync_token_id;
+    size_t                mcasync_attr_id;
+    size_t                mcasync_tree_id;
+    size_t                mchar_node_id;
+    myhtml_token_attr_t*  attr_current;
+    mythread_queue_node_t*  tmp_qnode;
+    mythread_queue_node_t*  current_qnode;
     
     myhtml_tree_indexes_t* indexes;
     
-    myhtml_tree_node_t* current;
-    myhtml_tree_node_t* document;
-    myhtml_tree_node_t* fragment;
+    // ref for nodes
+    myhtml_tree_node_t*  document;
+    myhtml_tree_node_t*  fragment;
+    myhtml_tree_node_t*  node_head;
+    myhtml_tree_node_t*  node_form;
     myhtml_tree_doctype_t doctype;
     
-    myhtml_tree_node_t* node_head;
-    myhtml_tree_node_t* node_form;
-    
-    myhtml_queue_node_index_t queue;
-    
-    myhtml_tree_list_t* active_formatting;
-    myhtml_tree_list_t* open_elements;
-    myhtml_tree_list_t* other_elements;
-    myhtml_tree_token_list_t* token_list;
+    // for build tree
+    myhtml_tree_list_t*           active_formatting;
+    myhtml_tree_list_t*           open_elements;
+    myhtml_tree_list_t*           other_elements;
+    myhtml_tree_token_list_t*     token_list;
     myhtml_tree_insertion_list_t* template_insertion;
+    myhtml_async_args_t*          async_args;
+    myhtml_token_attr_t*          queue_attr;
     
-    myhtml_token_attr_t* queue_attr;
-    
-    enum myhtml_tokenizer_state state;
-    enum myhtml_insertion_mode insert_mode;
-    enum myhtml_insertion_mode orig_insert_mode;
+    // tree params
+    enum myhtml_tokenizer_state  state;
+    enum myhtml_insertion_mode   insert_mode;
+    enum myhtml_insertion_mode   orig_insert_mode;
     enum myhtml_tree_compat_mode compat_mode;
-    enum myhtml_tree_flags flags;
-    enum myhtml_namespace namespace;
-    mybool_t foster_parenting;
-    
-    myhtml_t* myhtml;
-    mytags_ctx_index_t tmp_tag_id;
+    enum myhtml_tree_flags       flags;
+    enum myhtml_namespace        namespace;
+    mybool_t                     foster_parenting;
+    mybool_t                     is_single;
 };
 
 // base
-myhtml_tree_t * myhtml_tree_init(myhtml_t* myhtml);
+myhtml_tree_t * myhtml_tree_create(void);
+void myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml);
 void myhtml_tree_clean(myhtml_tree_t* tree);
+void myhtml_tree_clean_all(myhtml_tree_t* tree);
 myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree);
 
 // list
@@ -167,6 +182,7 @@ myhtml_tree_list_t * myhtml_tree_list_destroy(myhtml_tree_list_t* list, mybool_t
 
 void myhtml_tree_list_append(myhtml_tree_list_t* list, myhtml_tree_node_t* node);
 void myhtml_tree_list_append_after_index(myhtml_tree_list_t* list, myhtml_tree_node_t* node, size_t index);
+void myhtml_tree_list_insert_by_index(myhtml_tree_list_t* list, myhtml_tree_node_t* node, size_t index);
 myhtml_tree_node_t * myhtml_tree_list_current_node(myhtml_tree_list_t* list);
 
 // token list
@@ -215,7 +231,9 @@ void myhtml_tree_open_elements_pop_until_by_index(myhtml_tree_t* tree, size_t id
 void myhtml_tree_open_elements_remove(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 
 mybool_t myhtml_tree_open_elements_find(myhtml_tree_t* tree, myhtml_tree_node_t* idx, size_t* pos);
+mybool_t myhtml_tree_open_elements_find_reverse(myhtml_tree_t* tree, myhtml_tree_node_t* idx, size_t* pos);
 myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx(myhtml_tree_t* tree, mytags_ctx_index_t tag_idx, size_t* return_index);
+myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx_reverse(myhtml_tree_t* tree, mytags_ctx_index_t tag_idx, size_t* return_index);
 myhtml_tree_node_t * myhtml_tree_element_in_scope(myhtml_tree_t* tree, mytags_ctx_index_t tag_idx, enum mytags_categories category);
 mybool_t myhtml_tree_element_in_scope_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, enum mytags_categories category);
 void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, mytags_ctx_index_t exclude_tag_idx);
@@ -239,8 +257,9 @@ size_t myhtml_tree_template_insertion_length(myhtml_tree_t* tree);
 myhtml_tree_node_t * myhtml_tree_node_create(myhtml_tree_t* tree);
 void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* idx);
 void myhtml_tree_node_clean(myhtml_tree_node_t* tree_node);
-myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_t* tree, myhtml_tree_node_t* idx, size_t thread_idx);
+myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 
+void myhtml_tree_print_by_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out);
 void myhtml_tree_print_by_tree_idx(myhtml_tree_t* tree, myhtml_tree_node_t* idx, FILE* out, size_t inc);
 
 void myhtml_tree_node_add_child(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
@@ -259,7 +278,12 @@ myhtml_tree_node_t * myhtml_tree_node_insert_doctype(myhtml_tree_t* tree, myhtml
 myhtml_tree_node_t * myhtml_tree_node_insert_root(myhtml_tree_t* tree, myhtml_token_node_t* token, enum myhtml_namespace my_namespace);
 myhtml_tree_node_t * myhtml_tree_node_insert_text(myhtml_tree_t* tree, myhtml_token_node_t* token);
 
+// indexes
 myhtml_tree_indexes_t * myhtml_tree_index_create(myhtml_tree_t* tree, mytags_t* mytags);
+void myhtml_tree_index_clean(myhtml_tree_t* tree, mytags_t* mytags);
+myhtml_tree_indexes_t * myhtml_tree_index_destroy(myhtml_tree_t* tree, mytags_t* mytags);
+
+void myhtml_tree_index_append(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 
 // other
 

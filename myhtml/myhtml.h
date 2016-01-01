@@ -20,25 +20,26 @@
 #include "tree.h"
 #include "rules.h"
 #include "token.h"
-#include "queue.h"
+#include <sys/types.h>
+#include <sys/sysctl.h>
 
 #define mh_thread_get(__idx__, __attr__) myhtml_thread_get(myhtml->thread, __idx__, __attr__)
 #define mh_thread_set(__idx__, __attr__) myhtml_thread_set(myhtml->thread, __idx__, __attr__)
 
 #define mh_thread_post(__idx__) sem_post(myhtml_thread_get(myhtml->thread, __idx__, sem))
 #define mh_thread_wait(__idx__) sem_wait(myhtml_thread_get(myhtml->thread, __idx__, sem))
-#define mh_thread_done(__idx__, __bool__) myhtml_thread_set(myhtml->thread, __idx__, is_done) = __bool__;
+#define mh_thread_done(__idx__, __param__) myhtml_thread_set(myhtml->thread, __idx__, opt) = __param__;
 
 #define mh_thread_master_get(__attr__) myhtml_thread_master_get(myhtml->thread, __attr__)
 #define mh_thread_master_set(__attr__) myhtml_thread_master_set(myhtml->thread, __attr__)
 
 #define mh_thread_master_post() sem_post(myhtml_thread_master_get(myhtml->thread, sem))
 #define mh_thread_master_wait() sem_wait(myhtml_thread_master_get(myhtml->thread, sem))
-#define mh_thread_master_done(__bool__) myhtml_thread_master_set(myhtml->thread, is_done) = __bool__;
+#define mh_thread_master_done(__param__) myhtml_thread_master_set(myhtml->thread, opt) = __param__;
 
 #define mh_thread_stream_post() sem_post(myhtml_thread_stream_get(myhtml->thread, sem))
 #define mh_thread_stream_wait() sem_wait(myhtml_thread_stream_get(myhtml->thread, sem))
-#define mh_thread_stream_done(__bool__) myhtml_thread_stream_set(myhtml->thread, is_done) = __bool__;
+#define mh_thread_stream_done(__param__) myhtml_thread_stream_set(myhtml->thread, opt) = __param__;
 
 #define mh_tree_get(__attr__) myhtml_tree_get(tree, __attr__)
 #define mh_tree_set(__attr__) myhtml_tree_set(tree, __attr__)
@@ -56,9 +57,14 @@
 #define mh_queue_current_get(__attr__) mh_queue_get(mh_queue_current(), __attr__)
 #define mh_queue_current_set(__attr__) mh_queue_current_get(__attr__)
 
-#define mh_queue_add(__tree__, __html__, __qnode_idx__, __begin__)                                             \
-    __qnode_idx__ = myhtml_queue_node_malloc(myhtml->queue, __html__, __begin__, myfalse, 0, tree);            \
-    myhtml_token_node_malloc(__tree__->token, myhtml->queue->nodes[__qnode_idx__].token, 0)
+#define mh_queue_add(__tree__, __html__, __begin__)                                                           \
+    if(__tree__->is_single) { \
+        myhtml_parser_worker(0, __tree__->current_qnode); \
+        while(myhtml_rules_tree_dispatcher(__tree__, __tree__->current_qnode->token)){}; \
+    } \
+    __tree__->current_qnode = mythread_queue_node_malloc(__tree__->myhtml->queue, __html__, __begin__, NULL); \
+    __tree__->current_qnode->tree = __tree__; \
+    myhtml_token_node_malloc(__tree__->token, __tree__->current_qnode->token, __tree__->token->mcasync_token_id)
 
 #define mh_token_get(__idx__, __attr__) tree->token->nodes[__idx__].__attr__
 #define mh_token_set(__idx__, __attr__) mh_token_get(__idx__, __attr__)
@@ -89,35 +95,35 @@
     (__char__ < 'a' || __char__ > 'z') &&      \
     (__char__ < 'A' || __char__ > 'Z')
 
-
 struct myhtml {
-    mytags_t          *tags;
-    myhtml_queue_t    *queue;
-    myhtml_thread_t   *thread;
+    mytags_t            *tags;
+    mythread_queue_t    *queue;
+    mythread_t          *thread;
     
     myhtml_tokenizer_state_f* parse_state_func;
     myhtml_insertion_f* insertion_func;
+    
+    enum myhtml_options opt;
 };
 
-myhtml_t * myhtml_init(size_t thread_count);
+myhtml_t * myhtml_create(void);
+void myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t thread_count, size_t queue_size, size_t token_nodes_size);
 void myhtml_clean(myhtml_t* myhtml);
 myhtml_t* myhtml_destroy(myhtml_t* myhtml);
 
-myhtml_tree_t * myhtml_parse(myhtml_t* myhtml, const char* html, size_t html_size);
-myhtml_tree_t * myhtml_parse_fragment(myhtml_t* myhtml, const char* html, size_t html_size);
+void myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size);
+void myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, size_t html_size);
 
-void myhtml_tokenizer_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length);
-void myhtml_tokenizer_end(myhtml_t* myhtml, myhtml_tree_t* tree);
-void myhtml_tokenizer_continue(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length);
-void myhtml_tokenizer_wait(myhtml_t* myhtml);
-void myhtml_tokenizer_post(myhtml_t* myhtml);
+myhtml_tree_node_t ** myhtml_get_elements_by_tag_id(myhtml_tree_t* tree, mytags_ctx_index_t tag_id, size_t* return_length);
+myhtml_tree_node_t ** myhtml_get_elements_by_name(myhtml_tree_t* tree, const char* html, size_t length, size_t* return_length);
 
-myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, mytags_ctx_index_t tag_idx, enum myhtml_namespace my_namespace);
+void myhtml_destroy_node_list(myhtml_tree_node_t **node_list);
+
 
 mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 
 uint64_t myhtml_rdtsc(void);
-void myhtml_rdtsc_print(char *name, uint64_t x, uint64_t y);
-void myhtml_rdtsc_print_by_val(char *name, uint64_t x);
+void myhtml_rdtsc_print(const char *name, uint64_t x, uint64_t y);
+void myhtml_rdtsc_print_by_val(const char *name, uint64_t x);
 
 #endif

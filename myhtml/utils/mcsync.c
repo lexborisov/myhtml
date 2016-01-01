@@ -8,12 +8,12 @@
 
 #include "mcsync.h"
 
-static inline int atomic_compare_exchange(int* ptr, int compare, int exchange)
+static int atomic_compare_exchange(int* ptr, int compare, int exchange)
 {
     return __atomic_compare_exchange_n(ptr, &compare, exchange, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 }
 
-static inline void atomic_store(int* ptr, int value)
+static void atomic_store(int* ptr, int value)
 {
     __atomic_store_n(ptr, 0, __ATOMIC_SEQ_CST);
 }

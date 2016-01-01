@@ -12,6 +12,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
+ 
+  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
 #ifndef __MyHTML_myhtml_H__
@@ -21,6 +23,10 @@
  * @file include/myhtml.h
  *
  * Fast C/C++ HTML 5 Parser. Using threads.
+ * With possibility of a Single Mode.
+ * 
+ * C99 and POSIX Threads! No dependencies!
+ *
  * By https://html.spec.whatwg.org/ specification.
  *
  */
@@ -28,9 +34,6 @@
 #define MyHTML_VERSION_MAJOR 0
 #define MyHTML_VERSION_MINOR 1
 #define MyHTML_VERSION_PATCH 0
-
-#define MyHTML_THREAD_MIN_THREADS 1
-#define MyHTML_THREAD_MAX_THREADS 10
 
 #include <stddef.h>
 
@@ -126,7 +129,7 @@ myhtml_tree_node_t*
 myhtml_tokenizer_fragment_init(myhtml_tree_t* tree,
                                mytags_ctx_index_t tag_idx,
                                enum myhtml_namespace my_namespace);
-    
+
 #ifdef __cplusplus
 //} /* extern "C" */
 #endif

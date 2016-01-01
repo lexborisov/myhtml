@@ -8,32 +8,82 @@
 
 #include "myhtml.h"
 
-
-myhtml_t * myhtml_init(size_t thread_count)
+myhtml_t * myhtml_create(void)
 {
     myhtml_t* myhtml = (myhtml_t*)mymalloc(sizeof(myhtml_t));
-    
-    myhtml->tags     = mytags_init();
-    myhtml->queue    = myhtml_queue_create(4096);
+    //if(myhtml == NULL)
+    // check this
+    return myhtml;
+}
+
+void myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t thread_count, size_t queue_size, size_t token_nodes_size)
+{
+    myhtml->tags = mytags_init();
     
     myhtml_tokenizer_state_init(myhtml);
     myhtml_rules_init(myhtml);
     
-    // and last, create threads
-    myhtml_thread_init(myhtml, "lastmac", 4, thread_count,
-                       myhtml_parser_stream,
-                       myhtml_parser_worker,
-                       myhtml_parser_index);
+    myhtml->thread = mythread_create();
+    
+    myhtml_status_t status;
+    
+    switch (opt) {
+        case MyHTML_OPTIONS_PARSE_MODE_SINGLE:
+            status = mythread_init(myhtml->thread, "lastmac", 0);
+            break;
+            
+        case MyHTML_OPTIONS_PARSE_MODE_ALL_IN_ONE:
+            status = mythread_init(myhtml->thread, "lastmac", 1);
+            myhread_create_stream(myhtml->thread, myhtml_parser_worker_index_stream, &status);
+            break;
+            
+        case MyHTML_OPTIONS_PARSE_MODE_WORKER_TREE:
+            status = mythread_init(myhtml->thread, "lastmac", 2);
+            
+            myhread_create_stream(myhtml->thread, myhtml_parser_index, &status);
+            myhread_create_stream(myhtml->thread, myhtml_parser_worker_stream, &status);
+            break;
+            
+        case MyHTML_OPTIONS_PARSE_MODE_WORKER_INDEX:
+            status = mythread_init(myhtml->thread, "lastmac", 2);
+            
+            myhread_create_stream(myhtml->thread, myhtml_parser_worker_index, &status);
+            myhread_create_stream(myhtml->thread, myhtml_parser_stream, &status);
+            break;
+            
+        case MyHTML_OPTIONS_PARSE_MODE_TREE_INDEX:
+            if(thread_count == 0)
+                thread_count = 1;
+            
+            status = mythread_init(myhtml->thread, "lastmac", (thread_count + 1));
+            
+            myhread_create_stream(myhtml->thread, myhtml_parser_stream_index, &status);
+            myhread_create_batch(myhtml->thread, myhtml_parser_worker, &status, thread_count);
+            break;
+            
+        default:
+            // default MyHTML_OPTIONS_PARSE_MODE_SEPARATELY
+            if(thread_count == 0)
+                thread_count = 1;
+            
+            status = mythread_init(myhtml->thread, "lastmac", (thread_count + 2));
+            
+            myhread_create_stream(myhtml->thread, myhtml_parser_index, &status);
+            myhread_create_stream(myhtml->thread, myhtml_parser_stream, &status);
+            myhread_create_batch(myhtml->thread, myhtml_parser_worker, &status, thread_count);
+            break;
+    }
+    
+    // set ref
+    myhtml->queue = myhtml->thread->queue;
     
     myhtml_clean(myhtml);
-    
-    return myhtml;
 }
 
 void myhtml_clean(myhtml_t* myhtml)
 {
-    myhtml_queue_clean(myhtml->queue);
-    myhtml_thread_clean(myhtml->thread, myhtml->queue->nodes_length);
+    mythread_queue_clean(myhtml->queue);
+    mythread_clean(myhtml->thread);
 }
 
 myhtml_t* myhtml_destroy(myhtml_t* myhtml)
@@ -41,115 +91,86 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
     if(myhtml == NULL)
         return NULL;
     
-    myhtml_thread_destroy(myhtml);
+    mythread_destroy(myhtml->thread, mytrue);
     myhtml_tokenizer_state_destroy(myhtml);
     
-    myhtml->tags  = mytags_destroy(myhtml->tags);
-    myhtml->queue = myhtml_queue_destroy(myhtml->queue);
+    myhtml->tags     = mytags_destroy(myhtml->tags);
+    myhtml->queue    = NULL;
+    
+    if(myhtml->insertion_func)
+        free(myhtml->insertion_func);
     
     free(myhtml);
     
     return NULL;
 }
 
-myhtml_tree_t * myhtml_parse(myhtml_t* myhtml, const char* html, size_t html_size)
+void myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size)
 {
-    myhtml_tree_t* tree = myhtml_tree_init(myhtml);
+    myhtml_tree_clean(tree);
+    mythread_queue_clean(tree->myhtml->queue);
+    mythread_clean(tree->myhtml->thread);
     
-    myhtml_tokenizer_begin(myhtml, tree, html, html_size);
-    myhtml_tokenizer_end(myhtml, tree);
-    
-    return tree;
+    myhtml_tokenizer_begin(tree, html, html_size);
+    myhtml_tokenizer_end(tree, html, html_size);
 }
 
-myhtml_tree_t * myhtml_parse_fragment(myhtml_t* myhtml, const char* html, size_t html_size)
+void myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, size_t html_size)
 {
-    myhtml_tree_t* tree = myhtml_tree_init(myhtml);
+    myhtml_tree_clean(tree);
     
     myhtml_tokenizer_fragment_init(tree, MyTAGS_TAG_DIV, MyHTML_NAMESPACE_HTML);
     
-    myhtml_tokenizer_begin(myhtml, tree, html, html_size);
-    myhtml_tokenizer_end(myhtml, tree);
-    
-    return tree;
+    myhtml_tokenizer_begin(tree, html, html_size);
+    myhtml_tokenizer_end(tree, html, html_size);
 }
 
-myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, mytags_ctx_index_t tag_idx, enum myhtml_namespace my_namespace)
+void myhtml_parse_single(myhtml_tree_t* tree, const char* html, size_t html_size)
 {
-    // step 3
-    tree->fragment = myhtml_tree_node_create(tree);
-    tree->fragment->namespace = my_namespace;
-    tree->fragment->tag_idx = tag_idx;
+    myhtml_tree_clean(tree);
     
-    // skip step 4, is already done
-    
-    // step 5-7
-    myhtml_tree_node_t* root = myhtml_tree_node_insert_root(tree, NULL, my_namespace);
-    
-    if(tag_idx == MyTAGS_TAG_TEMPLATE)
-        myhtml_tree_template_insertion_append(tree, MyHTML_INSERTION_MODE_IN_TEMPLATE);
-    
-    myhtml_tree_reset_insertion_mode_appropriately(tree);
-    
-    return root;
+    myhtml_tokenizer_begin(tree, html, html_size);
+    myhtml_tokenizer_end(tree, html, html_size);
 }
 
-void myhtml_tokenizer_begin(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length)
+myhtml_tree_node_t ** myhtml_get_elements_by_tag_id(myhtml_tree_t* tree, mytags_ctx_index_t tag_id, size_t* return_length)
 {
-    myhtml_queue_node_index_t qnode_idx = myhtml_queue_node_current(myhtml->queue);
+    mytags_index_tag_t *index_tag = mytags_index_tag_get(tree->indexes->tags, tag_id);
+    mytags_index_tag_node_t *index_node = mytags_index_tag_get_first(tree->indexes->tags, tag_id);
     
-    mh_queue_set(qnode_idx, html)        = html;
-    mh_queue_set(qnode_idx, myhtml_tree) = tree;
+    if(return_length)
+        *return_length = index_tag->count;
     
-    mh_tree_set(queue) = myhtml_queue_node_current(myhtml->queue);
-    myhtml_token_node_malloc(tree->token, mh_queue_get(qnode_idx, token), 0);
+    if(index_tag->count == 0)
+        return NULL;
     
-    myhtml_tokenizer_continue(myhtml, tree, html, html_length);
-}
-
-void myhtml_tokenizer_end(myhtml_t* myhtml, myhtml_tree_t* tree)
-{
-    myhtml_thread_wait_all_for_done(myhtml);
-}
-
-void myhtml_tokenizer_continue(myhtml_t* myhtml, myhtml_tree_t* tree, const char* html, size_t html_length)
-{
-    myhtml_tokenizer_state_f* state_f = myhtml->parse_state_func;
+    myhtml_tree_node_t **list = (myhtml_tree_node_t**)malloc(sizeof(myhtml_tree_node_t*) * (index_tag->count + 1));
     
-    mh_thread_master_done(myfalse);
-    mh_thread_master_post();
-    
-    mh_thread_stream_done(myfalse);
-    mh_thread_stream_post();
-    
-    mh_thread_done(MyHTML_THREAD_INDEX_ID, myfalse);
-    mh_thread_post(MyHTML_THREAD_INDEX_ID);
-    
-    size_t offset = 0;
-    
-    myhtml_queue_t* queue = myhtml->queue;
-    
-    while (offset < html_length) {
-        offset = state_f[tree->state](tree, &queue->nodes[tree->queue], html, offset, html_length);
+    size_t idx = 0;
+    while (index_node)
+    {
+        list[idx] = index_node->node;
+        idx++;
+        
+        index_node = index_node->next;
     }
-}
-
-void myhtml_tokenizer_wait(myhtml_t* myhtml)
-{
-    mh_thread_master_done(mytrue);
-    mh_thread_stream_done(mytrue);
-    mh_thread_done(MyHTML_THREAD_INDEX_ID, mytrue);
-}
-
-void myhtml_tokenizer_post(myhtml_t* myhtml)
-{
-    mh_thread_master_done(myfalse);
-    mh_thread_stream_done(myfalse);
-    mh_thread_done(MyHTML_THREAD_INDEX_ID, myfalse);
     
-    mh_thread_master_post();
-    mh_thread_stream_post();
-    mh_thread_post(MyHTML_THREAD_INDEX_ID);
+    list[idx] = NULL;
+    
+    return list;
+}
+
+myhtml_tree_node_t ** myhtml_get_elements_by_name(myhtml_tree_t* tree, const char* html, size_t length, size_t* return_length)
+{
+    mctree_index_t tag_ctx_idx = mctree_search_lowercase(tree->myhtml->tags->tree, html, length);
+    
+    return myhtml_get_elements_by_tag_id(tree, tag_ctx_idx, return_length);
+}
+
+void myhtml_destroy_node_list(myhtml_tree_node_t **node_list)
+{
+    if(node_list)
+        free(node_list);
 }
 
 mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size)
@@ -179,11 +200,30 @@ uint64_t myhtml_rdtsc(void) {
 }
 
 // 2... is fixed cpu 
-void myhtml_rdtsc_print(char *name, uint64_t x, uint64_t y) {
-    printf("%s: %0.5f\n", name, (float)(0.001 * ((y - x) / 2000000.0)));
+void myhtml_rdtsc_print(const char *name, uint64_t x, uint64_t y) {
+    int mib[2];
+    unsigned int freq;
+    size_t len;
+    
+    mib[0] = CTL_HW;
+    mib[1] = HW_CPU_FREQ;
+    len = sizeof(freq);
+    sysctl(mib, 2, &freq, &len, NULL, 0);
+    
+    printf("%s: %0.5f\n", name, (((float)(y - x) / (float)freq)));
+    //printf("%s: %0.5f\n", name, (0.001f * ((float)(y - x) / 2000000.0f)));
 }
 
-void myhtml_rdtsc_print_by_val(char *name, uint64_t x) {
-    printf("%s: %0.5f\n", name, (float)(0.001 * (x / 2000000.0)));
+void myhtml_rdtsc_print_by_val(const char *name, uint64_t x) {
+    int mib[2];
+    unsigned int freq;
+    size_t len;
+    
+    mib[0] = CTL_HW;
+    mib[1] = HW_CPU_FREQ;
+    len = sizeof(freq);
+    sysctl(mib, 2, &freq, &len, NULL, 0);
+    
+    printf("%s: %0.5f\n", name, ((float)x / (float)freq));
 }
 

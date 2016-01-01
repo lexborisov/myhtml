@@ -14,7 +14,8 @@
 #include "mctree.h"
 #include "mytags_const.h"
 #include "tokenizer.h"
-#include "utils/mcobject.h"
+#include "tree.h"
+#include "utils/mcobject_async.h"
 
 #define mytags_get(__mytags__, __idx__, __attr__) __mytags__->context[__idx__].__attr__
 
@@ -40,20 +41,20 @@
 #define mytags_index_tag_node(__index__, __idx__) \
     __index__->nodes[__idx__]
 
-#define mytags_index_tag_clean(__index__, __idx__) \
-    memset(&mytags_index_tag_node(__index__, __idx__), 0, sizeof(mytags_index_tag_node_t));
+#define mytags_index_tag_clean(__index_node__) \
+    memset(__index_node__, 0, sizeof(mytags_index_tag_node_t));
 
 struct mytags_index_tag {
-    size_t first;
-    size_t last;
+    mytags_index_tag_node_t *first;
+    mytags_index_tag_node_t *last;
     size_t count;
 };
 
 struct mytags_index_tag_node {
-    size_t next;
-    size_t prev;
+    mytags_index_tag_node_t *next;
+    mytags_index_tag_node_t *prev;
     
-    myhtml_token_node_t* token;
+    myhtml_tree_node_t* node;
 };
 
 struct mytags_index {
@@ -61,8 +62,7 @@ struct mytags_index {
     size_t tags_length;
     size_t tags_size;
     
-    mytags_index_tag_node_t* nodes;
-    mcobject_t* tag_nodes_obj;
+    size_t index_id;
 };
 
 struct mytags_context {
@@ -84,6 +84,8 @@ struct mytags {
     char* cache_name;
     size_t cache_name_length;
     size_t cache_name_size;
+    
+    mcobject_async_t* index_nodes;
 };
 
 mytags_t * mytags_init(void);
@@ -100,10 +102,13 @@ void mytags_set_category(mytags_t* mytags, mytags_ctx_index_t tag_idx,
 
 mytags_index_t * mytags_index_create(mytags_t* mytags);
 void mytags_index_init(mytags_t* mytags, mytags_index_t* idx_tags);
-void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, myhtml_token_node_t* token);
-size_t mytags_index_tag_get_first(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
-size_t mytags_index_tag_get_last(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
-size_t mytags_index_tag_get_from_node_id(mytags_index_t* idx_tags, size_t node_id, long long offset);
+void mytags_index_clean(mytags_t* mytags, mytags_index_t* index_tags);
+mytags_index_t * mytags_index_destroy(mytags_t* mytags, mytags_index_t* idx_tags);
+
+void mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, myhtml_tree_node_t* node);
+mytags_index_tag_t * mytags_index_tag_get(mytags_index_t* idx_tags, mytags_ctx_index_t tag_idx);
+mytags_index_tag_node_t * mytags_index_tag_get_first(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
+mytags_index_tag_node_t * mytags_index_tag_get_last(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
 
 void mytags_print(mytags_t* mytags, FILE* fh);
 

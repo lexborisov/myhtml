@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E0516A41C28888E001D5212 /* mchar_async.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E0516A21C28888E001D5212 /* mchar_async.c */; };
 		0E3F31771C22411400D5CB75 /* mcobject.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E3F316F1C22411400D5CB75 /* mcobject.c */; };
 		0E3F31781C22411400D5CB75 /* mcobject_async.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E3F31711C22411400D5CB75 /* mcobject_async.c */; };
 		0E3F31791C22411400D5CB75 /* mcsync.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E3F31731C22411400D5CB75 /* mcsync.c */; };
@@ -17,7 +18,6 @@
 		0EE004D81BEFF0F40084C362 /* tokenizer_doctype.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EE004BF1BEFF0F40084C362 /* tokenizer_doctype.c */; };
 		0EE004D91BEFF0F40084C362 /* tokenizer_script.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EE004C11BEFF0F40084C362 /* tokenizer_script.c */; };
 		0EE004DA1BEFF0F40084C362 /* tokenizer.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EE004C31BEFF0F40084C362 /* tokenizer.c */; };
-		0EE004DB1BEFF0F40084C362 /* queue.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EE004C51BEFF0F40084C362 /* queue.c */; };
 		0EE004DC1BEFF0F40084C362 /* rules.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EE004C71BEFF0F40084C362 /* rules.c */; };
 		0EE004DD1BEFF0F40084C362 /* string.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EE004C91BEFF0F40084C362 /* string.c */; };
 		0EE004DE1BEFF0F40084C362 /* thread.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EE004CB1BEFF0F40084C362 /* thread.c */; };
@@ -41,6 +41,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0E0516A21C28888E001D5212 /* mchar_async.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mchar_async.c; sourceTree = "<group>"; };
+		0E0516A31C28888E001D5212 /* mchar_async.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mchar_async.h; sourceTree = "<group>"; };
 		0E3F316F1C22411400D5CB75 /* mcobject.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mcobject.c; sourceTree = "<group>"; };
 		0E3F31701C22411400D5CB75 /* mcobject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mcobject.h; sourceTree = "<group>"; };
 		0E3F31711C22411400D5CB75 /* mcobject_async.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mcobject_async.c; sourceTree = "<group>"; };
@@ -62,8 +64,6 @@
 		0EE004C21BEFF0F40084C362 /* tokenizer_script.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tokenizer_script.h; sourceTree = "<group>"; };
 		0EE004C31BEFF0F40084C362 /* tokenizer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tokenizer.c; sourceTree = "<group>"; };
 		0EE004C41BEFF0F40084C362 /* tokenizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tokenizer.h; sourceTree = "<group>"; };
-		0EE004C51BEFF0F40084C362 /* queue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = queue.c; sourceTree = "<group>"; };
-		0EE004C61BEFF0F40084C362 /* queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = queue.h; sourceTree = "<group>"; };
 		0EE004C71BEFF0F40084C362 /* rules.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rules.c; sourceTree = "<group>"; };
 		0EE004C81BEFF0F40084C362 /* rules.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rules.h; sourceTree = "<group>"; };
 		0EE004C91BEFF0F40084C362 /* string.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = string.c; sourceTree = "<group>"; };
@@ -102,6 +102,8 @@
 				0E3F316F1C22411400D5CB75 /* mcobject.c */,
 				0E3F31721C22411400D5CB75 /* mcobject_async.h */,
 				0E3F31711C22411400D5CB75 /* mcobject_async.c */,
+				0E0516A31C28888E001D5212 /* mchar_async.h */,
+				0E0516A21C28888E001D5212 /* mchar_async.c */,
 				0E3F31741C22411400D5CB75 /* mcsync.h */,
 				0E3F31731C22411400D5CB75 /* mcsync.c */,
 				0E3F31761C22411400D5CB75 /* mctree.h */,
@@ -153,12 +155,14 @@
 			children = (
 				0EE004D21BEFF0F40084C362 /* myhtml.h */,
 				0EE004D11BEFF0F40084C362 /* myhtml.c */,
+				0EE004D01BEFF0F40084C362 /* tree.h */,
+				0EE004CF1BEFF0F40084C362 /* tree.c */,
 				0EE004BE1BEFF0F40084C362 /* def.h */,
 				0EE004D31BEFF0F40084C362 /* myosi.h */,
 				0E7BC5501BF98B5400178C69 /* myosi.c */,
 				0EE004D71BEFF0F40084C362 /* mytags.h */,
-				0EE004D41BEFF0F40084C362 /* mytags_const.h */,
 				0EE004D61BEFF0F40084C362 /* mytags.c */,
+				0EE004D41BEFF0F40084C362 /* mytags_const.h */,
 				0EE004D51BEFF0F40084C362 /* mytags_init.c */,
 				0E7BC5531BFB254500178C69 /* parser.h */,
 				0E7BC5521BFB254500178C69 /* parser.c */,
@@ -166,18 +170,14 @@
 				0EE004C31BEFF0F40084C362 /* tokenizer.c */,
 				0EE004C01BEFF0F40084C362 /* tokenizer_doctype.h */,
 				0EE004BF1BEFF0F40084C362 /* tokenizer_doctype.c */,
-				0EE004C21BEFF0F40084C362 /* tokenizer_script.h */,
 				0EE004C11BEFF0F40084C362 /* tokenizer_script.c */,
-				0EE004D01BEFF0F40084C362 /* tree.h */,
-				0EE004CF1BEFF0F40084C362 /* tree.c */,
-				0EE004C61BEFF0F40084C362 /* queue.h */,
-				0EE004C51BEFF0F40084C362 /* queue.c */,
+				0EE004C21BEFF0F40084C362 /* tokenizer_script.h */,
+				0EE004CC1BEFF0F40084C362 /* thread.h */,
+				0EE004CB1BEFF0F40084C362 /* thread.c */,
 				0EE004C81BEFF0F40084C362 /* rules.h */,
 				0EE004C71BEFF0F40084C362 /* rules.c */,
 				0EE004CA1BEFF0F40084C362 /* string.h */,
 				0EE004C91BEFF0F40084C362 /* string.c */,
-				0EE004CC1BEFF0F40084C362 /* thread.h */,
-				0EE004CB1BEFF0F40084C362 /* thread.c */,
 				0EE004CE1BEFF0F40084C362 /* token.h */,
 				0EE004CD1BEFF0F40084C362 /* token.c */,
 			);
@@ -240,7 +240,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0EE004DB1BEFF0F40084C362 /* queue.c in Sources */,
 				0EE004DA1BEFF0F40084C362 /* tokenizer.c in Sources */,
 				0EE004E21BEFF0F40084C362 /* mytags_init.c in Sources */,
 				0EE004E01BEFF0F40084C362 /* tree.c in Sources */,
@@ -254,6 +253,7 @@
 				0E7BC5511BF98B5400178C69 /* myosi.c in Sources */,
 				0EE004D81BEFF0F40084C362 /* tokenizer_doctype.c in Sources */,
 				0E3F317A1C22411400D5CB75 /* mctree.c in Sources */,
+				0E0516A41C28888E001D5212 /* mchar_async.c in Sources */,
 				0EE004DD1BEFF0F40084C362 /* string.c in Sources */,
 				0EE004DC1BEFF0F40084C362 /* rules.c in Sources */,
 				0EE004E11BEFF0F40084C362 /* myhtml.c in Sources */,
@@ -347,8 +347,9 @@
 		0EE004BA1BEFF0850084C362 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_OPTIMIZATION_LEVEL = 0;
-				OTHER_LIBTOOLFLAGS = "";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				OTHER_CFLAGS = "-DDEBUG_MODE2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -356,7 +357,8 @@
 		0EE004BB1BEFF0850084C362 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				OTHER_LIBTOOLFLAGS = "";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				OTHER_CFLAGS = "-DDEBUG_MODE2";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

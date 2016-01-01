@@ -85,30 +85,31 @@ static const myhtml_token_namespace_replacement_t myhtml_token_attr_namespace_re
     {"xmlns:xlink", 11, "xlink", 5, MyHTML_NAMESPACE_XMLNS}
 };
 
-
-void myhtml_token_callback_for_new(mcobject_async_t* mcobj_async, size_t idx)
+myhtml_token_t * myhtml_token_create(myhtml_tree_t* tree, size_t size)
 {
-    myhtml_token_node_t* nodes = (myhtml_token_node_t*)mcobj_async->mem;
+    if(size == 0)
+        size = 4096;
     
-    nodes[idx].entry.data   = NULL;
-    nodes[idx].entry.length = 0;
-    nodes[idx].entry.size   = 0;
-}
-
-myhtml_token_t * myhtml_token_create(size_t size)
-{
     myhtml_token_t* token = (myhtml_token_t*)mymalloc(sizeof(myhtml_token_t));
     
-    token->nodes_obj = mcobject_async_create(256, size, sizeof(myhtml_token_node_t));
-    token->attr_obj  = mcobject_async_create(256, size, sizeof(myhtml_token_attr_t));
+    token->nodes_obj = mcobject_async_create(128, size, sizeof(myhtml_token_node_t));
+    token->attr_obj  = mcobject_async_create(128, size, sizeof(myhtml_token_attr_t));
     
-    mcobject_async_node_add(token->nodes_obj, 4096);
-    mcobject_async_node_add(token->attr_obj , 4096);
+    token->mcasync_token_id  = mcobject_async_node_add(token->nodes_obj);
+    token->mcasync_attr_id   = mcobject_async_node_add(token->attr_obj);
+    
+    token->tree = tree;
     
     return token;
 }
 
 void myhtml_token_clean(myhtml_token_t* token)
+{
+    mcobject_async_node_clean(token->nodes_obj, token->mcasync_token_id);
+    mcobject_async_node_clean(token->attr_obj, token->mcasync_attr_id);
+}
+
+void myhtml_token_clean_all(myhtml_token_t* token)
 {
     mcobject_async_clean(token->nodes_obj);
     mcobject_async_clean(token->attr_obj);
@@ -119,31 +120,27 @@ myhtml_token_t * myhtml_token_destroy(myhtml_token_t* token)
     if(token == NULL)
         return NULL;
     
-//    size_t i;
-//    for(i = 0; i < token->nodes_obj->mem_length; i++) {
-//        myhtml_string_destroy(&token->nodes[i].entry, myfalse);
-//    }
-    
     if(token->nodes_obj)
         token->nodes_obj = mcobject_async_destroy(token->nodes_obj, 1);
     
     if(token->attr_obj)
         token->attr_obj = mcobject_async_destroy(token->attr_obj, 1);
     
+    free(token);
+    
     return NULL;
 }
 
 void myhtml_token_node_clean(myhtml_token_node_t* node)
 {
-    node->tag_ctx_idx    = MyTAGS_TAG__TEXT;
-    node->type           = MyHTML_TOKEN_TYPE_OPEN;
+    node->tag_ctx_idx    = MyTAGS_TAG__UNDEF;
+    node->type           = MyHTML_TOKEN_TYPE_OPEN|MyHTML_TOKEN_TYPE_WHITESPACE;
     node->attr_first     = NULL;
     node->attr_last      = NULL;
     node->begin          = 0;
     node->length         = 0;
-    node->is_done        = myfalse;
     
-    myhtml_string_clean(&node->entry);
+    myhtml_string_clean(&node->my_str_tm);
 }
 
 void myhtml_token_attr_clean(myhtml_token_attr_t* attr)
@@ -155,40 +152,45 @@ void myhtml_token_attr_clean(myhtml_token_attr_t* attr)
     attr->value_begin  = 0;
     attr->value_length = 0;
     attr->namespace    = MyHTML_NAMESPACE_UNDEF;
+    
+    myhtml_string_clean(&attr->entry);
 }
 
 void myhtml_token_node_wait_for_done(myhtml_token_node_t* node)
 {
-    while(node->is_done == myfalse) {}
+    while((node->type & MyHTML_TOKEN_TYPE_DONE) == 0) {}
 }
 
-myhtml_token_node_t * myhtml_token_clone(myhtml_token_t* token, myhtml_token_node_t* node, size_t thread_idx)
+myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_token_node_t* node, size_t token_thread_idx, size_t attr_thread_idx)
 {
     if(node == NULL)
         return NULL;
     
-    myhtml_token_node_t* new_node = mcobject_async_malloc(token->nodes_obj, thread_idx);
+    myhtml_tree_t* tree = token->tree;
+    
+    myhtml_token_node_t* new_node = mcobject_async_malloc(token->nodes_obj, token_thread_idx);
     
     new_node->tag_ctx_idx = node->tag_ctx_idx;
     new_node->type        = node->type;
-    new_node->attr_first  = 0;
-    new_node->attr_last   = 0;
+    new_node->attr_first  = NULL;
+    new_node->attr_last   = NULL;
     new_node->begin       = node->begin;
     new_node->length      = node->length;
     
-    myhtml_string_init(&new_node->entry, node->entry.size);
-    myhtml_token_node_attr_copy(token, node, new_node, thread_idx);
+    myhtml_string_init(&new_node->my_str_tm,  tree->mchar, tree->mchar_node_id, node->my_str_tm.size);
+    myhtml_token_node_attr_copy(token, node, new_node, attr_thread_idx);
     
     return new_node;
 }
 
 void myhtml_token_node_text_append(myhtml_token_t* token, myhtml_token_node_t* dest, const char* text, size_t text_len)
 {
-    myhtml_string_init(&dest->entry, (text_len + 512));
+    myhtml_string_init(&dest->my_str_tm, token->tree->mchar,
+                       token->tree->mchar_node_id, (text_len + 32));
     
-    myhtml_string_t* string = &dest->entry;
+    myhtml_string_t* string = &dest->my_str_tm;
     
-    dest->begin  = myhtml_string_len(string);
+    dest->begin  = string->length;
     dest->length = text_len;
     
     myhtml_string_append_with_null(string, text, text_len);
@@ -198,19 +200,18 @@ myhtml_token_attr_t * myhtml_token_node_attr_append(myhtml_token_t* token, myhtm
                                    const char* key, size_t key_len,
                                    const char* value, size_t value_len, size_t thread_idx)
 {
-    myhtml_string_t* dest_string = &dest->entry;
-    
-    myhtml_string_init(&dest->entry, (key_len + value_len + 512));
-    
     myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx);
     new_attr->next = 0;
     
+    myhtml_string_init(&new_attr->entry, token->tree->mchar,
+                       token->tree->mchar_node_id, (key_len + value_len + 16));
+    
     if(key_len)
     {
-        new_attr->name_begin = myhtml_string_len(dest_string);
+        new_attr->name_begin = new_attr->entry.length;
         new_attr->name_length = key_len;
         
-        myhtml_string_append_lowercase_with_null(dest_string,
+        myhtml_string_append_lowercase_with_null(&new_attr->entry,
                                                  key,
                                                  key_len);
     }
@@ -221,10 +222,10 @@ myhtml_token_attr_t * myhtml_token_node_attr_append(myhtml_token_t* token, myhtm
     
     if(value_len)
     {
-        new_attr->value_begin = myhtml_string_len(dest_string);
+        new_attr->value_begin = new_attr->entry.length;
         new_attr->value_length = value_len;
         
-        myhtml_string_append_lowercase_with_null(dest_string,
+        myhtml_string_append_lowercase_with_null(&new_attr->entry,
                                                  value,
                                                  value_len);
     }
@@ -256,33 +257,26 @@ void myhtml_token_node_attr_copy(myhtml_token_t* token, myhtml_token_node_t* tar
     
     while (attr)
     {
-        myhtml_token_attr_copy(token, target, attr, dest, thread_idx);
+        myhtml_token_attr_copy(token, attr, dest, thread_idx);
         attr = attr->next;
     }
 }
 
-mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_attr_t* attr,
-                            myhtml_token_node_t* dest, size_t thread_idx)
+mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_attr_t* attr, myhtml_token_node_t* dest, size_t thread_idx)
 {
-    myhtml_string_t* targ_string = &target->entry;
-    myhtml_string_t* dest_string = &dest->entry;
-    
-//    if(myhtml_token_attr_by_name(target, &targ_string->data[attr->name_begin], attr->name_length)) {
-//        return myfalse;
-//    }
-    
     myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx);
     new_attr->next = 0;
     
-    myhtml_string_init(&dest->entry, 512 + attr->name_length + attr->value_begin);
+    myhtml_string_init(&new_attr->entry,  token->tree->mchar, token->tree->mchar_node_id,
+                       (attr->name_length + attr->value_begin + 16));
     
     if(attr->name_length)
     {
-        new_attr->name_begin = myhtml_string_len(dest_string);
+        new_attr->name_begin  = new_attr->entry.length;
         new_attr->name_length = attr->name_length;
         
-        myhtml_string_append_lowercase_with_null(dest_string,
-                                                 &targ_string->data[attr->name_begin],
+        myhtml_string_append_lowercase_with_null(&new_attr->entry,
+                                                 &attr->entry.data[attr->name_begin],
                                                  attr->name_length);
     }
     else {
@@ -292,11 +286,11 @@ mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_node_t* targ
     
     if(attr->value_length)
     {
-        new_attr->value_begin = myhtml_string_len(dest_string);
+        new_attr->value_begin  = new_attr->entry.length;
         new_attr->value_length = attr->value_length;
         
-        myhtml_string_append_lowercase_with_null(dest_string,
-                                                 &targ_string->data[attr->value_begin],
+        myhtml_string_append_lowercase_with_null(&new_attr->entry,
+                                                 &attr->entry.data[attr->value_begin],
                                                  attr->value_length);
     }
     else {
@@ -323,15 +317,14 @@ mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_node_t* targ
 myhtml_token_attr_t * myhtml_token_attr_match(myhtml_token_t* token, myhtml_token_node_t* target,
                                               const char* key, size_t key_size, const char* value, size_t value_size)
 {
-    myhtml_string_t* targ_string = &target->entry;
     myhtml_token_attr_t* attr = target->attr_first;
     
     while (attr)
     {
         if(attr->name_length == key_size && attr->value_length == value_size)
         {
-            if((strncmp(key, &targ_string->data[attr->name_begin], key_size) == 0)) {
-               if((strncmp(value, &targ_string->data[attr->value_begin], value_size) == 0)) {
+            if((strncmp(key, &attr->entry.data[attr->name_begin], key_size) == 0)) {
+               if((strncmp(value, &attr->entry.data[attr->value_begin], value_size) == 0)) {
                    return attr;
                }
                else {
@@ -350,15 +343,14 @@ myhtml_token_attr_t * myhtml_token_attr_match(myhtml_token_t* token, myhtml_toke
 myhtml_token_attr_t * myhtml_token_attr_match_case(myhtml_token_t* token, myhtml_token_node_t* target,
                                               const char* key, size_t key_size, const char* value, size_t value_size)
 {
-    myhtml_string_t* targ_string = &target->entry;
     myhtml_token_attr_t* attr = target->attr_first;
     
     while (attr)
     {
         if(attr->name_length == key_size && attr->value_length == value_size)
         {
-            if((strncmp(key, &targ_string->data[attr->name_begin], key_size) == 0)) {
-                if((strncasecmp(value, &targ_string->data[attr->value_begin], value_size) == 0)) {
+            if((strncmp(key, &attr->entry.data[attr->name_begin], key_size) == 0)) {
+                if((strncasecmp(value, &attr->entry.data[attr->value_begin], value_size) == 0)) {
                     return attr;
                 }
                 else {
@@ -378,30 +370,27 @@ void myhtml_token_adjust_mathml_attributes(myhtml_token_node_t* target)
     myhtml_token_attr_t* attr = myhtml_token_attr_by_name(target, "definitionurl", 13);
     
     if(attr) {
-        myhtml_string_t* targ_string = &target->entry;
-        memcpy(&targ_string->data[attr->name_begin], "definitionURL", 13);
+        memcpy(&attr->entry.data[attr->name_begin], "definitionURL", 13);
     }
 }
 
-void _myhtml_token_create_copy_srt(const char* from, size_t from_size, char** to)
+// TODO: init mchar_async
+void _myhtml_token_create_copy_srt(myhtml_token_t* token, const char* from, size_t from_size, char** to)
 {
-    if(*to)
-        myfree(*to);
-    
-    *to = mymalloc(from_size + 2);
-    
+    *to = mchar_async_malloc(token->tree->mchar, token->tree->mchar_node_id, (from_size + 2));
     strcpy(*to, from);
 }
 
-void myhtml_token_strict_doctype_by_token(myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)
+void myhtml_token_strict_doctype_by_token(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)
 {
-    myhtml_string_t* targ_string = &target->entry;
     myhtml_token_attr_t* attr = target->attr_first;
     
-    const char* data = targ_string->data;
+    const char* data;
     
     if(attr && attr->name_length) {
-        _myhtml_token_create_copy_srt(&data[attr->name_begin], attr->name_length, &return_doctype->name);
+        data = attr->entry.data;
+        
+        _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->name);
         
         if(strcmp("html", return_doctype->name))
              return_doctype->is_html = myfalse;
@@ -430,19 +419,24 @@ void myhtml_token_strict_doctype_by_token(myhtml_token_node_t* target, myhtml_tr
     
     if(attr && attr->name_length)
     {
+        data = attr->entry.data;
+        
         if(strcmp("PUBLIC", &data[attr->name_begin]) == 0)
         {
             // try see public
             attr = attr->next;
             
             if(attr && attr->name_length) {
-                _myhtml_token_create_copy_srt(&data[attr->name_begin], attr->name_length, &return_doctype->public);
+                data = attr->entry.data;
+                
+                _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->public);
                 
                 // try see system
                 attr = attr->next;
                 
                 if(attr && attr->name_length) {
-                    _myhtml_token_create_copy_srt(&data[attr->name_begin], attr->name_length, &return_doctype->system);
+                    data = attr->entry.data;
+                    _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->system);
                 }
                 else {
                     if(return_doctype->system)
@@ -465,7 +459,8 @@ void myhtml_token_strict_doctype_by_token(myhtml_token_node_t* target, myhtml_tr
             attr = attr->next;
             
             if(attr && attr->name_length) {
-                _myhtml_token_create_copy_srt(&data[attr->name_begin], attr->name_length, &return_doctype->system);
+                data = attr->entry.data;
+                _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->system);
             }
             else {
                 if(return_doctype->public)
@@ -497,9 +492,6 @@ mybool_t myhtml_token_doctype_check_html_4_0(myhtml_tree_doctype_t* return_docty
 
 mybool_t myhtml_token_doctype_check_html_4_01(myhtml_tree_doctype_t* return_doctype)
 {
-    if(return_doctype->system == NULL)
-        return mytrue;
-    
     return strcmp(return_doctype->public, "-//W3C//DTD HTML 4.01//EN") &&
     (return_doctype->system == NULL || strcmp(return_doctype->system, "http://www.w3.org/TR/html4/strict.dtd"));
 }
@@ -515,16 +507,19 @@ mybool_t myhtml_token_doctype_check_xhtml_1_0(myhtml_tree_doctype_t* return_doct
 
 mybool_t myhtml_token_doctype_check_xhtml_1_1(myhtml_tree_doctype_t* return_doctype)
 {
+    if(return_doctype->system == NULL)
+        return mytrue;
+    
     return strcmp(return_doctype->public, "-//W3C//DTD XHTML 1.1//EN") &&
     strcmp(return_doctype->system, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
 }
 
-mybool_t myhtml_token_release_and_check_doctype_attributes(myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)
+mybool_t myhtml_token_release_and_check_doctype_attributes(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)
 {
     if(return_doctype == NULL)
         return myfalse;
     
-    myhtml_token_strict_doctype_by_token(target, return_doctype);
+    myhtml_token_strict_doctype_by_token(token, target, return_doctype);
     
     if(return_doctype->name == NULL)
         return myfalse;
@@ -561,11 +556,10 @@ void myhtml_token_adjust_svg_attributes(myhtml_token_node_t* target)
                                                               myhtml_token_attr_svg_replacement[i].from_size);
         
         if(attr) {
-            myhtml_string_t* targ_string = &target->entry;
-            memcpy(&targ_string->data[attr->name_begin],
+            memcpy(&attr->entry.data[attr->name_begin],
                    myhtml_token_attr_svg_replacement[i].to,
                    myhtml_token_attr_svg_replacement[i].from_size);
-            // from_size == to_size, but i use from_size for copy
+            // from_size == to_size, but use from_size for copy
         }
     }
 }
@@ -580,13 +574,12 @@ void myhtml_token_adjust_foreign_attributes(myhtml_token_node_t* target)
                                                               myhtml_token_attr_namespace_replacement[i].from_size);
         
         if(attr) {
-            myhtml_string_t* targ_string = &target->entry;
-            memcpy(&targ_string->data[attr->name_begin],
+            memcpy(&attr->entry.data[attr->name_begin],
                    myhtml_token_attr_namespace_replacement[i].to,
                    myhtml_token_attr_namespace_replacement[i].to_size);
             
             attr->name_length = myhtml_token_attr_namespace_replacement[i].to_size;
-            targ_string->data[attr->name_length] = '\0';
+            attr->entry.data[attr->name_length] = '\0';
             
             attr->namespace = myhtml_token_attr_namespace_replacement[i].namespace;
         }
@@ -598,9 +591,6 @@ mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_nod
     if(target == NULL || dest == NULL)
         return myfalse;
     
-    char* target_char = target->entry.data;
-    char* dest_char   = dest->entry.data;
-    
     myhtml_token_attr_t* target_attr = target->attr_first;
     myhtml_token_attr_t* dest_attr   = dest->attr_first;
     
@@ -609,10 +599,10 @@ mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_nod
         if(target_attr->name_length == dest_attr->name_length &&
            target_attr->value_length == dest_attr->value_length)
         {
-            if(strcmp(&target_char[target_attr->name_begin], &dest_char[dest_attr->name_begin]) != 0)
+            if(strcmp(&target_attr->entry.data[target_attr->name_begin], &dest_attr->entry.data[dest_attr->name_begin]) != 0)
                 break;
             
-            if(strcasecmp(&target_char[target_attr->value_begin], &dest_char[dest_attr->value_begin]) != 0)
+            if(strcasecmp(&target_attr->entry.data[target_attr->value_begin], &dest_attr->entry.data[dest_attr->value_begin]) != 0)
                 break;
         }
         else
@@ -631,12 +621,11 @@ mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_nod
 myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const char* name, size_t name_length)
 {
     myhtml_token_attr_t* attr = node->attr_first;
-    char* buff = node->entry.data;
     
     while (attr)
     {
         if(name_length == attr->name_length) {
-            if(strncmp(name, &buff[attr->name_begin], name_length) == 0)
+            if(strncmp(name, &attr->entry.data[attr->name_begin], name_length) == 0)
                 break;
         }
         
@@ -679,7 +668,7 @@ myhtml_token_attr_t * myhtml_token_attr_remove_by_name(myhtml_token_node_t* node
 
 mybool_t myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* node)
 {
-    const char* html = node->entry.data;
+    const char* html = node->my_str_tm.data;
     
     size_t i;
     for (i = node->begin; i < node->length; i++)
@@ -728,7 +717,7 @@ void myhtml_token_print_by_idx(myhtml_tree_t* tree, myhtml_token_node_t* node, F
     {
         if(node->length) {
             fprintf(out, "%.*s: %.*s\n", (int)tag_name_size, mctree_nodes[mctree_id].str,
-                    (int)node->length, &node->entry.data[node->begin]);
+                    (int)node->length, &node->my_str_tm.data[node->begin]);
         }
         else {
             fprintf(out, "%.*s is empty\n", (int)tag_name_size, mctree_nodes[mctree_id].str);
@@ -759,8 +748,6 @@ void myhtml_token_print_by_idx(myhtml_tree_t* tree, myhtml_token_node_t* node, F
 
 void myhtml_token_print_attr(myhtml_tree_t* tree, myhtml_token_node_t* node, FILE* out)
 {
-    const char* html = node->entry.data;
-    
     myhtml_token_attr_t* attr = node->attr_first;
     
     while(attr)
@@ -770,11 +757,11 @@ void myhtml_token_print_attr(myhtml_tree_t* tree, myhtml_token_node_t* node, FIL
         if(attr->value_begin)
         {
             fprintf(out, "%.*s=\"%.*s\"",
-                    (int)attr->name_length, &html[attr->name_begin],
-                    (int)attr->value_length, &html[attr->value_begin]);
+                    (int)attr->name_length, &attr->entry.data[attr->name_begin],
+                    (int)attr->value_length, &attr->entry.data[attr->value_begin]);
         }
         else {
-            fprintf(out, "%.*s", (int)attr->name_length, &html[attr->name_begin]);
+            fprintf(out, "%.*s", (int)attr->name_length, &attr->entry.data[attr->name_begin]);
         }
         
         attr = attr->next;

@@ -13,6 +13,21 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <stdint.h>
+#include <stdarg.h>
+
+#ifdef DEBUG_MODE
+    #define MyHTML_DEBUG(__format__, ...)      \
+        myhtml_print(stderr, "DEBUG: "__format__"\n", ##__VA_ARGS__)
+#else
+    #define MyHTML_DEBUG(__format__, ...)
+#endif
+
+#ifdef DEBUG_MODE
+    #define MyHTML_DEBUG_ERROR(__format__, ...)      \
+        myhtml_print(stderr, "DEBUG ERROR: "__format__"\n", ##__VA_ARGS__)
+#else
+    #define MyHTML_DEBUG_ERROR(__format__, ...)
+#endif
 
 #define myhtml_base_add(__myhtml__, __point__, __lenn__, __sizen__, __strcn__, __size__)    \
     __myhtml__->__lenn__++;                                                                 \
@@ -25,11 +40,21 @@
 typedef enum {myfalse = 0, mytrue = 1} mybool_t;
 
 // thread
-typedef size_t myhtml_thread_index_t;
+enum mythread_thread_opt {
+    MyTHREAD_OPT_UNDEF = 0,
+    MyTHREAD_OPT_WAIT  = 1,
+    MyTHREAD_OPT_QUIT  = 2
+}
+typedef mythread_thread_opt_t;
 
-typedef struct myhtml_thread_context myhtml_thread_context_t;
-typedef struct myhtml_thread_list myhtml_thread_list_t;
-typedef struct myhtml_thread myhtml_thread_t;
+typedef struct mythread_queue_node mythread_queue_node_t;
+typedef struct mythread_queue mythread_queue_t;
+
+typedef size_t mythread_id_t;
+typedef struct mythread_workers_list mythread_workers_list_t;
+typedef struct mythread_context mythread_context_t;
+typedef struct mythread_list mythread_list_t;
+typedef struct mythread mythread_t;
 
 // tree
 typedef struct myhtml_tree_insertion_list myhtml_tree_insertion_list_t;
@@ -37,28 +62,20 @@ typedef struct myhtml_tree_token_list myhtml_tree_token_list_t;
 typedef struct myhtml_tree_list myhtml_tree_list_t;
 typedef struct myhtml_tree_indexes myhtml_tree_indexes_t;
 typedef struct myhtml_tree_doctype myhtml_tree_doctype_t;
+typedef struct myhtml_async_args myhtml_async_args_t;
 
 typedef struct myhtml_tree_node myhtml_tree_node_t;
 typedef struct myhtml_tree myhtml_tree_t;
 
-// queue
-enum myhtml_queue_node_opt {
-    MyHTML_QUEUE_OPT_CLEAN = 0x00,
-    MyHTML_QUEUE_OPT_QUIT  = 0x01
-};
-
+// token
 enum myhtml_token_type {
     MyHTML_TOKEN_TYPE_OPEN             = 0x00,
     MyHTML_TOKEN_TYPE_CLOSE            = 0x01,
-    MyHTML_TOKEN_TYPE_CLOSE_SELF       = 0x02
+    MyHTML_TOKEN_TYPE_CLOSE_SELF       = 0x02,
+    MyHTML_TOKEN_TYPE_DONE             = 0x04,
+    MyHTML_TOKEN_TYPE_WHITESPACE       = 0x08
 };
 
-typedef size_t myhtml_queue_node_index_t;
-
-typedef struct myhtml_queue_node myhtml_queue_node_t;
-typedef struct myhtml_queue myhtml_queue_t;
-
-// token
 typedef size_t myhtml_token_index_t;
 typedef size_t myhtml_token_attr_index_t;
 typedef struct myhtml_token_replacement_entry myhtml_token_replacement_entry_t;
@@ -192,6 +209,26 @@ enum myhtml_insertion_mode {
 };
 
 // base
+enum myhtml_status {
+    MyHTML_STATUS_OK                                = 0,
+    MyHTML_STATUS_THREAD_ERROR_LIST_INIT            = 1,
+    MyHTML_STATUS_THREAD_ERROR_ATTR_MALLOC          = 10,
+    MyHTML_STATUS_THREAD_ERROR_ATTR_INIT            = 11,
+    MyHTML_STATUS_THREAD_ERROR_ATTR_SET             = 12,
+    MyHTML_STATUS_THREAD_ERROR_NO_SLOTS             = 13,
+    MyHTML_STATUS_THREAD_ERROR_BATCH_INIT           = 14,
+    MyHTML_STATUS_THREAD_ERROR_WORKER_MALLOC        = 16,
+    MyHTML_STATUS_THREAD_ERROR_WORKER_SEM_CREATE    = 17,
+    MyHTML_STATUS_THREAD_ERROR_WORKER_THREAD_CREATE = 18,
+    MyHTML_STATUS_THREAD_ERROR_MASTER_THREAD_CREATE = 19,
+    MyHTML_STATUS_THREAD_ERROR_SEM_PREFIX_MALLOC    = 50,
+    MyHTML_STATUS_THREAD_ERROR_SEM_CREATE           = 51,
+    MyHTML_STATUS_THREAD_ERROR_QUEUE_MALLOC         = 100,
+    MyHTML_STATUS_THREAD_ERROR_QUEUE_NODES_MALLOC   = 101,
+    MyHTML_STATUS_THREAD_ERROR_QUEUE_NODE_MALLOC    = 102,
+}
+typedef myhtml_status_t;
+
 enum myhtml_namespace {
     MyHTML_NAMESPACE_UNDEF      = 0x00,
     MyHTML_NAMESPACE_HTML       = 0x01,
@@ -203,14 +240,24 @@ enum myhtml_namespace {
     MyHTML_NAMESPACE_LAST_ENTRY = 0x07
 };
 
+enum myhtml_options {
+    MyHTML_OPTIONS_DEFAULT                 = 0x00,
+    MyHTML_OPTIONS_PARSE_MODE_SINGLE       = 0x01,
+    MyHTML_OPTIONS_PARSE_MODE_ALL_IN_ONE   = 0x02,
+    MyHTML_OPTIONS_PARSE_MODE_SEPARATELY   = 0x04,
+    MyHTML_OPTIONS_PARSE_MODE_WORKER_TREE  = 0x08,
+    MyHTML_OPTIONS_PARSE_MODE_WORKER_INDEX = 0x10,
+    MyHTML_OPTIONS_PARSE_MODE_TREE_INDEX   = 0x20
+};
+
 typedef struct myhtml myhtml_t;
 
 
 // parser state function
-typedef size_t (*myhtml_tokenizer_state_f)(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);
+typedef size_t (*myhtml_tokenizer_state_f)(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);
 
 // parser stream function
-typedef void (*myhtml_thread_f)(myhtml_tree_t* tree, myhtml_queue_node_index_t qnode_idx, myhtml_token_node_t* token);
+typedef void (*mythread_f)(mythread_id_t thread_id, mythread_queue_node_t *qnode);
 
 // parser insertion mode function
 typedef mybool_t (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_node_t* token);
@@ -218,7 +265,9 @@ typedef mybool_t (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_node_t*
 void * mymalloc(size_t size);
 void * myrealloc(void* dst, size_t size);
 void * mycalloc(size_t num, size_t size);
-void myfree(void* dst);
+void   myfree(void* dst);
+
+void myhtml_print(FILE* out, const char* format, ...);
 
 #endif
 

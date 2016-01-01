@@ -9,7 +9,7 @@
 #include "tokenizer_script.h"
 
 
-size_t myhtml_tokenizer_state_script_data(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -56,28 +56,28 @@ size_t myhtml_tokenizer_state_script_data(myhtml_tree_t* tree, myhtml_queue_node
 }
 
 // see myhtml_tokenizer_state_script_data
-size_t myhtml_tokenizer_state_script_data_less_than_sign(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_less_than_sign(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     return html_offset;
 }
 
 // see myhtml_tokenizer_state_script_data
-size_t myhtml_tokenizer_state_script_data_escape_start(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_escape_start(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     return html_offset;
 }
 
 // see myhtml_tokenizer_state_script_data
-size_t myhtml_tokenizer_state_script_data_escape_start_dash(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_escape_start_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     return html_offset;
 }
 
 // see myhtml_tokenizer_state_script_data
-size_t myhtml_tokenizer_state_script_data_end_tag_open(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_end_tag_open(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -92,10 +92,8 @@ size_t myhtml_tokenizer_state_script_data_end_tag_open(myhtml_tree_t* tree, myht
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    myhtml_t* myhtml = tree->myhtml;
-    
     size_t offset_cache = html_offset;
     
     while(html_offset < html_size)
@@ -152,7 +150,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 html_offset++;
-                mh_queue_add(tree, html, mh_queue_current(), html_offset);
+                mh_queue_add(tree, html, html_offset);
                 
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             }
@@ -175,7 +173,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_escaped_dash_dash(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_escaped_dash_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -199,7 +197,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_dash_dash(myhtml_tree_t* tree,
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_escaped_less_than_sign(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_escaped_less_than_sign(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -217,7 +215,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_less_than_sign(myhtml_tree_t* 
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_escaped_end_tag_open(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_escaped_end_tag_open(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -231,10 +229,8 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_open(myhtml_tree_t* tr
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    myhtml_t* myhtml = tree->myhtml;
-    
     size_t offset_cache = html_offset;
     
     while(html_offset < html_size)
@@ -293,7 +289,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
                 
                 html_offset++;
-                mh_queue_add(tree, html, mh_queue_current(), html_offset);
+                mh_queue_add(tree, html, html_offset);
             }
             else {
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
@@ -314,7 +310,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_escaped(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_escaped(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -339,7 +335,7 @@ size_t myhtml_tokenizer_state_script_data_escaped(myhtml_tree_t* tree, myhtml_qu
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_escaped_dash(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_escaped_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -358,7 +354,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_dash(myhtml_tree_t* tree, myht
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -390,7 +386,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tre
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_double_escaped(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_double_escaped(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -415,7 +411,7 @@ size_t myhtml_tokenizer_state_script_data_double_escaped(myhtml_tree_t* tree, my
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_double_escaped_dash(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_double_escaped_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -436,7 +432,7 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_dash(myhtml_tree_t* tre
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_double_escaped_dash_dash(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_double_escaped_dash_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -462,7 +458,7 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_dash_dash(myhtml_tree_t
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_double_escaped_less_than_sign(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_double_escaped_less_than_sign(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     
@@ -477,7 +473,7 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_less_than_sign(myhtml_t
     return html_offset;
 }
 
-size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree, myhtml_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     //myhtml_t* myhtml = tree->myhtml;
     

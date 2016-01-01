@@ -15,14 +15,9 @@ mctree_t * mctree_create(size_t start_size)
     
     mctree->nodes_size = start_size + 4096;
     mctree->nodes_length = start_size + 1;
-    mctree->nodes = (mctree_node_t*)mymalloc(sizeof(mctree_node_t) * mctree->nodes_size);
+    mctree->nodes = (mctree_node_t*)mycalloc(mctree->nodes_size, sizeof(mctree_node_t));
     
     mctree->start_size = start_size;
-    
-    size_t i;
-    for(i = 0; i < mctree->nodes_length; i++) {
-        mctree_node_clean(mctree, i);
-    }
     
     return mctree;
 }

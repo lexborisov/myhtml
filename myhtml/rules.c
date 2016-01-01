@@ -14,8 +14,7 @@ mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t*
     {
         case MyTAGS_TAG__TEXT:
         {
-            myhtml_token_node_wait_for_done(token);
-            if(myhtml_token_is_whithspace(tree, token)) {
+            if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
                 return myfalse;
             }
             
@@ -35,7 +34,7 @@ mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t*
         {
             myhtml_token_node_wait_for_done(token);
             
-            myhtml_token_release_and_check_doctype_attributes(token, &tree->doctype);
+            myhtml_token_release_and_check_doctype_attributes(tree->token, token, &tree->doctype);
             myhtml_tree_node_insert_doctype(tree, token);
             
             // fix for tokenizer
@@ -92,8 +91,7 @@ mybool_t myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_nod
                 
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token)) {
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
                     break;
                 }
                 
@@ -132,7 +130,7 @@ mybool_t myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_nod
             case MyTAGS_TAG_HEAD:
             case MyTAGS_TAG_BODY:
             {
-                myhtml_tree_node_insert(tree, MyTAGS_TAG_HEAD, MyHTML_NAMESPACE_HTML);
+                tree->node_head = myhtml_tree_node_insert(tree, MyTAGS_TAG_HEAD, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
                 return mytrue;
             }
@@ -146,13 +144,12 @@ mybool_t myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_nod
         {
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token)) {
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
                     break;
                 }
                 
                 // default, other token
-                myhtml_tree_node_insert(tree, MyTAGS_TAG_HEAD, MyHTML_NAMESPACE_HTML);
+                tree->node_head = myhtml_tree_node_insert(tree, MyTAGS_TAG_HEAD, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
                 return mytrue;
             }
@@ -173,14 +170,14 @@ mybool_t myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_nod
                 
             case MyTAGS_TAG_HEAD:
             {
-                myhtml_tree_node_insert_html_element(tree, token);
+                tree->node_head = myhtml_tree_node_insert_html_element(tree, token);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
                 break;
             }
                 
             default:
             {
-                myhtml_tree_node_insert(tree, MyTAGS_TAG_HEAD, MyHTML_NAMESPACE_HTML);
+                tree->node_head = myhtml_tree_node_insert(tree, MyTAGS_TAG_HEAD, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
                 return mytrue;
             }
@@ -235,8 +232,7 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
         {
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token))
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
                 {
                     myhtml_tree_node_insert_text(tree, token);
                     break;
@@ -406,8 +402,7 @@ mybool_t myhtml_insertion_mode_in_head_noscript(myhtml_tree_t* tree, myhtml_toke
                 
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token))
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
                     return myhtml_insertion_mode_in_head(tree, token);
                 
                 // default, other token
@@ -469,8 +464,7 @@ mybool_t myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node
         {
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token))
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
                 {
                     myhtml_tree_node_insert_text(tree, token);
                     break;
@@ -694,7 +688,6 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 
                 // step 3
                 myhtml_tree_open_elements_pop_until(tree, token->tag_ctx_idx, myfalse);
-                
                 break;
             }
                 
@@ -937,8 +930,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_tree_active_formatting_reconstruction(tree);
                 myhtml_tree_node_insert_text(tree, token);
                 
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token) == myfalse)
+                if((token->type & MyHTML_TOKEN_TYPE_WHITESPACE) == 0)
                     tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
                 
                 break;
@@ -962,7 +954,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                     if(top_node->token) {
                         myhtml_token_node_wait_for_done(token);
                         myhtml_token_node_wait_for_done(top_node->token);
-                        myhtml_token_node_attr_copy(tree->token, token, top_node->token, 1);
+                        myhtml_token_node_attr_copy(tree->token, token, top_node->token, tree->mcasync_attr_id);
                     }
                 }
                 
@@ -1002,7 +994,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                     if(top_node->token) {
                         myhtml_token_node_wait_for_done(token);
                         myhtml_token_node_wait_for_done(top_node->token);
-                        myhtml_token_node_attr_copy(tree->token, token, top_node->token, 1);
+                        myhtml_token_node_attr_copy(tree->token, token, top_node->token, tree->mcasync_attr_id);
                     }
                 }
                 
@@ -1411,10 +1403,10 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_token_attr_t *attr_action = myhtml_token_attr_remove_by_name(token, "action", 6);
                 
                 if(attr_action) {
-                    myhtml_token_node_malloc(tree->token, form->token, 1);
+                    myhtml_token_node_malloc(tree->token, form->token, tree->mcasync_token_id);
                     myhtml_token_node_set_done(form->token);
                     
-                    myhtml_token_attr_copy(tree->token, token, attr_action, form->token, 1);
+                    myhtml_token_attr_copy(tree->token, attr_action, form->token, tree->mcasync_attr_id);
                 }
                 
                 myhtml_tree_node_insert(tree, MyTAGS_TAG_HR, MyHTML_NAMESPACE_HTML);
@@ -1438,13 +1430,13 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_tree_node_t* text_node = myhtml_tree_node_insert(tree, MyTAGS_TAG__TEXT, MyHTML_NAMESPACE_HTML);
                 myhtml_tree_open_elements_pop(tree);
                 
-                myhtml_token_node_malloc(tree->token, text_node->token, 1);
+                myhtml_token_node_malloc(tree->token, text_node->token, tree->mcasync_token_id);
                 myhtml_token_node_set_done(text_node->token);
                 
                 const char message[] = "This is a searchable index. Enter search keywords: (input field)";
                 
                 if(attr_prompt && attr_prompt->value_length) {
-                    myhtml_token_node_text_append(tree->token, text_node->token, &token->entry.data[ attr_prompt->value_begin ], attr_prompt->value_length);
+                    myhtml_token_node_text_append(tree->token, text_node->token, &token->my_str_tm.data[ attr_prompt->value_begin ], attr_prompt->value_length);
                 }
                 else {
                     myhtml_token_node_text_append(tree->token, text_node->token, message, strlen(message));
@@ -1457,30 +1449,30 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 // Immediately pop the current node off the stack of open elements.
                 myhtml_tree_node_t* input_node = myhtml_tree_node_insert(tree, MyTAGS_TAG_INPUT, MyHTML_NAMESPACE_HTML);
                 
-                myhtml_token_node_malloc(tree->token, input_node->token, 1);
+                myhtml_token_node_malloc(tree->token, input_node->token, tree->mcasync_token_id);
                 myhtml_token_node_set_done(input_node->token);
                 
-                if(token->entry.data) {
+                if(token->attr_first) {
                     myhtml_token_attr_t* attr_isindex = token->attr_first;
                     
                     while (attr_isindex)
                     {
-                        myhtml_token_attr_copy(tree->token, token, attr_isindex, input_node->token, 1);
+                        myhtml_token_attr_copy(tree->token, attr_isindex, input_node->token, tree->mcasync_attr_id);
                         attr_isindex = attr_isindex->next;
                     }
                 }
-                myhtml_token_node_attr_append(tree->token, input_node->token, "name", 4, "isindex", 7, 1);
+                myhtml_token_node_attr_append(tree->token, input_node->token, "name", 4, "isindex", 7, tree->mcasync_attr_id);
                 myhtml_tree_open_elements_pop(tree);
                 
                 // Insert more characters (see below for what they should say).
                 text_node = myhtml_tree_node_insert(tree, MyTAGS_TAG__TEXT, MyHTML_NAMESPACE_HTML);
                 myhtml_tree_open_elements_pop(tree);
                 
-                myhtml_token_node_malloc(tree->token, text_node->token, 1);
+                myhtml_token_node_malloc(tree->token, text_node->token, tree->mcasync_token_id);
                 myhtml_token_node_set_done(text_node->token);
                 
                 if(attr_prompt && attr_prompt->value_length) {
-                    myhtml_token_node_text_append(tree->token, text_node->token, &token->entry.data[ attr_prompt->value_begin ], attr_prompt->value_length);
+                    myhtml_token_node_text_append(tree->token, text_node->token, &token->my_str_tm.data[ attr_prompt->value_begin ], attr_prompt->value_length);
                 }
                 else {
                     myhtml_token_node_text_append(tree->token, text_node->token, message, strlen(message));
@@ -1638,6 +1630,8 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
             case MyTAGS_TAG_SVG:
             {
                 myhtml_tree_active_formatting_reconstruction(tree);
+                
+                myhtml_token_node_wait_for_done(token);
                 
                 myhtml_token_adjust_svg_attributes(token);
                 myhtml_token_adjust_foreign_attributes(token);
@@ -1929,8 +1923,7 @@ mybool_t myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_n
         myhtml_tree_token_list_t* token_list = tree->token_list;
         
         for(size_t i = 0; i < token_list->length; i++) {
-            myhtml_token_node_wait_for_done(token_list->list[i]);
-            if(myhtml_token_is_whithspace(tree, token_list->list[i]) == myfalse)
+            if((token->type & MyHTML_TOKEN_TYPE_WHITESPACE) == 0)
             {
                 tree->foster_parenting = mytrue;
                 myhtml_insertion_mode_in_body(tree, token_list->list[i]);
@@ -2089,9 +2082,7 @@ mybool_t myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token
         {
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token))
-                {
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
                     myhtml_tree_node_insert_text(tree, token);
                     break;
                 }
@@ -2787,11 +2778,8 @@ mybool_t myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node
         {
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token))
-                {
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
                     return myhtml_insertion_mode_in_body(tree, token);
-                }
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return mytrue;
@@ -2873,9 +2861,7 @@ mybool_t myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_nod
         {
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token))
-                {
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
                     myhtml_tree_node_insert_text(tree, token);
                     break;
                 }
@@ -2947,9 +2933,7 @@ mybool_t myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_
         {
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token))
-                {
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
                     myhtml_tree_node_insert_text(tree, token);
                     break;
                 }
@@ -3011,11 +2995,8 @@ mybool_t myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_toke
                 
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token))
-                {
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
                     return myhtml_insertion_mode_in_body(tree, token);
-                }
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return mytrue;
@@ -3061,11 +3042,8 @@ mybool_t myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_
                 
             case MyTAGS_TAG__TEXT:
             {
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token))
-                {
+                if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
                     return myhtml_insertion_mode_in_body(tree, token);
-                }
                 
                 // parse error
                 break;
@@ -3177,8 +3155,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_to
             {
                 myhtml_tree_node_insert_text(tree, token);
                 
-                myhtml_token_node_wait_for_done(token);
-                if(myhtml_token_is_whithspace(tree, token) == myfalse)
+                if((token->type & MyHTML_TOKEN_TYPE_WHITESPACE) == 0)
                     tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
                 
                 break;

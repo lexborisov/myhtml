@@ -17,7 +17,7 @@ void * mymalloc(size_t size)
 // see who's call realloc
 void * myrealloc(void* dst, size_t size)
 {
-    printf("Call realloc\n");
+    //printf("Call realloc\n");
     return realloc(dst, size);
 }
 
@@ -33,4 +33,10 @@ void myfree(void* dst)
     free(dst);
 }
 
-
+void myhtml_print(FILE* out, const char* format, ...)
+{
+    va_list argptr;
+    va_start(argptr, format);
+    vfprintf(out, format, argptr);
+    va_end(argptr);
+}
