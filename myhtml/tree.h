@@ -11,8 +11,8 @@
 
 #include "myosi.h"
 #include "myhtml.h"
+#include "mystring.h"
 #include "token.h"
-#include "string.h"
 #include "utils/mcsync.h"
 #include "utils/mchar_async.h"
 #include "utils/mcobject_async.h"

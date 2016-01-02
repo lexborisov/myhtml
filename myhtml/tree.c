@@ -1790,7 +1790,7 @@ void myhtml_tree_print_by_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node, FIL
     }
     else
     {
-        fprintf(out, "<%.*s tagid=\"%lu\" mem=\"%x\"", (int)tag_name_size, mctree_nodes[mctree_id].str,
+        fprintf(out, "<%.*s tagid=\"%lu\" mem=\"%zx\"", (int)tag_name_size, mctree_nodes[mctree_id].str,
                 mh_tags_get(node->tag_idx, id), (size_t)node);
         
         if(node->token)

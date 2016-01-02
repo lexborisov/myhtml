@@ -11,9 +11,9 @@
 
 #include "myosi.h"
 #include "myhtml.h"
+#include "mystring.h"
 #include "tree.h"
 #include "token.h"
-#include "string.h"
 #include "utils/mcobject.h"
 
 void myhtml_parser_index(mythread_id_t thread_id, mythread_queue_node_t *qnode);

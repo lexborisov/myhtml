@@ -15,6 +15,11 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+/* strncasecmp is not C99 and needs this for glibc */
+#if defined(__linux__)
+#   include <strings.h> 
+#endif /* linux */
+
 #ifdef DEBUG_MODE
     #define MyHTML_DEBUG(__format__, ...)      \
         myhtml_print(stderr, "DEBUG: "__format__"\n", ##__VA_ARGS__)
