@@ -122,8 +122,19 @@ void myhtml_destroy_node_list(myhtml_tree_node_t **node_list);
 
 mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 
-uint64_t myhtml_rdtsc(void);
-void myhtml_rdtsc_print(const char *name, uint64_t x, uint64_t y);
-void myhtml_rdtsc_print_by_val(const char *name, uint64_t x);
+/** 
+ * Platform-specific hdef performance clock queries.
+ * Implemented in perf.c
+ */ 
+
+/** Get clock resolution */
+uint64_t myhtml_hperf_res(void);
+
+/** Get current value in clock ticks */
+uint64_t myhtml_hperf_clock(void);
+
+/** Print an hperf measure */
+void myhtml_hperf_print(const char *name, uint64_t x, uint64_t y);
+void myhtml_hperf_print_by_val(const char *name, uint64_t x);
 
 #endif
