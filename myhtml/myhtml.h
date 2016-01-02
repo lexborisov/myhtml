@@ -88,12 +88,12 @@
     __char__ __action__ '\r'
 
 #define myhtml_ascii_char_cmp(__char__)     \
-    (__char__ >= 'a' && __char__ <= 'z') || \
-    (__char__ >= 'A' && __char__ <= 'Z')
+    ((__char__ >= 'a' && __char__ <= 'z') || \
+    (__char__ >= 'A' && __char__ <= 'Z'))
 
 #define myhtml_ascii_char_unless_cmp(__char__) \
-    (__char__ < 'a' || __char__ > 'z') &&      \
-    (__char__ < 'A' || __char__ > 'Z')
+    ((__char__ < 'a' || __char__ > 'z') &&      \
+    (__char__ < 'A' || __char__ > 'Z'))
 
 struct myhtml {
     mytags_t            *tags;
