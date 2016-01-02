@@ -115,6 +115,16 @@ void test_all(void)
 
 int main(int argc, const char * argv[])
 {
+    /* Default path or argument value */
+    //const char* path = "/new/C-git/myhtml/test/test.html";
+    //const char* path = "/new/C-git/myhtml/test/broken.html";
+    const char* path = "/new/C-git/myhtml/test/test_full.html";
+    //const char* path = "/new/Test/2.html";
+
+    if (argc == 2) {
+        path = argv[1];
+    }
+
     setbuf(stdout, 0);
     
     //mcobject_async_test();
@@ -132,14 +142,11 @@ int main(int argc, const char * argv[])
     
     //usleep(10000000);
     
-    //struct res_html res = load_html("/new/C-git/myhtml/test/test.html");
-    //struct res_html res = load_html("/new/C-git/myhtml/test/broken.html");
-    struct res_html res = load_html("/new/C-git/myhtml/test/test_full.html");
-    //struct res_html res = load_html("/new/Test/2.html");
-    
-    uint64_t all_start = myhtml_rdtsc();
-    
-    uint64_t tree_init_start = myhtml_rdtsc();
+    struct res_html res = load_html(path);
+
+    uint64_t all_start = myhtml_hperf_clock();
+
+    uint64_t tree_init_start = myhtml_hperf_clock();
     // init once for N html
     
     myhtml_tree_t* tree = myhtml_tree_create();
@@ -149,8 +156,8 @@ int main(int argc, const char * argv[])
     //myhtml_tree_t* tree_2 = myhtml_tree_create();
     //myhtml_tree_init(tree_2, myhtml);
     
-    uint64_t tree_init_stop = myhtml_rdtsc();
-    uint64_t parse_start = myhtml_rdtsc();
+    uint64_t tree_init_stop = myhtml_hperf_clock();
+    uint64_t parse_start = myhtml_hperf_clock();
     
     for(size_t i = 0; i < 1; i++)
     {
@@ -174,16 +181,16 @@ int main(int argc, const char * argv[])
     
     //myhtml_parse_fragment(tree_2, res.html, res.size);
     
-    uint64_t parse_stop = myhtml_rdtsc();
-    uint64_t all_stop = myhtml_rdtsc();
+    uint64_t parse_stop = myhtml_hperf_clock();
+    uint64_t all_stop = myhtml_hperf_clock();
     
     //myhtml_tree_print_by_tree_idx(tree_2, tree_2->document->child, stdout, 0);
     
     printf("\n\nInformation:\n");
-    printf("Timer:\n");
-    myhtml_rdtsc_print("\tFirst Tree init", tree_init_start, tree_init_stop);
-    myhtml_rdtsc_print("\tParse html", parse_start, parse_stop);
-    myhtml_rdtsc_print("\tTotal", all_start, all_stop);
+    printf("Timer (%llu ticks/sec):\n", (unsigned long long) myhtml_hperf_res());
+    myhtml_hperf_print("\tFirst Tree init", tree_init_start, tree_init_stop);
+    myhtml_hperf_print("\tParse html", parse_start, parse_stop);
+    myhtml_hperf_print("\tTotal", all_start, all_stop);
     printf("\n");
     
     myhtml_tree_destroy(tree);
