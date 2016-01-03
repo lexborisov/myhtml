@@ -20,8 +20,6 @@
 #include "tree.h"
 #include "rules.h"
 #include "token.h"
-#include <sys/types.h>
-#include <sys/sysctl.h>
 
 #define mh_thread_get(__idx__, __attr__) myhtml_thread_get(myhtml->thread, __idx__, __attr__)
 #define mh_thread_set(__idx__, __attr__) myhtml_thread_set(myhtml->thread, __idx__, __attr__)
@@ -128,13 +126,13 @@ mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t si
  */ 
 
 /** Get clock resolution */
-uint64_t myhtml_hperf_res(void);
+uint64_t myhtml_hperf_res(myhtml_status_t *status);
 
 /** Get current value in clock ticks */
-uint64_t myhtml_hperf_clock(void);
+uint64_t myhtml_hperf_clock(myhtml_status_t *status);
 
 /** Print an hperf measure */
-void myhtml_hperf_print(const char *name, uint64_t x, uint64_t y);
-void myhtml_hperf_print_by_val(const char *name, uint64_t x);
+myhtml_status_t myhtml_hperf_print(const char *name, uint64_t x, uint64_t y, FILE *fh);
+myhtml_status_t myhtml_hperf_print_by_val(const char *name, uint64_t x, FILE *fh);
 
 #endif

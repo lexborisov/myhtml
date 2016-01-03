@@ -13,6 +13,7 @@
 #include "mytags.h"
 #include "myhtml.h"
 #include "string.h"
+#include "strings.h"
 #include "utils/mcobject_async.h"
 #include "utils/mchar_async.h"
 #include "utils/mcsync.h"

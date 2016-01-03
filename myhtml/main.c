@@ -144,9 +144,9 @@ int main(int argc, const char * argv[])
     
     struct res_html res = load_html(path);
 
-    uint64_t all_start = myhtml_hperf_clock();
+    uint64_t all_start = myhtml_hperf_clock(NULL);
 
-    uint64_t tree_init_start = myhtml_hperf_clock();
+    uint64_t tree_init_start = myhtml_hperf_clock(NULL);
     // init once for N html
     
     myhtml_tree_t* tree = myhtml_tree_create();
@@ -156,8 +156,8 @@ int main(int argc, const char * argv[])
     //myhtml_tree_t* tree_2 = myhtml_tree_create();
     //myhtml_tree_init(tree_2, myhtml);
     
-    uint64_t tree_init_stop = myhtml_hperf_clock();
-    uint64_t parse_start = myhtml_hperf_clock();
+    uint64_t tree_init_stop = myhtml_hperf_clock(NULL);
+    uint64_t parse_start = myhtml_hperf_clock(NULL);
     
     for(size_t i = 0; i < 1; i++)
     {
@@ -176,21 +176,21 @@ int main(int argc, const char * argv[])
 //        myhtml_destroy_node_list(node_list);
         
         //print_token_by_index(tree, MyTAGS_TAG_A);
-        //myhtml_tree_print_by_tree_idx(tree, tree->document->child, stdout, 0);
+        myhtml_tree_print_by_tree_idx(tree, tree->document->child, stdout, 0);
     }
     
     //myhtml_parse_fragment(tree_2, res.html, res.size);
     
-    uint64_t parse_stop = myhtml_hperf_clock();
-    uint64_t all_stop = myhtml_hperf_clock();
+    uint64_t parse_stop = myhtml_hperf_clock(NULL);
+    uint64_t all_stop = myhtml_hperf_clock(NULL);
     
     //myhtml_tree_print_by_tree_idx(tree_2, tree_2->document->child, stdout, 0);
     
     printf("\n\nInformation:\n");
-    printf("Timer (%llu ticks/sec):\n", (unsigned long long) myhtml_hperf_res());
-    myhtml_hperf_print("\tFirst Tree init", tree_init_start, tree_init_stop);
-    myhtml_hperf_print("\tParse html", parse_start, parse_stop);
-    myhtml_hperf_print("\tTotal", all_start, all_stop);
+    printf("Timer (%llu ticks/sec):\n", (unsigned long long) myhtml_hperf_res(NULL));
+    myhtml_hperf_print("\tFirst Tree init", tree_init_start, tree_init_stop, stdout);
+    myhtml_hperf_print("\tParse html", parse_start, parse_stop, stdout);
+    myhtml_hperf_print("\tTotal", all_start, all_stop, stdout);
     printf("\n");
     
     myhtml_tree_destroy(tree);

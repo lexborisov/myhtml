@@ -7,7 +7,32 @@
 
 #include "myhtml.h"
 
-#if defined(MYHTML_FORCE_RDTSC) /* Force using rdtsc, useful for comparison */
+#if !defined(MyHTML_WITH_PERF)
+
+uint64_t myhtml_hperf_res(myhtml_status_t *status)
+{
+    if(status)
+        *status = MyHTML_STATUS_PERF_ERROR_COMPILED_WITHOUT_PERF;
+    
+    return 0;
+}
+
+uint64_t myhtml_hperf_clock(myhtml_status_t *status)
+{
+    if(status)
+        *status = MyHTML_STATUS_PERF_ERROR_COMPILED_WITHOUT_PERF;
+    
+    return 0;
+}
+
+#else
+
+#if defined(__APPLE__)
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
+
+#if defined(MyHTML_FORCE_RDTSC) /* Force using rdtsc, useful for comparison */
 
 /**
  * Get CPU rdtsc frequency.
@@ -21,19 +46,24 @@
  *
  * Consider using platform-specific monotonic hperf timers (ftrace/dtrace) or even clock().
  */
-uint64_t myhtml_hperf_res(void)
+uint64_t myhtml_hperf_res(myhtml_status_t *status)
 {
     unsigned long long freq = 0;
-
-#if defined(CTL_HW) && defined(HW_CPU_FREQ)
+    
+    if(status)
+        *status = MyHTML_STATUS_OK;
+    
+#if defined(__APPLE__) && defined(CTL_HW) && defined(HW_CPU_FREQ)
     
     /* OSX kernel: sysctl(CTL_HW | HW_CPU_FREQ) */
     size_t len = sizeof(freq);
-    int mib[2] = {CTL_HW, HW_CPU_FREQ}
+    int mib[2] = {CTL_HW, HW_CPU_FREQ};
 
     int error = sysctl(mib, 2, &freq, &len, NULL, 0);
     if (error) {
-        /* TODO: error checking */
+        if(status)
+            *status = MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK;
+        
         return 0;
     }
 
@@ -45,7 +75,9 @@ uint64_t myhtml_hperf_res(void)
     FILE* fp = NULL;
     fp = fopen("/proc/cpuinfo", "r");
     if (fp == NULL) {
-        /* TODO: error checking */
+        if(status)
+            *status = MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK;
+        
         return 0;
     }
 
@@ -63,11 +95,16 @@ uint64_t myhtml_hperf_res(void)
     return freq;
 
 #else 
-#   error Cant figure out cpu frequency on this platfrom
-#endif 
+#   warning Cant figure out cpu frequency on this platfrom
+    
+    if(status)
+        *status = MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK;
+    
+    return 0;
+#endif /* defined __APPLE__ || __linux__ ... */
 }
 
-uint64_t myhtml_hperf_clock(void) 
+uint64_t myhtml_hperf_clock(myhtml_status_t *status)
 {
     uint64_t x;
 
@@ -83,22 +120,23 @@ uint64_t myhtml_hperf_clock(void)
     return x;
 }
 
-#elif defined(_POSIX_TIMERS) &&  defined(_POSIX_CPUTIME) /* Do we have clock_gettime? */
-
-/* clock_gettime needs _POSIX_C_SOURCE >= 199309L */
-#if !defined(_POSIX_C_SOURCE) || (_POSIX_C_SOURCE < 199309L)
-#   error clock_gettime needs _POSIX_C_SOURCE >= 199309L
-#endif
+#elif defined(_POSIX_TIMERS) &&  defined(_POSIX_CPUTIME) \
+    && defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE < 199309L) /* Do we have clock_gettime? */
 
 #define NSEC_PER_SECOND         1000000000ull
 #define TIMESPEC_TO_USEC(tspec) (((uint64_t)(tspec).tv_sec * NSEC_PER_SECOND) + (tspec).tv_nsec)
 
-uint64_t myhtml_hperf_res(void)
+uint64_t myhtml_hperf_res(myhtml_status_t *status)
 {
+    if(status)
+        *status = MyHTML_STATUS_OK;
+    
     struct timespec tspec;
     int error = clock_getres(CLOCK_PROCESS_CPUTIME_ID, &tspec);
     if (error) {
-        /* TODO: error checking */
+        if(status)
+            *status = MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK;
+        
         return 0;
     }
 
@@ -106,36 +144,118 @@ uint64_t myhtml_hperf_res(void)
     return ticks_per_sec;
 }
 
-uint64_t myhtml_hperf_clock(void)
+uint64_t myhtml_hperf_clock(myhtml_status_t *status)
 {
+    if(status)
+        *status = MyHTML_STATUS_OK;
+    
     struct timespec tspec;
     int error = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tspec);
     if (error) {
-        /* TODO: error checking */
+        if(status)
+            *status = MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK;
+        
         return 0;
     }
 
     return TIMESPEC_TO_USEC(tspec);
 }
 
-#else 
+#elif defined(__APPLE__) && defined(__MACH__)
 
 /* 
  * TODO: on OSX we can use clock_get_time: http://stackoverflow.com/questions/5167269/clock-gettime-alternative-in-mac-os-x 
  * Or this: http://web.archive.org/web/20100517095152/http://www.wand.net.nz/~smr26/wordpress/2009/01/19/monotonic-time-in-mac-os-x/comment-page-1/
  */
-#   error No hperf implementation for this platform
 
-#endif
+// TODO: this is incorrect plug for mac os x
+// look at links before this comment
 
-// 2... is fixed cpu 
-void myhtml_hperf_print(const char *name, uint64_t x, uint64_t y) {
-    unsigned long long freq = myhtml_hperf_res();
-    printf("%s: %0.5f\n", name, (((float)(y - x) / (float)freq)));
-    //printf("%s: %0.5f\n", name, (0.001f * ((float)(y - x) / 2000000.0f)));
+#include <mach/mach_time.h>
+
+uint64_t myhtml_hperf_res(myhtml_status_t *status)
+{
+    if(status)
+        *status = MyHTML_STATUS_OK;
+    
+    unsigned long long freq = 0;
+    
+    size_t len = sizeof(freq);
+    int mib[2] = {CTL_HW, HW_CPU_FREQ};
+    
+    int error = sysctl(mib, 2, &freq, &len, NULL, 0);
+    if (error) {
+        if(status)
+            *status = MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK;
+        
+        return 0;
+    }
+    
+    return freq;
 }
 
-void myhtml_hperf_print_by_val(const char *name, uint64_t x) {
-    unsigned long long freq = myhtml_hperf_res();
-    printf("%s: %0.5f\n", name, ((float)x / (float)freq));
+uint64_t myhtml_hperf_clock(myhtml_status_t *status)
+{
+    if(status)
+        *status = MyHTML_STATUS_OK;
+    
+    return mach_absolute_time();
 }
+
+#else
+
+#   warning No hperf implementation for this platform
+
+uint64_t myhtml_hperf_res(myhtml_status_t *status)
+{
+    if(status)
+        *status = MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK;
+    
+    return 0;
+}
+
+uint64_t myhtml_hperf_clock(myhtml_status_t *status)
+{
+    if(status)
+        *status = MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK;
+    
+    return 0;
+}
+
+#endif /* defined(MyHTML_FORCE_RDTSC) ... */
+#endif /* MyHTML_WITH_PERF */
+
+#define _MyHTML_CHECK_STATUS_AND_PRINT_ERROR \
+    if(status == MyHTML_STATUS_PERF_ERROR_COMPILED_WITHOUT_PERF) { \
+        fprintf(fh, "MyHTML: Library compiled without perf source. Please, build library with -DMyHTML_WITH_PERF flag\n"); \
+    } \
+    else if(status) { \
+        fprintf(fh, "MyHTML: Something wrong! Perhaps, your platform does not support the measurement of performance\n"); \
+    } \
+    else
+
+myhtml_status_t myhtml_hperf_print(const char *name, uint64_t x, uint64_t y, FILE *fh) {
+    myhtml_status_t status;
+    
+    unsigned long long freq = myhtml_hperf_res(&status);
+    
+    _MyHTML_CHECK_STATUS_AND_PRINT_ERROR {
+        fprintf(fh, "%s: %0.5f\n", name, (((float)(y - x) / (float)freq)));
+    }
+    
+    return status;
+}
+
+myhtml_status_t myhtml_hperf_print_by_val(const char *name, uint64_t x, FILE *fh) {
+    myhtml_status_t status;
+    
+    unsigned long long freq = myhtml_hperf_res(&status);
+    
+    _MyHTML_CHECK_STATUS_AND_PRINT_ERROR {
+        fprintf(fh, "%s: %0.5f\n", name, ((float)x / (float)freq));
+    }
+    
+    return status;
+}
+
+
