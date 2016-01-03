@@ -121,7 +121,7 @@ uint64_t myhtml_hperf_clock(myhtml_status_t *status)
 }
 
 #elif defined(_POSIX_TIMERS) &&  defined(_POSIX_CPUTIME) \
-    && defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE < 199309L) /* Do we have clock_gettime? */
+    && defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 199309L) /* Do we have clock_gettime? */
 
 #define NSEC_PER_SECOND         1000000000ull
 #define TIMESPEC_TO_USEC(tspec) (((uint64_t)(tspec).tv_sec * NSEC_PER_SECOND) + (tspec).tv_nsec)
