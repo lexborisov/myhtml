@@ -13,6 +13,7 @@ SUBDIRS := examples
 LIBNAME := myhtml
 
 all:
+	mkdir -p bin lib
 	$(MAKE) -C source all
 	cp $(SRCDIR)/*lib$(LIBNAME).* lib/
 	for f in $(SUBDIRS); do $(MAKE) -C $$f all; done
