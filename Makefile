@@ -1,19 +1,25 @@
-TARGET := myhtml
-SRCDIR := myhtml
+TARGET := source
+SRCDIR := source
 
 CC ?= gcc
-CFLAGS ?= -Wall -std=c99 -I. -Iutils
+CFLAGS ?= -Wall -std=c99 -I. -pthread
 
 SRCS := $(wildcard $(SRCDIR)/*.c)
 HDRS := $(wildcard $(SRCDIR)/*.h)
 OBJS := $(patsubst %.c,%.o,$(SRCS))
 
-SUBDIRS := myhtml 
+CFLAGS  += -pthread
+SUBDIRS := examples
+LIBNAME := myhtml
 
-all: 
+all:
+	$(MAKE) -C source all
+	cp $(SRCDIR)/*lib$(LIBNAME).* lib/
 	for f in $(SUBDIRS); do $(MAKE) -C $$f all; done
 
-clean: 
+clean:
+	$(MAKE) -C source clean
 	for f in $(SUBDIRS); do $(MAKE) -C $$f clean; done
+	rm -f lib/*
 
 .PHONY:all clean
