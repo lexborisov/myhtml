@@ -208,12 +208,9 @@ static void walk_subtree(myhtml_tree_node_t* root, int level)
 
     /* left hand depth-first recoursion */
     myhtml_tree_node_t* child = myhtml_node_child(root);
-    if (child != NULL) {
-        while (child != NULL) {
-            
-            walk_subtree(child, level + 1);
-            child = myhtml_node_next(child);
-        }
+    while (child != NULL) {
+        walk_subtree(child, level + 1);
+        child = myhtml_node_next(child);
     }
 
     /* close sexpr */
@@ -264,10 +261,10 @@ static void usage(void)
 
 int main(int argc, char** argv)
 {
-	if (argc != 2) {
-		usage();
-		DIE("Invalid number of arguments\n");
-	}
+    if (argc != 2) {
+        usage();
+        DIE("Invalid number of arguments\n");   
+    }
 
 	struct res_html data = load_html_file(argv[1]);
 	myhtml_status_t res = MyHTML_STATUS_OK;
@@ -304,5 +301,6 @@ int main(int argc, char** argv)
     myhtml_tree_destroy(tree);
     myhtml_destroy(myhtml);
     free(data.html);
-	return EXIT_SUCCESS;
+
+    return EXIT_SUCCESS;
 }
