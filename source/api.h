@@ -247,6 +247,8 @@ enum myhtml_status {
 }
 typedef myhtml_status_t;
 
+#define MYHTML_FAILED(_status_) ((_status_) != MyHTML_STATUS_OK)
+
 /**
  * @struct myhtml namespace
  */
