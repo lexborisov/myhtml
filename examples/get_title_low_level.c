@@ -43,7 +43,12 @@ struct res_html load_html_file(const char* filename)
         exit(EXIT_FAILURE);
     }
     
-    fread(html, 1, size, fh);
+    size_t nread = fread(html, 1, size, fh);
+    if (nread != size) {
+        fprintf(stderr, "could not read %ld bytes (%zu bytes done)\n", size, nread);
+        exit(EXIT_FAILURE);
+    }
+               
     fclose(fh);
     
     if(size < 0)
