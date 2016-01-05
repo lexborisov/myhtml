@@ -1,7 +1,23 @@
 /*
- * html2sexpr
- * Convert html tag tree into s-expression string in stdout
-  */
+ Copyright 2016 Alexander Borisov
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+ Authors: insoreiges@gmail.com (Evgeny Yakovlev)
+ 
+ html2sexpr
+ Convert html tag tree into s-expression string in stdout
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -197,6 +213,7 @@ static void walk_subtree(myhtml_tree_node_t* root, int level)
     /* start sexpr */
     putchar('(');
 
+    // XXX: why not myhtml_tag_name_by_id in api?
     /* print this node */
     printf("%s", tag_str(myhtml_node_tag_id(root)));
     myhtml_tree_attr_t* attr = myhtml_node_attribute_first(root);
@@ -278,6 +295,8 @@ int main(int argc, char** argv)
     
     // init tree
     // XXX: Why do we need to explicitly create a tree before calling parse_html? Can't parse_html just create and return a new tree for us?
+    // YYY: There are many resources initialized. It can be used many times for acceleration.
+    //      There 0.0006s :). Though, who needs to speed uses the low-level api. We will see...
     myhtml_tree_t* tree = myhtml_tree_create();
     res = myhtml_tree_init(tree, myhtml);
     if (MYHTML_FAILED(res)) {
@@ -286,6 +305,9 @@ int main(int argc, char** argv)
     
     // parse html
     myhtml_parse(tree, data.html, data.size);
+    
+    // XXX: see myhtml_tree_get_document in myhtml/api.h -- return root of tree,
+    //      continue to use myhtml_node_child(root_node)
     
     // Find <html>, we'll dump from there to make things easier
     myhtml_collection_t* collection = myhtml_get_nodes_by_tag_id(tree, NULL, MyTAGS_TAG_HTML, &res);
