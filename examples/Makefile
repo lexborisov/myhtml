@@ -20,7 +20,7 @@ OBJS := $(patsubst %.c, %, $(SRCS))
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	cp $< ../bin/
+	cp -r $(OBJS) ../bin/
 
 clean:
 	rm -f `ls | grep -v '.c\|Makefile$\'`

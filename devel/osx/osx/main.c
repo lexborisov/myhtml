@@ -1,10 +1,20 @@
-//
-//  main.c
-//  myhtml
-//
-//  Created by Alexander Borisov on 28.09.15.
-//  Copyright (c) 2015 Alexander Borisov. All rights reserved.
-//
+/*
+ Copyright 2015 Alexander Borisov
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+ Author: lex.borisov@gmail.com (Alexander Borisov)
+*/
 
 #include "main.h"
 #include "dirent.h"
@@ -29,28 +39,6 @@ struct res_html load_html(const char* filename)
     
     struct res_html res = {html, (size_t)l};
     return res;
-}
-
-void print_token_by_index(myhtml_tree_t* tree, mytags_ctx_index_t tag_ctx_idx)
-{
-    mytags_t* tags = tree->myhtml->tags;
-    myhtml_tree_indexes_t* indexes = tree->indexes;
-    
-    mctree_node_t* mctree_nodes = tags->tree->nodes;
-    size_t mctree_id = mytags_get(tags, tag_ctx_idx, mctree_id);
-    size_t tag_name_size = mctree_nodes[mctree_id].str_size;
-    
-    printf("\nPosition and length for tags \"%.*s\":\n",
-           (int)tag_name_size, mctree_nodes[mctree_id].str);
-    
-    mytags_index_tag_node_t *node = mytags_index_tag_get_first(indexes->tags, tag_ctx_idx);
-    while (node)
-    {
-        if(node->node->token)
-            myhtml_token_print_by_idx(tree, node->node->token, stdout);
-        
-        node = node->next;
-    }
 }
 
 void test_all(void)
@@ -84,13 +72,10 @@ void test_all(void)
             if(ent->d_name[0] != '.' && !S_ISDIR(path_stat.st_mode))
             {
                 count++;
-                //printf("%lu: %s\n", count, path);
+                printf("%lu: %s\n", count, path);
                 
                 struct res_html res = load_html(path);
-                
                 myhtml_parse(tree, res.html, res.size);
-                
-                
                 
 //                myhtml_tree_node_t **node_list = myhtml_get_elements_by_tag_id(tree, MyTAGS_TAG_TITLE, NULL);
 //                
@@ -99,8 +84,6 @@ void test_all(void)
 //                        myhtml_tree_print_by_tree_idx(tree, node_list[0]->child, stdout, 0);
 //                
 //                myhtml_destroy_node_list(node_list);
-                
-                
                 
                 free(res.html);
             }
@@ -127,80 +110,29 @@ int main(int argc, const char * argv[])
 
     setbuf(stdout, 0);
     
-    //mcobject_async_test();
-    //mchar_async_test();
-//    uint64_t all = myhtml_rdtsc();
-//    test_all();
-//    uint64_t all_s = myhtml_rdtsc();
-//    
-//    myhtml_rdtsc_print("Total", all, all_s);
-//    
-//    return 0;
-    
     myhtml_t* myhtml = myhtml_create();
     myhtml_init(myhtml, MyHTML_OPTIONS_DEFAULT, 1, 0);
-    
-    //usleep(10000000);
     
     struct res_html res = load_html(path);
 
     uint64_t all_start = myhtml_hperf_clock(NULL);
-
     uint64_t tree_init_start = myhtml_hperf_clock(NULL);
-    // init once for N html
     
+    // init once for N html
     myhtml_tree_t* tree = myhtml_tree_create();
     myhtml_tree_init(tree, myhtml);
-    //tree->is_single = mytrue;
-    
-    //myhtml_tree_t* tree_2 = myhtml_tree_create();
-    //myhtml_tree_init(tree_2, myhtml);
     
     uint64_t tree_init_stop = myhtml_hperf_clock(NULL);
     uint64_t parse_start = myhtml_hperf_clock(NULL);
     
     for(size_t i = 0; i < 1; i++)
     {
-        //myhtml_tokenizer_begin(myhtml, tree, res.html, res.size);
-        //myhtml_tokenizer_end(myhtml, tree);
-        
-        //tree->is_single = mytrue;
         myhtml_parse(tree, res.html, res.size);
-        
-//        myhtml_tree_node_t **node_list = myhtml_get_elements_by_tag_id(tree, MyTAGS_TAG_TITLE, NULL);
-//        
-//        if(node_list && node_list[0])
-//            if(node_list[0]->token)
-//                myhtml_tree_print_by_tree_idx(tree, node_list[0]->child, stdout, 0);
-//        
-//        myhtml_destroy_node_list(node_list);
-        
-        //print_token_by_index(tree, MyTAGS_TAG_A);
-        
-        myhtml_collection_t *collection = myhtml_get_nodes_by_tag_id(tree, NULL, MyTAGS_TAG_TITLE, NULL);
-        
-        if(collection && collection->list) {
-            for (size_t i = 0; i < collection->length; i++)
-            {
-                myhtml_tree_node_t *text_node = myhtml_node_child(collection->list[i]);
-                
-                if(text_node) {
-                    const char* text = myhtml_node_text(text_node, NULL);
-                    
-                    if(text)
-                        printf("Title: %s\n", text);
-                }
-            }
-        }
-        //myhtml_tree_print_by_tree_idx(tree, tree->document->child, stdout, 0);
+        //myhtml_tree_print_tree_by_node(tree, tree->document->child, stdout, 0);
     }
-    
-    //myhtml_parse_fragment(tree_2, res.html, res.size);
     
     uint64_t parse_stop = myhtml_hperf_clock(NULL);
     uint64_t all_stop = myhtml_hperf_clock(NULL);
-    
-    //myhtml_tree_print_by_tree_idx(tree_2, tree_2->document->child, stdout, 0);
     
     printf("\n\nInformation:\n");
     printf("Timer (%llu ticks/sec):\n", (unsigned long long) myhtml_hperf_res(NULL));

@@ -1,10 +1,20 @@
-//
-//  myhtml_tree.c
-//  myhtml
-//
-//  Created by Alexander Borisov on 08.10.15.
-//  Copyright © 2015 Alexander Borisov. All rights reserved.
-//
+/*
+ Copyright 2015 Alexander Borisov
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+ Author: lex.borisov@gmail.com (Alexander Borisov)
+*/
 
 #include "tree.h"
 
@@ -231,6 +241,19 @@ void myhtml_tree_index_append(myhtml_tree_t* tree, myhtml_tree_node_t* node)
         return;
     
     mytags_index_tag_add(tree->myhtml->tags, tree->indexes->tags, node);
+}
+
+myhtml_tree_node_t * myhtml_tree_index_get(myhtml_tree_t* tree, myhtml_tag_id_t tag_id)
+{
+    if(tree->indexes == NULL)
+        return NULL;
+    
+    mytags_index_tag_node_t *tag_index = mytags_index_tag_get_first(tree->indexes->tags, tag_id);
+    
+    if(tag_index)
+        return tag_index->node;
+    
+    return NULL;
 }
 
 myhtml_tree_node_t * myhtml_tree_node_create(myhtml_tree_t* tree)
@@ -1410,11 +1433,6 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, mytags_ctx_i
             }
         }
         
-//        for(int j = (int)tree->open_elements->length; --j >= 0;) {
-//            printf("first %d: ", j);
-//            myhtml_tree_print_by_idx(tree, tree->open_elements->list[j], stdout);
-//        }
-        
         //myhtml_tree_node_t* formatting_element = myhtml_tree_active_formatting_between_last_marker(tree, subject_tag_idx, &afe_index);
         
         // If there is no such element, then abort these steps and instead act as described in the
@@ -1793,8 +1811,11 @@ size_t myhtml_tree_template_insertion_length(myhtml_tree_t* tree)
     return tree->template_insertion->length;
 }
 
-void myhtml_tree_print_by_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out)
+void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out)
 {
+    if(node == NULL)
+        return;
+    
     myhtml_t* myhtml            = tree->myhtml;
     mctree_node_t* mctree_nodes = myhtml->tags->tree->nodes;
     
@@ -1804,10 +1825,10 @@ void myhtml_tree_print_by_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node, FIL
     if(node->tag_idx == MyTAGS_TAG__TEXT ||
        node->tag_idx == MyTAGS_TAG__COMMENT)
     {
-//        if(node->token)
-//            fprintf(out, "<%.*s>: %.*s\n", (int)tag_name_size, mctree_nodes[mctree_id].str,
-//                    (int)node->token->length, &node->token->my_str_tm.data[node->token->begin]);
-//        else
+        if(node->token)
+            fprintf(out, "<%.*s>: %.*s\n", (int)tag_name_size, mctree_nodes[mctree_id].str,
+                    (int)node->token->length, &node->token->my_str_tm.data[node->token->begin]);
+        else
             fprintf(out, "<%.*s>\n", (int)tag_name_size, mctree_nodes[mctree_id].str);
     }
     else
@@ -1822,8 +1843,11 @@ void myhtml_tree_print_by_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node, FIL
     }
 }
 
-void myhtml_tree_print_by_tree_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
+void myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
 {
+    if(node == NULL)
+        return;
+    
     size_t i;
     
     while(node)
@@ -1831,11 +1855,20 @@ void myhtml_tree_print_by_tree_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node
         for(i = 0; i < inc; i++)
             fprintf(out, "\t");
         
-        myhtml_tree_print_by_idx(tree, node, out);
-        myhtml_tree_print_by_tree_idx(tree, node->child, out, (inc + 1));
+        myhtml_tree_print_node(tree, node, out);
+        myhtml_tree_print_node_childs(tree, node->child, out, (inc + 1));
         
         node = node->next;
     }
+}
+
+void myhtml_tree_print_tree_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
+{
+    if(node == NULL)
+        return;
+    
+    myhtml_tree_print_node(tree, node, out);
+    myhtml_tree_print_node_childs(tree, node->child, out, (inc + 1));
 }
 
 // token list

@@ -1,13 +1,27 @@
-//
-//  myhtml_tree.h
-//  myhtml
-//
-//  Created by Alexander Borisov on 08.10.15.
-//  Copyright © 2015 Alexander Borisov. All rights reserved.
-//
+/*
+ Copyright 2015 Alexander Borisov
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+ Author: lex.borisov@gmail.com (Alexander Borisov)
+*/
 
-#ifndef myhtml_tree_h
-#define myhtml_tree_h
+#ifndef MyHTML_TREE_H
+#define MyHTML_TREE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "myosi.h"
 #include "myhtml.h"
@@ -259,8 +273,9 @@ void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* idx);
 void myhtml_tree_node_clean(myhtml_tree_node_t* tree_node);
 myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 
-void myhtml_tree_print_by_idx(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out);
-void myhtml_tree_print_by_tree_idx(myhtml_tree_t* tree, myhtml_tree_node_t* idx, FILE* out, size_t inc);
+void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out);
+void myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc);
+void myhtml_tree_print_tree_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc);
 
 void myhtml_tree_node_add_child(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
 void myhtml_tree_node_insert_before(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
@@ -284,6 +299,7 @@ void myhtml_tree_index_clean(myhtml_tree_t* tree, mytags_t* mytags);
 myhtml_tree_indexes_t * myhtml_tree_index_destroy(myhtml_tree_t* tree, mytags_t* mytags);
 
 void myhtml_tree_index_append(myhtml_tree_t* tree, myhtml_tree_node_t* node);
+myhtml_tree_node_t * myhtml_tree_index_get(myhtml_tree_t* tree, myhtml_tag_id_t tag_id);
 
 // other
 
@@ -296,6 +312,10 @@ void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_no
 
 mybool_t myhtml_tree_is_mathml_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 mybool_t myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* myhtml_tree_h */
 

@@ -1,13 +1,27 @@
-//
-//  mytags_init.h
-//  myhtml
-//
-//  Created by Alexander Borisov on 29.09.15.
-//  Copyright (c) 2015 Alexander Borisov. All rights reserved.
-//
+/*
+ Copyright 2015 Alexander Borisov
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+ Author: lex.borisov@gmail.com (Alexander Borisov)
+*/
 
-#ifndef myhtml_mytags_init_h
-#define myhtml_mytags_init_h
+#ifndef MyHTML_MYTAGS_H
+#define MyHTML_MYTAGS_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "myosi.h"
 
@@ -114,5 +128,8 @@ mytags_index_tag_node_t * mytags_index_tag_get_last(mytags_index_t* idx_tags, my
 
 void mytags_print(mytags_t* mytags, FILE* fh);
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif

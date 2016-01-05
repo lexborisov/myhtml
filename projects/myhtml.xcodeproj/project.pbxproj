@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E770BD61C3BB49700F68C82 /* api.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E770BD51C3BB49700F68C82 /* api.h */; };
 		0E82BB8A1C3A7AC700B38816 /* def.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BB6E1C3A7AC700B38816 /* def.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0E82BB8B1C3A7AC700B38816 /* myhtml.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E82BB6F1C3A7AC700B38816 /* myhtml.c */; };
 		0E82BB8C1C3A7AC700B38816 /* myhtml.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BB701C3A7AC700B38816 /* myhtml.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -45,11 +46,11 @@
 		0E82BBB71C3A7ADA00B38816 /* mcsync.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BBAD1C3A7ADA00B38816 /* mcsync.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0E82BBB81C3A7ADA00B38816 /* mctree.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E82BBAE1C3A7ADA00B38816 /* mctree.c */; };
 		0E82BBB91C3A7ADA00B38816 /* mctree.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BBAF1C3A7ADA00B38816 /* mctree.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		0E82BBBC1C3A7B0100B38816 /* myhtml.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BBBB1C3A7B0100B38816 /* myhtml.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0E770BCE1C3A836B00F68C82 /* libmyhtml.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libmyhtml.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		0E770BD51C3BB49700F68C82 /* api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = api.h; path = ../source/api.h; sourceTree = "<group>"; };
 		0E82BB6E1C3A7AC700B38816 /* def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = def.h; path = ../source/def.h; sourceTree = "<group>"; };
 		0E82BB6F1C3A7AC700B38816 /* myhtml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = myhtml.c; path = ../source/myhtml.c; sourceTree = "<group>"; };
 		0E82BB701C3A7AC700B38816 /* myhtml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = myhtml.h; path = ../source/myhtml.h; sourceTree = "<group>"; };
@@ -88,7 +89,6 @@
 		0E82BBAD1C3A7ADA00B38816 /* mcsync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mcsync.h; path = ../source/utils/mcsync.h; sourceTree = "<group>"; };
 		0E82BBAE1C3A7ADA00B38816 /* mctree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mctree.c; path = ../source/utils/mctree.c; sourceTree = "<group>"; };
 		0E82BBAF1C3A7ADA00B38816 /* mctree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mctree.h; path = ../source/utils/mctree.h; sourceTree = "<group>"; };
-		0E82BBBB1C3A7B0100B38816 /* myhtml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = myhtml.h; path = ../include/myhtml.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,7 +105,6 @@
 		0E82BB5C1C3A7A4A00B38816 = {
 			isa = PBXGroup;
 			children = (
-				0E82BBBA1C3A7AF600B38816 /* include */,
 				0E82BB6C1C3A7A8100B38816 /* base */,
 				0E82BB6D1C3A7A8800B38816 /* utils */,
 				0E82BB661C3A7A4A00B38816 /* Products */,
@@ -123,6 +122,7 @@
 		0E82BB6C1C3A7A8100B38816 /* base */ = {
 			isa = PBXGroup;
 			children = (
+				0E770BD51C3BB49700F68C82 /* api.h */,
 				0E82BB6E1C3A7AC700B38816 /* def.h */,
 				0E82BB721C3A7AC700B38816 /* myosi.h */,
 				0E82BB711C3A7AC700B38816 /* myosi.c */,
@@ -172,14 +172,6 @@
 			name = utils;
 			sourceTree = "<group>";
 		};
-		0E82BBBA1C3A7AF600B38816 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				0E82BBBB1C3A7B0100B38816 /* myhtml.h */,
-			);
-			name = include;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -187,7 +179,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0E82BBBC1C3A7B0100B38816 /* myhtml.h in Headers */,
 				0E82BB9F1C3A7AC700B38816 /* tokenizer_doctype.h in Headers */,
 				0E82BB9B1C3A7AC700B38816 /* thread.h in Headers */,
 				0E82BB991C3A7AC700B38816 /* rules.h in Headers */,
@@ -205,6 +196,7 @@
 				0E82BBB91C3A7ADA00B38816 /* mctree.h in Headers */,
 				0E82BB8C1C3A7AC700B38816 /* myhtml.h in Headers */,
 				0E82BBA11C3A7AC700B38816 /* tokenizer_script.h in Headers */,
+				0E770BD61C3BB49700F68C82 /* api.h in Headers */,
 				0E82BBB11C3A7ADA00B38816 /* mchar_async.h in Headers */,
 				0E82BBB71C3A7ADA00B38816 /* mcsync.h in Headers */,
 			);
@@ -376,6 +368,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				HEADER_SEARCH_PATHS = ../source;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -386,6 +379,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				HEADER_SEARCH_PATHS = ../source;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

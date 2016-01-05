@@ -1,13 +1,27 @@
-//
-//  myhtml_parse.h
-//  myhtml
-//
-//  Created by Alexander Borisov on 30.09.15.
-//  Copyright (c) 2015 Alexander Borisov. All rights reserved.
-//
+/*
+ Copyright 2015 Alexander Borisov
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+ Author: lex.borisov@gmail.com (Alexander Borisov)
+*/
 
-#ifndef myhtml_myhtml_tokenizer_h
-#define myhtml_myhtml_tokenizer_h
+#ifndef MyHTML_TOKENIZER_H
+#define MyHTML_TOKENIZER_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "myosi.h"
 #include "myhtml.h"
@@ -34,5 +48,9 @@ myhtml_status_t myhtml_tokenizer_state_init(myhtml_t* myhtml);
 void myhtml_tokenizer_state_destroy(myhtml_t* myhtml);
 
 mythread_queue_node_t * myhtml_tokenizer_queue_create_text_node_if_need(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif

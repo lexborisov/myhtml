@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <myhtml.h>
+#include <myhtml/api.h>
 
 struct res_html {
     char  *html;

@@ -1,16 +1,30 @@
-//
-//  mchar_async.h
-//  myhtml
-//
-//  Created by Alexander Borisov on 21.12.15.
-//  Copyright © 2015 Alexander Borisov. All rights reserved.
-//
+/*
+ Copyright 2015 Alexander Borisov
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+ Author: lex.borisov@gmail.com (Alexander Borisov)
+*/
 
-#ifndef mchar_async_h
-#define mchar_async_h
+#ifndef MyHTML_UTILS_MCHAR_ASYNC_H
+#define MyHTML_UTILS_MCHAR_ASYNC_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "myosi.h"
-#include "mcsync.h"
+#include "utils/mcsync.h"
 
 #define mchar_async_cache_has_nodes(__cache__) __cache__.count
 
@@ -100,6 +114,10 @@ size_t mchar_async_cache_delete(mchar_async_cache_t *cache, size_t size);
 void mchar_async_cache_print(mchar_async_cache_t *cache, FILE* out, size_t idx);
 
 void mchar_async_test(void);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* mchar_async_h */
 

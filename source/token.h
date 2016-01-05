@@ -1,19 +1,35 @@
-//
-//  myhtml_token.h
-//  myhtml
-//
-//  Created by Alexander Borisov on 26.10.15.
-//  Copyright © 2015 Alexander Borisov. All rights reserved.
-//
+/*
+ Copyright 2015 Alexander Borisov
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+ Author: lex.borisov@gmail.com (Alexander Borisov)
+*/
 
-#ifndef myhtml_token_h
-#define myhtml_token_h
+#ifndef MyHTML_TOKEN_H
+#define MyHTML_TOKEN_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <string.h>
+#include <strings.h>
 
 #include "myosi.h"
 #include "mytags.h"
 #include "myhtml.h"
-#include "string.h"
-#include "strings.h"
+#include "mystring.h"
 #include "utils/mcobject_async.h"
 #include "utils/mchar_async.h"
 #include "utils/mcsync.h"
@@ -128,5 +144,8 @@ void myhtml_token_print_param_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_no
 void myhtml_token_print_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out);
 void myhtml_token_print_attr(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out);
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* myhtml_token_h */
