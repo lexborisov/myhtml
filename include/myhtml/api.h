@@ -20,7 +20,7 @@
 #define MyHTML_MyHTML_API_H
 
 /**
- * @file include/myhtml.h
+ * @file myhtml/api.h
  *
  * Fast C/C++ HTML 5 Parser. Using threads.
  * With possibility of a Single Mode.
