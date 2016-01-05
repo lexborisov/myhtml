@@ -188,6 +188,7 @@ myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree)
     tree->token              = myhtml_token_destroy(tree->token);
     tree->mchar              = mchar_async_destroy(tree->mchar, 1);
     
+    free(tree->async_args);
     free(tree);
     
     return NULL;

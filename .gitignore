@@ -1,3 +1,7 @@
 *.o
-myhtml/myhtml
+*.so
+*.a
+*.swp
+*.swo
+bin/*
 .tags*
