@@ -7,16 +7,15 @@ LIBPOSTFIX := .so
 LIBNAME    := myhtml
 LIBSTATIC_PREFIX  := static_
 
+CFLAGS ?= -Wall -Werror -O2 -fPIC --std=c99 -pthread -I.
+
 ifeq ($(OS),Windows_NT)
 else
 	UNAM := $(shell uname -s)
 	ifeq ($(UNAM),Darwin)
 		LIBPOSTFIX := .dylib
-		CFLAGS ?= -Wall -Werror -O2 --std=c99 -pthread -I.
-	else ifeq ($(UNAM),FreeBSD)
-		CFLAGS := -Wall -Werror -O2 -fPIC --std=c99 -pthread -I.
 	else
-		CFLAGS ?= -Wall -Werror -O2 --std=c99 -pthread -D_POSIX_C_SOURCE=199309L -I.
+		CFLAGS += -D_POSIX_C_SOURCE=199309L
 	endif
 endif
 
