@@ -13,6 +13,8 @@ else
 	ifeq ($(UNAM),Darwin)
 		LIBPOSTFIX := .dylib
 		CFLAGS ?= -Wall -Werror -O2 --std=c99 -pthread -I.
+	else ifeq ($(UNAM),FreeBSD)
+		CFLAGS := -Wall -Werror -O2 -fPIC --std=c99 -pthread -I.
 	else
 		CFLAGS ?= -Wall -Werror -O2 --std=c99 -pthread -D_POSIX_C_SOURCE=199309L -I.
 	endif

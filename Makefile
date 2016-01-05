@@ -30,6 +30,6 @@ clone: create
 	rm -rf include/myhtml/*.old include/myhtml/utils/*.old
 
 create:
-	mkdir -p lib include/myhtml/utils
+	mkdir -p bin lib include/myhtml/utils
 
 .PHONY:all clean
