@@ -266,8 +266,8 @@ int main(int argc, char** argv)
         DIE("Invalid number of arguments\n");   
     }
 
-	struct res_html data = load_html_file(argv[1]);
-	myhtml_status_t res = MyHTML_STATUS_OK;
+    struct res_html data = load_html_file(argv[1]);
+    myhtml_status_t res = MyHTML_STATUS_OK;
 
 	// basic init
     myhtml_t* myhtml = myhtml_create();
