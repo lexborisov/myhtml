@@ -28,7 +28,6 @@ extern "C" {
 #include "mystring.h"
 #include "tree.h"
 #include "token.h"
-#include "utils/mcobject.h"
 
 void myhtml_parser_index(mythread_id_t thread_id, mythread_queue_node_t *qnode);
 void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode);
