@@ -142,6 +142,8 @@ myhtml_tree_node_t * myhtml_node_child(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_last_child(myhtml_tree_node_t *node);
 enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node);
 myhtml_tag_id_t myhtml_node_tag_id(myhtml_tree_node_t *node);
+const char * myhtml_tag_name_by_id(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, size_t *length);
+mybool_t myhtml_node_is_close_self(myhtml_tree_node_t *node);
 myhtml_tree_attr_t * myhtml_node_attribute_first(myhtml_tree_node_t *node);
 myhtml_tree_attr_t * myhtml_node_attribute_last(myhtml_tree_node_t *node);
 const char * myhtml_node_text(myhtml_tree_node_t *node, size_t *length);

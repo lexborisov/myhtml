@@ -38,7 +38,9 @@ extern "C" {
 #define mytags_context_clean(__mytags__, __idx__)                        \
     __mytags__->context[__idx__].id          = 0;                        \
     __mytags__->context[__idx__].mctree_id   = 0;                        \
-    __mytags__->context[__idx__].data_parser = MyHTML_TOKENIZER_STATE_DATA;
+    __mytags__->context[__idx__].data_parser = MyHTML_TOKENIZER_STATE_DATA; \
+    memset(__mytags__->context[__idx__].cats, MyTAGS_CATEGORIES_UNDEF, sizeof(__mytags__->context[__idx__].cats));
+
 
 #define mytags_context_add(__mytags__)                                         \
     __mytags__->context_length++;                                              \

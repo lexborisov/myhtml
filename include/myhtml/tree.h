@@ -189,6 +189,8 @@ void myhtml_tree_clean(myhtml_tree_t* tree);
 void myhtml_tree_clean_all(myhtml_tree_t* tree);
 myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree);
 
+myhtml_tree_node_t * myhtml_tree_get_document(myhtml_tree_t* tree);
+
 // list
 myhtml_tree_list_t * myhtml_tree_list_init(void);
 void myhtml_tree_list_clean(myhtml_tree_list_t* list);

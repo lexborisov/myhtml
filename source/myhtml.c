@@ -280,6 +280,34 @@ myhtml_tag_id_t myhtml_node_tag_id(myhtml_tree_node_t *node)
     return node->tag_idx;
 }
 
+const char * myhtml_tag_name_by_id(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, size_t *length)
+{
+    if(tree == NULL || tree->myhtml == NULL || tree->myhtml->tags == NULL ||
+       tree->myhtml->tags->context_length <= tag_id)
+    {
+        if(length)
+            *length = 0;
+        
+        return NULL;
+    }
+    
+    mctree_node_t* mctree_nodes = tree->myhtml->tags->tree->nodes;
+    size_t mcid = tree->myhtml->tags->context[tag_id].mctree_id;
+    
+    if(length)
+        *length = mctree_nodes[mcid].str_size;
+    
+    return mctree_nodes[mcid].str;
+}
+
+mybool_t myhtml_node_is_close_self(myhtml_tree_node_t *node)
+{
+    if(node->token)
+        return (node->token->type & MyHTML_TOKEN_TYPE_CLOSE_SELF);
+    
+    return myfalse;
+}
+
 myhtml_tree_attr_t * myhtml_node_attribute_first(myhtml_tree_node_t *node)
 {
     if(node->token)

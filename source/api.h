@@ -42,6 +42,11 @@ extern "C" {
 #endif
 
 /**
+ * bool
+ */
+typedef enum {myfalse = 0, mytrue = 1} mybool_t;
+
+/**
  * @struct basic tag ids
  */
 enum mytags_tag {
@@ -411,6 +416,16 @@ myhtml_tree_clean(myhtml_tree_t* tree);
 myhtml_tree_t*
 myhtml_tree_destroy(myhtml_tree_t* tree);
 
+/**
+ * Get Tree Document (Root of Tree)
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_tree_get_document(myhtml_tree_t* tree);
+
 /***********************************************************************************
  *
  * MyHTML_NODE
@@ -515,6 +530,29 @@ myhtml_node_namespace(myhtml_tree_node_t *node);
  */
 myhtml_tag_id_t
 myhtml_node_tag_id(myhtml_tree_node_t *node);
+
+/**
+ * Get tag name by tag id
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] tag id
+ * @param[out] optional, name length
+ *
+ * @return const char* if exists, otherwise a NULL value
+ */
+const char*
+myhtml_tag_name_by_id(myhtml_tree_t* tree,
+                      myhtml_tag_id_t tag_id, size_t *length);
+
+/**
+ * Node has self-closing flag?
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return mytrue or myfalse (1 or 0)
+ */
+mybool_t
+myhtml_node_is_close_self(myhtml_tree_node_t *node);
 
 /**
  * Get first attribute of a node
