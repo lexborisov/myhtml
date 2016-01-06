@@ -4,3 +4,4 @@ compiler:
   - clang
   - gcc
 install: false
+script: make -j2 && make clean
