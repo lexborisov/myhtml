@@ -494,6 +494,16 @@ myhtml_tag_t*
 myhtml_tree_get_tag(myhtml_tree_t* tree);
 
 /**
+ * Get myhtml_tag_index_t* from a myhtml_tree_t*
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_tag_index_t* if exists, otherwise a NULL value
+ */
+myhtml_tag_index_t*
+myhtml_tree_get_tag_index(myhtml_tree_t* tree);
+
+/**
  * Get Tree Document (Root of Tree)
  *
  * @param[in] myhtml_tree_t*

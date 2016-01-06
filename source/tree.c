@@ -271,6 +271,14 @@ myhtml_tag_t * myhtml_tree_get_tag(myhtml_tree_t* tree)
     return NULL;
 }
 
+myhtml_tag_index_t * myhtml_tree_get_tag_index(myhtml_tree_t* tree)
+{
+    if(tree && tree->indexes)
+        return tree->indexes->tags;
+    
+    return NULL;
+}
+
 myhtml_tree_node_t * myhtml_tree_get_document(myhtml_tree_t* tree)
 {
     return tree->document;
