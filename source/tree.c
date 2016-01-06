@@ -209,7 +209,7 @@ myhtml_tree_indexes_t * myhtml_tree_index_create(myhtml_tree_t* tree, myhtml_tag
 {
     myhtml_tree_indexes_t* indexes = (myhtml_tree_indexes_t*)mymalloc(sizeof(myhtml_tree_indexes_t));
     
-    indexes->tags = myhtml_tag_index_create(tags);
+    indexes->tags = myhtml_tag_index_create();
     myhtml_tag_index_init(tags, indexes->tags);
     
     return indexes;
@@ -247,10 +247,26 @@ myhtml_tree_node_t * myhtml_tree_index_get(myhtml_tree_t* tree, myhtml_tag_id_t 
     if(tree->indexes == NULL)
         return NULL;
     
-    myhtml_tag_index_node_t *tag_index = myhtml_tag_index_get_first(tree->indexes->tags, tag_id);
+    myhtml_tag_index_node_t *tag_index = myhtml_tag_index_first(tree->indexes->tags, tag_id);
     
     if(tag_index)
         return tag_index->node;
+    
+    return NULL;
+}
+
+myhtml_t * myhtml_tree_get_myhtml(myhtml_tree_t* tree)
+{
+    if(tree)
+        return tree->myhtml;
+    
+    return NULL;
+}
+
+myhtml_tag_t * myhtml_tree_get_tag(myhtml_tree_t* tree)
+{
+    if(tree && tree->myhtml)
+        return tree->myhtml->tags;
     
     return NULL;
 }

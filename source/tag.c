@@ -88,7 +88,7 @@ myhtml_tag_t * myhtml_tag_destroy(myhtml_tag_t* tags)
     return NULL;
 }
 
-myhtml_tag_index_t * myhtml_tag_index_create(myhtml_tag_t* tags)
+myhtml_tag_index_t * myhtml_tag_index_create(void)
 {
     return (myhtml_tag_index_t*)calloc(1, sizeof(myhtml_tag_index_t));
 }
@@ -185,7 +185,7 @@ myhtml_status_t myhtml_tag_index_add(myhtml_tag_t* tags, myhtml_tag_index_t* idx
     return MyHTML_STATUS_OK;
 }
 
-myhtml_tag_index_entry_t * myhtml_tag_index_get(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
+myhtml_tag_index_entry_t * myhtml_tag_index_entry(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
 {
     if(idx_tags->tags_size > tag_idx)
         return &idx_tags->tags[tag_idx];
@@ -193,7 +193,7 @@ myhtml_tag_index_entry_t * myhtml_tag_index_get(myhtml_tag_index_t* idx_tags, my
     return NULL;
 }
 
-myhtml_tag_index_node_t * myhtml_tag_index_get_first(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
+myhtml_tag_index_node_t * myhtml_tag_index_first(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
 {
     if(idx_tags->tags_size > tag_idx)
         return idx_tags->tags[tag_idx].first;
@@ -201,10 +201,35 @@ myhtml_tag_index_node_t * myhtml_tag_index_get_first(myhtml_tag_index_t* idx_tag
     return NULL;
 }
 
-myhtml_tag_index_node_t * myhtml_tag_index_get_last(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
+myhtml_tag_index_node_t * myhtml_tag_index_last(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
 {
     if(idx_tags->tags_size > tag_idx)
         return idx_tags->tags[tag_idx].last;
+    
+    return NULL;
+}
+
+myhtml_tag_index_node_t * myhtml_tag_index_next(myhtml_tag_index_node_t *index_node)
+{
+    if(index_node)
+        return index_node->next;
+    
+    return NULL;
+}
+
+myhtml_tag_index_node_t * myhtml_tag_index_prev(myhtml_tag_index_node_t *index_node)
+{
+    if(index_node)
+        return index_node->prev;
+    
+    return NULL;
+}
+
+
+myhtml_tree_node_t * myhtml_tag_index_tree_node(myhtml_tag_index_node_t *index_node)
+{
+    if(index_node)
+        return index_node->node;
     
     return NULL;
 }

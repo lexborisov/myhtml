@@ -127,6 +127,8 @@ myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* ht
 myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status);
 myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection, const char* html, size_t length, myhtml_status_t *status);
 
+myhtml_tag_t * myhtml_get_tag(myhtml_t* myhtml);
+
 myhtml_tree_node_t * myhtml_node_next(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_prev(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_parent(myhtml_tree_node_t *node);

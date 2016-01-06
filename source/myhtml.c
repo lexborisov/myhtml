@@ -202,12 +202,23 @@ myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* ht
 }
 
 /*
+ * Helpers
+ */
+myhtml_tag_t * myhtml_get_tag(myhtml_t* myhtml)
+{
+    if(myhtml)
+        return myhtml->tags;
+    
+    return NULL;
+}
+
+/*
  * Nodes
  */
 myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status)
 {
-    myhtml_tag_index_entry_t *index_tag = myhtml_tag_index_get(tree->indexes->tags, tag_id);
-    myhtml_tag_index_node_t *index_node = myhtml_tag_index_get_first(tree->indexes->tags, tag_id);
+    myhtml_tag_index_entry_t *index_tag = myhtml_tag_index_entry(tree->indexes->tags, tag_id);
+    myhtml_tag_index_node_t *index_node = myhtml_tag_index_first(tree->indexes->tags, tag_id);
     
     if(index_tag->count == 0) {
         if(status)
@@ -404,16 +415,6 @@ const char * myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length)
     if(length)
         *length = 0;
     
-    return NULL;
-}
-
-/*
- * Index
- */
-myhtml_tag_index_node_t * myhtml_index_tag_first(myhtml_tree_t *tree, myhtml_tag_id_t tag_id)
-{
-//    tag_id
-//    return attr->next;
     return NULL;
 }
 

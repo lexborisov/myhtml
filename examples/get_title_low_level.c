@@ -86,7 +86,7 @@ int main(int argc, const char * argv[])
     // get title from index
     if(tree->indexes)
     {
-        myhtml_tag_index_node_t *node_index = myhtml_tag_index_get_first(tree->indexes->tags, MyHTML_TAG_TITLE);
+        myhtml_tag_index_node_t *node_index = myhtml_tag_index_first(tree->indexes->tags, MyHTML_TAG_TITLE);
         
         if(node_index && node_index->node) {
             myhtml_tree_print_by_node(tree, node_index->node, stdout, 0);

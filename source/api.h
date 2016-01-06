@@ -290,9 +290,20 @@ typedef struct myhtml myhtml_t;
  */
 typedef struct myhtml_tree myhtml_tree_t;
 
-typedef size_t myhtml_tag_id_t;
 typedef struct myhtml_token_attr myhtml_tree_attr_t;
 typedef struct myhtml_tree_node myhtml_tree_node_t;
+
+/**
+ * MyHTML_TAG
+ *
+ */
+typedef size_t myhtml_tag_id_t;
+
+typedef struct myhtml_tag_index_node myhtml_tag_index_node_t;
+typedef struct myhtml_tag_index_entry myhtml_tag_index_entry_t;
+typedef struct myhtml_tag_index myhtml_tag_index_t;
+
+typedef struct myhtml_tag myhtml_tag_t;
 
 /**
  * @struct myhtml_collection_t
@@ -409,6 +420,16 @@ myhtml_status_t
 myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size,
                       myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
 
+/**
+ * Get myhtml_tag_t* from a myhtml_t*
+ *
+ * @param[in] myhtml_t*
+ *
+ * @return myhtml_tag_t* if exists, otherwise a NULL value
+ */
+myhtml_tag_t*
+myhtml_get_tag(myhtml_t* myhtml);
+
 /***********************************************************************************
  *
  * MyHTML_TREE
@@ -451,6 +472,26 @@ myhtml_tree_clean(myhtml_tree_t* tree);
  */
 myhtml_tree_t*
 myhtml_tree_destroy(myhtml_tree_t* tree);
+
+/**
+ * Get myhtml_t* from a myhtml_tree_t*
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_t* if exists, otherwise a NULL value
+ */
+myhtml_t*
+myhtml_tree_get_myhtml(myhtml_tree_t* tree);
+
+/**
+ * Get myhtml_tag_t* from a myhtml_tree_t*
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_tag_t* if exists, otherwise a NULL value
+ */
+myhtml_tag_t*
+myhtml_tree_get_tag(myhtml_tree_t* tree);
 
 /**
  * Get Tree Document (Root of Tree)
@@ -716,11 +757,126 @@ myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length);
 
 /***********************************************************************************
  *
- * MyHTML_INDEX
+ * MyHTML_TAG_INDEX
  *
  ***********************************************************************************/
-//myhtml_tag_index_entry_t*
-//myhtml_tag_index_get(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
+
+/**
+ * Create tag index structure
+ *
+ * @param[in] myhtml_tag_t*
+ *
+ * @return myhtml_tag_index_t* if successful, otherwise a NULL value
+ */
+myhtml_tag_index_t*
+myhtml_tag_index_create(myhtml_tag_t* tag);
+
+/**
+ * Allocating and Initialization resources for a tag index structure
+ *
+ * @param[in] myhtml_tag_t*
+ * @param[in] myhtml_tag_index_t*
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status.
+ */
+myhtml_status_t
+myhtml_tag_index_init(myhtml_tag_t* tag, myhtml_tag_index_t* tag_index);
+
+/**
+ * Clears tag index
+ *
+ * @param[in] myhtml_tag_t*
+ * @param[in] myhtml_tag_index_t*
+ *
+ */
+void
+myhtml_tag_index_clean(myhtml_tag_t* tag, myhtml_tag_index_t* tag_index);
+
+/**
+ * Free allocated resources
+ *
+ * @param[in] myhtml_tag_t*
+ * @param[in] myhtml_tag_index_t*
+ *
+ * @return NULL if successful, otherwise an myhtml_tag_index_t* structure
+ */
+myhtml_tag_index_t*
+myhtml_tag_index_destroy(myhtml_tag_t* tag, myhtml_tag_index_t* tag_index);
+
+/**
+ * Adds myhtml_tree_node_t* to tag index
+ *
+ * @param[in] myhtml_tag_t*
+ * @param[in] myhtml_tag_index_t*
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status.
+ */
+myhtml_status_t
+myhtml_tag_index_add(myhtml_tag_t* tag, myhtml_tag_index_t* tag_index, myhtml_tree_node_t* node);
+
+/**
+ * Get root tag index. Is the initial entry for a tag. It contains statistics and other items by tag
+ *
+ * @param[in] myhtml_tag_index_t*
+ * @param[in] myhtml_tag_id_t
+ *
+ * @return myhtml_tag_index_entry_t* if successful, otherwise a NULL value.
+ */
+myhtml_tag_index_entry_t*
+myhtml_tag_index_entry(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
+
+/**
+ * Get first index node for tag
+ *
+ * @param[in] myhtml_tag_index_t*
+ * @param[in] myhtml_tag_id_t
+ *
+ * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
+ */
+myhtml_tag_index_node_t*
+myhtml_tag_index_first(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_ctx_id);
+
+/**
+ * Get last index node for tag
+ *
+ * @param[in] myhtml_tag_index_t*
+ * @param[in] myhtml_tag_id_t
+ *
+ * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
+ */
+myhtml_tag_index_node_t*
+myhtml_tag_index_last(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_ctx_id);
+
+/**
+ * Get next index node for tag, by index node
+ *
+ * @param[in] myhtml_tag_index_node_t*
+ *
+ * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
+ */
+myhtml_tag_index_node_t*
+myhtml_tag_index_next(myhtml_tag_index_node_t *index_node);
+
+/**
+ * Get previous index node for tag, by index node
+ *
+ * @param[in] myhtml_tag_index_node_t*
+ *
+ * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
+ */
+myhtml_tag_index_node_t*
+myhtml_tag_index_prev(myhtml_tag_index_node_t *index_node);
+
+/**
+ * Get myhtml_tree_node_t* by myhtml_tag_index_node_t*
+ *
+ * @param[in] myhtml_tag_index_node_t*
+ *
+ * @return myhtml_tree_node_t* if exists, otherwise a NULL value.
+ */
+myhtml_tree_node_t*
+myhtml_tag_index_tree_node(myhtml_tag_index_node_t *index_node);
 
 /***********************************************************************************
  *
