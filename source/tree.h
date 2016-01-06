@@ -94,7 +94,8 @@ enum myhtml_tree_flags {
     MyHTML_TREE_FLAGS_SCRIPT          = 0x01,
     MyHTML_TREE_FLAGS_FRAMESET_OK     = 0x02,
     MyHTML_TREE_FLAGS_IFRAME_SRCDOC   = 0x04,
-    MyHTML_TREE_FLAGS_ALREADY_STARTED = 0x08
+    MyHTML_TREE_FLAGS_ALREADY_STARTED = 0x08,
+    MyHTML_TREE_FLAGS_SINGLE_MODE     = 0x10
 };
 
 enum myhtml_tree_insertion_mode {
@@ -179,7 +180,6 @@ struct myhtml_tree {
     enum myhtml_tree_flags       flags;
     enum myhtml_namespace        namespace;
     mybool_t                     foster_parenting;
-    mybool_t                     is_single;
 };
 
 // base
@@ -277,7 +277,7 @@ myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_t* tree, myhtml_tree_nod
 
 void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out);
 void myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc);
-void myhtml_tree_print_tree_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc);
+void myhtml_tree_print_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc);
 
 void myhtml_tree_node_add_child(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
 void myhtml_tree_node_insert_before(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);

@@ -114,7 +114,7 @@ int main(int argc, const char * argv[])
     myhtml_init(myhtml, MyHTML_OPTIONS_DEFAULT, 1, 0);
     
     struct res_html res = load_html(path);
-
+    
     uint64_t all_start = myhtml_hperf_clock(NULL);
     uint64_t tree_init_start = myhtml_hperf_clock(NULL);
     
@@ -127,8 +127,8 @@ int main(int argc, const char * argv[])
     
     for(size_t i = 0; i < 1; i++)
     {
-        myhtml_parse(tree, res.html, res.size);
-        //myhtml_tree_print_tree_by_node(tree, tree->document->child, stdout, 0);
+        myhtml_parse_fragment_single(tree, res.html, res.size, 0, 0);
+        myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
     }
     
     uint64_t parse_stop = myhtml_hperf_clock(NULL);

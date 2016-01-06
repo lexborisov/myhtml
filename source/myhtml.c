@@ -60,6 +60,7 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
         return status;
     }
     
+    myhtml->opt = opt;
     myhtml->thread = mythread_create();
     
     switch (opt) {
@@ -156,7 +157,7 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
     return NULL;
 }
 
-void myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size)
+myhtml_status_t myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size)
 {
     myhtml_tree_clean(tree);
     mythread_queue_clean(tree->myhtml->queue);
@@ -164,24 +165,40 @@ void myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size)
     
     myhtml_tokenizer_begin(tree, html, html_size);
     myhtml_tokenizer_end(tree, html, html_size);
+    
+    return MyHTML_STATUS_OK;
 }
 
-void myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, size_t html_size)
+myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
 {
     myhtml_tree_clean(tree);
+    mythread_queue_clean(tree->myhtml->queue);
+    mythread_clean(tree->myhtml->thread);
     
-    myhtml_tokenizer_fragment_init(tree, MyTAGS_TAG_DIV, MyHTML_NAMESPACE_HTML);
+    if(tag_id == 0)
+        tag_id = MyTAGS_TAG_DIV;
+    
+    if(my_namespace == 0)
+        my_namespace = MyHTML_NAMESPACE_HTML;
+    
+    myhtml_tokenizer_fragment_init(tree, tag_id, my_namespace);
     
     myhtml_tokenizer_begin(tree, html, html_size);
     myhtml_tokenizer_end(tree, html, html_size);
+    
+    return MyHTML_STATUS_OK;
 }
 
-void myhtml_parse_single(myhtml_tree_t* tree, const char* html, size_t html_size)
+myhtml_status_t myhtml_parse_single(myhtml_tree_t* tree, const char* html, size_t html_size)
 {
-    myhtml_tree_clean(tree);
-    
-    myhtml_tokenizer_begin(tree, html, html_size);
-    myhtml_tokenizer_end(tree, html, html_size);
+    tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
+    return myhtml_parse(tree, html, html_size);
+}
+
+myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
+{
+    tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
+    return myhtml_parse_fragment(tree, html, html_size, tag_id, my_namespace);
 }
 
 /*

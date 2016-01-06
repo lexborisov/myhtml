@@ -119,7 +119,6 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->tmp_qnode        = NULL;
     tree->flags            = MyHTML_TREE_FLAGS_CLEAN;
     tree->foster_parenting = myfalse;
-    tree->is_single        = myfalse;
     tree->namespace        = MyHTML_NAMESPACE_HTML;
     
     myhtml_tree_active_formatting_clean(tree);
@@ -159,7 +158,6 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->tmp_qnode        = NULL;
     tree->flags            = MyHTML_TREE_FLAGS_CLEAN;
     tree->foster_parenting = myfalse;
-    tree->is_single        = myfalse;
     tree->namespace        = MyHTML_NAMESPACE_HTML;
     
     myhtml_tree_active_formatting_clean(tree);
@@ -1839,8 +1837,12 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
     }
     else
     {
+#ifdef DEBUG_MODE
         fprintf(out, "<%.*s tagid=\"%lu\" mem=\"%zx\"", (int)tag_name_size, mctree_nodes[mctree_id].str,
                 mh_tags_get(node->tag_idx, id), (size_t)node);
+#else
+        fprintf(out, "<%.*s", (int)tag_name_size, mctree_nodes[mctree_id].str);
+#endif
         
         if(node->token)
             myhtml_token_print_attr(tree, node->token, out);
@@ -1849,7 +1851,7 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
     }
 }
 
-void myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
+void _myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
 {
     if(node == NULL)
         return;
@@ -1862,19 +1864,27 @@ void myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node
             fprintf(out, "\t");
         
         myhtml_tree_print_node(tree, node, out);
-        myhtml_tree_print_node_childs(tree, node->child, out, (inc + 1));
+        _myhtml_tree_print_node_childs(tree, node->child, out, (inc + 1));
         
         node = node->next;
     }
 }
 
-void myhtml_tree_print_tree_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
+void myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
+{
+    if(node == NULL)
+        return;
+    
+    _myhtml_tree_print_node_childs(tree, node->child, out, inc);
+}
+
+void myhtml_tree_print_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
 {
     if(node == NULL)
         return;
     
     myhtml_tree_print_node(tree, node, out);
-    myhtml_tree_print_node_childs(tree, node->child, out, (inc + 1));
+    myhtml_tree_print_node_childs(tree, node, out, (inc + 1));
 }
 
 // token list

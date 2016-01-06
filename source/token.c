@@ -765,16 +765,14 @@ void myhtml_token_print_attr(myhtml_tree_t* tree, myhtml_token_node_t* node, FIL
     
     while(attr)
     {
-        fprintf(out, " ");
-        
         if(attr->value_begin)
         {
-            fprintf(out, "%.*s=\"%.*s\"",
+            fprintf(out, " %.*s=\"%.*s\"",
                     (int)attr->name_length, &attr->entry.data[attr->name_begin],
                     (int)attr->value_length, &attr->entry.data[attr->value_begin]);
         }
         else {
-            fprintf(out, "%.*s", (int)attr->name_length, &attr->entry.data[attr->name_begin]);
+            fprintf(out, " %.*s", (int)attr->name_length, &attr->entry.data[attr->name_begin]);
         }
         
         attr = attr->next;

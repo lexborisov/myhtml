@@ -89,7 +89,7 @@ int main(int argc, const char * argv[])
         mytags_index_tag_node_t *tag_index = mytags_index_tag_get_first(tree->indexes->tags, MyTAGS_TAG_TITLE);
         
         if(tag_index && tag_index->node) {
-            myhtml_tree_print_tree_by_node(tree, tag_index->node, stdout, 0);
+            myhtml_tree_print_by_node(tree, tag_index->node, stdout, 0);
         }
     }
     

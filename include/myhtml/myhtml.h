@@ -42,17 +42,6 @@ extern "C" {
 #define mh_thread_wait(__idx__) sem_wait(myhtml_thread_get(myhtml->thread, __idx__, sem))
 #define mh_thread_done(__idx__, __param__) myhtml_thread_set(myhtml->thread, __idx__, opt) = __param__;
 
-#define mh_thread_master_get(__attr__) myhtml_thread_master_get(myhtml->thread, __attr__)
-#define mh_thread_master_set(__attr__) myhtml_thread_master_set(myhtml->thread, __attr__)
-
-#define mh_thread_master_post() sem_post(myhtml_thread_master_get(myhtml->thread, sem))
-#define mh_thread_master_wait() sem_wait(myhtml_thread_master_get(myhtml->thread, sem))
-#define mh_thread_master_done(__param__) myhtml_thread_master_set(myhtml->thread, opt) = __param__;
-
-#define mh_thread_stream_post() sem_post(myhtml_thread_stream_get(myhtml->thread, sem))
-#define mh_thread_stream_wait() sem_wait(myhtml_thread_stream_get(myhtml->thread, sem))
-#define mh_thread_stream_done(__param__) myhtml_thread_stream_set(myhtml->thread, opt) = __param__;
-
 #define mh_tree_get(__attr__) myhtml_tree_get(tree, __attr__)
 #define mh_tree_set(__attr__) myhtml_tree_set(tree, __attr__)
 
@@ -70,7 +59,7 @@ extern "C" {
 #define mh_queue_current_set(__attr__) mh_queue_current_get(__attr__)
 
 #define mh_queue_add(__tree__, __html__, __begin__)                                                           \
-    if(__tree__->is_single) { \
+    if(__tree__->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) { \
         myhtml_parser_worker(0, __tree__->current_qnode); \
         while(myhtml_rules_tree_dispatcher(__tree__, __tree__->current_qnode->token)){}; \
     } \
@@ -129,8 +118,11 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
 void myhtml_clean(myhtml_t* myhtml);
 myhtml_t* myhtml_destroy(myhtml_t* myhtml);
 
-void myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size);
-void myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, size_t html_size);
+myhtml_status_t myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size);
+myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+
+myhtml_status_t myhtml_parse_single(myhtml_tree_t* tree, const char* html, size_t html_size);
+myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
 
 myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, mytags_ctx_index_t tag_id, myhtml_status_t *status);
 myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection, const char* html, size_t length, myhtml_status_t *status);

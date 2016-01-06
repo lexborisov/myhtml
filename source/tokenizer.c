@@ -28,6 +28,9 @@ void myhtml_tokenizer_begin(myhtml_tree_t* tree, const char* html, size_t html_l
     
     myhtml_token_node_malloc(tree->token, tree->current_qnode->token, tree->mcasync_token_id);
     
+    if(myhtml->opt & MyHTML_OPTIONS_PARSE_MODE_SINGLE)
+        tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
+    
     myhtml_tokenizer_continue(tree, html, html_length);
 }
 
@@ -37,9 +40,9 @@ void myhtml_tokenizer_end(myhtml_tree_t* tree, const char* html, size_t html_len
         tree->current_qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, tree->current_qnode, html, html_length);
     }
     
-    if(tree->is_single == myfalse) {
+    if((tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0 &&
+       (tree->myhtml->opt & MyHTML_OPTIONS_PARSE_MODE_SINGLE) == 0)
         myhtml_tokenizer_wait(tree);
-    }
     
 #ifdef DEBUG_MODE
     if(tree->open_elements->length) {
@@ -56,7 +59,10 @@ void myhtml_tokenizer_continue(myhtml_tree_t* tree, const char* html, size_t htm
     myhtml_t* myhtml = tree->myhtml;
     myhtml_tokenizer_state_f* state_f = myhtml->parse_state_func;
     
-    if(tree->is_single == myfalse)
+    if(myhtml->opt & MyHTML_OPTIONS_PARSE_MODE_SINGLE)
+        tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
+    
+    if((tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
         myhtml_tokenizer_post(tree);
     
     size_t offset = 0;

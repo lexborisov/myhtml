@@ -353,15 +353,16 @@ myhtml_clean(myhtml_t* myhtml);
 myhtml_t*
 myhtml_destroy(myhtml_t* myhtml);
 
-
 /**
  * Parsing HTML
  *
  * @param[in] previously created structure myhtml_tree_t*
  * @param[in] HTML
  * @param[in] HTML size
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-void
+myhtml_status_t
 myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size);
 
 /**
@@ -370,10 +371,43 @@ myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size);
  * @param[in] previously created structure myhtml_tree_t*
  * @param[in] HTML
  * @param[in] HTML size
+ * @param[in] fragment base (root) tag id. Default: MyTAGS_TAG_DIV if set 0
+ * @param[in] fragment NAMESPACE. Default: MyHTML_NAMESPACE_HTML if set 0
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-void
-myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, size_t html_size);
+myhtml_status_t
+myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, size_t html_size,
+                      myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
 
+/**
+ * Parsing HTML in Single Mode. 
+ * No matter what was said during initialization MyHTML
+ *
+ * @param[in] previously created structure myhtml_tree_t*
+ * @param[in] HTML
+ * @param[in] HTML size
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
+ */
+myhtml_status_t
+myhtml_parse_single(myhtml_tree_t* tree, const char* html, size_t html_size);
+
+/**
+ * Parsing fragment of HTML in Single Mode. 
+ * No matter what was said during initialization MyHTML
+ *
+ * @param[in] previously created structure myhtml_tree_t*
+ * @param[in] HTML
+ * @param[in] HTML size
+ * @param[in] fragment base (root) tag id. Default: MyTAGS_TAG_DIV if set 0
+ * @param[in] fragment NAMESPACE. Default: MyHTML_NAMESPACE_HTML if set 0
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
+ */
+myhtml_status_t
+myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size,
+                      myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
 
 /***********************************************************************************
  *
@@ -395,7 +429,7 @@ myhtml_tree_create(void);
  * @param[in] myhtml_tree_t*
  * @param[in] workmyhtml_t*
  *
- * @return MyHTML_STATUS_OK if successful, otherwise an error status value.
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
 myhtml_status_t
 myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml);
@@ -427,6 +461,40 @@ myhtml_tree_destroy(myhtml_tree_t* tree);
  */
 myhtml_tree_node_t*
 myhtml_tree_get_document(myhtml_tree_t* tree);
+
+/**
+ * Print tree of a node. Print including current node
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] file handle, for example use stdout
+ * @param[in] tab (\t) increment for pretty print, set 0
+ */
+void
+myhtml_tree_print_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node,
+                          FILE* out, size_t inc);
+
+/**
+ * Print tree of a node. Print excluding current node
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] file handle, for example use stdout
+ * @param[in] tab (\t) increment for pretty print, set 0
+ */
+void
+myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node,
+                              FILE* out, size_t inc);
+
+/**
+ * Print a node
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] file handle, for example use stdout
+ */
+void
+myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out);
 
 /***********************************************************************************
  *
