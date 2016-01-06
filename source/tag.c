@@ -185,26 +185,34 @@ myhtml_status_t myhtml_tag_index_add(myhtml_tag_t* tags, myhtml_tag_index_t* idx
     return MyHTML_STATUS_OK;
 }
 
-myhtml_tag_index_entry_t * myhtml_tag_index_entry(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
+myhtml_tag_index_entry_t * myhtml_tag_index_entry(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id)
 {
-    if(idx_tags->tags_size > tag_idx)
-        return &idx_tags->tags[tag_idx];
+    if(tag_index->tags_size > tag_id)
+        return &tag_index->tags[tag_id];
     
     return NULL;
 }
 
-myhtml_tag_index_node_t * myhtml_tag_index_first(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
+size_t myhtml_tag_index_entry_count(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id)
 {
-    if(idx_tags->tags_size > tag_idx)
-        return idx_tags->tags[tag_idx].first;
+    if(tag_index->tags_size > tag_id)
+        return tag_index->tags[tag_id].count;
+    
+    return 0;
+}
+
+myhtml_tag_index_node_t * myhtml_tag_index_first(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id)
+{
+    if(tag_index->tags_size > tag_id)
+        return tag_index->tags[tag_id].first;
     
     return NULL;
 }
 
-myhtml_tag_index_node_t * myhtml_tag_index_last(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx)
+myhtml_tag_index_node_t * myhtml_tag_index_last(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id)
 {
-    if(idx_tags->tags_size > tag_idx)
-        return idx_tags->tags[tag_idx].last;
+    if(tag_index->tags_size > tag_id)
+        return tag_index->tags[tag_id].last;
     
     return NULL;
 }

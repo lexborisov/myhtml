@@ -38,7 +38,7 @@
 #include <stddef.h>
 
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 /**
@@ -845,7 +845,7 @@ myhtml_tag_index_entry(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
  * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
  */
 myhtml_tag_index_node_t*
-myhtml_tag_index_first(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_ctx_id);
+myhtml_tag_index_first(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
 
 /**
  * Get last index node for tag
@@ -856,7 +856,7 @@ myhtml_tag_index_first(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_ctx_id
  * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
  */
 myhtml_tag_index_node_t*
-myhtml_tag_index_last(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_ctx_id);
+myhtml_tag_index_last(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
 
 /**
  * Get next index node for tag, by index node
@@ -887,6 +887,17 @@ myhtml_tag_index_prev(myhtml_tag_index_node_t *index_node);
  */
 myhtml_tree_node_t*
 myhtml_tag_index_tree_node(myhtml_tag_index_node_t *index_node);
+
+/**
+ * Get count of elements in index by tag id
+ *
+ * @param[in] myhtml_tag_index_t*
+ * @param[in] tag id
+ *
+ * @return count of elements
+ */
+size_t
+myhtml_tag_index_entry_count(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
 
 /***********************************************************************************
  *

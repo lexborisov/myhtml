@@ -113,17 +113,19 @@ void myhtml_tag_set_category(myhtml_tag_t* tags, myhtml_tag_id_t tag_idx,
                          enum myhtml_namespace my_namespace, enum myhtml_tag_categories cats);
 
 myhtml_tag_index_t * myhtml_tag_index_create(void);
-myhtml_status_t myhtml_tag_index_init(myhtml_tag_t* tags, myhtml_tag_index_t* idx_tags);
-void myhtml_tag_index_clean(myhtml_tag_t* tags, myhtml_tag_index_t* index_tags);
-myhtml_tag_index_t * myhtml_tag_index_destroy(myhtml_tag_t* tags, myhtml_tag_index_t* idx_tags);
+myhtml_status_t myhtml_tag_index_init(myhtml_tag_t* tags, myhtml_tag_index_t* tag_index);
+void myhtml_tag_index_clean(myhtml_tag_t* tags, myhtml_tag_index_t* tag_index);
+myhtml_tag_index_t * myhtml_tag_index_destroy(myhtml_tag_t* tags, myhtml_tag_index_t* tag_index);
 
-myhtml_status_t myhtml_tag_index_add(myhtml_tag_t* tags, myhtml_tag_index_t* idx_tags, myhtml_tree_node_t* node);
-myhtml_tag_index_entry_t * myhtml_tag_index_entry(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_idx);
-myhtml_tag_index_node_t * myhtml_tag_index_first(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_ctx_idx);
-myhtml_tag_index_node_t * myhtml_tag_index_last(myhtml_tag_index_t* idx_tags, myhtml_tag_id_t tag_ctx_idx);
+myhtml_status_t myhtml_tag_index_add(myhtml_tag_t* tags, myhtml_tag_index_t* tag_index, myhtml_tree_node_t* node);
+myhtml_tag_index_entry_t * myhtml_tag_index_entry(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
+myhtml_tag_index_node_t * myhtml_tag_index_first(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
+myhtml_tag_index_node_t * myhtml_tag_index_last(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
 myhtml_tag_index_node_t * myhtml_tag_index_next(myhtml_tag_index_node_t *index_node);
 myhtml_tag_index_node_t * myhtml_tag_index_prev(myhtml_tag_index_node_t *index_node);
 myhtml_tree_node_t * myhtml_tag_index_tree_node(myhtml_tag_index_node_t *index_node);
+
+size_t myhtml_tag_index_entry_count(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
 
 void myhtml_tag_print(myhtml_tag_t* tags, FILE* fh);
 
