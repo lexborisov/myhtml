@@ -84,7 +84,7 @@ int main(int argc, const char * argv[])
     myhtml_parse(tree, res.html, res.size);
     
     // parse html
-    myhtml_collection_t *collection = myhtml_get_nodes_by_tag_id(tree, NULL, MyTAGS_TAG_TITLE, NULL);
+    myhtml_collection_t *collection = myhtml_get_nodes_by_tag_id(tree, NULL, MyHTML_TAG_TITLE, NULL);
     
     if(collection && collection->list && collection->length) {
         myhtml_tree_node_t *text_node = myhtml_node_child(collection->list[0]);

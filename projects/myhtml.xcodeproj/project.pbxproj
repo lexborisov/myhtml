@@ -15,10 +15,10 @@
 		0E82BB8E1C3A7AC700B38816 /* myosi.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BB721C3A7AC700B38816 /* myosi.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0E82BB8F1C3A7AC700B38816 /* mystring.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E82BB731C3A7AC700B38816 /* mystring.c */; };
 		0E82BB901C3A7AC700B38816 /* mystring.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BB741C3A7AC700B38816 /* mystring.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		0E82BB911C3A7AC700B38816 /* mytags_const.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BB751C3A7AC700B38816 /* mytags_const.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		0E82BB921C3A7AC700B38816 /* mytags_init.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E82BB761C3A7AC700B38816 /* mytags_init.c */; };
-		0E82BB931C3A7AC700B38816 /* mytags.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E82BB771C3A7AC700B38816 /* mytags.c */; };
-		0E82BB941C3A7AC700B38816 /* mytags.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BB781C3A7AC700B38816 /* mytags.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		0E82BB911C3A7AC700B38816 /* tag_const.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BB751C3A7AC700B38816 /* tag_const.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		0E82BB921C3A7AC700B38816 /* tag_init.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E82BB761C3A7AC700B38816 /* tag_init.c */; };
+		0E82BB931C3A7AC700B38816 /* tag.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E82BB771C3A7AC700B38816 /* tag.c */; };
+		0E82BB941C3A7AC700B38816 /* tag.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BB781C3A7AC700B38816 /* tag.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0E82BB951C3A7AC700B38816 /* parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E82BB791C3A7AC700B38816 /* parser.c */; };
 		0E82BB961C3A7AC700B38816 /* parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E82BB7A1C3A7AC700B38816 /* parser.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0E82BB971C3A7AC700B38816 /* perf.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E82BB7B1C3A7AC700B38816 /* perf.c */; };
@@ -56,10 +56,10 @@
 		0E82BB721C3A7AC700B38816 /* myosi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = myosi.h; path = ../source/myosi.h; sourceTree = "<group>"; };
 		0E82BB731C3A7AC700B38816 /* mystring.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mystring.c; path = ../source/mystring.c; sourceTree = "<group>"; };
 		0E82BB741C3A7AC700B38816 /* mystring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mystring.h; path = ../source/mystring.h; sourceTree = "<group>"; };
-		0E82BB751C3A7AC700B38816 /* mytags_const.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mytags_const.h; path = ../source/mytags_const.h; sourceTree = "<group>"; };
-		0E82BB761C3A7AC700B38816 /* mytags_init.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mytags_init.c; path = ../source/mytags_init.c; sourceTree = "<group>"; };
-		0E82BB771C3A7AC700B38816 /* mytags.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mytags.c; path = ../source/mytags.c; sourceTree = "<group>"; };
-		0E82BB781C3A7AC700B38816 /* mytags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mytags.h; path = ../source/mytags.h; sourceTree = "<group>"; };
+		0E82BB751C3A7AC700B38816 /* tag_const.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tag_const.h; path = ../source/tag_const.h; sourceTree = "<group>"; };
+		0E82BB761C3A7AC700B38816 /* tag_init.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tag_init.c; path = ../source/tag_init.c; sourceTree = "<group>"; };
+		0E82BB771C3A7AC700B38816 /* tag.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tag.c; path = ../source/tag.c; sourceTree = "<group>"; };
+		0E82BB781C3A7AC700B38816 /* tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tag.h; path = ../source/tag.h; sourceTree = "<group>"; };
 		0E82BB791C3A7AC700B38816 /* parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = parser.c; path = ../source/parser.c; sourceTree = "<group>"; };
 		0E82BB7A1C3A7AC700B38816 /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parser.h; path = ../source/parser.h; sourceTree = "<group>"; };
 		0E82BB7B1C3A7AC700B38816 /* perf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = perf.c; path = ../source/perf.c; sourceTree = "<group>"; };
@@ -138,10 +138,10 @@
 				0E82BB841C3A7AC700B38816 /* tokenizer_script.c */,
 				0E82BB741C3A7AC700B38816 /* mystring.h */,
 				0E82BB731C3A7AC700B38816 /* mystring.c */,
-				0E82BB781C3A7AC700B38816 /* mytags.h */,
-				0E82BB771C3A7AC700B38816 /* mytags.c */,
-				0E82BB761C3A7AC700B38816 /* mytags_init.c */,
-				0E82BB751C3A7AC700B38816 /* mytags_const.h */,
+				0E82BB781C3A7AC700B38816 /* tag.h */,
+				0E82BB771C3A7AC700B38816 /* tag.c */,
+				0E82BB761C3A7AC700B38816 /* tag_init.c */,
+				0E82BB751C3A7AC700B38816 /* tag_const.h */,
 				0E82BB7A1C3A7AC700B38816 /* parser.h */,
 				0E82BB791C3A7AC700B38816 /* parser.c */,
 				0E82BB7F1C3A7AC700B38816 /* thread.h */,
@@ -180,9 +180,9 @@
 				0E82BB901C3A7AC700B38816 /* mystring.h in Headers */,
 				0E82BB8A1C3A7AC700B38816 /* def.h in Headers */,
 				0E82BBA51C3A7AC700B38816 /* tree.h in Headers */,
-				0E82BB941C3A7AC700B38816 /* mytags.h in Headers */,
+				0E82BB941C3A7AC700B38816 /* tag.h in Headers */,
 				0E82BB961C3A7AC700B38816 /* parser.h in Headers */,
-				0E82BB911C3A7AC700B38816 /* mytags_const.h in Headers */,
+				0E82BB911C3A7AC700B38816 /* tag_const.h in Headers */,
 				0E82BBB31C3A7ADA00B38816 /* mcobject_async.h in Headers */,
 				0E82BB9D1C3A7AC700B38816 /* token.h in Headers */,
 				0E82BBA31C3A7AC700B38816 /* tokenizer.h in Headers */,
@@ -260,9 +260,9 @@
 				0E82BBB21C3A7ADA00B38816 /* mcobject_async.c in Sources */,
 				0E82BB8F1C3A7AC700B38816 /* mystring.c in Sources */,
 				0E82BB981C3A7AC700B38816 /* rules.c in Sources */,
-				0E82BB921C3A7AC700B38816 /* mytags_init.c in Sources */,
+				0E82BB921C3A7AC700B38816 /* tag_init.c in Sources */,
 				0E82BBB61C3A7ADA00B38816 /* mcsync.c in Sources */,
-				0E82BB931C3A7AC700B38816 /* mytags.c in Sources */,
+				0E82BB931C3A7AC700B38816 /* tag.c in Sources */,
 				0E82BB951C3A7AC700B38816 /* parser.c in Sources */,
 				0E82BBA21C3A7AC700B38816 /* tokenizer.c in Sources */,
 				0E82BB9E1C3A7AC700B38816 /* tokenizer_doctype.c in Sources */,

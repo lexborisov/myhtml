@@ -16,37 +16,19 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "myosi.h"
+#ifndef MyHTML_TAG_CONST_H
+#define MyHTML_TAG_CONST_H
 
-void * mymalloc(size_t size)
-{
-    //printf("Call malloc\n");
-    return malloc(size);
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// see who's call realloc
-void * myrealloc(void* dst, size_t size)
-{
-    //printf("Call realloc\n");
-    return realloc(dst, size);
-}
+enum myhtml_tags {
+%BODY%
+};
 
-void * mycalloc(size_t num, size_t size)
-{
-    //printf("Call calloc\n");
-    return calloc(num, size);
-}
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
-void myfree(void* dst)
-{
-    //printf("Call free\n");
-    free(dst);
-}
-
-void myhtml_print(FILE* out, const char* format, ...)
-{
-    va_list argptr;
-    va_start(argptr, format);
-    vfprintf(out, format, argptr);
-    va_end(argptr);
-}
+#endif

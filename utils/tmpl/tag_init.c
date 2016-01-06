@@ -16,37 +16,15 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "myosi.h"
+#include "tag.h"
 
-void * mymalloc(size_t size)
+void myhtml_tag_init_tags(myhtml_tag_t* tags)
 {
-    //printf("Call malloc\n");
-    return malloc(size);
+%BODY%
 }
 
-// see who's call realloc
-void * myrealloc(void* dst, size_t size)
+void myhtml_tag_init_tags_categories(myhtml_tag_t* tags)
 {
-    //printf("Call realloc\n");
-    return realloc(dst, size);
+%CATS%
 }
 
-void * mycalloc(size_t num, size_t size)
-{
-    //printf("Call calloc\n");
-    return calloc(num, size);
-}
-
-void myfree(void* dst)
-{
-    //printf("Call free\n");
-    free(dst);
-}
-
-void myhtml_print(FILE* out, const char* format, ...)
-{
-    va_list argptr;
-    va_start(argptr, format);
-    vfprintf(out, format, argptr);
-    va_end(argptr);
-}

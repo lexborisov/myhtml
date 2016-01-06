@@ -27,16 +27,16 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
 {
     myhtml_status_t status;
     
-    myhtml->tags = mytags_create();
+    myhtml->tags = myhtml_tag_create();
     if(myhtml->tags == NULL) {
         myhtml->parse_state_func = NULL;
         myhtml->insertion_func = NULL;
         myhtml->thread = NULL;
         
-        return MyHTML_STATUS_MYTAGS_ERROR_MEMORY_ALLOCATION;
+        return MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION;
     }
     
-    status = mytags_init(myhtml->tags);
+    status = myhtml_tag_init(myhtml->tags);
     if(status) {
         myhtml->parse_state_func = NULL;
         myhtml->insertion_func = NULL;
@@ -146,7 +146,7 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
     mythread_destroy(myhtml->thread, mytrue);
     myhtml_tokenizer_state_destroy(myhtml);
     
-    myhtml->tags     = mytags_destroy(myhtml->tags);
+    myhtml->tags     = myhtml_tag_destroy(myhtml->tags);
     myhtml->queue    = NULL;
     
     if(myhtml->insertion_func)
@@ -176,7 +176,7 @@ myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, siz
     mythread_clean(tree->myhtml->thread);
     
     if(tag_id == 0)
-        tag_id = MyTAGS_TAG_DIV;
+        tag_id = MyHTML_TAG_DIV;
     
     if(my_namespace == 0)
         my_namespace = MyHTML_NAMESPACE_HTML;
@@ -204,10 +204,10 @@ myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* ht
 /*
  * Nodes
  */
-myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, mytags_ctx_index_t tag_id, myhtml_status_t *status)
+myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status)
 {
-    mytags_index_tag_t *index_tag = mytags_index_tag_get(tree->indexes->tags, tag_id);
-    mytags_index_tag_node_t *index_node = mytags_index_tag_get_first(tree->indexes->tags, tag_id);
+    myhtml_tag_index_entry_t *index_tag = myhtml_tag_index_get(tree->indexes->tags, tag_id);
+    myhtml_tag_index_node_t *index_node = myhtml_tag_index_get_first(tree->indexes->tags, tag_id);
     
     if(index_tag->count == 0) {
         if(status)
@@ -404,6 +404,16 @@ const char * myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length)
     if(length)
         *length = 0;
     
+    return NULL;
+}
+
+/*
+ * Index
+ */
+myhtml_tag_index_node_t * myhtml_index_tag_first(myhtml_tree_t *tree, myhtml_tag_id_t tag_id)
+{
+//    tag_id
+//    return attr->next;
     return NULL;
 }
 

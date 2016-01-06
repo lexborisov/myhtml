@@ -146,7 +146,7 @@ myhtml_token_t * myhtml_token_destroy(myhtml_token_t* token)
 
 void myhtml_token_node_clean(myhtml_token_node_t* node)
 {
-    node->tag_ctx_idx    = MyTAGS_TAG__UNDEF;
+    node->tag_ctx_idx    = MyHTML_TAG__UNDEF;
     node->type           = MyHTML_TOKEN_TYPE_OPEN|MyHTML_TOKEN_TYPE_WHITESPACE;
     node->attr_first     = NULL;
     node->attr_last      = NULL;
@@ -725,8 +725,8 @@ void myhtml_token_print_by_idx(myhtml_tree_t* tree, myhtml_token_node_t* node, F
     size_t mctree_id = mh_tags_get(node->tag_ctx_idx, mctree_id);
     size_t tag_name_size = mctree_nodes[mctree_id].str_size;
     
-    if(node->tag_ctx_idx == MyTAGS_TAG__TEXT ||
-       node->tag_ctx_idx == MyTAGS_TAG__COMMENT)
+    if(node->tag_ctx_idx == MyHTML_TAG__TEXT ||
+       node->tag_ctx_idx == MyHTML_TAG__COMMENT)
     {
         if(node->length) {
             fprintf(out, "%.*s: %.*s\n", (int)tag_name_size, mctree_nodes[mctree_id].str,

@@ -16,20 +16,20 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#ifndef MyHTML_MYTAGS_H
-#define MyHTML_MYTAGS_H
+#ifndef MyHTML_TAGS_H
+#define MyHTML_TAGS_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "myosi.h"
+#include "myhtml/myhtml/myhtml/myhtml/myosi.h"
 
-#include "utils/mctree.h"
-#include "mytags_const.h"
-#include "tokenizer.h"
-#include "tree.h"
-#include "utils/mcobject_async.h"
+#include "myhtml/myhtml/myhtml/myhtml/utils/mctree.h"
+#include "myhtml/myhtml/myhtml/myhtml/tags_const.h"
+#include "myhtml/myhtml/myhtml/myhtml/tokenizer.h"
+#include "myhtml/myhtml/myhtml/myhtml/tree.h"
+#include "myhtml/myhtml/myhtml/myhtml/utils/mcobject_async.h"
 
 #define mytags_get(__mytags__, __idx__, __attr__) __mytags__->context[__idx__].__attr__
 
@@ -51,24 +51,18 @@ extern "C" {
     }                                                                          \
     mytags_context_clean(__mytags__, __mytags__->context_length)
 
-#define mytags_index_tag_node_attr(__index__, __idx__, __attr__) \
-    __index__->nodes[__idx__].__attr__
-
-#define mytags_index_tag_node(__index__, __idx__) \
-    __index__->nodes[__idx__]
-
-#define mytags_index_tag_clean(__index_node__) \
-    memset(__index_node__, 0, sizeof(mytags_index_tag_node_t));
+#define mytags_index_clean_node(__index_node__) \
+    memset(__index_node__, 0, sizeof(mytags_index_node_t));
 
 struct mytags_index_tag {
-    mytags_index_tag_node_t *first;
-    mytags_index_tag_node_t *last;
+    mytags_index_node_t *first;
+    mytags_index_node_t *last;
     size_t count;
 };
 
-struct mytags_index_tag_node {
-    mytags_index_tag_node_t *next;
-    mytags_index_tag_node_t *prev;
+struct mytags_index_node {
+    mytags_index_node_t *next;
+    mytags_index_node_t *prev;
     
     myhtml_tree_node_t* node;
 };
@@ -123,10 +117,10 @@ myhtml_status_t mytags_index_init(mytags_t* mytags, mytags_index_t* idx_tags);
 void mytags_index_clean(mytags_t* mytags, mytags_index_t* index_tags);
 mytags_index_t * mytags_index_destroy(mytags_t* mytags, mytags_index_t* idx_tags);
 
-myhtml_status_t mytags_index_tag_add(mytags_t* mytags, mytags_index_t* idx_tags, myhtml_tree_node_t* node);
-mytags_index_tag_t * mytags_index_tag_get(mytags_index_t* idx_tags, mytags_ctx_index_t tag_idx);
-mytags_index_tag_node_t * mytags_index_tag_get_first(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
-mytags_index_tag_node_t * mytags_index_tag_get_last(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
+myhtml_status_t mytags_index_add(mytags_t* mytags, mytags_index_t* idx_tags, myhtml_tree_node_t* node);
+mytags_index_tag_t * mytags_index_get(mytags_index_t* idx_tags, mytags_ctx_index_t tag_idx);
+mytags_index_node_t * mytags_index_get_first(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
+mytags_index_node_t * mytags_index_get_last(mytags_index_t* idx_tags, mytags_ctx_index_t tag_ctx_idx);
 
 void mytags_print(mytags_t* mytags, FILE* fh);
 

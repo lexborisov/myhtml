@@ -34,8 +34,8 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
     
     size_t mchar_node_id = qnode->tree->async_args[thread_id].mchar_node_id;
     
-    if(token->tag_ctx_idx == MyTAGS_TAG__TEXT ||
-       token->tag_ctx_idx == MyTAGS_TAG__COMMENT)
+    if(token->tag_ctx_idx == MyHTML_TAG__TEXT ||
+       token->tag_ctx_idx == MyHTML_TAG__COMMENT)
     {
         myhtml_string_init(&token->my_str_tm, qnode->tree->mchar, mchar_node_id, (qnode->length + 32));
         

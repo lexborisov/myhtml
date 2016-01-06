@@ -4,11 +4,11 @@ use utf8;
 use strict;
 use MyHTML::Base;
 
-my $utils = MyHTML::Base->new(dirs => {source => "../myhtml", template => "tmpl"});
+my $utils = MyHTML::Base->new(dirs => {source => "../source", template => "tmpl"});
 
-my $data = $utils->read_tmpl("mytags_init.c");
-my $data_const = $utils->read_tmpl("mytags_const.h");
-my $tags = $utils->read_tmpl("mytags.txt");
+my $data = $utils->read_tmpl("tag_init.c");
+my $data_const = $utils->read_tmpl("tag_const.h");
+my $tags = $utils->read_tmpl("tags.txt");
 
 my (@body, @cats, @list);
 my $count = 0;
@@ -21,7 +21,7 @@ foreach my $line (@$tags) {
         {
                 my ($namespace_pos, $cats) = split /\:\s*/, $line, 2;
                 
-                push @cats, "\t". qq~mytags_set_category(tags, $last_tag_idx, $namespace_pos, $cats);~;
+                push @cats, "\t". qq~myhtml_tag_set_category(tags, $last_tag_idx, $namespace_pos, $cats);~;
         }
         else {
                 my $parse_tag_data = "MyHTML_TOKENIZER_STATE_DATA";
@@ -34,7 +34,7 @@ foreach my $line (@$tags) {
                 
                 $parse_tag_data = $options[0] if defined $options[0] && $options[0] ne "";
                 
-                push @body, "\t". qq~mytags_add(tags, "$tagname", ~. length($tagname) .qq~, $parse_tag_data);~;
+                push @body, "\t". qq~myhtml_tag_add(tags, "$tagname", ~. length($tagname) .qq~, $parse_tag_data);~;
                 
                 if($tagname eq "!--") {
                         $tagname = "_comment";
@@ -43,7 +43,7 @@ foreach my $line (@$tags) {
                 $tagname =~ s/[\-!?]/_/g;
                 $tagname = uc($tagname);
                 
-                $last_tag_idx = "MyTAGS_TAG_$tagname";
+                $last_tag_idx = "MyHTML_TAG_$tagname";
                 
                 push @list, [$last_tag_idx, sprintf("0x%03x", $count)];
         }
@@ -51,17 +51,17 @@ foreach my $line (@$tags) {
 
 $count++;
 
-push @list, ["MyTAGS_TAG_FIRST_ENTRY", $list[0]->[0]];
-push @list, ["MyTAGS_TAG_LAST_ENTRY", sprintf("0x%03x", $count)];
+push @list, ["MyHTML_TAG_FIRST_ENTRY", $list[0]->[0]];
+push @list, ["MyHTML_TAG_LAST_ENTRY", sprintf("0x%03x", $count)];
 
-unshift @list, ["MyTAGS_TAG__UNDEF", "0x000"];
+unshift @list, ["MyHTML_TAG__UNDEF", "0x000"];
 
 my $res = $utils->format_list_text(\@list, "= ");
 
 my $args = {BODY => \@body, CATS => \@cats};
 my $args_const = {BODY => "\t". join ",\n\t", @$res};
 
-$utils->save_src("mytags_const.h", $data_const, $args_const);
-$utils->save_src("mytags_init.c", $data, $args);
+$utils->save_src("tag_const.h", $data_const, $args_const);
+$utils->save_src("tag_init.c", $data, $args);
 
 

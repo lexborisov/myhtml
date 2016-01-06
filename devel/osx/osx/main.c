@@ -77,7 +77,7 @@ void test_all(void)
                 struct res_html res = load_html(path);
                 myhtml_parse(tree, res.html, res.size);
                 
-//                myhtml_tree_node_t **node_list = myhtml_get_elements_by_tag_id(tree, MyTAGS_TAG_TITLE, NULL);
+//                myhtml_tree_node_t **node_list = myhtml_get_elements_by_tag_id(tree, MyHTML_TAG_TITLE, NULL);
 //                
 //                if(node_list && node_list[0])
 //                    if(node_list[0]->token)
@@ -100,8 +100,8 @@ int main(int argc, const char * argv[])
 {
     /* Default path or argument value */
     //const char* path = "/new/C-git/myhtml/test/test.html";
-    //const char* path = "/new/C-git/myhtml/test/broken.html";
-    const char* path = "/new/C-git/myhtml/test/test_full.html";
+    const char* path = "/new/C-git/myhtml/test/broken.html";
+    //const char* path = "/new/C-git/myhtml/test/test_full.html";
     //const char* path = "/new/Test/2.html";
 
     if (argc == 2) {
@@ -130,6 +130,8 @@ int main(int argc, const char * argv[])
         myhtml_parse_fragment_single(tree, res.html, res.size, 0, 0);
         myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
     }
+    
+    
     
     uint64_t parse_stop = myhtml_hperf_clock(NULL);
     uint64_t all_stop = myhtml_hperf_clock(NULL);

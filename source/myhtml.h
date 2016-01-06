@@ -26,7 +26,7 @@ extern "C" {
 #include "myosi.h"
 
 #include "utils/mctree.h"
-#include "mytags.h"
+#include "tag.h"
 #include "def.h"
 #include "parser.h"
 #include "tokenizer.h"
@@ -50,7 +50,7 @@ extern "C" {
 #define mh_state_get(__tree__) myhtml_tree_get(__tree__, state)
 #define mh_state_set(__tree__) myhtml_tree_set(__tree__, state)
 
-#define mh_tags_get(__idx__, __attr__) mytags_get(myhtml->tags, __idx__, __attr__)
+#define mh_tags_get(__idx__, __attr__) myhtml_tag_get(myhtml->tags, __idx__, __attr__)
 
 #define mh_queue_last(__attr__) myhtml->queue->nodes[myhtml_queue_node_current(myhtml->queue)].__attr__
 #define mh_queue_get(__idx__, __attr__) myhtml->queue->nodes[__idx__].__attr__
@@ -97,7 +97,7 @@ extern "C" {
     (__char__ < 'A' || __char__ > 'Z'))
 
 struct myhtml {
-    mytags_t            *tags;
+    myhtml_tag_t            *tags;
     mythread_queue_t    *queue;
     mythread_t          *thread;
     
@@ -124,7 +124,7 @@ myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, siz
 myhtml_status_t myhtml_parse_single(myhtml_tree_t* tree, const char* html, size_t html_size);
 myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
 
-myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, mytags_ctx_index_t tag_id, myhtml_status_t *status);
+myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status);
 myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection, const char* html, size_t length, myhtml_status_t *status);
 
 myhtml_tree_node_t * myhtml_node_next(myhtml_tree_node_t *node);

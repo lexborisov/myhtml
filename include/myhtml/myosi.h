@@ -105,26 +105,25 @@ typedef struct myhtml_token_node myhtml_token_node_t;
 typedef struct myhtml_token myhtml_token_t;
 
 // tags
-enum mytags_categories {
-    MyTAGS_CATEGORIES_UNDEF            = 0x000,
-    MyTAGS_CATEGORIES_ORDINARY         = 0x001,
-    MyTAGS_CATEGORIES_SPECIAL          = 0x002,
-    MyTAGS_CATEGORIES_FORMATTING       = 0x004,
-    MyTAGS_CATEGORIES_SCOPE            = 0x008,
-    MyTAGS_CATEGORIES_SCOPE_LIST_ITEM  = 0x010,
-    MyTAGS_CATEGORIES_SCOPE_BUTTON     = 0x020,
-    MyTAGS_CATEGORIES_SCOPE_TABLE      = 0x040,
-    MyTAGS_CATEGORIES_SCOPE_SELECT     = 0x080
+enum myhtml_tag_categories {
+    MyHTML_TAG_CATEGORIES_UNDEF            = 0x000,
+    MyHTML_TAG_CATEGORIES_ORDINARY         = 0x001,
+    MyHTML_TAG_CATEGORIES_SPECIAL          = 0x002,
+    MyHTML_TAG_CATEGORIES_FORMATTING       = 0x004,
+    MyHTML_TAG_CATEGORIES_SCOPE            = 0x008,
+    MyHTML_TAG_CATEGORIES_SCOPE_LIST_ITEM  = 0x010,
+    MyHTML_TAG_CATEGORIES_SCOPE_BUTTON     = 0x020,
+    MyHTML_TAG_CATEGORIES_SCOPE_TABLE      = 0x040,
+    MyHTML_TAG_CATEGORIES_SCOPE_SELECT     = 0x080
 };
 
-typedef struct mytags_index_tag_node mytags_index_tag_node_t;
-typedef struct mytags_index_tag mytags_index_tag_t;
-typedef struct mytags_index mytags_index_t;
+typedef struct myhtml_tag_index_node myhtml_tag_index_node_t;
+typedef struct myhtml_tag_index_entry myhtml_tag_index_entry_t;
+typedef struct myhtml_tag_index myhtml_tag_index_t;
 
-typedef size_t mytags_ctx_index_t;
-typedef size_t mytags_tag_id_t;
+typedef size_t myhtml_tag_id_t;
 
-typedef struct mytags mytags_t;
+typedef struct myhtml_tag myhtml_tag_t;
 
 // parse
 enum myhtml_tokenizer_state {
@@ -250,12 +249,12 @@ enum myhtml_status {
     MyHTML_STATUS_PERF_ERROR_COMPILED_WITHOUT_PERF     = 200,
     MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK            = 201,
     MyHTML_STATUS_TOKENIZER_ERROR_MEMORY_ALLOCATION    = 300,
-    MyHTML_STATUS_MYTAGS_ERROR_MEMORY_ALLOCATION       = 400,
-    MyHTML_STATUS_MYTAGS_ERROR_MCOBJECT_CREATE         = 401,
-    MyHTML_STATUS_MYTAGS_ERROR_MCOBJECT_MALLOC         = 402,
-    MyHTML_STATUS_MYTAGS_ERROR_MCOBJECT_CREATE_NODE    = 403,
-    MyHTML_STATUS_MYTAGS_ERROR_CACHE_MEMORY_ALLOCATION = 404,
-    MyHTML_STATUS_MYTAGS_ERROR_INDEX_MEMORY_ALLOCATION = 405,
+    MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION       = 400,
+    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE         = 401,
+    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_MALLOC         = 402,
+    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE_NODE    = 403,
+    MyHTML_STATUS_TAGS_ERROR_CACHE_MEMORY_ALLOCATION = 404,
+    MyHTML_STATUS_TAGS_ERROR_INDEX_MEMORY_ALLOCATION = 405,
     MyHTML_STATUS_TREE_ERROR_MEMORY_ALLOCATION         = 500,
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE           = 501,
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT             = 502,
@@ -284,7 +283,6 @@ enum myhtml_options {
     MyHTML_OPTIONS_PARSE_MODE_TREE_INDEX   = 0x20
 };
 
-typedef mytags_ctx_index_t myhtml_tag_id_t;
 typedef myhtml_token_attr_t myhtml_tree_attr_t;
 typedef struct myhtml_collection myhtml_collection_t;
 typedef struct myhtml myhtml_t;

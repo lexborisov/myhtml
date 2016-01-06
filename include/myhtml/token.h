@@ -27,7 +27,7 @@ extern "C" {
 #include <strings.h>
 
 #include "myhtml/myosi.h"
-#include "myhtml/mytags.h"
+#include "myhtml/tag.h"
 #include "myhtml/myhtml.h"
 #include "myhtml/mystring.h"
 #include "myhtml/utils/mcobject_async.h"
@@ -84,7 +84,7 @@ struct myhtml_token_attr {
 };
 
 struct myhtml_token_node {
-    mytags_ctx_index_t tag_ctx_idx;
+    myhtml_tag_id_t tag_ctx_idx;
     
     myhtml_string_t my_str_tm;
     

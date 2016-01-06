@@ -23,13 +23,13 @@
 extern "C" {
 #endif
 
-#include "myhtml/myhtml/myhtml/myhtml/myhtml/myosi.h"
+#include "myosi.h"
 
-#include "myhtml/myhtml/myhtml/myhtml/myhtml/utils/mctree.h"
-#include "myhtml/myhtml/myhtml/myhtml/myhtml/mytags_const.h"
-#include "myhtml/myhtml/myhtml/myhtml/myhtml/tokenizer.h"
-#include "myhtml/myhtml/myhtml/myhtml/myhtml/tree.h"
-#include "myhtml/myhtml/myhtml/myhtml/myhtml/utils/mcobject_async.h"
+#include "utils/mctree.h"
+#include "mytags_const.h"
+#include "tokenizer.h"
+#include "tree.h"
+#include "utils/mcobject_async.h"
 
 #define mytags_get(__mytags__, __idx__, __attr__) __mytags__->context[__idx__].__attr__
 

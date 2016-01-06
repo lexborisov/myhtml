@@ -25,7 +25,7 @@ extern "C" {
 
 #include "myhtml/myosi.h"
 #include "myhtml/myhtml.h"
-#include "myhtml/mytags.h"
+#include "myhtml/tag.h"
 #include "myhtml/thread.h"
 #include "myhtml/tokenizer_doctype.h"
 #include "myhtml/tokenizer_script.h"
@@ -39,7 +39,7 @@ void myhtml_tokenizer_begin(myhtml_tree_t* tree, const char* html, size_t html_l
 void myhtml_tokenizer_continue(myhtml_tree_t* tree, const char* html, size_t html_length);
 void myhtml_tokenizer_end(myhtml_tree_t* tree, const char* html, size_t html_length);
 
-myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, mytags_ctx_index_t tag_idx, enum myhtml_namespace my_namespace);
+myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, enum myhtml_namespace my_namespace);
 
 void myhtml_tokenizer_wait(myhtml_tree_t* tree);
 void myhtml_tokenizer_post(myhtml_tree_t* tree);

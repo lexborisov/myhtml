@@ -72,7 +72,7 @@ void myhtml_tokenizer_continue(myhtml_tree_t* tree, const char* html, size_t htm
     }
 }
 
-myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, mytags_ctx_index_t tag_idx, enum myhtml_namespace my_namespace)
+myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, enum myhtml_namespace my_namespace)
 {
     // step 3
     tree->fragment = myhtml_tree_node_create(tree);
@@ -84,7 +84,7 @@ myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, mytags_
     // step 5-7
     myhtml_tree_node_t* root = myhtml_tree_node_insert_root(tree, NULL, my_namespace);
     
-    if(tag_idx == MyTAGS_TAG_TEMPLATE)
+    if(tag_idx == MyHTML_TAG_TEMPLATE)
         myhtml_tree_template_insertion_append(tree, MyHTML_INSERTION_MODE_IN_TEMPLATE);
     
     myhtml_tree_reset_insertion_mode_appropriately(tree);
@@ -116,7 +116,7 @@ void myhtml_tokenizer_pause(myhtml_tree_t* tree)
 void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t* html_offset, size_t html_size)
 {
     myhtml_t* myhtml = tree->myhtml;
-    mytags_t* tags = myhtml->tags;
+    myhtml_tag_t* tags = myhtml->tags;
     mctree_t* tags_tree = tags->tree;
     
     size_t tagname_begin = qnode->begin;
@@ -125,7 +125,7 @@ void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, 
     mctree_index_t idx = mctree_search_lowercase(tags_tree, &html[tagname_begin], qnode->length);
     
     if(idx) {
-        qnode->token->tag_ctx_idx = (mytags_ctx_index_t)(tags_tree->nodes[idx].value);
+        qnode->token->tag_ctx_idx = (myhtml_tag_id_t)(tags_tree->nodes[idx].value);
         
         // parser is multi-threaded, and the specification requires the definition namespace for parsing cdata sections
         // but namespace we see after build tree, that is unacceptable to us
@@ -137,35 +137,35 @@ void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, 
         // then consume those characters and switch to the CDATA section state.
         if(tree->namespace != MyHTML_NAMESPACE_HTML)
         {
-            if(tags->context[ qnode->token->tag_ctx_idx ].cats[ tree->namespace ] == MyTAGS_CATEGORIES_UNDEF)
+            if(tags->context[ qnode->token->tag_ctx_idx ].cats[ tree->namespace ] == MyHTML_TAG_CATEGORIES_UNDEF)
             {
-                if(qnode->token->tag_ctx_idx == MyTAGS_TAG_MATH)
+                if(qnode->token->tag_ctx_idx == MyHTML_TAG_MATH)
                     tree->namespace = MyHTML_NAMESPACE_MATHML;
-                else if(qnode->token->tag_ctx_idx == MyTAGS_TAG_SVG)
+                else if(qnode->token->tag_ctx_idx == MyHTML_TAG_SVG)
                     tree->namespace = MyHTML_NAMESPACE_SVG;
                 else
                     tree->namespace = MyHTML_NAMESPACE_HTML;
             }
         }
-        else if(qnode->token->tag_ctx_idx == MyTAGS_TAG_MATH)
+        else if(qnode->token->tag_ctx_idx == MyHTML_TAG_MATH)
                 tree->namespace = MyHTML_NAMESPACE_MATHML;
-        else if(qnode->token->tag_ctx_idx == MyTAGS_TAG_SVG)
+        else if(qnode->token->tag_ctx_idx == MyHTML_TAG_SVG)
             tree->namespace = MyHTML_NAMESPACE_SVG;
     }
     else {
-        qnode->token->tag_ctx_idx = mytags_add(tags, &html[tagname_begin], qnode->length, MyHTML_TOKENIZER_STATE_DATA);
-        mytags_set_category(tags, qnode->token->tag_ctx_idx, tree->namespace, MyTAGS_CATEGORIES_ORDINARY);
+        qnode->token->tag_ctx_idx = myhtml_tag_add(tags, &html[tagname_begin], qnode->length, MyHTML_TOKENIZER_STATE_DATA);
+        myhtml_tag_set_category(tags, qnode->token->tag_ctx_idx, tree->namespace, MyHTML_TAG_CATEGORIES_ORDINARY);
     }
 }
 
 ////
 mythread_queue_node_t * myhtml_tokenizer_queue_create_text_node_if_need(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset)
 {
-    if(qnode->token->tag_ctx_idx == MyTAGS_TAG__UNDEF)
+    if(qnode->token->tag_ctx_idx == MyHTML_TAG__UNDEF)
     {
         if(html_offset > qnode->begin)
         {
-            qnode->token->tag_ctx_idx = MyTAGS_TAG__TEXT;
+            qnode->token->tag_ctx_idx = MyHTML_TAG__TEXT;
             qnode->length = html_offset - qnode->begin;
             mh_queue_add(tree, html, 0);
             
@@ -487,7 +487,7 @@ size_t myhtml_tokenizer_state_data(myhtml_tree_t* tree, mythread_queue_node_t* q
                     qnode->begin  = html_offset;
                 }
                 else {
-                    qnode->token->tag_ctx_idx = MyTAGS_TAG__COMMENT;
+                    qnode->token->tag_ctx_idx = MyHTML_TAG__COMMENT;
                     mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BOGUS_COMMENT;
                     
                     qnode->begin = html_offset - 2;
@@ -515,7 +515,7 @@ size_t myhtml_tokenizer_state_data(myhtml_tree_t* tree, mythread_queue_node_t* q
                     if(html[html_offset] == '-' && html[html_offset_n] == '-')
                     {
                         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_COMMENT;
-                        qnode->token->tag_ctx_idx = MyTAGS_TAG__COMMENT;
+                        qnode->token->tag_ctx_idx = MyHTML_TAG__COMMENT;
                         
                         qnode->begin  = html_offset - 2;
                         qnode->length = 0;
@@ -541,7 +541,7 @@ size_t myhtml_tokenizer_state_data(myhtml_tree_t* tree, mythread_queue_node_t* q
                         
                         qnode->begin  = html_offset;
                         qnode->length = 0;
-                        qnode->token->tag_ctx_idx = MyTAGS_TAG__TEXT;
+                        qnode->token->tag_ctx_idx = MyHTML_TAG__TEXT;
                         
                         break;
                     }
@@ -560,7 +560,7 @@ size_t myhtml_tokenizer_state_data(myhtml_tree_t* tree, mythread_queue_node_t* q
                         
                         qnode->begin  = html_offset;
                         qnode->length = 7;
-                        qnode->token->tag_ctx_idx = MyTAGS_TAG__DOCTYPE;
+                        qnode->token->tag_ctx_idx = MyHTML_TAG__DOCTYPE;
                         
                         html_offset = html_offset_n + 1;
                         break;
@@ -570,7 +570,7 @@ size_t myhtml_tokenizer_state_data(myhtml_tree_t* tree, mythread_queue_node_t* q
                 qnode->begin  = html_offset - 2;
                 qnode->length = 0;
                 
-                qnode->token->tag_ctx_idx = MyTAGS_TAG__COMMENT;
+                qnode->token->tag_ctx_idx = MyHTML_TAG__COMMENT;
                 
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BOGUS_COMMENT;
                 break;
