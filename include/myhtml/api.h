@@ -247,7 +247,7 @@ enum myhtml_status {
     MyHTML_STATUS_ATTR_ERROR_ALLOCATION                = 600,
     MyHTML_STATUS_ATTR_ERROR_CREATE                    = 601
 }
-typedef myhtml_status_t
+typedef myhtml_status_t;
 
 #define MYHTML_FAILED(_status_) ((_status_) != MyHTML_STATUS_OK)
 
