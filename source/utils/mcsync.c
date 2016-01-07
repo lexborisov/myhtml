@@ -18,6 +18,12 @@
 
 #include "mcsync.h"
 
+#if !defined(MyHTML_WITHOUT_THREADS) && ((defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)) || \
+    defined(__ATOMIC_SEQ_CST))
+#define MyHTML_FORCE_SPINLOCK
+#endif
+
+#if defined(MyHTML_FORCE_SPINLOCK)
 static int atomic_compare_exchange(int* ptr, int compare, int exchange)
 {
     return __atomic_compare_exchange_n(ptr, &compare, exchange, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
@@ -27,25 +33,30 @@ static void atomic_store(int* ptr, int value)
 {
     __atomic_store_n(ptr, 0, __ATOMIC_SEQ_CST);
 }
+#endif
 
 mcsync_t * mcsync_create(void)
 {
-    mcsync_t* mcsync = malloc(sizeof(mcsync_t));
-    
-    mcsync_init(mcsync);
-    
-    return mcsync;
+    return calloc(1, sizeof(mcsync_t));
 }
 
-void mcsync_init(mcsync_t* mcsync)
+mcsync_status_t mcsync_init(mcsync_t* mcsync)
 {
     mcsync_clean(mcsync);
+    return MCSYNC_STATUS_OK;
 }
 
 mcsync_t * mcsync_destroy(mcsync_t* mcsync, int destroy_self)
 {
     if(mcsync == NULL)
         return NULL;
+    
+#if !defined(MyHTML_FORCE_SPINLOCK)
+    if(mcsync->mutex) {
+        pthread_mutex_destroy(mcsync->mutex);
+        free(mcsync->mutex);
+    }
+#endif
     
     if(destroy_self)
         free(mcsync);
@@ -58,14 +69,58 @@ void mcsync_clean(mcsync_t* mcsync)
     mcsync->spinlock = 0;
 }
 
-void mcsync_lock(mcsync_t* mcsync)
+mcsync_status_t mcsync_lock(mcsync_t* mcsync)
 {
+#if defined(MyHTML_FORCE_SPINLOCK)
     while (!atomic_compare_exchange(&mcsync->spinlock, 0, 1)) {}
+#else
+    mcsync_mutex_lock(mcsync);
+#endif
+    
+    return MCSYNC_STATUS_OK;
 }
 
-void mcsync_unlock(mcsync_t* mcsync)
+mcsync_status_t mcsync_unlock(mcsync_t* mcsync)
 {
+#if defined(MyHTML_FORCE_SPINLOCK)
     atomic_store(&mcsync->spinlock, 0);
+#else
+    mcsync_mutex_unlock(mcsync);
+#endif
+    
+    return MCSYNC_STATUS_OK;
 }
 
+mcsync_status_t mcsync_mutex_lock(mcsync_t* mcsync)
+{
+#if !defined(MyHTML_FORCE_SPINLOCK)
+    if(mcsync->mutex == NULL) {
+        mcsync->mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+        
+        if(mcsync->mutex == NULL)
+            return MCSYNC_STATUS_ERROR_MEM_ALLOCATE;
+        
+        pthread_mutex_init(mcsync->mutex, NULL);
+    }
+    
+    if(pthread_mutex_lock(mcsync->mutex) == 0)
+        return MCSYNC_STATUS_OK;
+    else
+        return MCSYNC_STATUS_NOT_OK;
+#else
+    return MCSYNC_STATUS_NOT_OK;
+#endif
+}
+
+mcsync_status_t mcsync_mutex_unlock(mcsync_t* mcsync)
+{
+#if !defined(MyHTML_FORCE_SPINLOCK)
+    if(pthread_mutex_unlock(mcsync->mutex) == 0)
+        return MCSYNC_STATUS_OK;
+    else
+        return MCSYNC_STATUS_NOT_OK;
+#else
+    return MCSYNC_STATUS_NOT_OK;
+#endif
+}
 

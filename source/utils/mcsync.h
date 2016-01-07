@@ -26,20 +26,36 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
+    
+#if !defined(MyHTML_WITHOUT_THREADS)
+#include <pthread.h>
+#endif
+
+enum mcsync_status {
+    MCSYNC_STATUS_OK                 = 0,
+    MCSYNC_STATUS_NOT_OK             = 1,
+    MCSYNC_STATUS_ERROR_MEM_ALLOCATE = 2
+}
+typedef mcsync_status_t;
 
 struct mcsync {
     int spinlock;
+#if !defined(MyHTML_WITHOUT_THREADS)
+    pthread_mutex_t *mutex;
+#endif
 }
 typedef mcsync_t;
 
-
 mcsync_t * mcsync_create(void);
-void mcsync_init(mcsync_t* mcsync);
+mcsync_status_t mcsync_init(mcsync_t* mcsync);
 void mcsync_clean(mcsync_t* mcsync);
 mcsync_t * mcsync_destroy(mcsync_t* mcsync, int destroy_self);
 
-void mcsync_lock(mcsync_t* mclock);
-void mcsync_unlock(mcsync_t* mclock);
+mcsync_status_t mcsync_lock(mcsync_t* mclock);
+mcsync_status_t mcsync_unlock(mcsync_t* mclock);
+
+mcsync_status_t mcsync_mutex_lock(mcsync_t* mclock);
+mcsync_status_t mcsync_mutex_unlock(mcsync_t* mclock);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -360,6 +360,12 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					MyHTML_WITH_PERF,
+					MyHTML_FORCE_RDTSC,
+					"$(inherited)",
+				);
 				HEADER_SEARCH_PATHS = ../source;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

@@ -100,8 +100,8 @@ int main(int argc, const char * argv[])
 {
     /* Default path or argument value */
     //const char* path = "/new/C-git/myhtml/test/test.html";
-    const char* path = "/new/C-git/myhtml/test/broken.html";
-    //const char* path = "/new/C-git/myhtml/test/test_full.html";
+    //const char* path = "/new/C-git/myhtml/test/broken.html";
+    const char* path = "/new/C-git/myhtml/test/test_full.html";
     //const char* path = "/new/Test/2.html";
 
     if (argc == 2) {
@@ -127,8 +127,8 @@ int main(int argc, const char * argv[])
     
     for(size_t i = 0; i < 1; i++)
     {
-        myhtml_parse_fragment_single(tree, res.html, res.size, 0, 0);
-        myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
+        myhtml_parse(tree, res.html, res.size);
+        //myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
     }
     
     
