@@ -1,5 +1,4 @@
 # MyHTML C/C++ HTML 5 Parser. Using threads.
-============================
 
 [![Build Status](https://travis-ci.org/lexborisov/myhtml.svg?branch=master)](https://travis-ci.org/lexborisov/myhtml)
 
