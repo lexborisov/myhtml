@@ -41,6 +41,7 @@ mcobject_async_status_t mcobject_async_init(mcobject_async_t *mcobj_async, size_
 {
     mcobj_async->origin_size      = obj_size_by_one_chunk;
     mcobj_async->struct_size      = struct_size;
+    mcobj_async->struct_size_sn   = struct_size + sizeof(size_t);
     
     mcobj_async->chunks_pos_length = 0;
     mcobj_async->chunks_pos_size   = 128;
@@ -163,7 +164,7 @@ mcobject_async_status_t mcobject_async_mem_malloc(mcobject_async_t *mcobj_async,
             free(chunk->begin);
             
             chunk->size = length + mcobj_async->origin_size;
-            chunk->begin = (char*)mymalloc(chunk->size * mcobj_async->struct_size);
+            chunk->begin = (char*)mymalloc(chunk->size * mcobj_async->struct_size_sn);
         }
     }
     else {
@@ -172,7 +173,7 @@ mcobject_async_status_t mcobject_async_mem_malloc(mcobject_async_t *mcobj_async,
         if(length > chunk->size)
             chunk->size += length;
         
-        chunk->begin = (char*)mymalloc(chunk->size * mcobj_async->struct_size);
+        chunk->begin = (char*)mymalloc(chunk->size * mcobj_async->struct_size_sn);
     }
     
     chunk->length = 0;
@@ -389,14 +390,20 @@ void * mcobject_async_malloc(mcobject_async_t *mcobj_async, size_t node_idx, mco
     if(status)
         *status = MCOBJECT_ASYNC_STATUS_OK;
     
-    size_t offset = node->chunk->length * mcobj_async->struct_size;
-    node->chunk->length++;
+    size_t offset = node->chunk->length * mcobj_async->struct_size_sn;
+    *((size_t*)(&node->chunk->begin[offset])) = node_idx;
     
-    return &node->chunk->begin[offset];
+    node->chunk->length++;
+    return &node->chunk->begin[(offset + sizeof(size_t))];
 }
 
-void mcobject_async_free(mcobject_async_t *mcobj_async, size_t node_idx, void *entry)
+void mcobject_async_free(mcobject_async_t *mcobj_async, void *entry)
 {
+    size_t node_idx = *((size_t*)(entry - sizeof(size_t)));
+    
+    if(node_idx >= mcobj_async->nodes_length)
+        return;
+    
     mcobject_async_node_t *node = &mcobj_async->nodes[node_idx];
     
     if(node->cache_length > node->cache_size) {

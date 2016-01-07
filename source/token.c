@@ -650,13 +650,11 @@ myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const
 
 void myhtml_token_delete(myhtml_token_t* token, myhtml_token_node_t* node)
 {
-    mcobject_async_free(token->nodes_obj, 0, node);
+    mcobject_async_free(token->nodes_obj, node);
 }
 
-myhtml_token_attr_t * myhtml_token_attr_remove_by_name(myhtml_token_node_t* node, const char* name, size_t name_length)
+myhtml_token_attr_t * myhtml_token_attr_remove(myhtml_token_node_t* node, myhtml_token_attr_t* attr)
 {
-    myhtml_token_attr_t* attr = myhtml_token_attr_by_name(node, name, name_length);
-    
     if(attr)
     {
         if(node->attr_first == attr)
@@ -677,6 +675,11 @@ myhtml_token_attr_t * myhtml_token_attr_remove_by_name(myhtml_token_node_t* node
     }
     
     return attr;
+}
+
+myhtml_token_attr_t * myhtml_token_attr_remove_by_name(myhtml_token_node_t* node, const char* name, size_t name_length)
+{
+    return myhtml_token_attr_remove(node, myhtml_token_attr_by_name(node, name, name_length));
 }
 
 mybool_t myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* node)

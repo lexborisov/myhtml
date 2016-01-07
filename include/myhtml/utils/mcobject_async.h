@@ -57,6 +57,7 @@ typedef mcobject_async_node_t;
 struct mcobject_async {
     size_t  origin_size;
     size_t  struct_size;
+    size_t  struct_size_sn;
     
     mcobject_async_chunk_t **chunk_cache;
     size_t  chunk_cache_size;
@@ -87,7 +88,7 @@ void mcobject_async_node_clean(mcobject_async_t *mcobj_async, size_t node_idx);
 void mcobject_async_node_delete(mcobject_async_t *mcobj_async, size_t node_idx);
 
 void * mcobject_async_malloc(mcobject_async_t *mcobj_async, size_t node_idx, mcobject_async_status_t *status);
-void mcobject_async_free(mcobject_async_t *mcobj_async, size_t node_idx, void *entry);
+void mcobject_async_free(mcobject_async_t *mcobj_async, void *entry);
 
 mcobject_async_chunk_t * mcobject_async_chunk_malloc(mcobject_async_t *mcobj_async, size_t length, mcobject_async_status_t *status);
 mcobject_async_chunk_t * mcobject_async_chunk_malloc_without_lock(mcobject_async_t *mcobj_async, size_t length, mcobject_async_status_t *status);

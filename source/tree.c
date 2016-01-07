@@ -535,7 +535,7 @@ void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 {
     if(node) {
         myhtml_token_delete(tree->token, node->token);
-        mcobject_async_free(tree->tree_obj, tree->mcasync_tree_id, node);
+        mcobject_async_free(tree->tree_obj, node);
     }
 }
 

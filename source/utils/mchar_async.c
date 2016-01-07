@@ -301,18 +301,18 @@ char * mchar_async_malloc(mchar_async_t *mchar_async, size_t node_idx, size_t si
     mchar_async_node_t *node = &mchar_async->nodes[node_idx];
     mchar_async_chunk_t *chunk = node->chunk;
     
+    if(mchar_async_cache_has_nodes(node->cache)) {
+        size_t index = mchar_async_cache_delete(&node->cache, size);
+        
+        if(index) {
+            return (char *)(node->cache.nodes[index].value);
+        }
+    }
+    
     size_t new_size = chunk->length + size + sizeof(size_t);
     
     if(new_size > chunk->size)
     {
-        if(mchar_async_cache_has_nodes(node->cache)) {
-            size_t index = mchar_async_cache_delete(&node->cache, size);
-            
-            if(index) {
-                return (char *)(node->cache.nodes[index].value);
-            }
-        }
-        
         if((chunk->length + sizeof(size_t)) < chunk->size)
         {
             size_t size = chunk->size - chunk->length;
@@ -437,7 +437,7 @@ size_t mchar_async_cache_malloc(mchar_async_cache_t *cache)
     
     cache->nodes_length++;
     
-    if(cache->nodes_length > cache->nodes_size) {
+    if(cache->nodes_length >= cache->nodes_size) {
         cache->nodes_size <<= 1;
         
         mchar_async_cache_node_t *tmp = (mchar_async_cache_node_t*)myrealloc(cache->nodes, sizeof(mchar_async_cache_node_t) * cache->nodes_size);
@@ -508,11 +508,11 @@ size_t mchar_async_cache_delete(mchar_async_cache_t *cache, size_t size)
 
 void mchar_async_cache_add(mchar_async_cache_t *cache, void* value, size_t size)
 {
-    mchar_async_cache_node_t *list = cache->nodes;
-    
     cache->count++;
     
     if(cache->nodes_root == 0) {
+        mchar_async_cache_node_t *list = cache->nodes;
+        
         cache->nodes_root = mchar_async_cache_malloc(cache);
         
         list[cache->nodes_root].parent = 0;
@@ -526,6 +526,8 @@ void mchar_async_cache_add(mchar_async_cache_t *cache, void* value, size_t size)
     
     size_t idx = cache->nodes_root;
     size_t new_idx = mchar_async_cache_malloc(cache);
+    
+    mchar_async_cache_node_t *list = cache->nodes;
     
     while(idx)
     {

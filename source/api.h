@@ -244,8 +244,10 @@ enum myhtml_status {
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE           = 501,
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT             = 502,
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE      = 503,
+    MyHTML_STATUS_ATTR_ERROR_ALLOCATION                = 600,
+    MyHTML_STATUS_ATTR_ERROR_CREATE                    = 601
 }
-typedef myhtml_status_t;
+typedef myhtml_status_t
 
 #define MYHTML_FAILED(_status_) ((_status_) != MyHTML_STATUS_OK)
 
@@ -764,6 +766,83 @@ myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length);
  */
 const char*
 myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length);
+
+/**
+ * Get attribute by key
+ *
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] attr key name
+ * @param[in] attr key name length
+ *
+ * @return myhtml_tree_attr_t* if exists, otherwise a NULL value
+ */
+myhtml_tree_attr_t*
+myhtml_attribute_by_key(myhtml_tree_node_t *node,
+                        const char *key, size_t key_len);
+
+/**
+ * Added attribute to tree node
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] attr key name
+ * @param[in] attr key name length
+ * @param[in] attr value name
+ * @param[in] attr value name length
+ *
+ * @return created myhtml_tree_attr_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_attr_t*
+myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node,
+                     const char *key, size_t key_len,
+                     const char *value, size_t value_len);
+
+/**
+ * Remove attribute reference. Do not release the resources
+ *
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] myhtml_tree_attr_t*
+ *
+ * @return myhtml_tree_attr_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_attr_t*
+myhtml_attribute_remove(myhtml_tree_node_t *node, myhtml_tree_attr_t *attr);
+
+/**
+ * Remove attribute by key reference. Do not release the resources
+ *
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] attr key name
+ * @param[in] attr key name length
+ *
+ * @return myhtml_tree_attr_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_attr_t*
+myhtml_attribute_remove_by_key(myhtml_tree_node_t *node, const char *key, size_t key_len);
+
+/**
+ * Remove attribute and release allocated resources
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] myhtml_tree_attr_t*
+ *
+ * @return myhtml_tree_attr_t* if successful, otherwise a NULL value
+ */
+void
+myhtml_attribute_delete(myhtml_tree_t *tree, myhtml_tree_node_t *node,
+                        myhtml_tree_attr_t *attr);
+
+/**
+ * Release allocated resources
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_attr_t*
+ *
+ * @return myhtml_tree_attr_t* if successful, otherwise a NULL value
+ */
+void
+myhtml_attribute_free(myhtml_tree_t *tree, myhtml_tree_attr_t *attr);
 
 /***********************************************************************************
  *

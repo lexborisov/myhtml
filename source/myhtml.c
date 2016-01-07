@@ -418,6 +418,64 @@ const char * myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length)
     return NULL;
 }
 
+myhtml_tree_attr_t * myhtml_attribute_by_key(myhtml_tree_node_t *node, const char *key, size_t key_len)
+{
+    if(node == NULL || node->token == NULL)
+        return NULL;
+    
+    return myhtml_token_attr_by_name(node->token, key, key_len);
+}
+
+myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node, const char *key, size_t key_len, const char *value, size_t value_len)
+{
+    if(node == NULL)
+        return NULL;
+    
+    if(node->token == NULL) {
+        mcobject_async_status_t mcstatus;
+        node->token = (myhtml_token_node_t*)mcobject_async_malloc(tree->token->nodes_obj, tree->mcasync_token_id, &mcstatus);
+        
+        if(mcstatus)
+            return NULL;
+        
+        myhtml_token_node_clean(node->token);
+    }
+    
+    return myhtml_token_node_attr_append(tree->token, node->token, key, key_len,
+                                  value, value_len, tree->mcasync_token_id);
+}
+
+myhtml_tree_attr_t * myhtml_attribute_remove(myhtml_tree_node_t *node, myhtml_tree_attr_t *attr)
+{
+    if(node == NULL || node->token == NULL)
+        return NULL;
+    
+    return myhtml_token_attr_remove(node->token, attr);
+}
+
+myhtml_tree_attr_t * myhtml_attribute_remove_by_key(myhtml_tree_node_t *node, const char *key, size_t key_len)
+{
+    if(node == NULL || node->token == NULL)
+        return NULL;
+    
+    return myhtml_token_attr_remove_by_name(node->token, key, key_len);
+}
+
+void myhtml_attribute_delete(myhtml_tree_t *tree, myhtml_tree_node_t *node, myhtml_tree_attr_t *attr)
+{
+    if(node == NULL || node->token == NULL)
+        return;
+    
+    myhtml_token_attr_remove(node->token, attr);
+    myhtml_attribute_free(tree, attr);
+}
+
+void myhtml_attribute_free(myhtml_tree_t *tree, myhtml_tree_attr_t *attr)
+{
+    mchar_async_free(attr->entry.mchar, attr->entry.node_idx, attr->entry.data);
+    mcobject_async_free(tree->token->attr_obj, attr);
+}
+
 /*
  * Collections
  */
