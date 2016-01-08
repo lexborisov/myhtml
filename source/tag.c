@@ -294,7 +294,7 @@ void myhtml_tag_print(myhtml_tag_t* tags, FILE* fh)
     size_t i;
     for(i = MyHTML_TAG_FIRST_ENTRY; i <= MyHTML_TAG_LAST_ENTRY; i++)
     {
-        fprintf(fh, "<%s id=\"%lu\">\n", mct_nodes[ ctx[i].mctree_id ].str, i);
+        fprintf(fh, "<%s id=\"%zu\">\n", mct_nodes[ ctx[i].mctree_id ].str, i);
     }
 }
 

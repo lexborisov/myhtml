@@ -46,10 +46,10 @@ void myhtml_tokenizer_end(myhtml_tree_t* tree, const char* html, size_t html_len
     
 #ifdef DEBUG_MODE
     if(tree->open_elements->length) {
-        MyHTML_DEBUG_ERROR("Tokenizer end; Open Elements is %lu", tree->open_elements->length);
+        MyHTML_DEBUG_ERROR("Tokenizer end; Open Elements is %zu", tree->open_elements->length);
     }
     if(tree->active_formatting->length) {
-        MyHTML_DEBUG_ERROR("Tokenizer end; Active Formatting Elements is %lu", tree->active_formatting->length);
+        MyHTML_DEBUG_ERROR("Tokenizer end; Active Formatting Elements is %zu", tree->active_formatting->length);
     }
 #endif
 }

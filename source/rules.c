@@ -2469,8 +2469,9 @@ mybool_t myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_
                         if(tree->open_elements->list[ tree->open_elements->length - 2 ]->tag_idx == MyHTML_TAG_OPTGROUP)
                             myhtml_tree_open_elements_pop(tree);
                     }
-                    else
-                        fprintf(stderr, "ERROR: in select state; open elements length < 2");
+                    else {
+                        MyHTML_DEBUG_ERROR("in select state; open elements length < 2");
+                    }
                 }
                 
                 current_node = myhtml_tree_current_node(tree);
@@ -2798,7 +2799,7 @@ mybool_t myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node
             case MyHTML_TAG__COMMENT:
             {
                 if(tree->open_elements->length == 0) {
-                    fprintf(stderr, "ERROR: after body state; open_elements length < 1\n");
+                    MyHTML_DEBUG_ERROR("after body state; open_elements length < 1");
                     break;
                 }
                 

@@ -93,8 +93,6 @@ void mcobject_async_free(mcobject_async_t *mcobj_async, void *entry);
 mcobject_async_chunk_t * mcobject_async_chunk_malloc(mcobject_async_t *mcobj_async, size_t length, mcobject_async_status_t *status);
 mcobject_async_chunk_t * mcobject_async_chunk_malloc_without_lock(mcobject_async_t *mcobj_async, size_t length, mcobject_async_status_t *status);
 
-void mcobject_async_test(void);
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

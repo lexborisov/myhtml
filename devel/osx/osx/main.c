@@ -72,7 +72,7 @@ void test_all(void)
             if(ent->d_name[0] != '.' && !S_ISDIR(path_stat.st_mode))
             {
                 count++;
-                printf("%lu: %s\n", count, path);
+                printf("%zu: %s\n", count, path);
                 
                 struct res_html res = load_html(path);
                 myhtml_parse(tree, res.html, res.size);

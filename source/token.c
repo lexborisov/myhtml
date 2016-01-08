@@ -726,7 +726,7 @@ void myhtml_token_print_param_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_no
         fprintf(out, "<");
     }
     
-    fprintf(out, "tag_ctx_idx=%lu; body_begin=%lu; body_length=%lu; attr_first=%lu; attr_last=%lu",
+    fprintf(out, "tag_ctx_idx=%zu; body_begin=%zu; body_length=%zu; attr_first=%zu; attr_last=%zu",
             node->tag_ctx_idx, node->begin, node->length,
             (size_t)node->attr_first, (size_t)node->attr_last);
     
@@ -766,7 +766,7 @@ void myhtml_token_print_by_idx(myhtml_tree_t* tree, myhtml_token_node_t* node, F
             fprintf(out, "<");
         }
         
-        fprintf(out, "%.*s tagid=\"%lu\"", (int)tag_name_size, mctree_nodes[mctree_id].str,
+        fprintf(out, "%.*s tagid=\"%zu\"", (int)tag_name_size, mctree_nodes[mctree_id].str,
                 mh_tags_get(node->tag_ctx_idx, id));
         
         myhtml_token_print_attr(tree, node, out);

@@ -111,9 +111,6 @@ void mchar_async_cache_clean(mchar_async_cache_t *cache);
 
 void mchar_async_cache_add(mchar_async_cache_t *cache, void* value, size_t size);
 size_t mchar_async_cache_delete(mchar_async_cache_t *cache, size_t size);
-void mchar_async_cache_print(mchar_async_cache_t *cache, FILE* out, size_t idx);
-
-void mchar_async_test(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

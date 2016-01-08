@@ -158,7 +158,7 @@ myhtml_status_t myhread_create_sem(mythread_t *mythread, mythread_context_t *ctx
 {
     ctx->sem_name = calloc(1024, sizeof(char));
     
-    sprintf(ctx->sem_name, "%s%lus%lup%lu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
+    sprintf(ctx->sem_name, "%s%zus%zup%zu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
     
     ctx->sem_name_size = strlen(ctx->sem_name);
     

@@ -1276,7 +1276,7 @@ void myhtml_tree_active_formatting_append_with_check(myhtml_tree_t* tree, myhtml
         
 #ifdef DEBUG_MODE
         if(list[i] == NULL) {
-            MyHTML_DEBUG("Appen active formatting with check; list[%lu] is NULL", i);
+            MyHTML_DEBUG("Appen active formatting with check; list[%zu] is NULL", i);
         }
 #endif
         
@@ -1347,7 +1347,7 @@ void myhtml_tree_active_formatting_up_to_last_marker(myhtml_tree_t* tree)
     
 #ifdef DEBUG_MODE
     if(list[ tree->active_formatting->length ] == NULL) {
-        MyHTML_DEBUG("Up to last marker active formatting; list[%lu] is NULL", tree->active_formatting->length);
+        MyHTML_DEBUG("Up to last marker active formatting; list[%zu] is NULL", tree->active_formatting->length);
     }
 #endif
     
@@ -1360,7 +1360,7 @@ void myhtml_tree_active_formatting_up_to_last_marker(myhtml_tree_t* tree)
         
 #ifdef DEBUG_MODE
         if(list[ tree->active_formatting->length ] == NULL) {
-            MyHTML_DEBUG("Up to last marker active formatting; list[%lu] is NULL", tree->active_formatting->length);
+            MyHTML_DEBUG("Up to last marker active formatting; list[%zu] is NULL", tree->active_formatting->length);
         }
 #endif
         
@@ -1383,7 +1383,7 @@ myhtml_tree_node_t * myhtml_tree_active_formatting_between_last_marker(myhtml_tr
         
 #ifdef DEBUG_MODE
         if(list[i] == NULL) {
-            MyHTML_DEBUG("Between last marker active formatting; list[%lu] is NULL", i);
+            MyHTML_DEBUG("Between last marker active formatting; list[%zu] is NULL", i);
         }
 #endif
         
@@ -1422,7 +1422,7 @@ void myhtml_tree_active_formatting_reconstruction(myhtml_tree_t* tree)
         
 #ifdef DEBUG_MODE
         if(list[af_idx] == NULL) {
-            MyHTML_DEBUG("Formatting reconstruction; Step 4--6; list[%lu] is NULL", af_idx);
+            MyHTML_DEBUG("Formatting reconstruction; Step 4--6; list[%zu] is NULL", af_idx);
         }
 #endif
         
@@ -1438,7 +1438,7 @@ void myhtml_tree_active_formatting_reconstruction(myhtml_tree_t* tree)
     {
 #ifdef DEBUG_MODE
         if(list[af_idx] == NULL) {
-            MyHTML_DEBUG("Formatting reconstruction; Next steps; list[%lu] is NULL", af_idx);
+            MyHTML_DEBUG("Formatting reconstruction; Next steps; list[%zu] is NULL", af_idx);
         }
 #endif
         
@@ -1702,7 +1702,7 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
         
 #ifdef DEBUG_MODE
         if(bookmark >= tree->active_formatting->length) {
-            MyHTML_DEBUG_ERROR("Adoption agency algorithm; Before Step 18; bookmark (%lu) >= open_elements length", bookmark);
+            MyHTML_DEBUG_ERROR("Adoption agency algorithm; Before Step 18; bookmark (%zu) >= open_elements length", bookmark);
         }
 #endif
         
@@ -1905,7 +1905,7 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
     else
     {
 #ifdef DEBUG_MODE
-        fprintf(out, "<%.*s tagid=\"%lu\" mem=\"%zx\"", (int)tag_name_size, mctree_nodes[mctree_id].str,
+        fprintf(out, "<%.*s tagid=\"%zu\" mem=\"%zx\"", (int)tag_name_size, mctree_nodes[mctree_id].str,
                 mh_tags_get(node->tag_idx, id), (size_t)node);
 #else
         fprintf(out, "<%.*s", (int)tag_name_size, mctree_nodes[mctree_id].str);

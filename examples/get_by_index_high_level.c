@@ -39,7 +39,7 @@ int main(int argc, const char * argv[])
     myhtml_tag_index_t *tag_index = myhtml_tree_get_tag_index(tree);
     myhtml_tag_index_node_t *index_node = myhtml_tag_index_first(tag_index, MyHTML_TAG_DIV);
     
-    printf("Count of DIV nodes in index: %lu\n", myhtml_tag_index_entry_count(tag_index, MyHTML_TAG_DIV));
+    printf("Count of DIV nodes in index: %zu\n", myhtml_tag_index_entry_count(tag_index, MyHTML_TAG_DIV));
     printf("Get all DIV nodes from index:\n");
     
     while (index_node) {
