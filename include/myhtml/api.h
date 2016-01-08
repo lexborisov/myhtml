@@ -466,6 +466,36 @@ void
 myhtml_tree_clean(myhtml_tree_t* tree);
 
 /**
+ * Add child node to node. If children already exists it will be added to the last
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t* The node to which we add child node
+ * @param[in] myhtml_tree_node_t* The node which adds
+ */
+void
+myhtml_tree_node_add_child(myhtml_tree_t* tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
+
+/**
+ * Add a node immediately before the existing node
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t* add for this node
+ * @param[in] myhtml_tree_node_t* add this node
+ */
+void
+myhtml_tree_node_insert_before(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
+
+/**
+ * Add a node immediately after the existing node
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t* add for this node
+ * @param[in] myhtml_tree_node_t* add this node
+ */
+void
+myhtml_tree_node_insert_after(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
+
+/**
  * Destroy of a MyHTML_TREE structure
  *
  * @param[in] myhtml_tree_t*
@@ -633,6 +663,55 @@ myhtml_node_child(myhtml_tree_node_t *node);
  */
 myhtml_tree_node_t*
 myhtml_node_last_child(myhtml_tree_node_t *node);
+
+/**
+ * Create new node
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] enum myhtml_namespace
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_node_create(myhtml_tree_t* tree, enum myhtml_namespace my_namespace);
+
+/**
+ * Release allocated resources
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ */
+void
+myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node);
+    
+/**
+ * Remove node of tree
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_node_remove(myhtml_tree_node_t *node);
+
+/**
+ * Remove node of tree and release allocated resources
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ */
+void
+myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node);
+
+/**
+ * Remove nodes of tree recursively and release allocated resources
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ */
+void
+myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node);
 
 /**
  * Get node namespace

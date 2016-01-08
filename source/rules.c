@@ -1026,7 +1026,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 
                 myhtml_tree_node_t* node = tree->open_elements->list[1];
                 
-                myhtml_tree_node_remove(tree, node);
+                myhtml_tree_node_remove(node);
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_HTML, mytrue);
                 
                 myhtml_tree_node_insert_html_element(tree, token);

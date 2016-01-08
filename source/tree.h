@@ -274,19 +274,21 @@ size_t myhtml_tree_template_insertion_length(myhtml_tree_t* tree);
 
 // other for a tree
 myhtml_tree_node_t * myhtml_tree_node_create(myhtml_tree_t* tree);
-void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* idx);
+void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* node);
+void myhtml_tree_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 void myhtml_tree_node_clean(myhtml_tree_node_t* tree_node);
+void myhtml_tree_node_free(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 
 void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out);
 void myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc);
 void myhtml_tree_print_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc);
 
-void myhtml_tree_node_add_child(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
-void myhtml_tree_node_insert_before(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
-void myhtml_tree_node_insert_after(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* idx);
+void myhtml_tree_node_add_child(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
+void myhtml_tree_node_insert_before(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
+void myhtml_tree_node_insert_after(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
 void myhtml_tree_node_insert_by_mode(myhtml_tree_t* tree, myhtml_tree_node_t* adjusted_location, myhtml_tree_node_t* node, enum myhtml_tree_insertion_mode mode);
-void myhtml_tree_node_remove(myhtml_tree_t* tree, myhtml_tree_node_t* idx);
+myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_node_t* node);
 
 myhtml_tree_node_t * myhtml_tree_node_insert_html_element(myhtml_tree_t* tree, myhtml_token_node_t* token);
 myhtml_tree_node_t * myhtml_tree_node_insert_foreign_element(myhtml_tree_t* tree, myhtml_token_node_t* token);

@@ -650,7 +650,25 @@ myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const
 
 void myhtml_token_delete(myhtml_token_t* token, myhtml_token_node_t* node)
 {
+    if(node->my_str_tm.data && node->my_str_tm.mchar) {
+        mchar_async_free(node->my_str_tm.mchar, node->my_str_tm.node_idx, node->my_str_tm.data);
+    }
+    
     mcobject_async_free(token->nodes_obj, node);
+}
+
+void myhtml_token_attr_delete_all(myhtml_token_t* token, myhtml_token_node_t* node)
+{
+    myhtml_token_attr_t* attr = node->attr_first;
+    
+    while (attr)
+    {
+        if(attr->entry.data && attr->entry.mchar) {
+            mchar_async_free(attr->entry.mchar, attr->entry.node_idx, attr->entry.data);
+        }
+        
+        attr = attr->next;
+    }
 }
 
 myhtml_token_attr_t * myhtml_token_attr_remove(myhtml_token_node_t* node, myhtml_token_attr_t* attr)

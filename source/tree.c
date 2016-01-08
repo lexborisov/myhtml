@@ -335,17 +335,70 @@ void myhtml_tree_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t* root
     root->next   = node;
 }
 
-void myhtml_tree_node_remove(myhtml_tree_t* tree, myhtml_tree_node_t* node)
+myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_node_t* node)
 {
     if(node->next)
         node->next->prev = node->prev;
-    else
+    else if(node->parent)
         node->parent->last_child = node->prev;
     
-    if(node->prev)
+    if(node->prev) {
         node->prev->next = node->next;
-    else
+        node->prev = NULL;
+    } else if(node->parent)
         node->parent->child = node->next;
+    
+    node->parent = NULL;
+    
+    if(node->next)
+        node->next = NULL;
+    
+    return node;
+}
+
+void myhtml_tree_node_free(myhtml_tree_t* tree, myhtml_tree_node_t* node)
+{
+    if(node)
+        return;
+    
+    if(node->token) {
+        myhtml_token_attr_delete_all(tree->token, node->token);
+        myhtml_token_delete(tree->token, node->token);
+    }
+    
+    mcobject_async_free(tree->tree_obj, node);
+}
+
+void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* node)
+{
+    if(node)
+        return;
+    
+    myhtml_tree_node_remove(node);
+    myhtml_tree_node_free(tree, node);
+}
+
+void _myhtml_tree_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t* node)
+{
+    while(node)
+    {
+        if(node->child)
+            _myhtml_tree_node_delete_recursive(tree, node->child);
+        
+        node = node->next;
+        myhtml_tree_node_delete(tree, node);
+    }
+}
+
+void myhtml_tree_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t* node)
+{
+    if(node)
+        return;
+    
+    if(node->child)
+        _myhtml_tree_node_delete_recursive(tree, node->child);
+    
+    myhtml_tree_node_delete(tree, node);
 }
 
 myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_t* tree, myhtml_tree_node_t* node)
@@ -529,14 +582,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert_html_element(myhtml_tree_t* tree, m
     myhtml_tree_index_append(tree, node);
     
     return node;
-}
-
-void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* node)
-{
-    if(node) {
-        myhtml_token_delete(tree->token, node->token);
-        mcobject_async_free(tree->tree_obj, node);
-    }
 }
 
 myhtml_tree_node_t * myhtml_tree_element_in_scope(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, enum myhtml_tag_categories category)
@@ -1609,10 +1654,8 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
             
             // step 13.9
             if(last->parent)
-                myhtml_tree_node_remove(tree, last);
+                myhtml_tree_node_remove(last);
             
-            last->next       = NULL;
-            last->parent     = NULL;
             last->child      = NULL;
             last->last_child = NULL;
             last->prev       = NULL;
@@ -1624,7 +1667,7 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
         }
         
         if(last->parent)
-            myhtml_tree_node_remove(tree, last);
+            myhtml_tree_node_remove(last);
         
         // step 14
         enum myhtml_tree_insertion_mode insert_mode;
@@ -1641,7 +1684,7 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
         
         while (furthest_block_child) {
             if(furthest_block_child->parent)
-                myhtml_tree_node_remove(tree, furthest_block_child);
+                myhtml_tree_node_remove(furthest_block_child);
             
             myhtml_tree_node_add_child(tree, new_formatting_element, furthest_block_child);
             furthest_block_child = furthest_block_child->next;

@@ -16,7 +16,8 @@ Release will have major version number 1
 - Asynchronous Parsing, Build Tree and Indexation
 - Fully conformant with the [HTML5 specification]
 - Two API - [high] and [low]-level
-- Manipulation elements attributes: add, change, delete and other
+- Manipulation of elements: add, change, delete and other
+- Manipulation of elements attributes: add, change, delete and other
 - Support Single Mode parsing
 - Support for fragment parsing
 - No outside dependencies

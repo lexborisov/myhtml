@@ -298,6 +298,33 @@ myhtml_tree_node_t * myhtml_node_last_child(myhtml_tree_node_t *node)
     return node->last_child;
 }
 
+myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, enum myhtml_namespace my_namespace)
+{
+    myhtml_tree_node_t *node = myhtml_tree_node_create(tree);
+    node->namespace = my_namespace;
+    return node;
+}
+
+myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_node_t *node)
+{
+    return myhtml_tree_node_remove(node);
+}
+
+void myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node)
+{
+    myhtml_tree_node_delete(tree, node);
+}
+
+void myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node)
+{
+    myhtml_tree_node_delete_recursive(tree, node);
+}
+
+void myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node)
+{
+    myhtml_tree_node_free(tree, node);
+}
+
 enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node)
 {
     return node->namespace;
