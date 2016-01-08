@@ -29,7 +29,6 @@ extern "C" {
 
 #include <pthread.h>
 #include <time.h>
-#include <sys/time.h>
 #include <sys/stat.h>
 
 #include <semaphore.h>

@@ -41,6 +41,8 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
+
 /**
  * bool
  */
@@ -1106,7 +1108,7 @@ myhtml_collection_check_size(myhtml_collection_t *collection, size_t up_to_lengt
 
 /***********************************************************************************
  *
- * MyHTML_COLLECTION
+ * MyHTML_UTILS
  *
  ***********************************************************************************/
 

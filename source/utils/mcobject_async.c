@@ -399,7 +399,7 @@ void * mcobject_async_malloc(mcobject_async_t *mcobj_async, size_t node_idx, mco
 
 void mcobject_async_free(mcobject_async_t *mcobj_async, void *entry)
 {
-    size_t node_idx = *((size_t*)(entry - sizeof(size_t)));
+    size_t node_idx = *((size_t*)((char*)entry - sizeof(size_t)));
     
     if(node_idx >= mcobj_async->nodes_length)
         return;
