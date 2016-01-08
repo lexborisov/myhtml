@@ -27,6 +27,7 @@
 		0E770C101C3E87BA00F68C82 /* mcobject_async.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BFA1C3E87BA00F68C82 /* mcobject_async.c */; };
 		0E770C111C3E87BA00F68C82 /* mcsync.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BFC1C3E87BA00F68C82 /* mcsync.c */; };
 		0E770C121C3E87BA00F68C82 /* mctree.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BFE1C3E87BA00F68C82 /* mctree.c */; };
+		0E770C151C3FE6A400F68C82 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770C131C3FE6A400F68C82 /* utils.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -83,6 +84,8 @@
 		0E770BFD1C3E87BA00F68C82 /* mcsync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mcsync.h; sourceTree = "<group>"; };
 		0E770BFE1C3E87BA00F68C82 /* mctree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mctree.c; sourceTree = "<group>"; };
 		0E770BFF1C3E87BA00F68C82 /* mctree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mctree.h; sourceTree = "<group>"; };
+		0E770C131C3FE6A400F68C82 /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
+		0E770C141C3FE6A400F68C82 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,6 +158,8 @@
 				0E770BF41C3E87BA00F68C82 /* tokenizer_script.h */,
 				0E770BF61C3E87BA00F68C82 /* tree.h */,
 				0E770BF51C3E87BA00F68C82 /* tree.c */,
+				0E770C141C3FE6A400F68C82 /* utils.h */,
+				0E770C131C3FE6A400F68C82 /* utils.c */,
 				0E770BF71C3E87BA00F68C82 /* utils */,
 			);
 			name = source;
@@ -247,6 +252,7 @@
 				0E770C0B1C3E87BA00F68C82 /* tokenizer.c in Sources */,
 				0E770C0A1C3E87BA00F68C82 /* token.c in Sources */,
 				0E770C111C3E87BA00F68C82 /* mcsync.c in Sources */,
+				0E770C151C3FE6A400F68C82 /* utils.c in Sources */,
 				0E770BBD1C3A7FBF00F68C82 /* main.c in Sources */,
 				0E770C0D1C3E87BA00F68C82 /* tokenizer_script.c in Sources */,
 				0E770C0F1C3E87BA00F68C82 /* mchar_async.c in Sources */,
@@ -340,6 +346,7 @@
 		0E770BC11C3A7FBF00F68C82 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					MyHTML_WITH_PERF,

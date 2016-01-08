@@ -52,21 +52,9 @@ mctree_index_t __mtree_search_lowercase_to_start(mctree_t* mctree, mctree_index_
     while (idx)
     {
         if(key_size == nodes[idx].str_size) {
-            size_t i = 0;
-            const unsigned char* test = (const unsigned char*)nodes[idx].str;
-            
-            for(;;) {
-                if(i == key_size)
-                    return idx;
-                
-                if((const unsigned char)(key[i] > 0x40 && key[i] < 0x5b ? (key[i]|0x60) : key[i]) != test[i]) {
-                    break;
-                }
-                
-                i++;
+            if(myhtml_strncasecmp(key, nodes[idx].str, key_size) == 0) {
+                return idx;
             }
-            
-            //strncasecmp(test, key, key_size);
             
             idx = nodes[idx].child;
         }

@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 #include "myosi.h"
+#include "utils.h"
 #include "myhtml.h"
 
 size_t myhtml_tokenizer_state_before_doctype_name(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);

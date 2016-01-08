@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 #include "myosi.h"
+#include "utils.h"
 #include "myhtml.h"
 #include "tag.h"
 #include "thread.h"

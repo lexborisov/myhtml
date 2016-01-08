@@ -1104,6 +1104,35 @@ myhtml_status_t
 myhtml_collection_check_size(myhtml_collection_t *collection, size_t up_to_length);
 
 
+/***********************************************************************************
+ *
+ * MyHTML_COLLECTION
+ *
+ ***********************************************************************************/
+
+/**
+ * Compare two strings ignoring case
+ *
+ * @param[in] myhtml_collection_t*
+ * @param[in] count of add nodes
+ *
+ * @return 0 if match, otherwise index of break position
+ */
+size_t
+myhtml_strcasecmp(const char* str1, const char* str2);
+
+/**
+ * Compare two strings ignoring case of the first n characters
+ *
+ * @param[in] myhtml_collection_t*
+ * @param[in] count of add nodes
+ *
+ * @return 0 if match, otherwise index of break position
+ */
+size_t
+myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

@@ -363,7 +363,7 @@ myhtml_token_attr_t * myhtml_token_attr_match_case(myhtml_token_t* token, myhtml
         if(attr->name_length == key_size && attr->value_length == value_size)
         {
             if((strncmp(key, &attr->entry.data[attr->name_begin], key_size) == 0)) {
-                if((strncasecmp(value, &attr->entry.data[attr->value_begin], value_size) == 0)) {
+                if((myhtml_strncasecmp(value, &attr->entry.data[attr->value_begin], value_size) == 0)) {
                     return attr;
                 }
                 else {
@@ -615,7 +615,7 @@ mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_nod
             if(strcmp(&target_attr->entry.data[target_attr->name_begin], &dest_attr->entry.data[dest_attr->name_begin]) != 0)
                 break;
             
-            if(strcasecmp(&target_attr->entry.data[target_attr->value_begin], &dest_attr->entry.data[dest_attr->value_begin]) != 0)
+            if(myhtml_strcasecmp(&target_attr->entry.data[target_attr->value_begin], &dest_attr->entry.data[dest_attr->value_begin]) != 0)
                 break;
         }
         else

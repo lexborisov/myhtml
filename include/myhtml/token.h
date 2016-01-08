@@ -24,9 +24,9 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include <strings.h>
 
 #include "myhtml/myosi.h"
+#include "myhtml/utils.h"
 #include "myhtml/tag.h"
 #include "myhtml/myhtml.h"
 #include "myhtml/mystring.h"

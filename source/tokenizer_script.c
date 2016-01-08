@@ -110,7 +110,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
     {
         if(myhtml_whithspace(html[html_offset], ==, ||))
         {
-            if(strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
                 qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
                 
@@ -130,7 +130,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         }
         else if(html[html_offset] == '/')
         {
-            if(strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
                 qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
                 
@@ -150,7 +150,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         }
         else if(html[html_offset] == '>')
         {
-            if(strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
                 qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
                 
@@ -247,7 +247,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
     {
         if(myhtml_whithspace(html[html_offset], ==, ||))
         {
-            if(strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
                 qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
                 
@@ -267,7 +267,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         }
         else if(html[html_offset] == '/')
         {
-            if(strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
                 qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
                 
@@ -287,7 +287,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         }
         else if(html[html_offset] == '>')
         {
-            if(strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
                 qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
                 
@@ -374,7 +374,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tre
     {
         if(myhtml_whithspace(html[html_offset], ==, ||) || html[html_offset] == '/' || html[html_offset] == '>')
         {
-            if((html_offset - offset_cache) > 5 && strncasecmp(&html[offset_cache], "script", 6) == 0) {
+            if((html_offset - offset_cache) > 5 && myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0) {
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
             }
             else {
@@ -493,7 +493,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree,
     {
         if(myhtml_whithspace(html[html_offset], ==, ||) || html[html_offset] == '/' || html[html_offset] == '>')
         {
-            if((html_offset - offset_cache) > 5 && strncasecmp(&html[offset_cache], "script", 6) == 0) {
+            if((html_offset - offset_cache) > 5 && myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0) {
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
             }
             else {

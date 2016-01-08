@@ -128,7 +128,7 @@ size_t myhtml_tokenizer_state_after_doctype_name(myhtml_tree_t* tree, mythread_q
         return html_offset;
     }
     
-    if(strncasecmp(&html[html_offset], "PUBLIC", 6) == 0) {
+    if(myhtml_strncasecmp(&html[html_offset], "PUBLIC", 6) == 0) {
         myhtml_parser_queue_set_attr(tree, qnode);
         
         tree->queue_attr->name_begin   = html_offset;
@@ -140,7 +140,7 @@ size_t myhtml_tokenizer_state_after_doctype_name(myhtml_tree_t* tree, mythread_q
         
         html_offset = html_offset_n + 1;
     }
-    else if(strncasecmp(&html[html_offset], "SYSTEM", 6) == 0) {
+    else if(myhtml_strncasecmp(&html[html_offset], "SYSTEM", 6) == 0) {
         myhtml_parser_queue_set_attr(tree, qnode);
         
         tree->queue_attr->name_begin  = html_offset;

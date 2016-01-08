@@ -123,28 +123,13 @@ int main(int argc, const char * argv[])
     myhtml_tree_init(tree, myhtml);
     
     uint64_t tree_init_stop = myhtml_hperf_clock(NULL);
-    
+    uint64_t parse_start = myhtml_hperf_clock(NULL);
     
     for(size_t i = 0; i < 1; i++)
     {
         myhtml_parse(tree, res.html, res.size);
-        myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
+        //myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
     }
-    
-    myhtml_tag_index_t *tag_index = myhtml_tree_get_tag_index(tree);
-    myhtml_tag_index_node_t *index_node = myhtml_tag_index_first(tag_index, MyHTML_TAG_DIV);
-    myhtml_tree_node_t *node = myhtml_tag_index_tree_node(index_node);
-    
-    uint64_t parse_start = myhtml_hperf_clock(NULL);
-    for(size_t j = 0; j < 102400; j++) {
-        myhtml_tree_attr_t *attr = myhtml_attribute_add(tree, node, "key", 3, "value", 5);
-        myhtml_attribute_delete(tree, node, attr);
-    }
-    
-    myhtml_attribute_add(tree, node, "key", 3, "value", 5);
-    
-    myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
-    
     
     uint64_t parse_stop = myhtml_hperf_clock(NULL);
     uint64_t all_stop = myhtml_hperf_clock(NULL);

@@ -554,7 +554,7 @@ size_t myhtml_tokenizer_state_data(myhtml_tree_t* tree, mythread_queue_node_t* q
                     if(html_offset_n >= html_size)
                         return html_offset_n; // parse exit
                     
-                    if(strncasecmp(&html[html_offset], "DOCTYPE", 7) == 0)
+                    if(myhtml_strncasecmp(&html[html_offset], "DOCTYPE", 7) == 0)
                     {
                         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_DOCTYPE_NAME;
                         
