@@ -32,7 +32,7 @@ extern "C" {
 
 #if defined(_WIN32) || defined(_WIN64)
 #define IS_OS_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 #ifdef DEBUG_MODE

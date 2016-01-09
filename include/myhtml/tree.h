@@ -66,7 +66,7 @@ struct myhtml_tree_node {
     enum myhtml_tree_node_flags flags;
     
     myhtml_tag_id_t tag_idx;
-    enum myhtml_namespace namespace;
+    enum myhtml_namespace my_namespace;
     
     myhtml_tree_node_t* prev;                // предыдущий ид элемента этого же уровня
     myhtml_tree_node_t* next;                // следеющий ид эелента этого же уровня
@@ -111,9 +111,9 @@ struct myhtml_async_args {
 
 struct myhtml_tree_doctype {
     mybool_t is_html;
-    char* name;
-    char* public;
-    char* system;
+    char* attr_name;
+    char* attr_public;
+    char* attr_system;
 };
 
 struct myhtml_tree_indexes {
@@ -179,7 +179,7 @@ struct myhtml_tree {
     enum myhtml_insertion_mode   orig_insert_mode;
     enum myhtml_tree_compat_mode compat_mode;
     enum myhtml_tree_flags       flags;
-    enum myhtml_namespace        namespace;
+    enum myhtml_namespace        my_namespace;
     mybool_t                     foster_parenting;
 };
 

@@ -67,7 +67,7 @@ struct myhtml_token_namespace_replacement {
     char* to;
     size_t to_size;
     
-    enum myhtml_namespace namespace;
+    enum myhtml_namespace my_namespace;
 };
 
 struct myhtml_token_attr {
@@ -81,7 +81,7 @@ struct myhtml_token_attr {
     size_t value_begin;
     size_t value_length;
     
-    enum myhtml_namespace namespace;
+    enum myhtml_namespace my_namespace;
 };
 
 struct myhtml_token_node {

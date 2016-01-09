@@ -301,7 +301,7 @@ myhtml_tree_node_t * myhtml_node_last_child(myhtml_tree_node_t *node)
 myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, enum myhtml_namespace my_namespace)
 {
     myhtml_tree_node_t *node = myhtml_tree_node_create(tree);
-    node->namespace = my_namespace;
+    node->my_namespace = my_namespace;
     return node;
 }
 
@@ -327,7 +327,7 @@ void myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node)
 
 enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node)
 {
-    return node->namespace;
+    return node->my_namespace;
 }
 
 myhtml_tag_id_t myhtml_node_tag_id(myhtml_tree_node_t *node)
@@ -410,7 +410,7 @@ myhtml_tree_attr_t * myhtml_attribute_prev(myhtml_tree_attr_t *attr)
 
 enum myhtml_namespace myhtml_attribute_namespace(myhtml_tree_attr_t *attr)
 {
-    return attr->namespace;
+    return attr->my_namespace;
 }
 
 const char * myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length)

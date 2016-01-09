@@ -164,7 +164,7 @@ void myhtml_token_attr_clean(myhtml_token_attr_t* attr)
     attr->name_length  = 0;
     attr->value_begin  = 0;
     attr->value_length = 0;
-    attr->namespace    = MyHTML_NAMESPACE_UNDEF;
+    attr->my_namespace = MyHTML_NAMESPACE_UNDEF;
     
     myhtml_string_clean(&attr->entry);
 }
@@ -403,9 +403,9 @@ void myhtml_token_strict_doctype_by_token(myhtml_token_t* token, myhtml_token_no
     if(attr && attr->name_length) {
         data = attr->entry.data;
         
-        _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->name);
+        _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->attr_name);
         
-        if(strcmp("html", return_doctype->name))
+        if(strcmp("html", return_doctype->attr_name))
              return_doctype->is_html = myfalse;
         else
              return_doctype->is_html = mytrue;
@@ -413,17 +413,17 @@ void myhtml_token_strict_doctype_by_token(myhtml_token_t* token, myhtml_token_no
     else {
         return_doctype->is_html = myfalse;
         
-        if(return_doctype->name)
-            myfree(return_doctype->name);
-        return_doctype->name = NULL;
+        if(return_doctype->attr_name)
+            myfree(return_doctype->attr_name);
+        return_doctype->attr_name = NULL;
         
-        if(return_doctype->public)
-            myfree(return_doctype->public);
-        return_doctype->public = NULL;
+        if(return_doctype->attr_public)
+            myfree(return_doctype->attr_public);
+        return_doctype->attr_public = NULL;
         
-        if(return_doctype->system)
-            myfree(return_doctype->system);
-        return_doctype->system = NULL;
+        if(return_doctype->attr_system)
+            myfree(return_doctype->attr_system);
+        return_doctype->attr_system = NULL;
         
         return;
     }
@@ -442,29 +442,29 @@ void myhtml_token_strict_doctype_by_token(myhtml_token_t* token, myhtml_token_no
             if(attr && attr->name_length) {
                 data = attr->entry.data;
                 
-                _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->public);
+                _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->attr_public);
                 
                 // try see system
                 attr = attr->next;
                 
                 if(attr && attr->name_length) {
                     data = attr->entry.data;
-                    _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->system);
+                    _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->attr_system);
                 }
                 else {
-                    if(return_doctype->system)
-                        myfree(return_doctype->system);
-                    return_doctype->system = NULL;
+                    if(return_doctype->attr_system)
+                        myfree(return_doctype->attr_system);
+                    return_doctype->attr_system = NULL;
                 }
             }
             else {
-                if(return_doctype->public)
-                    myfree(return_doctype->public);
-                return_doctype->public = NULL;
+                if(return_doctype->attr_public)
+                    myfree(return_doctype->attr_public);
+                return_doctype->attr_public = NULL;
                 
-                if(return_doctype->system)
-                    myfree(return_doctype->system);
-                return_doctype->system = NULL;
+                if(return_doctype->attr_system)
+                    myfree(return_doctype->attr_system);
+                return_doctype->attr_system = NULL;
             }
         }
         else if(strcmp("SYSTEM", &data[attr->name_begin]) == 0)
@@ -473,58 +473,58 @@ void myhtml_token_strict_doctype_by_token(myhtml_token_t* token, myhtml_token_no
             
             if(attr && attr->name_length) {
                 data = attr->entry.data;
-                _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->system);
+                _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->attr_system);
             }
             else {
-                if(return_doctype->public)
-                    myfree(return_doctype->public);
-                return_doctype->public = NULL;
+                if(return_doctype->attr_public)
+                    myfree(return_doctype->attr_public);
+                return_doctype->attr_public = NULL;
                 
-                if(return_doctype->system)
-                    myfree(return_doctype->system);
-                return_doctype->system = NULL;
+                if(return_doctype->attr_system)
+                    myfree(return_doctype->attr_system);
+                return_doctype->attr_system = NULL;
             }
         }
         else {
-            if(return_doctype->public)
-                myfree(return_doctype->public);
-            return_doctype->public = NULL;
+            if(return_doctype->attr_public)
+                myfree(return_doctype->attr_public);
+            return_doctype->attr_public = NULL;
             
-            if(return_doctype->system)
-                myfree(return_doctype->system);
-            return_doctype->system = NULL;
+            if(return_doctype->attr_system)
+                myfree(return_doctype->attr_system);
+            return_doctype->attr_system = NULL;
         }
     }
 }
 
 mybool_t myhtml_token_doctype_check_html_4_0(myhtml_tree_doctype_t* return_doctype)
 {
-    return strcmp(return_doctype->public, "-//W3C//DTD HTML 4.0//EN") &&
-    (return_doctype->system == NULL || strcmp(return_doctype->system, "http://www.w3.org/TR/REC-html40/strict.dtd"));
+    return strcmp(return_doctype->attr_public, "-//W3C//DTD HTML 4.0//EN") &&
+    (return_doctype->attr_system == NULL || strcmp(return_doctype->attr_system, "http://www.w3.org/TR/REC-html40/strict.dtd"));
 }
 
 mybool_t myhtml_token_doctype_check_html_4_01(myhtml_tree_doctype_t* return_doctype)
 {
-    return strcmp(return_doctype->public, "-//W3C//DTD HTML 4.01//EN") &&
-    (return_doctype->system == NULL || strcmp(return_doctype->system, "http://www.w3.org/TR/html4/strict.dtd"));
+    return strcmp(return_doctype->attr_public, "-//W3C//DTD HTML 4.01//EN") &&
+    (return_doctype->attr_system == NULL || strcmp(return_doctype->attr_system, "http://www.w3.org/TR/html4/strict.dtd"));
 }
 
 mybool_t myhtml_token_doctype_check_xhtml_1_0(myhtml_tree_doctype_t* return_doctype)
 {
-    if(return_doctype->system == NULL)
+    if(return_doctype->attr_system == NULL)
         return mytrue;
     
-    return strcmp(return_doctype->public, "-//W3C//DTD XHTML 1.0 Strict//EN") &&
-    strcmp(return_doctype->system, "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd");
+    return strcmp(return_doctype->attr_public, "-//W3C//DTD XHTML 1.0 Strict//EN") &&
+    strcmp(return_doctype->attr_system, "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd");
 }
 
 mybool_t myhtml_token_doctype_check_xhtml_1_1(myhtml_tree_doctype_t* return_doctype)
 {
-    if(return_doctype->system == NULL)
+    if(return_doctype->attr_system == NULL)
         return mytrue;
     
-    return strcmp(return_doctype->public, "-//W3C//DTD XHTML 1.1//EN") &&
-    strcmp(return_doctype->system, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
+    return strcmp(return_doctype->attr_public, "-//W3C//DTD XHTML 1.1//EN") &&
+    strcmp(return_doctype->attr_system, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
 }
 
 mybool_t myhtml_token_release_and_check_doctype_attributes(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)
@@ -534,14 +534,14 @@ mybool_t myhtml_token_release_and_check_doctype_attributes(myhtml_token_t* token
     
     myhtml_token_strict_doctype_by_token(token, target, return_doctype);
     
-    if(return_doctype->name == NULL)
+    if(return_doctype->attr_name == NULL)
         return myfalse;
     
     if((return_doctype->is_html ||
-       return_doctype->public ||
-       (return_doctype->system && strcmp(return_doctype->system, "about:legacy-compat"))))
+       return_doctype->attr_public ||
+       (return_doctype->attr_system && strcmp(return_doctype->attr_system, "about:legacy-compat"))))
     {
-        if(return_doctype->public == NULL)
+        if(return_doctype->attr_public == NULL)
             return myfalse;
         
         if(return_doctype->is_html &&
@@ -594,7 +594,7 @@ void myhtml_token_adjust_foreign_attributes(myhtml_token_node_t* target)
             attr->name_length = myhtml_token_attr_namespace_replacement[i].to_size;
             attr->entry.data[attr->name_length] = '\0';
             
-            attr->namespace = myhtml_token_attr_namespace_replacement[i].namespace;
+            attr->my_namespace = myhtml_token_attr_namespace_replacement[i].my_namespace;
         }
     }
 }

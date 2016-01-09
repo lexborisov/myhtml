@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include "myhtml/myosi.h"
+
 #if !defined(IS_OS_WINDOWS)
 #   include <pthread.h>
 #   include <semaphore.h>
@@ -35,7 +37,6 @@ extern "C" {
 #include <fcntl.h>
 #include <errno.h>
 
-#include "myhtml/myosi.h"
 #include "myhtml/myhtml.h"
 #include "myhtml/tree.h"
 #include "myhtml/mystring.h"

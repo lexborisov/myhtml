@@ -71,7 +71,7 @@ myhtml_status_t myhtml_hread_sem_create(mythread_t *mythread, mythread_context_t
     ctx->sem_name = calloc(1024, sizeof(wchar_t));
     
     char tmp[1024] = {0};
-    sprintf_s(tmp, 1024, "Global/%s%lus%lup%lu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
+    sprintf_s(tmp, 1024, "Global/%s%zus%zup%zu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
     
     size_t retval = 0;
     mbstowcs_s(&retval, ctx->sem_name, 1024, tmp, strlen(tmp) + 1);

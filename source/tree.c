@@ -105,9 +105,9 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->fragment  = NULL;
     
     tree->doctype.is_html = myfalse;
-    tree->doctype.name    = NULL;
-    tree->doctype.public  = NULL;
-    tree->doctype.system  = NULL;
+    tree->doctype.attr_name    = NULL;
+    tree->doctype.attr_public  = NULL;
+    tree->doctype.attr_system  = NULL;
     
     tree->node_head = 0;
     tree->node_form = 0;
@@ -119,7 +119,7 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->tmp_qnode        = NULL;
     tree->flags            = MyHTML_TREE_FLAGS_CLEAN;
     tree->foster_parenting = myfalse;
-    tree->namespace        = MyHTML_NAMESPACE_HTML;
+    tree->my_namespace     = MyHTML_NAMESPACE_HTML;
     
     myhtml_tree_active_formatting_clean(tree);
     myhtml_tree_open_elements_clean(tree);
@@ -144,9 +144,9 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->fragment  = NULL;
     
     tree->doctype.is_html = myfalse;
-    tree->doctype.name    = NULL;
-    tree->doctype.public  = NULL;
-    tree->doctype.system  = NULL;
+    tree->doctype.attr_name    = NULL;
+    tree->doctype.attr_public  = NULL;
+    tree->doctype.attr_system  = NULL;
     
     tree->node_head = 0;
     tree->node_form = 0;
@@ -158,7 +158,7 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->tmp_qnode        = NULL;
     tree->flags            = MyHTML_TREE_FLAGS_CLEAN;
     tree->foster_parenting = myfalse;
-    tree->namespace        = MyHTML_NAMESPACE_HTML;
+    tree->my_namespace     = MyHTML_NAMESPACE_HTML;
     
     myhtml_tree_active_formatting_clean(tree);
     myhtml_tree_open_elements_clean(tree);
@@ -202,7 +202,7 @@ void myhtml_tree_node_clean(myhtml_tree_node_t* tree_node)
     tree_node->parent        = 0;
     tree_node->last_child    = 0;
     tree_node->token         = 0;
-    tree_node->namespace     = MyHTML_NAMESPACE_HTML;
+    tree_node->my_namespace  = MyHTML_NAMESPACE_HTML;
 }
 
 myhtml_tree_indexes_t * myhtml_tree_index_create(myhtml_tree_t* tree, myhtml_tag_t* tags)
@@ -409,7 +409,7 @@ myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_t* tree, myhtml_tree_nod
     
     new_node->token            = myhtml_token_node_clone(tree->token, node->token, tree->mcasync_token_id, tree->mcasync_attr_id);
     new_node->tag_idx          = node->tag_idx;
-    new_node->namespace        = node->namespace;
+    new_node->my_namespace     = node->my_namespace;
     new_node->token->type     |= MyHTML_TOKEN_TYPE_DONE;
     
     return new_node;
@@ -431,9 +431,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert_by_token(myhtml_tree_t* tree, myhtm
 {
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->tag_idx   = token->tag_ctx_idx;
-    node->token     = token;
-    node->namespace = my_namespace;
+    node->tag_idx      = token->tag_ctx_idx;
+    node->token        = token;
+    node->my_namespace = my_namespace;
     
     enum myhtml_tree_insertion_mode mode;
     myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
@@ -450,9 +450,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert(myhtml_tree_t* tree, myhtml_tag_id_
 {
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->token     = NULL;
-    node->tag_idx   = tag_idx;
-    node->namespace = my_namespace;
+    node->token        = NULL;
+    node->tag_idx      = tag_idx;
+    node->my_namespace = my_namespace;
     
     enum myhtml_tree_insertion_mode mode;
     myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
@@ -477,7 +477,7 @@ myhtml_tree_node_t * myhtml_tree_node_insert_comment(myhtml_tree_t* tree, myhtml
     }
     
     myhtml_tree_node_insert_by_mode(tree, parent, node, mode);
-    node->namespace = parent->namespace;
+    node->my_namespace = parent->my_namespace;
     
     myhtml_tree_index_append(tree, node);
     
@@ -488,9 +488,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert_doctype(myhtml_tree_t* tree, myhtml
 {
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->token     = token;
-    node->namespace = MyHTML_NAMESPACE_HTML;
-    node->tag_idx   = MyHTML_TAG__DOCTYPE;
+    node->token        = token;
+    node->my_namespace = MyHTML_NAMESPACE_HTML;
+    node->tag_idx      = MyHTML_TAG__DOCTYPE;
     
     myhtml_tree_node_add_child(tree, tree->document, node);
     myhtml_tree_index_append(tree, node);
@@ -507,8 +507,8 @@ myhtml_tree_node_t * myhtml_tree_node_insert_root(myhtml_tree_t* tree, myhtml_to
     else
         node->tag_idx = MyHTML_TAG_HTML;
     
-    node->token     = token;
-    node->namespace = my_namespace;
+    node->token        = token;
+    node->my_namespace = my_namespace;
     
     myhtml_tree_node_add_child(tree, tree->document, node);
     myhtml_tree_open_elements_append(tree, node);
@@ -527,9 +527,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert_text(myhtml_tree_t* tree, myhtml_to
     
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->tag_idx   = MyHTML_TAG__TEXT;
-    node->token     = token;
-    node->namespace = adjusted_location->namespace;
+    node->tag_idx      = MyHTML_TAG__TEXT;
+    node->token        = token;
+    node->my_namespace = adjusted_location->my_namespace;
     
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_index_append(tree, node);
@@ -555,9 +555,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert_foreign_element(myhtml_tree_t* tree
     
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->tag_idx   = token->tag_ctx_idx;
-    node->token     = token;
-    node->namespace = adjusted_location->namespace;
+    node->tag_idx      = token->tag_ctx_idx;
+    node->token        = token;
+    node->my_namespace = adjusted_location->my_namespace;
     
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_open_elements_append(tree, node);
@@ -573,9 +573,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert_html_element(myhtml_tree_t* tree, m
     
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->tag_idx   = token->tag_ctx_idx;
-    node->token     = token;
-    node->namespace = MyHTML_NAMESPACE_HTML;
+    node->tag_idx      = token->tag_ctx_idx;
+    node->token        = token;
+    node->my_namespace = MyHTML_NAMESPACE_HTML;
     
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_open_elements_append(tree, node);
@@ -595,7 +595,7 @@ myhtml_tree_node_t * myhtml_tree_element_in_scope(myhtml_tree_t* tree, myhtml_ta
         
         if(list[i]->tag_idx == tag_idx)
             return list[i];
-        else if(tags_context[list[i]->tag_idx].cats[list[i]->namespace] & category)
+        else if(tags_context[list[i]->tag_idx].cats[list[i]->my_namespace] & category)
             break;
     }
     
@@ -613,7 +613,7 @@ mybool_t myhtml_tree_element_in_scope_by_node(myhtml_tree_t* tree, myhtml_tree_n
         
         if(list[i] == node)
             return mytrue;
-        else if(tags_context[list[i]->tag_idx].cats[list[i]->namespace] & category)
+        else if(tags_context[list[i]->tag_idx].cats[list[i]->my_namespace] & category)
             break;
     }
     
@@ -1288,7 +1288,7 @@ void myhtml_tree_active_formatting_append_with_check(myhtml_tree_t* tree, myhtml
             myhtml_token_node_wait_for_done(list[i]->token);
             myhtml_token_node_wait_for_done(node->token);
             
-            if(list[i]->namespace == node->namespace &&
+            if(list[i]->my_namespace == node->my_namespace &&
                list[i]->tag_idx == node->tag_idx &&
                myhtml_token_attr_compare(list[i]->token, node->token))
             {
@@ -1470,7 +1470,7 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
 #endif
     
     // step 1
-    if(current_node->namespace == MyHTML_NAMESPACE_HTML && current_node->tag_idx == subject_tag_idx &&
+    if(current_node->my_namespace == MyHTML_NAMESPACE_HTML && current_node->tag_idx == subject_tag_idx &&
        myhtml_tree_active_formatting_find(tree, current_node, NULL) == myfalse)
     {
         myhtml_tree_open_elements_pop(tree);
@@ -1536,7 +1536,7 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
         myhtml_tree_node_t* furthest_block = NULL;
         size_t idx_furthest_block = 0;
         for (idx_furthest_block = oel_format_el_idx; idx_furthest_block < tree->open_elements->length; idx_furthest_block++) {
-            if(tags_context[ oel_list[idx_furthest_block]->tag_idx ].cats[oel_list[idx_furthest_block]->namespace] & MyHTML_TAG_CATEGORIES_SPECIAL) {
+            if(tags_context[ oel_list[idx_furthest_block]->tag_idx ].cats[oel_list[idx_furthest_block]->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL) {
                 furthest_block = oel_list[idx_furthest_block];
                 break;
             }
@@ -1634,7 +1634,7 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
             // step 13.7
             myhtml_tree_node_t* clone = myhtml_tree_node_clone(tree, node);
             
-            clone->namespace = MyHTML_NAMESPACE_HTML;
+            clone->my_namespace = MyHTML_NAMESPACE_HTML;
             
             afe_list[afe_node_index] = clone;
             oel_list[node_index] = clone;
@@ -1677,7 +1677,7 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
         // step 15
         myhtml_tree_node_t* new_formatting_element = myhtml_tree_node_clone(tree, formatting_element);
         
-        new_formatting_element->namespace = MyHTML_NAMESPACE_HTML;
+        new_formatting_element->my_namespace = MyHTML_NAMESPACE_HTML;
         
         // step 16
         myhtml_tree_node_t * furthest_block_child = furthest_block->child;
@@ -2115,7 +2115,7 @@ void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_no
 
 mybool_t myhtml_tree_is_mathml_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 {
-    if(node->namespace == MyHTML_NAMESPACE_MATHML &&
+    if(node->my_namespace == MyHTML_NAMESPACE_MATHML &&
        (node->tag_idx == MyHTML_TAG_MI ||
         node->tag_idx == MyHTML_TAG_MO ||
         node->tag_idx == MyHTML_TAG_MN ||
@@ -2129,14 +2129,14 @@ mybool_t myhtml_tree_is_mathml_integration_point(myhtml_tree_t* tree, myhtml_tre
 
 mybool_t myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 {
-    if(node->namespace == MyHTML_NAMESPACE_SVG &&
+    if(node->my_namespace == MyHTML_NAMESPACE_SVG &&
        (node->tag_idx == MyHTML_TAG_FOREIGNOBJECT ||
         node->tag_idx == MyHTML_TAG_DESC ||
         node->tag_idx == MyHTML_TAG_TITLE)
        )
         return mytrue;
     
-    if(node->namespace == MyHTML_NAMESPACE_MATHML &&
+    if(node->my_namespace == MyHTML_NAMESPACE_MATHML &&
        node->tag_idx == MyHTML_TAG_ANNOTATION_XML && node->token)
     {
         myhtml_token_node_wait_for_done(node->token);

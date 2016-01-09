@@ -49,8 +49,8 @@ mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t*
             
             // fix for tokenizer
             if(tree->doctype.is_html == myfalse &&
-               (tree->doctype.public == NULL ||
-               tree->doctype.system == NULL))
+               (tree->doctype.attr_public == NULL ||
+               tree->doctype.attr_system == NULL))
             {
                 tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
             }
@@ -333,10 +333,10 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
                 // state 2
                 myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
                 
-                node->tag_idx   = MyHTML_TAG_SCRIPT;
-                node->token     = token;
-                node->namespace = MyHTML_NAMESPACE_HTML;
-                node->flags     = MyHTML_TREE_NODE_PARSER_INSERTED|MyHTML_TREE_NODE_BLOCKING;
+                node->tag_idx      = MyHTML_TAG_SCRIPT;
+                node->token        = token;
+                node->my_namespace = MyHTML_NAMESPACE_HTML;
+                node->flags        = MyHTML_TREE_NODE_PARSER_INSERTED|MyHTML_TREE_NODE_BLOCKING;
                 
                 myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, insert_mode);
                 myhtml_tree_open_elements_append(tree, node);
@@ -562,7 +562,7 @@ mybool_t myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml
             return myfalse;
         }
         
-        if(tags_context[node->tag_idx].cats[node->namespace] & MyHTML_TAG_CATEGORIES_SPECIAL) {
+        if(tags_context[node->tag_idx].cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL) {
             break;
         }
     }
@@ -693,7 +693,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 
                 // step 2
                 //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                //if(current_node->namespace != MyHTML_NAMESPACE_HTML)
+                //if(current_node->my_namespace != MyHTML_NAMESPACE_HTML)
                 //    parse error
                 
                 // step 3
@@ -831,7 +831,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                         node = list[i];
                         break;
                     }
-                    else if(tags_context[list[i]->tag_idx].cats[list[i]->namespace] & MyHTML_TAG_CATEGORIES_SCOPE)
+                    else if(tags_context[list[i]->tag_idx].cats[list[i]->my_namespace] & MyHTML_TAG_CATEGORIES_SCOPE)
                         break;
                 }
                 
@@ -1172,7 +1172,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                         myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_LI, myfalse);
                         break;
                     }
-                    else if(tags_context[node->tag_idx].cats[node->namespace] & MyHTML_TAG_CATEGORIES_SPECIAL &&
+                    else if(tags_context[node->tag_idx].cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL &&
                             node->tag_idx != MyHTML_TAG_ADDRESS && node->tag_idx != MyHTML_TAG_DIV &&
                             node->tag_idx != MyHTML_TAG_P)
                     {
@@ -1212,7 +1212,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                         myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_DT, myfalse);
                         break;
                     }
-                    else if(tags_context[node->tag_idx].cats[node->namespace] & MyHTML_TAG_CATEGORIES_SPECIAL &&
+                    else if(tags_context[node->tag_idx].cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL &&
                             node->tag_idx != MyHTML_TAG_ADDRESS && node->tag_idx != MyHTML_TAG_DIV &&
                             node->tag_idx != MyHTML_TAG_P)
                     {
@@ -1629,7 +1629,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_token_adjust_foreign_attributes(token);
                 
                 myhtml_tree_node_t* current_node = myhtml_tree_node_insert_foreign_element(tree, token);
-                current_node->namespace = MyHTML_NAMESPACE_MATHML;
+                current_node->my_namespace = MyHTML_NAMESPACE_MATHML;
                 
                 if(token->type & MyHTML_TOKEN_TYPE_CLOSE_SELF)
                     myhtml_tree_open_elements_pop(tree);
@@ -1647,7 +1647,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_token_adjust_foreign_attributes(token);
                 
                 myhtml_tree_node_t* current_node = myhtml_tree_node_insert_foreign_element(tree, token);
-                current_node->namespace = MyHTML_NAMESPACE_SVG;
+                current_node->my_namespace = MyHTML_NAMESPACE_SVG;
                 
                 if(token->type & MyHTML_TOKEN_TYPE_CLOSE_SELF)
                     myhtml_tree_open_elements_pop(tree);
@@ -2380,7 +2380,7 @@ mybool_t myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t*
                 
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
-                if(current_node->namespace != MyHTML_NAMESPACE_HTML ||
+                if(current_node->my_namespace != MyHTML_NAMESPACE_HTML ||
                    current_node->tag_idx != token->tag_ctx_idx)
                 {
                     // parse error
@@ -2808,9 +2808,9 @@ mybool_t myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node
                 // state 2
                 myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
                 
-                node->tag_idx   = MyHTML_TAG__COMMENT;
-                node->token     = token;
-                node->namespace = adjusted_location->namespace;
+                node->tag_idx      = MyHTML_TAG__COMMENT;
+                node->token        = token;
+                node->my_namespace = adjusted_location->my_namespace;
                 
                 myhtml_tree_node_add_child(tree, adjusted_location, node);
                 
@@ -2996,9 +2996,9 @@ mybool_t myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_toke
                 myhtml_tree_node_t* adjusted_location = tree->document;
                 myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
                 
-                node->tag_idx   = MyHTML_TAG__COMMENT;
-                node->token     = token;
-                node->namespace = adjusted_location->namespace;
+                node->tag_idx      = MyHTML_TAG__COMMENT;
+                node->token        = token;
+                node->my_namespace = adjusted_location->my_namespace;
                 
                 myhtml_tree_node_add_child(tree, adjusted_location, node);
                 break;
@@ -3043,9 +3043,9 @@ mybool_t myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_
                 myhtml_tree_node_t* adjusted_location = tree->document;
                 myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
                 
-                node->tag_idx   = MyHTML_TAG__COMMENT;
-                node->token     = token;
-                node->namespace = adjusted_location->namespace;
+                node->tag_idx      = MyHTML_TAG__COMMENT;
+                node->token        = token;
+                node->my_namespace = adjusted_location->my_namespace;
                 
                 myhtml_tree_node_add_child(tree, adjusted_location, node);
                 break;
@@ -3102,7 +3102,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content_end_other(myhtml_tree_t* tree,
             
             i--;
             
-            if(list[i]->namespace == MyHTML_NAMESPACE_HTML)
+            if(list[i]->my_namespace == MyHTML_NAMESPACE_HTML)
                 break;
         }
     }
@@ -3116,22 +3116,22 @@ mybool_t myhtml_insertion_mode_in_foreign_content_start_other(myhtml_tree_t* tre
     
     myhtml_token_node_wait_for_done(token);
     
-    if(adjusted_node->namespace == MyHTML_NAMESPACE_MATHML) {
+    if(adjusted_node->my_namespace == MyHTML_NAMESPACE_MATHML) {
         myhtml_token_adjust_mathml_attributes(token);
     }
-    else if(adjusted_node->namespace == MyHTML_NAMESPACE_SVG) {
+    else if(adjusted_node->my_namespace == MyHTML_NAMESPACE_SVG) {
         myhtml_token_adjust_svg_attributes(token);
     }
     
     myhtml_token_adjust_foreign_attributes(token);
     
     myhtml_tree_node_t* node = myhtml_tree_node_insert_foreign_element(tree, token);
-    node->namespace = adjusted_node->namespace;
+    node->my_namespace = adjusted_node->my_namespace;
     
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE_SELF)
     {
         if(token->tag_ctx_idx == MyHTML_TAG_SCRIPT &&
-           node->namespace == MyHTML_NAMESPACE_SVG)
+           node->my_namespace == MyHTML_NAMESPACE_SVG)
         {
             return myhtml_insertion_mode_in_foreign_content_end_other(tree, myhtml_tree_current_node(tree), token);
         }
@@ -3150,7 +3150,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_to
         
         if(token->tag_ctx_idx == MyHTML_TAG_SCRIPT &&
            current_node->tag_idx == MyHTML_TAG_SCRIPT &&
-           current_node->namespace == MyHTML_NAMESPACE_SVG)
+           current_node->my_namespace == MyHTML_NAMESPACE_SVG)
         {
             myhtml_tree_open_elements_pop(tree);
             // TODO: now script is disable, skip this
@@ -3245,7 +3245,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_to
                     }
                     while(current_node && !(myhtml_tree_is_mathml_integration_point(tree, current_node) ||
                                             myhtml_tree_is_html_integration_point(tree, current_node) ||
-                                            current_node->namespace == MyHTML_NAMESPACE_HTML));
+                                            current_node->my_namespace == MyHTML_NAMESPACE_HTML));
                     
                     return mytrue;
                 }
@@ -3268,7 +3268,7 @@ mybool_t myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* 
 {
     myhtml_tree_node_t* adjusted_node = myhtml_tree_adjusted_current_node(tree);
     
-    if(tree->open_elements->length == 0 || adjusted_node->namespace == MyHTML_NAMESPACE_HTML) {
+    if(tree->open_elements->length == 0 || adjusted_node->my_namespace == MyHTML_NAMESPACE_HTML) {
         return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
     }
     else if(myhtml_tree_is_mathml_integration_point(tree, adjusted_node))
@@ -3280,7 +3280,7 @@ mybool_t myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* 
     }
     
     if(adjusted_node->tag_idx == MyHTML_TAG_ANNOTATION_XML &&
-       adjusted_node->namespace == MyHTML_NAMESPACE_MATHML &&
+       adjusted_node->my_namespace == MyHTML_NAMESPACE_MATHML &&
        token->tag_ctx_idx != MyHTML_TAG_SVG)
     {
         return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
