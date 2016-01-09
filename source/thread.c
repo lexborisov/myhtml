@@ -1,5 +1,5 @@
 /*
- Copyright 2015 Alexander Borisov
+ Copyright 2015-2016 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,6 +18,227 @@
 
 #include "thread.h"
 
+#if defined(IS_OS_WINDOWS)
+/***********************************************************************************
+ *
+ * For Windows
+ *
+ ***********************************************************************************/
+myhtml_status_t myhtml_thread_create(mythread_t *mythread, mythread_list_t *thr, void *work_func)
+{
+    thr->pth = CreateThread(NULL,                   // default security attributes
+                            0,                      // use default stack size
+                            work_func,              // thread function name
+                            &thr->data,             // argument to thread function
+                            0,                      // use default creation flags
+                            NULL);                  // returns the thread identifier
+
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_join(mythread_t *mythread, mythread_list_t *thr)
+{
+    WaitForSingleObject(thr->pth, INFINITE);
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_cancel(mythread_t *mythread, mythread_list_t *thr)
+{
+    TerminateThread(thr->pth, 0);
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_attr_init(mythread_t *mythread)
+{
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_attr_clean(mythread_t *mythread)
+{
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_attr_destroy(mythread_t *mythread)
+{
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_sem_create(mythread_t *mythread, mythread_context_t *ctx, size_t prefix_id)
+{
+    ctx->sem_name = calloc(1024, sizeof(wchar_t));
+    
+    char tmp[1024] = {0};
+    sprintf_s(tmp, 1024, "Global/%s%lus%lup%lu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
+    
+    size_t retval = 0;
+    mbstowcs_s(&retval, ctx->sem_name, 1024, tmp, strlen(tmp) + 1);
+    
+    ctx->sem_name_size = wcslen(ctx->sem_name);
+    
+    ctx->sem = CreateSemaphore(NULL,           // default security attributes
+                               0,              // initial count
+                               0,              // maximum count
+                               ctx->sem_name); // unnamed semaphore
+    
+    if (ctx->sem == NULL) {
+        free(ctx->sem_name);
+        
+        mythread->sys_last_error = GetLastError();
+        return MyHTML_STATUS_THREAD_ERROR_SEM_CREATE;
+    }
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_sem_post(mythread_t *mythread, mythread_context_t *ctx)
+{
+    if(!ReleaseSemaphore(ctx->sem, 1, NULL)) {
+        return MyHTML_STATUS_OK;
+    }
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_sem_wait(mythread_t *mythread, mythread_context_t *ctx)
+{
+    DWORD dwWaitResult = WaitForSingleObject(ctx->sem, INFINITE);
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_sem_close(mythread_t *mythread, mythread_context_t *ctx)
+{
+    CloseHandle(ctx->sem);
+    
+    return MyHTML_STATUS_OK;
+}
+
+void myhtml_thread_nanosleep(const struct timespec *tomeout)
+{
+}
+
+#else /* defined(IS_OS_WINDOWS) */
+/***********************************************************************************
+ *
+ * For all unix system. POSIX pthread
+ *
+ ***********************************************************************************/
+
+myhtml_status_t myhtml_thread_create(mythread_t *mythread, mythread_list_t *thr, void *work_func)
+{
+    pthread_create(&thr->pth, mythread->attr,
+                   work_func,
+                   (void*)(&thr->data));
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_join(mythread_t *mythread, mythread_list_t *thr)
+{
+    pthread_join(thr->pth, NULL);
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_cancel(mythread_t *mythread, mythread_list_t *thr)
+{
+    pthread_cancel(thr->pth);
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_attr_init(mythread_t *mythread)
+{
+    mythread->attr = (pthread_attr_t*)calloc(1, sizeof(pthread_attr_t));
+    
+    if(mythread->attr == NULL)
+        return MyHTML_STATUS_THREAD_ERROR_ATTR_MALLOC;
+    
+    mythread->sys_last_error = pthread_attr_init(mythread->attr);
+    if(mythread->sys_last_error)
+        return MyHTML_STATUS_THREAD_ERROR_ATTR_INIT;
+    
+    mythread->sys_last_error = pthread_attr_setdetachstate(mythread->attr, PTHREAD_CREATE_JOINABLE);
+    if(mythread->sys_last_error)
+        return MyHTML_STATUS_THREAD_ERROR_ATTR_SET;
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_attr_clean(mythread_t *mythread)
+{
+    mythread->attr = NULL;
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_thread_attr_destroy(mythread_t *mythread)
+{
+    if(mythread->attr) {
+        mythread->sys_last_error = pthread_attr_destroy(mythread->attr);
+        
+        free(mythread->attr);
+        mythread->attr = NULL;
+        
+        if(mythread->sys_last_error)
+            return MyHTML_STATUS_THREAD_ERROR_ATTR_DESTROY;
+    }
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_sem_create(mythread_t *mythread, mythread_context_t *ctx, size_t prefix_id)
+{
+    ctx->sem_name = calloc(1024, sizeof(char));
+    
+    sprintf(ctx->sem_name, "/%s%zus%zup%zu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
+    
+    ctx->sem_name_size = strlen(ctx->sem_name);
+    
+    ctx->sem = sem_open(ctx->sem_name, O_CREAT, S_IRWXU|S_IRWXG, 0);
+    
+    if(ctx->sem == SEM_FAILED) {
+        free(ctx->sem_name);
+        
+        mythread->sys_last_error = errno;
+        return MyHTML_STATUS_THREAD_ERROR_SEM_CREATE;
+    }
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_sem_post(mythread_t *mythread, mythread_context_t *ctx)
+{
+    sem_post(ctx->sem);
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_sem_wait(mythread_t *mythread, mythread_context_t *ctx)
+{
+    sem_wait(ctx->sem);
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_sem_close(mythread_t *mythread, mythread_context_t *ctx)
+{
+    sem_close(ctx->sem);
+    return MyHTML_STATUS_OK;
+}
+
+void myhtml_thread_nanosleep(const struct timespec *tomeout)
+{
+    nanosleep(tomeout, NULL);
+}
+
+#endif /* !defined(IS_OS_WINDOWS) */
+
+
+/*
+ *
+ * MyTHREAD logic
+ *
+ */
+
 mythread_t * mythread_create(void)
 {
     return calloc(1, sizeof(mythread_t));
@@ -32,19 +253,9 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
     
     if(thread_count)
     {
-        mythread->attr = (pthread_attr_t*)calloc(1, sizeof(pthread_attr_t));
-        
-        if(mythread->attr == NULL)
-            return MyHTML_STATUS_THREAD_ERROR_ATTR_MALLOC;
-        
-        mythread->sys_last_error = pthread_attr_init(mythread->attr);
-        if(mythread->sys_last_error)
-            return MyHTML_STATUS_THREAD_ERROR_ATTR_INIT;
-        
-        mythread->sys_last_error = pthread_attr_setdetachstate(mythread->attr, PTHREAD_CREATE_JOINABLE);
-        
-        if(mythread->sys_last_error)
-            return MyHTML_STATUS_THREAD_ERROR_ATTR_SET;
+        myhtml_status_t status = myhtml_thread_attr_init(mythread);
+        if(status)
+            return status;
         
         mythread->pth_list_root   = 1;
         mythread->pth_list_length = 1;
@@ -55,7 +266,8 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
             return MyHTML_STATUS_THREAD_ERROR_LIST_INIT;
     }
     else {
-        mythread->attr            = NULL;
+        myhtml_thread_attr_clean(mythread);
+        
         mythread->sys_last_error  = 0;
         mythread->pth_list_root   = 1;
         mythread->pth_list_length = 1;
@@ -81,7 +293,11 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
                 return MyHTML_STATUS_THREAD_ERROR_SEM_PREFIX_MALLOC;
             }
             
+#if defined(IS_OS_WINDOWS)
+            strcpy_s(mythread->sem_prefix, mythread->sem_prefix_length, sem_prefix);
+#else
             strcpy(mythread->sem_prefix, sem_prefix);
+#endif
         }
     }
     
@@ -110,12 +326,7 @@ mythread_t * mythread_destroy(mythread_t *mythread, mybool_t self_destroy)
     if(mythread == NULL)
         return NULL;
     
-    if(mythread->attr) {
-        pthread_attr_destroy(mythread->attr);
-        
-        free(mythread->attr);
-        mythread->attr = NULL;
-    }
+    myhtml_thread_attr_destroy(mythread);
     
     if(mythread->pth_list) {
         mythread_resume_all(mythread);
@@ -125,7 +336,7 @@ mythread_t * mythread_destroy(mythread_t *mythread, mybool_t self_destroy)
         
         for (size_t i = mythread->pth_list_root; i < mythread->pth_list_length; i++)
         {
-            pthread_join(mythread->pth_list[i].pth, NULL);
+            myhtml_thread_join(mythread, &mythread->pth_list[i]);
             
             if(mythread->pth_list[i].data.sem_name) {
                 free(mythread->pth_list[i].data.sem_name);
@@ -154,26 +365,6 @@ mythread_t * mythread_destroy(mythread_t *mythread, mybool_t self_destroy)
     return mythread;
 }
 
-myhtml_status_t myhread_create_sem(mythread_t *mythread, mythread_context_t *ctx, size_t prefix_id)
-{
-    ctx->sem_name = calloc(1024, sizeof(char));
-    
-    sprintf(ctx->sem_name, "%s%zus%zup%zu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
-    
-    ctx->sem_name_size = strlen(ctx->sem_name);
-    
-    ctx->sem = sem_open(ctx->sem_name, O_CREAT, S_IRWXU|S_IRWXG, 0);
-    
-    if(ctx->sem == SEM_FAILED) {
-        free(ctx->sem_name);
-        
-        mythread->sys_last_error = errno;
-        return MyHTML_STATUS_THREAD_ERROR_SEM_CREATE;
-    }
-    
-    return MyHTML_STATUS_OK;
-}
-
 mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_f func, void *work_func, myhtml_status_t *status, size_t total_count)
 {
     mythread->sys_last_error = 0;
@@ -197,16 +388,16 @@ mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_f func, 
     thr->data.qnode    = NULL;
     thr->data.t_count  = total_count;
     
-    myhtml_status_t m_status = myhread_create_sem(mythread, &thr->data, 0);
+    myhtml_status_t m_status = myhtml_hread_sem_create(mythread, &thr->data, 0);
     
     if(m_status != MyHTML_STATUS_OK && status) {
         *status = m_status;
         return 0;
     }
     
-    pthread_create(&thr->pth, mythread->attr,
-                   work_func,
-                   (void*)(&thr->data));
+    m_status = myhtml_thread_create(mythread, thr, work_func);
+    if(m_status != MyHTML_STATUS_OK)
+        return 0;
     
     mythread->pth_list_length++;
     return thr->data.id;
@@ -256,10 +447,10 @@ mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml
             {
                 mythread_list_t *thr = &mythread->pth_list[n];
                 
-                pthread_cancel(thr->pth);
+                myhtml_thread_cancel(mythread, thr);
                 
-                sem_post(thr->data.sem);
-                sem_close(thr->data.sem);
+                myhtml_hread_sem_post(mythread, &thr->data);
+                myhtml_hread_sem_close(mythread, &thr->data);
                 
                 if(thr->data.sem_name)
                     free(thr->data.sem_name);
@@ -436,25 +627,11 @@ void mythread_wait_all(mythread_t *mythread)
     const struct timespec tomeout = {0, 10000};
     
     for (size_t idx = mythread->pth_list_root; idx < mythread->pth_list_length; idx++) {
-        //mythread_context_t *data = &mythread->pth_list[idx].data;
-        
         while(mythread->pth_list[idx].data.use < mythread->queue->nodes_uses) {
-            nanosleep(&tomeout, NULL);
+            myhtml_thread_nanosleep(&tomeout);
         }
     }
 }
-//
-//void mythread_batch_wait_all(mythread_t *mythread, mythread_id_t first_id)
-//{
-//    const struct timespec tomeout = {0, 10000};
-//
-//    for (size_t idx = first_id; idx < (mythread->batch_first_id + mythread->batch_count); idx++) {
-//        while(mythread->pth_list[idx].data.use < mythread->queue->nodes_uses) {
-//            nanosleep(&tomeout, NULL);
-//        }
-//    }
-//}
-//
 
 void mythread_stream_quit_all(mythread_t *mythread)
 {
@@ -486,7 +663,7 @@ void mythread_resume_all(mythread_t *mythread)
     mythread->batch_opt  = MyTHREAD_OPT_UNDEF;
     
     for (size_t idx = mythread->pth_list_root; idx < mythread->pth_list_length; idx++) {
-        sem_post(mythread->pth_list[idx].data.sem);
+        myhtml_hread_sem_post(mythread, &mythread->pth_list[idx].data);
     }
 }
 
@@ -498,26 +675,26 @@ void mythread_function_stream(void *arg)
     
     const struct timespec tomeout = {0, 10000};
     
-    sem_wait(ctx->sem);
+    myhtml_hread_sem_wait(mythread, ctx);
     
     do {
         while (ctx->use >= queue->nodes_uses) {
             if(mythread->stream_opt & MyTHREAD_OPT_WAIT) {
                 if(ctx->use >= queue->nodes_uses) {
                     ctx->opt = MyTHREAD_OPT_WAIT;
-                    sem_wait(ctx->sem);
+                    myhtml_hread_sem_wait(mythread, ctx);
                     ctx->opt = MyTHREAD_OPT_UNDEF;
                 }
             }
             else if(mythread->stream_opt & MyTHREAD_OPT_QUIT) {
                 if(ctx->use >= queue->nodes_uses) {
-                    sem_close(ctx->sem);
+                    myhtml_hread_sem_close(mythread, ctx);
                     ctx->opt = MyTHREAD_OPT_QUIT;
                     return;
                 }
             }
             
-            nanosleep(&tomeout, NULL);
+            myhtml_thread_nanosleep(&tomeout);
         }
         
         size_t pos = ctx->use / queue->nodes_size;
@@ -539,26 +716,26 @@ void mythread_function_batch(void *arg)
     
     const struct timespec tomeout = {0, 10000};
     
-    sem_wait(ctx->sem);
+    myhtml_hread_sem_wait(mythread, ctx);
     
     do {
         while (ctx->use >= queue->nodes_uses) {
             if(mythread->batch_opt & MyTHREAD_OPT_WAIT) {
                 if(ctx->use >= queue->nodes_uses) {
                     ctx->opt = MyTHREAD_OPT_WAIT;
-                    sem_wait(ctx->sem);
+                    myhtml_hread_sem_wait(mythread, ctx);
                     ctx->opt = MyTHREAD_OPT_UNDEF;
                 }
             }
             else if(mythread->batch_opt & MyTHREAD_OPT_QUIT) {
                 if(ctx->use >= queue->nodes_uses) {
-                    sem_close(ctx->sem);
+                    myhtml_hread_sem_close(mythread, ctx);
                     ctx->opt = MyTHREAD_OPT_QUIT;
                     return;
                 }
             }
             
-            nanosleep(&tomeout, NULL);
+            myhtml_thread_nanosleep(&tomeout);
         }
         
         size_t pos = ctx->use / queue->nodes_size;
@@ -571,4 +748,5 @@ void mythread_function_batch(void *arg)
     }
     while (1);
 }
+
 

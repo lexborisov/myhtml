@@ -18,6 +18,7 @@
 
 #ifndef MyHTML_MYSTRING_H
 #define MyHTML_MYSTRING_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {

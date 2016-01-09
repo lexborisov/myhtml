@@ -18,6 +18,7 @@
 
 #ifndef MyHTML_TOKENIZER_DOCTYPE_H
 #define MyHTML_TOKENIZER_DOCTYPE_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {

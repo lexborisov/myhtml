@@ -18,6 +18,7 @@
 
 #ifndef MyHTML_UTILS_MCOBJECT_ASYNC_H
 #define MyHTML_UTILS_MCOBJECT_ASYNC_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {

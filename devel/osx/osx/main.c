@@ -128,7 +128,7 @@ int main(int argc, const char * argv[])
     for(size_t i = 0; i < 1; i++)
     {
         myhtml_parse(tree, res.html, res.size);
-        //myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
+        myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
     }
     
     uint64_t parse_stop = myhtml_hperf_clock(NULL);

@@ -1957,7 +1957,7 @@ mybool_t myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node
         switch (token->tag_ctx_idx) {
             case MyHTML_TAG_CAPTION:
             {
-                if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_CAPTION, MyHTML_TAG_CATEGORIES_SCOPE_TABLE) == myfalse) {
+                if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_CAPTION, MyHTML_TAG_CATEGORIES_SCOPE_TABLE) == NULL) {
                     // parse error
                     break;
                 }
@@ -1978,7 +1978,7 @@ mybool_t myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node
               
             case MyHTML_TAG_TABLE:
             {
-                if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_CAPTION, MyHTML_TAG_CATEGORIES_SCOPE_TABLE) == myfalse) {
+                if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_CAPTION, MyHTML_TAG_CATEGORIES_SCOPE_TABLE) == NULL) {
                     // parse error
                     break;
                 }
@@ -2028,7 +2028,7 @@ mybool_t myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node
             case MyHTML_TAG_THEAD:
             case MyHTML_TAG_TR:
             {
-                if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_CAPTION, MyHTML_TAG_CATEGORIES_SCOPE_TABLE) == myfalse) {
+                if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_CAPTION, MyHTML_TAG_CATEGORIES_SCOPE_TABLE) == NULL) {
                     // parse error
                     break;
                 }

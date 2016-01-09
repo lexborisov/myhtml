@@ -18,6 +18,7 @@
 
 #ifndef MyHTML_UTILS_MCTREE_H
 #define MyHTML_UTILS_MCTREE_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {

@@ -18,6 +18,7 @@
 
 #ifndef MyHTML_THREAD_H
 #define MyHTML_THREAD_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,15 +28,20 @@ extern "C" {
 #include "myhtml/myhtml.h"
 #include "myhtml/tree.h"
 
-#include <pthread.h>
+#if defined(IS_OS_WINDOWS)
+    
+#else
+#   include <pthread.h>
+#   include <semaphore.h>
+#endif
+
 #include <time.h>
 #include <sys/stat.h>
 
-#include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
 
-#define MyTHREAD_SEM_NAME "/mythread"
+#define MyTHREAD_SEM_NAME "mythread"
 
 
 void mythread_function_stream(void *arg);
@@ -45,8 +51,14 @@ void mythread_function_batch(void *arg);
 struct mythread_context {
     mythread_id_t id;
     
-    sem_t *sem;
+#if defined(IS_OS_WINDOWS)
+    HANDLE sem;
+    wchar_t *sem_name;
+#else
     char *sem_name;
+    sem_t *sem;
+#endif
+    
     size_t sem_name_size;
     
     volatile size_t use;
@@ -61,7 +73,11 @@ struct mythread_context {
 };
 
 struct mythread_list {
+#if defined(IS_OS_WINDOWS)
+    HANDLE pth;
+#else
     pthread_t pth;
+#endif
     mythread_context_t data;
 };
 
@@ -81,7 +97,12 @@ struct mythread {
     char  *sem_prefix;
     size_t sem_prefix_length;
     
+#if defined(IS_OS_WINDOWS)
+    
+#else
     pthread_attr_t *attr;
+#endif
+    
     int sys_last_error;
     
     mythread_id_t batch_first_id;
@@ -107,6 +128,8 @@ void mythread_resume_all(mythread_t *mythread);
 
 void mythread_stream_quit_all(mythread_t *mythread);
 void mythread_batch_quit_all(mythread_t *mythread);
+
+void myhtml_thread_nanosleep(const struct timespec *tomeout);
 
 // queue
 struct mythread_queue_node {

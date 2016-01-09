@@ -18,6 +18,7 @@
 
 #ifndef MyHTML_MyHTML_API_H
 #define MyHTML_MyHTML_API_H
+#pragma once
 
 /**
  * @file myhtml/api.h
@@ -214,6 +215,7 @@ enum myhtml_tags {
 /**
  * @struct myhtml statuses
  */
+// base
 enum myhtml_status {
     MyHTML_STATUS_OK                                   = 0,
     MyHTML_STATUS_ERROR_MEMORY_ALLOCATION              = 1,
@@ -221,12 +223,13 @@ enum myhtml_status {
     MyHTML_STATUS_THREAD_ERROR_ATTR_MALLOC             = 11,
     MyHTML_STATUS_THREAD_ERROR_ATTR_INIT               = 12,
     MyHTML_STATUS_THREAD_ERROR_ATTR_SET                = 13,
-    MyHTML_STATUS_THREAD_ERROR_NO_SLOTS                = 14,
-    MyHTML_STATUS_THREAD_ERROR_BATCH_INIT              = 15,
-    MyHTML_STATUS_THREAD_ERROR_WORKER_MALLOC           = 16,
-    MyHTML_STATUS_THREAD_ERROR_WORKER_SEM_CREATE       = 17,
-    MyHTML_STATUS_THREAD_ERROR_WORKER_THREAD_CREATE    = 18,
-    MyHTML_STATUS_THREAD_ERROR_MASTER_THREAD_CREATE    = 19,
+    MyHTML_STATUS_THREAD_ERROR_ATTR_DESTROY            = 14,
+    MyHTML_STATUS_THREAD_ERROR_NO_SLOTS                = 15,
+    MyHTML_STATUS_THREAD_ERROR_BATCH_INIT              = 16,
+    MyHTML_STATUS_THREAD_ERROR_WORKER_MALLOC           = 17,
+    MyHTML_STATUS_THREAD_ERROR_WORKER_SEM_CREATE       = 18,
+    MyHTML_STATUS_THREAD_ERROR_WORKER_THREAD_CREATE    = 19,
+    MyHTML_STATUS_THREAD_ERROR_MASTER_THREAD_CREATE    = 20,
     MyHTML_STATUS_THREAD_ERROR_SEM_PREFIX_MALLOC       = 50,
     MyHTML_STATUS_THREAD_ERROR_SEM_CREATE              = 51,
     MyHTML_STATUS_THREAD_ERROR_QUEUE_MALLOC            = 60,

@@ -18,6 +18,7 @@
 
 #ifndef MyHTML_MYHTML_H
 #define MyHTML_MYHTML_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {

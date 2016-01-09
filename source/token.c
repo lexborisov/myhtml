@@ -391,7 +391,11 @@ void myhtml_token_adjust_mathml_attributes(myhtml_token_node_t* target)
 void _myhtml_token_create_copy_srt(myhtml_token_t* token, const char* from, size_t from_size, char** to)
 {
     *to = mchar_async_malloc(token->tree->mchar, token->tree->mchar_node_id, (from_size + 2));
+#if defined(IS_OS_WINDOWS)
+    strcpy_s(*to, from_size, from);
+#else
     strcpy(*to, from);
+#endif
 }
 
 void myhtml_token_strict_doctype_by_token(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)

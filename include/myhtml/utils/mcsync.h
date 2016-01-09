@@ -18,6 +18,7 @@
 
 #ifndef MyHTML_UTILS_MCSYNC_H
 #define MyHTML_UTILS_MCSYNC_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,8 +28,15 @@ extern "C" {
 #include <stdlib.h>
 #include <memory.h>
     
+#include "myhtml/myosi.h"
+    
 #if !defined(MyHTML_WITHOUT_THREADS)
-#include <pthread.h>
+#if defined(IS_OS_WINDOWS)
+    typedef CRITICAL_SECTION pthread_mutex_t;
+    typedef unsigned long pthread_mutexattr_t;
+#else
+#	include <pthread.h>
+#endif
 #endif
 
 enum mcsync_status {
@@ -56,6 +64,13 @@ mcsync_status_t mcsync_unlock(mcsync_t* mclock);
 
 mcsync_status_t mcsync_mutex_lock(mcsync_t* mclock);
 mcsync_status_t mcsync_mutex_unlock(mcsync_t* mclock);
+
+#if !defined(MyHTML_WITHOUT_THREADS) && defined(IS_OS_WINDOWS)
+    static int pthread_mutex_lock(pthread_mutex_t *mutex);
+    static int pthread_mutex_unlock(pthread_mutex_t *mutex);
+    static int pthread_mutex_init(pthread_mutex_t *m, pthread_mutexattr_t *a);
+    static int pthread_mutex_destroy(pthread_mutex_t *m);
+#endif
 
 #ifdef __cplusplus
 } /* extern "C" */
