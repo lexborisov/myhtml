@@ -121,5 +121,15 @@ void myhtml_string_copy(myhtml_string_t* target, myhtml_string_t* dest)
     myhtml_string_append(dest, target->data, target->length);
 }
 
-
+size_t myhtml_string_raw_copy(char* str1, const char* str2, size_t size)
+{
+    str1[size] = '\0';
+    
+    while(size) {
+        size--;
+        str1[size] = str2[size];
+    }
+    
+    return size;
+}
 

@@ -56,6 +56,8 @@ void myhtml_string_copy(myhtml_string_t* target, myhtml_string_t* dest);
 
 mybool_t myhtml_string_check(myhtml_string_t* str, size_t length);
 
+size_t myhtml_string_raw_copy(char* str1, const char* str2, size_t size);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

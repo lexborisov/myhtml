@@ -24,13 +24,7 @@
 extern "C" {
 #endif
 
-#include "myosi.h"
-#include "myhtml.h"
-#include "tree.h"
-
-#if defined(IS_OS_WINDOWS)
-    
-#else
+#if !defined(IS_OS_WINDOWS)
 #   include <pthread.h>
 #   include <semaphore.h>
 #endif
@@ -40,6 +34,11 @@ extern "C" {
 
 #include <fcntl.h>
 #include <errno.h>
+
+#include "myosi.h"
+#include "myhtml.h"
+#include "tree.h"
+#include "mystring.h"
 
 #define MyTHREAD_SEM_NAME "mythread"
 
@@ -97,9 +96,7 @@ struct mythread {
     char  *sem_prefix;
     size_t sem_prefix_length;
     
-#if defined(IS_OS_WINDOWS)
-    
-#else
+#if !defined(IS_OS_WINDOWS)
     pthread_attr_t *attr;
 #endif
     

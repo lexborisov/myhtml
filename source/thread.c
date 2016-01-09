@@ -293,11 +293,7 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
                 return MyHTML_STATUS_THREAD_ERROR_SEM_PREFIX_MALLOC;
             }
             
-#if defined(IS_OS_WINDOWS)
-            strcpy_s(mythread->sem_prefix, mythread->sem_prefix_length, sem_prefix);
-#else
-            strcpy(mythread->sem_prefix, sem_prefix);
-#endif
+            myhtml_string_raw_copy(mythread->sem_prefix, sem_prefix, mythread->sem_prefix_length);
         }
     }
     

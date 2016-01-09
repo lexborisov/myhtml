@@ -20,10 +20,12 @@
  * Platform-specific hdef performance clock value. 
  */ 
 
-#include <unistd.h>
+#include "myhtml.h"
 #include <time.h>
 
-#include "myhtml.h"
+#if !defined(IS_OS_WINDOWS)
+#include <unistd.h>
+#endif
 
 #if !defined(MyHTML_WITH_PERF)
 
@@ -48,6 +50,7 @@ uint64_t myhtml_hperf_clock(myhtml_status_t *status)
 #if defined(__APPLE__)
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#elif defined(IS_OS_WINDOWS)
 #endif
 
 #if defined(MyHTML_FORCE_RDTSC) /* Force using rdtsc, useful for comparison */
