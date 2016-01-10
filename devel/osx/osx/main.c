@@ -125,10 +125,13 @@ int main(int argc, const char * argv[])
     uint64_t tree_init_stop = myhtml_hperf_clock(NULL);
     uint64_t parse_start = myhtml_hperf_clock(NULL);
     
+    char *text = "<div name=";
+    
     for(size_t i = 0; i < 1; i++)
     {
+        //myhtml_parse(tree, text, strlen(text));
         myhtml_parse(tree, res.html, res.size);
-        myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
+        //myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
     }
     
     uint64_t parse_stop = myhtml_hperf_clock(NULL);

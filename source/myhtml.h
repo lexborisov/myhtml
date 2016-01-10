@@ -98,7 +98,7 @@ extern "C" {
     (__char__ < 'A' || __char__ > 'Z'))
 
 struct myhtml {
-    myhtml_tag_t            *tags;
+    myhtml_tag_t        *tags;
     mythread_queue_t    *queue;
     mythread_t          *thread;
     

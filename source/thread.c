@@ -283,10 +283,10 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
     
     if(sem_prefix)
     {
-        mythread->sem_prefix_length = strlen(sem_prefix) + 1;
+        mythread->sem_prefix_length = strlen(sem_prefix);
         
         if(mythread->sem_prefix_length) {
-            mythread->sem_prefix = calloc(mythread->sem_prefix_length, sizeof(char));
+            mythread->sem_prefix = calloc((mythread->sem_prefix_length + 1), sizeof(char));
             
             if(mythread->sem_prefix == NULL) {
                 mythread->sem_prefix_length = 0;

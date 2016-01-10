@@ -54,9 +54,9 @@ if(mh_queue_get(qnode_idx, tagname_begin) == html_offset) {       \
         __qnode__->token->attr_first = myhtml_tree_token_attr_current(__tree__);                \
         __qnode__->token->attr_last  = __qnode__->token->attr_first;                            \
                                                                                                 \
-        __tree__->queue_attr = __qnode__->token->attr_last;                                     \
-        __tree__->queue_attr->next = NULL;                                                      \
-        __tree__->queue_attr->prev = NULL;                                                      \
+        __tree__->attr_current = __qnode__->token->attr_last;                                     \
+        __tree__->attr_current->next = NULL;                                                      \
+        __tree__->attr_current->prev = NULL;                                                      \
     }                                                                                           \
     else {                                                                                      \
         __qnode__->token->attr_last->next = myhtml_tree_token_attr_current(__tree__);           \
@@ -64,8 +64,9 @@ if(mh_queue_get(qnode_idx, tagname_begin) == html_offset) {       \
         __qnode__->token->attr_last = __qnode__->token->attr_last->next;                        \
                                                                                                 \
         __qnode__->token->attr_last->next = NULL;                                               \
-        __tree__->queue_attr = __qnode__->token->attr_last;                                     \
+        __tree__->attr_current = __qnode__->token->attr_last;                                     \
     }
+
 
 #ifdef __cplusplus
 } /* extern "C" */

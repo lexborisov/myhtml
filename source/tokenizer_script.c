@@ -21,42 +21,13 @@
 
 size_t myhtml_tokenizer_state_script_data(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     while (html_offset < html_size)
     {
-        if(html[html_offset] == '<')
-        {
-            myhtml_tokenizer_inc_html_offset(html_offset, html_size);
+        if(html[html_offset] == '<') {
+            html_offset++;
+            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_LESS_THAN_SIGN;
             
-            // skip state: script_data_less_than_sign, script_data_escate_start and script_data_escate_start_dash
-            if(html[html_offset] == '/')
-            {
-                myhtml_tokenizer_inc_html_offset(html_offset, html_size);
-                
-                if(myhtml_ascii_char_cmp(html[html_offset]))
-                {
-                    mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_END_TAG_NAME;
-                    break;
-                }
-            }
-            else if(html[html_offset] == '!')
-            {
-                myhtml_tokenizer_inc_html_offset(html_offset, html_size);
-                
-                size_t next_offset = html_offset + 1;
-                
-                if(next_offset < html_size)
-                {
-                    if(html[html_offset] == '-' && html[next_offset] == '-')
-                    {
-                        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_DASH_DASH;
-                        
-                        html_offset = next_offset + 1;
-                        break;
-                    }
-                }
-            }
+            break;
         }
         
         html_offset++;
@@ -65,38 +36,59 @@ size_t myhtml_tokenizer_state_script_data(myhtml_tree_t* tree, mythread_queue_no
     return html_offset;
 }
 
-// see myhtml_tokenizer_state_script_data
 size_t myhtml_tokenizer_state_script_data_less_than_sign(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
+    if(html[html_offset] == '/')
+    {
+        html_offset++;
+        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_END_TAG_OPEN;
+    }
+    else if(html[html_offset] == '!')
+    {
+        html_offset++;
+        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPE_START;
+    }
+    else {
+        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+    }
+    
+    
     return html_offset;
 }
 
-// see myhtml_tokenizer_state_script_data
 size_t myhtml_tokenizer_state_script_data_escape_start(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
+    if(html[html_offset] == '-') {
+        html_offset++;
+        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPE_START_DASH;
+    }
+    else {
+        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+    }
+    
     return html_offset;
 }
 
-// see myhtml_tokenizer_state_script_data
 size_t myhtml_tokenizer_state_script_data_escape_start_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
+    if(html[html_offset] == '-') {
+        html_offset++;
+        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_DASH_DASH;
+    }
+    else {
+        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+    }
+    
     return html_offset;
 }
 
-// see myhtml_tokenizer_state_script_data
 size_t myhtml_tokenizer_state_script_data_end_tag_open(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     if(myhtml_ascii_char_cmp(html[html_offset])) {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_END_TAG_NAME;
     }
     else {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
-        html_offset++;
     }
     
     return html_offset;

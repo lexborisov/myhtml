@@ -147,11 +147,11 @@ struct myhtml_tree {
     mcsync_t*             sync;
     
     // init id's
-    size_t                mcasync_token_id;
-    size_t                mcasync_attr_id;
-    size_t                mcasync_tree_id;
-    size_t                mchar_node_id;
-    myhtml_token_attr_t*  attr_current;
+    size_t                  mcasync_token_id;
+    size_t                  mcasync_attr_id;
+    size_t                  mcasync_tree_id;
+    size_t                  mchar_node_id;
+    myhtml_token_attr_t*    attr_current;
     mythread_queue_node_t*  tmp_qnode;
     mythread_queue_node_t*  current_qnode;
     
@@ -171,7 +171,6 @@ struct myhtml_tree {
     myhtml_tree_token_list_t*     token_list;
     myhtml_tree_insertion_list_t* template_insertion;
     myhtml_async_args_t*          async_args;
-    myhtml_token_attr_t*          queue_attr;
     
     // tree params
     enum myhtml_tokenizer_state  state;
