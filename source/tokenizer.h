@@ -33,6 +33,10 @@ extern "C" {
 #include "tokenizer_script.h"
 #include "tokenizer_end.h"
 
+#define MyHTML_TOKENIZER_CHAR_OTHER        '\000'
+#define MyHTML_TOKENIZER_CHAR_A_Z_a_z      '\001'
+#define MyHTML_TOKENIZER_CHAR_WHITESPACE   '\002'
+    
 #define myhtml_tokenizer_inc_html_offset(__offset__, __size__)   \
     __offset__++;                                            \
     if(__offset__ >= __size__)                               \
@@ -50,8 +54,8 @@ void myhtml_tokenizer_post(myhtml_tree_t* tree);
 myhtml_status_t myhtml_tokenizer_state_init(myhtml_t* myhtml);
 void myhtml_tokenizer_state_destroy(myhtml_t* myhtml);
 
-mythread_queue_node_t * myhtml_tokenizer_queue_create_text_node_if_need(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset);
-void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t* html_offset, size_t html_size);
+mythread_queue_node_t * myhtml_tokenizer_queue_create_text_node_if_need(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, enum myhtml_token_type type);
+void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -104,7 +104,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         {
             if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
@@ -124,7 +124,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         {
             if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
@@ -144,7 +144,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         {
             if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
@@ -241,7 +241,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         {
             if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
@@ -261,7 +261,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         {
             if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;
@@ -281,7 +281,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         {
             if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
                 
                 qnode->begin = offset_cache;
                 qnode->length = 6;

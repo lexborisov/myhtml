@@ -89,11 +89,18 @@ typedef struct myhtml_tree myhtml_tree_t;
 
 // token
 enum myhtml_token_type {
-    MyHTML_TOKEN_TYPE_OPEN             = 0x00,
-    MyHTML_TOKEN_TYPE_CLOSE            = 0x01,
-    MyHTML_TOKEN_TYPE_CLOSE_SELF       = 0x02,
-    MyHTML_TOKEN_TYPE_DONE             = 0x04,
-    MyHTML_TOKEN_TYPE_WHITESPACE       = 0x08
+    MyHTML_TOKEN_TYPE_OPEN             = 0x000,
+    MyHTML_TOKEN_TYPE_CLOSE            = 0x001,
+    MyHTML_TOKEN_TYPE_CLOSE_SELF       = 0x002,
+    MyHTML_TOKEN_TYPE_DONE             = 0x004,
+    MyHTML_TOKEN_TYPE_WHITESPACE       = 0x008,
+    MyHTML_TOKEN_TYPE_RCDATA           = 0x010,
+    MyHTML_TOKEN_TYPE_RAWTEXT          = 0x020,
+    MyHTML_TOKEN_TYPE_SCRIPT           = 0x040,
+    MyHTML_TOKEN_TYPE_PLAINTEXT        = 0x080,
+    MyHTML_TOKEN_TYPE_CDATA            = 0x100,
+    MyHTML_TOKEN_TYPE_DATA             = 0x200,
+    MyHTML_TOKEN_TYPE_COMMENT          = 0x400
 };
 
 typedef size_t myhtml_token_index_t;
