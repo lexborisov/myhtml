@@ -71,9 +71,11 @@ mybool_t myhtml_string_check(myhtml_string_t* str, size_t length)
 void myhtml_string_append(myhtml_string_t* str, const char* buff, size_t length)
 {
     size_t begin = str->length;
-    myhtml_string_check(str, length);
+    myhtml_string_check(str, length + 1);
+    str->length--;
     
     memcpy(&str->data[begin], buff, (sizeof(char) * length));
+    str->data[str->length] = '\0';
 }
 
 void myhtml_string_append_with_null(myhtml_string_t* str, const char* buff, size_t length)

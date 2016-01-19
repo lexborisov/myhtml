@@ -145,9 +145,8 @@ mchar_async_chunk_t * mchar_async_chunk_malloc_without_lock(mchar_async_t *mchar
     {
         size_t index = mchar_async_cache_delete(&mchar_async->chunk_cache, length);
         
-        if(index) {
-            return (mchar_async_chunk_t*)(mchar_async->chunk_cache.nodes[index].value);
-        }
+        if(index)
+            return (mchar_async_chunk_t*)mchar_async->chunk_cache.nodes[index].value;
     }
     
     if(mchar_async->chunks_length >= mchar_async->chunks_size)
@@ -271,18 +270,24 @@ mchar_async_chunk_t * mchar_sync_chunk_find_by_size(mchar_async_node_t *node, si
     
     while (chunk) {
         if(chunk->size >= size)
-            break;
+            return chunk;
         
         chunk = chunk->next;
     }
     
-    return chunk;
+    return NULL;
 }
 
 void mchar_sync_chunk_insert_after(mchar_async_chunk_t *base, mchar_async_chunk_t *chunk)
 {
     if(base->next == chunk)
         return;
+    
+    if(chunk->prev)
+        chunk->prev->next = chunk->next;
+    
+    if(chunk->next)
+        chunk->next->prev = chunk->prev;
     
     if(base->next)
         base->next->prev = chunk;

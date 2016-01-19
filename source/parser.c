@@ -28,6 +28,56 @@ void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
     while(myhtml_rules_tree_dispatcher(qnode->tree, qnode->token)){}
 }
 
+myhtml_incoming_buf_t * myhtml_parser_find_first_buf(myhtml_tree_t *tree, size_t begin)
+{
+    myhtml_incoming_buf_t *inc_buf = tree->incoming_buf_first;
+    while (inc_buf && inc_buf->next && inc_buf->next->offset < begin) {
+        inc_buf = inc_buf->next;
+    }
+    
+    return inc_buf;
+}
+
+void myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length)
+{
+    myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
+    
+    size_t current_buf_offset = begin - inc_buf->offset;
+    
+    if((current_buf_offset + length) <= inc_buf->size)
+    {
+        myhtml_string_append_with_null(string,
+                                       &inc_buf->data[current_buf_offset],
+                                       length);
+        
+        return;
+    }
+    
+    size_t buf_next_offset = inc_buf->size - current_buf_offset;
+    
+    myhtml_string_append(string,
+                         &inc_buf->data[current_buf_offset],
+                         buf_next_offset);
+    
+    size_t tmp_len = length - buf_next_offset;
+    inc_buf = inc_buf->next;
+    
+    while (inc_buf && tmp_len)
+    {
+        if(tmp_len > inc_buf->size) {
+            myhtml_string_append(string, inc_buf->data, inc_buf->size);
+            
+            tmp_len -= inc_buf->size;
+        }
+        else {
+            myhtml_string_append(string, inc_buf->data, tmp_len);
+            break;
+        }
+        
+        inc_buf = inc_buf->next;
+    }
+}
+
 void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
 {
     myhtml_token_node_t* token = qnode->token;
@@ -39,16 +89,15 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
     {
         myhtml_string_init(&token->my_str_tm, qnode->tree->mchar, mchar_node_id, (qnode->length + 32));
         
-        myhtml_string_t* string = &token->my_str_tm;
-        
-        token->begin      = string->length;
+        token->begin      = token->my_str_tm.length;
         token->length     = qnode->length;
         token->attr_first = NULL;
         token->attr_last  = NULL;
         
-        myhtml_string_append_with_null(string,
-                                       &qnode->text[qnode->begin],
-                                       qnode->length);
+        myhtml_parser_add_text(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length);
+//        myhtml_string_append_with_null(string,
+//                                       &qnode->text[qnode->begin],
+//                                       qnode->length);
     }
     else if(token->attr_first)
     {
@@ -72,11 +121,10 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
                 size_t begin = attr->name_begin;
                 attr->name_begin = attr->entry.length;
                 
-                size_t len = attr->name_length;
-                
-                myhtml_string_append_lowercase_with_null(&attr->entry,
-                                                         &qnode->text[begin],
-                                                         len);
+                myhtml_parser_add_text(qnode->tree, &attr->entry, qnode->text, begin, attr->name_length);
+//                myhtml_string_append_lowercase_with_null(&attr->entry,
+//                                                         &qnode->text[begin],
+//                                                         len);
             }
             
             if(attr->value_length)
@@ -84,9 +132,10 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
                 size_t begin = attr->value_begin;
                 attr->value_begin = attr->entry.length;
                 
-                myhtml_string_append_with_null(&attr->entry,
-                                               &qnode->text[begin],
-                                               attr->value_length);
+                myhtml_parser_add_text(qnode->tree, &attr->entry, qnode->text, begin, attr->value_length);
+//                myhtml_string_append_with_null(&attr->entry,
+//                                               &qnode->text[begin],
+//                                               attr->value_length);
             }
             
             attr = attr->next;

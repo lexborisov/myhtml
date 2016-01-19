@@ -310,6 +310,13 @@ void mcobject_async_node_clean(mcobject_async_t *mcobj_async, size_t node_idx)
     node->cache_length  = 0;
 }
 
+void mcobject_async_node_all_clean(mcobject_async_t *mcobj_async)
+{
+    for (size_t node_idx = 0; node_idx < mcobj_async->nodes_length; node_idx++) {
+        mcobject_async_node_clean(mcobj_async, node_idx);
+    }
+}
+
 void mcobject_async_node_delete(mcobject_async_t *mcobj_async, size_t node_idx)
 {
     mcsync_lock(mcobj_async->mcsync);
@@ -355,16 +362,16 @@ void * mcobject_async_malloc(mcobject_async_t *mcobj_async, size_t node_idx, mco
 {
     mcobject_async_node_t *node = &mcobj_async->nodes[node_idx];
     
+    if(node->cache_length) {
+        if(status)
+            *status = MCOBJECT_ASYNC_STATUS_OK;
+        
+        node->cache_length--;
+        return node->cache[ node->cache_length ];
+    }
+    
     if(node->chunk->length >= node->chunk->size)
     {
-        if(node->cache_length) {
-            if(status)
-                *status = MCOBJECT_ASYNC_STATUS_OK;
-            
-            node->cache_length--;
-            return node->cache[ node->cache_length ];
-        }
-        
         if(node->chunk->next) {
             node->chunk = node->chunk->next;
             node->chunk->length = 0;

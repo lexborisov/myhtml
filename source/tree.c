@@ -27,9 +27,9 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
 {
     myhtml_status_t status = MyHTML_STATUS_OK;
     
-    tree->myhtml  = myhtml;
-    
-    tree->token = myhtml_token_create(tree, (4096 * 4));
+    tree->myhtml             = myhtml;
+    tree->token              = myhtml_token_create(tree, (4096 * 4));
+    tree->temp_tag_name.data = NULL;
     
     tree->tree_obj = mcobject_async_create();
     if(tree->tree_obj == NULL)
@@ -57,6 +57,10 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
         return MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE;
     
     tree->mcasync_attr_id = mcobject_async_node_add(tree->token->attr_obj, &mcstatus);
+    if(mcstatus)
+        return MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE;
+    
+    tree->mcasync_incoming_buf_id = mcobject_async_node_add(myhtml->async_incoming_buf, &mcstatus);
     if(mcstatus)
         return MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE;
     
@@ -112,14 +116,18 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->node_head = 0;
     tree->node_form = 0;
     
-    tree->state            = MyHTML_TOKENIZER_STATE_DATA;
-    tree->insert_mode      = MyHTML_INSERTION_MODE_INITIAL;
-    tree->orig_insert_mode = MyHTML_INSERTION_MODE_INITIAL;
-    tree->compat_mode      = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
-    tree->tmp_qnode        = NULL;
-    tree->flags            = MyHTML_TREE_FLAGS_CLEAN;
-    tree->foster_parenting = myfalse;
-    tree->my_namespace     = MyHTML_NAMESPACE_HTML;
+    tree->state              = MyHTML_TOKENIZER_STATE_DATA;
+    tree->insert_mode        = MyHTML_INSERTION_MODE_INITIAL;
+    tree->orig_insert_mode   = MyHTML_INSERTION_MODE_INITIAL;
+    tree->compat_mode        = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
+    tree->tmp_qnode          = NULL;
+    tree->flags              = MyHTML_TREE_FLAGS_CLEAN;
+    tree->foster_parenting   = myfalse;
+    tree->my_namespace       = MyHTML_NAMESPACE_HTML;
+    tree->incoming_buf       = NULL;
+    tree->incoming_buf_first = NULL;
+    tree->global_offset      = 0;
+    tree->current_qnode      = NULL;
     
     myhtml_tree_active_formatting_clean(tree);
     myhtml_tree_open_elements_clean(tree);
@@ -127,6 +135,7 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     myhtml_tree_token_list_clean(tree->token_list);
     myhtml_tree_template_insertion_clean(tree);
     myhtml_tree_index_clean(tree, tree->myhtml->tags);
+    mcobject_async_node_clean(myhtml->async_incoming_buf, tree->mcasync_incoming_buf_id);
     
     myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->mcasync_attr_id);
 }
@@ -151,14 +160,18 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->node_head = 0;
     tree->node_form = 0;
     
-    tree->state            = MyHTML_TOKENIZER_STATE_DATA;
-    tree->insert_mode      = MyHTML_INSERTION_MODE_INITIAL;
-    tree->orig_insert_mode = MyHTML_INSERTION_MODE_INITIAL;
-    tree->compat_mode      = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
-    tree->tmp_qnode        = NULL;
-    tree->flags            = MyHTML_TREE_FLAGS_CLEAN;
-    tree->foster_parenting = myfalse;
-    tree->my_namespace     = MyHTML_NAMESPACE_HTML;
+    tree->state              = MyHTML_TOKENIZER_STATE_DATA;
+    tree->insert_mode        = MyHTML_INSERTION_MODE_INITIAL;
+    tree->orig_insert_mode   = MyHTML_INSERTION_MODE_INITIAL;
+    tree->compat_mode        = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
+    tree->tmp_qnode          = NULL;
+    tree->flags              = MyHTML_TREE_FLAGS_CLEAN;
+    tree->foster_parenting   = myfalse;
+    tree->my_namespace       = MyHTML_NAMESPACE_HTML;
+    tree->incoming_buf       = NULL;
+    tree->incoming_buf_first = NULL;
+    tree->global_offset      = 0;
+    tree->current_qnode      = NULL;
     
     myhtml_tree_active_formatting_clean(tree);
     myhtml_tree_open_elements_clean(tree);
@@ -166,6 +179,7 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     myhtml_tree_token_list_clean(tree->token_list);
     myhtml_tree_template_insertion_clean(tree);
     myhtml_tree_index_clean(tree, tree->myhtml->tags);
+    mcobject_async_node_clean(tree->myhtml->async_incoming_buf, tree->mcasync_incoming_buf_id);
     
     myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->mcasync_attr_id);
 }
@@ -185,6 +199,9 @@ myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree)
     tree->tree_obj           = mcobject_async_destroy(tree->tree_obj, mytrue);
     tree->token              = myhtml_token_destroy(tree->token);
     tree->mchar              = mchar_async_destroy(tree->mchar, 1);
+    
+    mcobject_async_node_delete(tree->myhtml->async_incoming_buf, tree->mcasync_incoming_buf_id);
+    myhtml_tree_temp_tag_name_destroy(&tree->temp_tag_name, myfalse);
     
     free(tree->async_args);
     free(tree);
@@ -2148,4 +2165,85 @@ mybool_t myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_
     
     return myfalse;
 }
+
+// temp tag name
+myhtml_status_t myhtml_tree_temp_tag_name_init(myhtml_tree_temp_tag_name_t* temp_tag_name)
+{
+    temp_tag_name->size   = 1024;
+    temp_tag_name->length = 0;
+    temp_tag_name->data   = (char *)mymalloc(temp_tag_name->size * sizeof(char));
+    
+    if(temp_tag_name->data == NULL)
+        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+    
+    return MyHTML_STATUS_OK;
+}
+
+void myhtml_tree_temp_tag_name_clean(myhtml_tree_temp_tag_name_t* temp_tag_name)
+{
+    temp_tag_name->length = 0;
+}
+
+myhtml_tree_temp_tag_name_t * myhtml_tree_temp_tag_name_destroy(myhtml_tree_temp_tag_name_t* temp_tag_name, mybool_t self_destroy)
+{
+    if(temp_tag_name == NULL)
+        return NULL;
+    
+    if(temp_tag_name->data) {
+        free(temp_tag_name->data);
+        temp_tag_name->data = NULL;
+    }
+    
+    if(self_destroy) {
+        free(temp_tag_name);
+        return NULL;
+    }
+    
+    return temp_tag_name;
+}
+
+myhtml_status_t myhtml_tree_temp_tag_name_append_one(myhtml_tree_temp_tag_name_t* temp_tag_name, const char name)
+{
+    if(temp_tag_name->length >= temp_tag_name->size) {
+        size_t nsize = temp_tag_name->size << 1;
+        char *tmp = (char *)myrealloc(temp_tag_name->data, nsize * sizeof(char));
+        
+        if(tmp) {
+            temp_tag_name->size = nsize;
+            temp_tag_name->data = tmp;
+        }
+        else
+            return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+    }
+    
+    temp_tag_name->data[temp_tag_name->length] = name;
+    
+    temp_tag_name->length++;
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_tree_temp_tag_name_append(myhtml_tree_temp_tag_name_t* temp_tag_name, const char* name, size_t name_len)
+{
+    if(name_len == 0)
+        return MyHTML_STATUS_OK;
+    
+    if((temp_tag_name->length + name_len) >= temp_tag_name->size) {
+        size_t nsize = (temp_tag_name->size << 1) + name_len;
+        char *tmp = (char *)myrealloc(temp_tag_name->data, nsize * sizeof(char));
+        
+        if(tmp) {
+            temp_tag_name->size = nsize;
+            temp_tag_name->data = tmp;
+        }
+        else
+            return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+        
+    }
+    
+    memcpy(&temp_tag_name->data[temp_tag_name->length], name, name_len);
+    
+    temp_tag_name->length += name_len;
+    return MyHTML_STATUS_OK;
+}
+
 

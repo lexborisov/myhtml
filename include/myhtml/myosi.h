@@ -77,6 +77,17 @@ typedef struct mythread_list mythread_list_t;
 typedef struct mythread mythread_t;
 
 // tree
+enum myhtml_tree_flags {
+    MyHTML_TREE_FLAGS_CLEAN           = 0x00,
+    MyHTML_TREE_FLAGS_SCRIPT          = 0x01,
+    MyHTML_TREE_FLAGS_FRAMESET_OK     = 0x02,
+    MyHTML_TREE_FLAGS_IFRAME_SRCDOC   = 0x04,
+    MyHTML_TREE_FLAGS_ALREADY_STARTED = 0x08,
+    MyHTML_TREE_FLAGS_SINGLE_MODE     = 0x10,
+    MyHTML_TREE_FLAGS_PARSE_END       = 0x20
+};
+
+typedef struct myhtml_tree_temp_tag_name myhtml_tree_temp_tag_name_t;
 typedef struct myhtml_tree_insertion_list myhtml_tree_insertion_list_t;
 typedef struct myhtml_tree_token_list myhtml_tree_token_list_t;
 typedef struct myhtml_tree_list myhtml_tree_list_t;
@@ -203,8 +214,9 @@ enum myhtml_tokenizer_state {
     MyHTML_TOKENIZER_STATE_AFTER_DOCTYPE_SYSTEM_IDENTIFIER               = 0x041,
     MyHTML_TOKENIZER_STATE_BOGUS_DOCTYPE                                 = 0x042,
     MyHTML_TOKENIZER_STATE_CDATA_SECTION                                 = 0x043,
+    MyHTML_TOKENIZER_STATE_CUSTOM_AFTER_DOCTYPE_NAME_A_Z                 = 0x044,
     MyHTML_TOKENIZER_STATE_FIRST_ENTRY                                   = MyHTML_TOKENIZER_STATE_DATA,
-    MyHTML_TOKENIZER_STATE_LAST_ENTRY                                    = 0x044
+    MyHTML_TOKENIZER_STATE_LAST_ENTRY                                    = 0x045
 };
 
 enum myhtml_insertion_mode {
@@ -294,6 +306,7 @@ enum myhtml_options {
     MyHTML_OPTIONS_PARSE_MODE_TREE_INDEX   = 0x20
 };
 
+typedef struct myhtml_incoming_buf myhtml_incoming_buf_t;
 typedef myhtml_token_attr_t myhtml_tree_attr_t;
 typedef struct myhtml_collection myhtml_collection_t;
 typedef struct myhtml myhtml_t;

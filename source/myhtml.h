@@ -27,6 +27,7 @@ extern "C" {
 #include "myosi.h"
 
 #include "utils/mctree.h"
+#include "utils/mcobject_async.h"
 #include "tag.h"
 #include "def.h"
 #include "parser.h"
@@ -51,7 +52,7 @@ extern "C" {
 #define mh_state_get(__tree__) myhtml_tree_get(__tree__, state)
 #define mh_state_set(__tree__) myhtml_tree_set(__tree__, state)
 
-#define mh_tags_get(__idx__, __attr__) myhtml_tag_get(myhtml->tags, __idx__, __attr__)
+#define mh_tags_get(__idx__, __attr__) myhtml_tag_get(tree->myhtml->tags, __idx__, __attr__)
 
 #define mh_queue_last(__attr__) myhtml->queue->nodes[myhtml_queue_node_current(myhtml->queue)].__attr__
 #define mh_queue_get(__idx__, __attr__) myhtml->queue->nodes[__idx__].__attr__
@@ -64,7 +65,7 @@ extern "C" {
         myhtml_parser_worker(0, __tree__->current_qnode); \
         while(myhtml_rules_tree_dispatcher(__tree__, __tree__->current_qnode->token)){}; \
     } \
-    __tree__->current_qnode = mythread_queue_node_malloc(__tree__->myhtml->queue, __html__, __begin__, NULL); \
+    __tree__->current_qnode = mythread_queue_node_malloc(__tree__->myhtml->queue, __html__, (__tree__->global_offset + __begin__), NULL); \
     __tree__->current_qnode->tree = __tree__; \
     myhtml_token_node_malloc(__tree__->token, __tree__->current_qnode->token, __tree__->token->mcasync_token_id)
 
@@ -101,6 +102,7 @@ struct myhtml {
     myhtml_tag_t        *tags;
     mythread_queue_t    *queue;
     mythread_t          *thread;
+    mcobject_async_t    *async_incoming_buf;
     
     myhtml_tokenizer_state_f* parse_state_func;
     myhtml_insertion_f* insertion_func;
@@ -114,6 +116,16 @@ struct myhtml_collection {
     size_t length;
 };
 
+struct myhtml_incoming_buf {
+    const char* data;
+    size_t length;
+    size_t size;
+    size_t offset;
+    
+    struct myhtml_incoming_buf* prev;
+    struct myhtml_incoming_buf* next;
+};
+
 myhtml_t * myhtml_create(void);
 myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t thread_count, size_t queue_size);
 void myhtml_clean(myhtml_t* myhtml);
@@ -124,6 +136,9 @@ myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, siz
 
 myhtml_status_t myhtml_parse_single(myhtml_tree_t* tree, const char* html, size_t html_size);
 myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+
+myhtml_status_t myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t html_size);
+myhtml_status_t myhtml_parse_end(myhtml_tree_t* tree);
 
 myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status);
 myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection, const char* html, size_t length, myhtml_status_t *status);
@@ -166,6 +181,12 @@ myhtml_collection_t * myhtml_collection_create(size_t size, myhtml_status_t *sta
 void myhtml_collection_clean(myhtml_collection_t *collection);
 myhtml_collection_t * myhtml_collection_destroy(myhtml_collection_t *collection);
 myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, size_t up_to_length);
+
+// incoming buffer
+void myhtml_incomming_buf_add(myhtml_t* myhtml, myhtml_tree_t* tree, myhtml_incoming_buf_t *current, const char *html, size_t html_size);
+void myhtml_incomming_buf_clean(myhtml_tree_t* tree, myhtml_incoming_buf_t *current);
+const char * myhtml_tree_incomming_buf_get_last(myhtml_tree_t *tree, myhtml_incoming_buf_t *inc_buf, size_t current_offset, size_t len);
+const char * myhtml_tree_incomming_buf_make_data(myhtml_tree_t *tree, mythread_queue_node_t *qnode, size_t len);
 
 mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 

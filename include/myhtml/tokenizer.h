@@ -43,8 +43,8 @@ extern "C" {
         return __offset__
 
 void myhtml_tokenizer_begin(myhtml_tree_t* tree, const char* html, size_t html_length);
-void myhtml_tokenizer_continue(myhtml_tree_t* tree, const char* html, size_t html_length);
-void myhtml_tokenizer_end(myhtml_tree_t* tree, const char* html, size_t html_length);
+void myhtml_tokenizer_chunk(myhtml_tree_t* tree, const char* html, size_t html_length);
+void myhtml_tokenizer_end(myhtml_tree_t* tree);
 
 myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, enum myhtml_namespace my_namespace);
 
@@ -55,7 +55,9 @@ myhtml_status_t myhtml_tokenizer_state_init(myhtml_t* myhtml);
 void myhtml_tokenizer_state_destroy(myhtml_t* myhtml);
 
 mythread_queue_node_t * myhtml_tokenizer_queue_create_text_node_if_need(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, enum myhtml_token_type type);
-void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html);
+void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset);
+
+size_t myhtml_tokenizer_state_bogus_comment(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);
 
 #ifdef __cplusplus
 } /* extern "C" */

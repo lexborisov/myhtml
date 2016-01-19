@@ -86,6 +86,7 @@ mcobject_async_t * mcobject_async_destroy(mcobject_async_t *mcobj_async, int des
 
 size_t mcobject_async_node_add(mcobject_async_t *mcobj_async, mcobject_async_status_t *status);
 void mcobject_async_node_clean(mcobject_async_t *mcobj_async, size_t node_idx);
+void mcobject_async_node_all_clean(mcobject_async_t *mcobj_async);
 void mcobject_async_node_delete(mcobject_async_t *mcobj_async, size_t node_idx);
 
 void * mcobject_async_malloc(mcobject_async_t *mcobj_async, size_t node_idx, mcobject_async_status_t *status);

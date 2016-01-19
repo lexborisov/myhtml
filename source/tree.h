@@ -90,15 +90,6 @@ enum myhtml_tree_doctype_id {
     MyHTML_TREE_DOCTYPE_ID_PUBLIC = 0x02
 };
 
-enum myhtml_tree_flags {
-    MyHTML_TREE_FLAGS_CLEAN           = 0x00,
-    MyHTML_TREE_FLAGS_SCRIPT          = 0x01,
-    MyHTML_TREE_FLAGS_FRAMESET_OK     = 0x02,
-    MyHTML_TREE_FLAGS_IFRAME_SRCDOC   = 0x04,
-    MyHTML_TREE_FLAGS_ALREADY_STARTED = 0x08,
-    MyHTML_TREE_FLAGS_SINGLE_MODE     = 0x10
-};
-
 enum myhtml_tree_insertion_mode {
     MyHTML_TREE_INSERTION_MODE_DEFAULT     = 0x00,
     MyHTML_TREE_INSERTION_MODE_BEFORE      = 0x01,
@@ -138,6 +129,12 @@ struct myhtml_tree_insertion_list {
     size_t size;
 };
 
+struct myhtml_tree_temp_tag_name {
+    char   *data;
+    size_t  length;
+    size_t  size;
+};
+
 struct myhtml_tree {
     // ref
     myhtml_t*             myhtml;
@@ -151,9 +148,12 @@ struct myhtml_tree {
     size_t                  mcasync_attr_id;
     size_t                  mcasync_tree_id;
     size_t                  mchar_node_id;
+    size_t                  mcasync_incoming_buf_id;
     myhtml_token_attr_t*    attr_current;
     mythread_queue_node_t*  tmp_qnode;
     mythread_queue_node_t*  current_qnode;
+    myhtml_incoming_buf_t*  incoming_buf;
+    myhtml_incoming_buf_t*  incoming_buf_first;
     
     myhtml_tree_indexes_t* indexes;
     
@@ -180,6 +180,9 @@ struct myhtml_tree {
     enum myhtml_tree_flags       flags;
     enum myhtml_namespace        my_namespace;
     mybool_t                     foster_parenting;
+    size_t                       global_offset;
+    
+    myhtml_tree_temp_tag_name_t  temp_tag_name;
 };
 
 // base
@@ -319,6 +322,13 @@ void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_no
 
 mybool_t myhtml_tree_is_mathml_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 mybool_t myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node);
+
+// temp tag name
+myhtml_status_t myhtml_tree_temp_tag_name_init(myhtml_tree_temp_tag_name_t* temp_tag_name);
+void myhtml_tree_temp_tag_name_clean(myhtml_tree_temp_tag_name_t* temp_tag_name);
+myhtml_tree_temp_tag_name_t * myhtml_tree_temp_tag_name_destroy(myhtml_tree_temp_tag_name_t* temp_tag_name, mybool_t self_destroy);
+myhtml_status_t myhtml_tree_temp_tag_name_append(myhtml_tree_temp_tag_name_t* temp_tag_name, const char* name, size_t name_len);
+myhtml_status_t myhtml_tree_temp_tag_name_append_one(myhtml_tree_temp_tag_name_t* temp_tag_name, const char name);
 
 #ifdef __cplusplus
 } /* extern "C" */

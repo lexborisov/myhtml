@@ -29,7 +29,7 @@ struct res_html load_html(const char* filename)
     FILE *f = fopen(filename, "rb");
     fseek(f, 0L, SEEK_END);
     
-    long l = ftell(f); // именно такой размер у файла
+    long l = ftell(f);
     fseek(f, 0L, SEEK_SET);
     
     char *html = (char*)mymalloc(l);
@@ -39,6 +39,52 @@ struct res_html load_html(const char* filename)
     
     struct res_html res = {html, (size_t)l};
     return res;
+}
+
+void chunk_test(void)
+{
+    struct res_html res = load_html("/new/C-git/myhtml/test/html/chunk.data");
+    //struct res_html res = load_html("/new/C-git/myhtml/test/broken.html");
+    
+    myhtml_t* myhtml = myhtml_create();
+    myhtml_init(myhtml, MyHTML_OPTIONS_DEFAULT, 1, 0);
+    
+    myhtml_tree_t* tree = myhtml_tree_create();
+    myhtml_tree_init(tree, myhtml);
+    
+    size_t begin = 0, i = 0;
+    while (i < res.size)
+    {
+        if(res.html[i] == '\n') {
+            //printf("Parse chunk: %.*s\n", (int)(i - begin), &res.html[begin]);
+            myhtml_parse_chunk(tree, &res.html[begin], (i - begin));
+            myhtml_tokenizer_wait(tree);
+            
+            begin = i + 1;
+        }
+        
+        i++;
+    }
+    
+    myhtml_parse_chunk(tree, &res.html[begin], (i - begin));
+    myhtml_parse_end(tree);
+    
+    i = 0;
+    while (i < res.size)
+    {
+        if(res.html[i] != '\n') {
+            printf("%c", res.html[i]);
+        }
+        
+        i++;
+    }
+    printf("\n");
+    
+    myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
+    
+    myhtml_tree_destroy(tree);
+    myhtml_destroy(myhtml);
+    free(res.html);
 }
 
 void test_all(void)
@@ -72,7 +118,7 @@ void test_all(void)
             if(ent->d_name[0] != '.' && !S_ISDIR(path_stat.st_mode))
             {
                 count++;
-                printf("%zu: %s\n", count, path);
+//                printf("%zu: %s\n", count, path);
                 
                 struct res_html res = load_html(path);
                 myhtml_parse(tree, res.html, res.size);
@@ -98,22 +144,29 @@ void test_all(void)
 
 int main(int argc, const char * argv[])
 {
+    chunk_test();
+//    uint64_t all_start1 = myhtml_hperf_clock(NULL);
+//    test_all();
+//    uint64_t all_stop1 = myhtml_hperf_clock(NULL);
+//
+//    myhtml_hperf_print("Parse html", all_start1, all_stop1, stdout);
+    return 0;
+    
     /* Default path or argument value */
     //const char* path = "/new/C-git/myhtml/test/test.html";
     //const char* path = "/new/C-git/myhtml/test/broken.html";
     const char* path = "/new/C-git/myhtml/test/test_full.html";
-    //const char* path = "/new/Test/2.html";
-
+    
     if (argc == 2) {
         path = argv[1];
     }
-
+    
     setbuf(stdout, 0);
     
     myhtml_t* myhtml = myhtml_create();
     myhtml_init(myhtml, MyHTML_OPTIONS_DEFAULT, 1, 0);
     
-    struct res_html res = load_html(path);
+    struct res_html res  = load_html(path);
     
     uint64_t all_start = myhtml_hperf_clock(NULL);
     uint64_t tree_init_start = myhtml_hperf_clock(NULL);
@@ -125,12 +178,11 @@ int main(int argc, const char * argv[])
     uint64_t tree_init_stop = myhtml_hperf_clock(NULL);
     uint64_t parse_start = myhtml_hperf_clock(NULL);
     
-    char *text = "<div name=";
-    
     for(size_t i = 0; i < 1; i++)
     {
         //myhtml_parse(tree, text, strlen(text));
         myhtml_parse(tree, res.html, res.size);
+        
         //myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
     }
     

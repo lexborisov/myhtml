@@ -52,7 +52,6 @@ size_t myhtml_tokenizer_state_script_data_less_than_sign(myhtml_tree_t* tree, my
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
     }
     
-    
     return html_offset;
 }
 
@@ -85,6 +84,7 @@ size_t myhtml_tokenizer_state_script_data_escape_start_dash(myhtml_tree_t* tree,
 size_t myhtml_tokenizer_state_script_data_end_tag_open(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     if(myhtml_ascii_char_cmp(html[html_offset])) {
+        qnode->token->begin = (html_offset + tree->global_offset);
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_END_TAG_NAME;
     }
     else {
@@ -96,17 +96,28 @@ size_t myhtml_tokenizer_state_script_data_end_tag_open(myhtml_tree_t* tree, myth
 
 size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    size_t offset_cache = html_offset;
-    
     while(html_offset < html_size)
     {
         if(myhtml_whithspace(html[html_offset], ==, ||))
         {
-            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if((qnode->token->begin + 6) > (html_offset + tree->global_offset)) {
+                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+                html_offset++;
+                break;
+            }
+            
+            size_t tmp_size = qnode->begin;
+            qnode->begin = qnode->token->begin;
+            
+            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            
+            qnode->begin = tmp_size;
+            
+            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 
-                qnode->begin = offset_cache;
+                qnode->begin  = qnode->token->begin;
                 qnode->length = 6;
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
@@ -122,11 +133,24 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         }
         else if(html[html_offset] == '/')
         {
-            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if((qnode->token->begin + 6) > (html_offset + tree->global_offset)) {
+                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+                html_offset++;
+                break;
+            }
+            
+            size_t tmp_size = qnode->begin;
+            qnode->begin = qnode->token->begin;
+            
+            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            
+            qnode->begin = tmp_size;
+            
+            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 
-                qnode->begin = offset_cache;
+                qnode->begin  = qnode->token->begin;
                 qnode->length = 6;
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
@@ -142,11 +166,24 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         }
         else if(html[html_offset] == '>')
         {
-            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if((qnode->token->begin + 6) > (html_offset + tree->global_offset)) {
+                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+                html_offset++;
+                break;
+            }
+            
+            size_t tmp_size = qnode->begin;
+            qnode->begin = qnode->token->begin;
+            
+            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            
+            qnode->begin = tmp_size;
+            
+            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 
-                qnode->begin = offset_cache;
+                qnode->begin  = qnode->token->begin;
                 qnode->length = 6;
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
@@ -177,8 +214,6 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
 
 size_t myhtml_tokenizer_state_script_data_escaped_dash_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     if(html[html_offset] == '-') {
         html_offset++;
         return html_offset;
@@ -201,13 +236,12 @@ size_t myhtml_tokenizer_state_script_data_escaped_dash_dash(myhtml_tree_t* tree,
 
 size_t myhtml_tokenizer_state_script_data_escaped_less_than_sign(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     if(html[html_offset] == '/') {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_END_TAG_OPEN;
         html_offset++;
     }
     else if(myhtml_ascii_char_cmp(html[html_offset])) {
+        qnode->token->begin = (html_offset + tree->global_offset);
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPE_START;
     }
     else {
@@ -219,9 +253,8 @@ size_t myhtml_tokenizer_state_script_data_escaped_less_than_sign(myhtml_tree_t* 
 
 size_t myhtml_tokenizer_state_script_data_escaped_end_tag_open(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     if(myhtml_ascii_char_cmp(html[html_offset])) {
+        qnode->token->begin = (html_offset + tree->global_offset);
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_END_TAG_NAME;
     }
     else {
@@ -233,17 +266,28 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_open(myhtml_tree_t* tr
 
 size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    size_t offset_cache = html_offset;
-    
     while(html_offset < html_size)
     {
         if(myhtml_whithspace(html[html_offset], ==, ||))
         {
-            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if((qnode->token->begin + 6) > (html_offset + tree->global_offset)) {
+                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                html_offset++;
+                break;
+            }
+            
+            size_t tmp_size = qnode->begin;
+            qnode->begin = qnode->token->begin;
+            
+            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            
+            qnode->begin = tmp_size;
+            
+            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 
-                qnode->begin = offset_cache;
+                qnode->begin  = qnode->token->begin;
                 qnode->length = 6;
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
@@ -259,11 +303,24 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         }
         else if(html[html_offset] == '/')
         {
-            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if((qnode->token->begin + 6) > (html_offset + tree->global_offset)) {
+                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                html_offset++;
+                break;
+            }
+            
+            size_t tmp_size = qnode->begin;
+            qnode->begin = qnode->token->begin;
+            
+            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            
+            qnode->begin = tmp_size;
+            
+            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 
-                qnode->begin = offset_cache;
+                qnode->begin  = qnode->token->begin;
                 qnode->length = 6;
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
@@ -279,11 +336,24 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         }
         else if(html[html_offset] == '>')
         {
-            if(myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0)
+            if((qnode->token->begin + 6) > (html_offset + tree->global_offset)) {
+                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                html_offset++;
+                break;
+            }
+            
+            size_t tmp_size = qnode->begin;
+            qnode->begin = qnode->token->begin;
+            
+            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            
+            qnode->begin = tmp_size;
+            
+            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
-                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, offset_cache - 2, MyHTML_TOKEN_TYPE_SCRIPT);
+                qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 
-                qnode->begin = offset_cache;
+                qnode->begin  = qnode->token->begin;
                 qnode->length = 6;
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
@@ -297,7 +367,6 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
             }
-            
             break;
         }
         else if(myhtml_ascii_char_unless_cmp(html[html_offset]))
@@ -314,8 +383,6 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
 
 size_t myhtml_tokenizer_state_script_data_escaped(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     while(html_offset < html_size)
     {
         if(html[html_offset] == '-')
@@ -339,8 +406,6 @@ size_t myhtml_tokenizer_state_script_data_escaped(myhtml_tree_t* tree, mythread_
 
 size_t myhtml_tokenizer_state_script_data_escaped_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     if(html[html_offset] == '-') {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_DASH_DASH;
         html_offset++;
@@ -358,15 +423,24 @@ size_t myhtml_tokenizer_state_script_data_escaped_dash(myhtml_tree_t* tree, myth
 
 size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
-    size_t offset_cache = html_offset;
-    
     while(html_offset < html_size)
     {
         if(myhtml_whithspace(html[html_offset], ==, ||) || html[html_offset] == '/' || html[html_offset] == '>')
         {
-            if((html_offset - offset_cache) > 5 && myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0) {
+            if((qnode->token->begin + 6) > (html_offset + tree->global_offset)) {
+                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                html_offset++;
+                break;
+            }
+            
+            size_t tmp_size = qnode->begin;
+            qnode->begin = qnode->token->begin;
+            
+            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            
+            qnode->begin = tmp_size;
+            
+            if(myhtml_strncasecmp(tem_name, "script", 6) == 0) {
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
             }
             else {
@@ -390,8 +464,6 @@ size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tre
 
 size_t myhtml_tokenizer_state_script_data_double_escaped(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     while(html_offset < html_size)
     {
         if(html[html_offset] == '-')
@@ -415,8 +487,6 @@ size_t myhtml_tokenizer_state_script_data_double_escaped(myhtml_tree_t* tree, my
 
 size_t myhtml_tokenizer_state_script_data_double_escaped_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     if(html[html_offset] == '-')
     {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH;
@@ -436,8 +506,6 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_dash(myhtml_tree_t* tre
 
 size_t myhtml_tokenizer_state_script_data_double_escaped_dash_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     if(html[html_offset] == '-') {
         html_offset++;
         return html_offset;
@@ -462,8 +530,6 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_dash_dash(myhtml_tree_t
 
 size_t myhtml_tokenizer_state_script_data_double_escaped_less_than_sign(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
     if(html[html_offset] == '/') {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPE_END;
         html_offset++;
@@ -477,15 +543,24 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_less_than_sign(myhtml_t
 
 size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
-    //myhtml_t* myhtml = tree->myhtml;
-    
-    size_t offset_cache = html_offset;
-    
     while(html_offset < html_size)
     {
         if(myhtml_whithspace(html[html_offset], ==, ||) || html[html_offset] == '/' || html[html_offset] == '>')
         {
-            if((html_offset - offset_cache) > 5 && myhtml_strncasecmp(&html[offset_cache], "script", 6) == 0) {
+            if((qnode->token->begin + 6) > (html_offset + tree->global_offset)) {
+                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
+                html_offset++;
+                break;
+            }
+            
+            size_t tmp_size = qnode->begin;
+            qnode->begin = qnode->token->begin;
+            
+            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            
+            qnode->begin = tmp_size;
+            
+            if(myhtml_strncasecmp(tem_name, "script", 6) == 0) {
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
             }
             else {
@@ -506,5 +581,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree,
     
     return html_offset;
 }
+
+
 
 
