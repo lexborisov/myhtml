@@ -138,7 +138,10 @@ myhtml_status_t myhtml_parse_single(myhtml_tree_t* tree, const char* html, size_
 myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
 
 myhtml_status_t myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t html_size);
-myhtml_status_t myhtml_parse_end(myhtml_tree_t* tree);
+myhtml_status_t myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+myhtml_status_t myhtml_parse_chunk_single(myhtml_tree_t* tree, const char* html, size_t html_size);
+myhtml_status_t myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+myhtml_status_t myhtml_parse_chunk_end(myhtml_tree_t* tree);
 
 myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status);
 myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection, const char* html, size_t length, myhtml_status_t *status);

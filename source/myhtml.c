@@ -181,9 +181,12 @@ myhtml_status_t myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_
 
 myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
 {
-    myhtml_tree_clean(tree);
-    mythread_queue_clean(tree->myhtml->queue);
-    mythread_clean(tree->myhtml->thread);
+    if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END)
+    {
+        myhtml_tree_clean(tree);
+        mythread_queue_clean(tree->myhtml->queue);
+        mythread_clean(tree->myhtml->thread);
+    }
     
     if(tag_id == 0)
         tag_id = MyHTML_TAG_DIV;
@@ -225,7 +228,45 @@ myhtml_status_t myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_parse_end(myhtml_tree_t* tree)
+myhtml_status_t myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
+{
+    if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END)
+    {
+        myhtml_tree_clean(tree);
+        mythread_queue_clean(tree->myhtml->queue);
+        mythread_clean(tree->myhtml->thread);
+    }
+    
+    if(tag_id == 0)
+        tag_id = MyHTML_TAG_DIV;
+    
+    if(my_namespace == 0)
+        my_namespace = MyHTML_NAMESPACE_HTML;
+    
+    myhtml_tokenizer_fragment_init(tree, tag_id, my_namespace);
+    
+    myhtml_tokenizer_chunk(tree, html, html_size);
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_parse_chunk_single(myhtml_tree_t* tree, const char* html, size_t html_size)
+{
+    if((tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
+        tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
+    
+    return myhtml_parse_chunk(tree, html, html_size);
+}
+
+myhtml_status_t myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
+{
+    if((tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
+        tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
+    
+    return myhtml_parse_chunk_fragment(tree, html, html_size, tag_id, my_namespace);
+}
+
+myhtml_status_t myhtml_parse_chunk_end(myhtml_tree_t* tree)
 {
     myhtml_tokenizer_end(tree);
     return MyHTML_STATUS_OK;

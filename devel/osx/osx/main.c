@@ -67,7 +67,7 @@ void chunk_test(void)
     }
     
     myhtml_parse_chunk(tree, &res.html[begin], (i - begin));
-    myhtml_parse_end(tree);
+    myhtml_parse_chunk_end(tree);
     
     i = 0;
     while (i < res.size)
@@ -144,18 +144,18 @@ void test_all(void)
 
 int main(int argc, const char * argv[])
 {
-    chunk_test();
+//    chunk_test();
 //    uint64_t all_start1 = myhtml_hperf_clock(NULL);
 //    test_all();
 //    uint64_t all_stop1 = myhtml_hperf_clock(NULL);
 //
 //    myhtml_hperf_print("Parse html", all_start1, all_stop1, stdout);
-    return 0;
+//    return 0;
     
     /* Default path or argument value */
     //const char* path = "/new/C-git/myhtml/test/test.html";
     //const char* path = "/new/C-git/myhtml/test/broken.html";
-    const char* path = "/new/C-git/myhtml/test/test_full.html";
+    const char* path = "/new/C-git/test_full.html";
     
     if (argc == 2) {
         path = argv[1];

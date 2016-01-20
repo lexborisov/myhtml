@@ -428,6 +428,71 @@ myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_
                       myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
 
 /**
+ * Parsing HTML chunk. For end parsing call myhtml_parse_chunk_end function
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] HTML
+ * @param[in] HTML size
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
+ */
+myhtml_status_t
+myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t html_size);
+
+/**
+ * Parsing chunk of fragment HTML. For end parsing call myhtml_parse_chunk_end function
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] HTML
+ * @param[in] HTML size
+ * @param[in] fragment base (root) tag id. Default: MyHTML_TAG_DIV if set 0
+ * @param[in] fragment NAMESPACE. Default: MyHTML_NAMESPACE_HTML if set 0
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
+ */
+myhtml_status_t
+myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html,size_t html_size,
+                            myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+
+/**
+ * Parsing HTML chunk in Single Mode.
+ * No matter what was said during initialization MyHTML
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] HTML
+ * @param[in] HTML size
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
+ */
+myhtml_status_t
+myhtml_parse_chunk_single(myhtml_tree_t* tree, const char* html, size_t html_size);
+
+/**
+ * Parsing chunk of fragment of HTML in Single Mode.
+ * No matter what was said during initialization MyHTML
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] HTML
+ * @param[in] HTML size
+ * @param[in] fragment base (root) tag id. Default: MyHTML_TAG_DIV if set 0
+ * @param[in] fragment NAMESPACE. Default: MyHTML_NAMESPACE_HTML if set 0
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
+ */
+myhtml_status_t
+myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size,
+                                   myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+
+/**
+ * End of parsing HTML chunks
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return MyHTML_STATUS_OK if successful, otherwise an error status
+ */
+myhtml_status_t myhtml_parse_chunk_end(myhtml_tree_t* tree);
+
+/**
  * Get myhtml_tag_t* from a myhtml_t*
  *
  * @param[in] myhtml_t*

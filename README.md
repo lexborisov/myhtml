@@ -20,6 +20,7 @@ Release will have major version number 1
 - Manipulation of elements attributes: add, change, delete and other
 - Support Single Mode parsing
 - Support for fragment parsing
+- Support for [parsing by chunks]
 - No outside dependencies
 - C99 support
 
@@ -123,3 +124,4 @@ See the License for the specific language governing permissions and limitations 
 [high]: https://github.com/lexborisov/myhtml/blob/master/include/myhtml/api.h
 [low]: https://github.com/lexborisov/myhtml/tree/master/include/myhtml
 [examples]: https://github.com/lexborisov/myhtml/tree/master/examples
+[parsing by chunks]: https://github.com/lexborisov/myhtml/blob/master/examples/chunks_high_level.c

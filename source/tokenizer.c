@@ -107,7 +107,9 @@ void myhtml_tokenizer_end(myhtml_tree_t* tree)
     
     if((tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0 &&
        (tree->myhtml->opt & MyHTML_OPTIONS_PARSE_MODE_SINGLE) == 0)
+    {
         myhtml_tokenizer_wait(tree);
+    }
     
     tree->flags |= MyHTML_TREE_FLAGS_PARSE_END;
     
