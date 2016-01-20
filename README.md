@@ -77,6 +77,7 @@ See [examples] directory
 ```c
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <myhtml/api.h>
 
@@ -93,7 +94,7 @@ int main(int argc, const char * argv[])
     myhtml_tree_init(tree, myhtml);
     
     // parse html
-    myhtml_parse(tree, html, (sizeof(html) - 1));
+    myhtml_parse(tree, html, strlen(html));
     
     // release resources
     myhtml_tree_destroy(tree);
