@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <myhtml/api.h>
 
 
@@ -34,7 +35,7 @@ int main(int argc, const char * argv[])
     myhtml_tree_init(tree, myhtml);
     
     // parse html
-    myhtml_parse_fragment(tree, html, (sizeof(html) - 1), MyHTML_TAG_DIV, MyHTML_NAMESPACE_HTML);
+    myhtml_parse_fragment(tree, html, strlen(html), MyHTML_TAG_DIV, MyHTML_NAMESPACE_HTML);
     
     // get first DIV from index
     myhtml_tag_index_t *tag_index = myhtml_tree_get_tag_index(tree);
@@ -46,8 +47,8 @@ int main(int argc, const char * argv[])
     printf("Original tree:\n");
     myhtml_tree_print_node_childs(tree, myhtml_tree_get_document(tree), stdout, 0);
     
-    printf("For a test; Create and delete 10000 attrs...\n");
-    for(size_t j = 0; j < 10000; j++) {
+    printf("For a test; Create and delete 100000 attrs...\n");
+    for(size_t j = 0; j < 100000; j++) {
         myhtml_tree_attr_t *attr = myhtml_attribute_add(tree, node, "key", 3, "value", 5);
         myhtml_attribute_delete(tree, node, attr);
     }
