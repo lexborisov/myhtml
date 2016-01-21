@@ -598,7 +598,7 @@ size_t myhtml_tokenizer_state_tag_open(myhtml_tree_t* tree, mythread_queue_node_
     }
     else if(html[html_offset] == '!')
     {
-        qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((tree->global_offset + html_offset) - 2), MyHTML_TOKEN_TYPE_DATA);
+        qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((tree->global_offset + html_offset) - 1), MyHTML_TOKEN_TYPE_DATA);
         
         html_offset++;
         qnode->begin = tree->global_offset + html_offset;
@@ -612,7 +612,7 @@ size_t myhtml_tokenizer_state_tag_open(myhtml_tree_t* tree, mythread_queue_node_
     }
     else if(html[html_offset] == '?')
     {
-        qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((tree->global_offset + html_offset) - 2), MyHTML_TOKEN_TYPE_DATA);
+        qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((tree->global_offset + html_offset) - 1), MyHTML_TOKEN_TYPE_DATA);
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BOGUS_COMMENT;
     }
     else {

@@ -41,7 +41,6 @@ myhtml_incoming_buf_t * myhtml_parser_find_first_buf(myhtml_tree_t *tree, size_t
 void myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length)
 {
     myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
-    
     size_t current_buf_offset = begin - inc_buf->offset;
     
     if((current_buf_offset + length) <= inc_buf->size)
@@ -70,12 +69,50 @@ void myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, const 
             tmp_len -= inc_buf->size;
         }
         else {
-            myhtml_string_append(string, inc_buf->data, tmp_len);
+            myhtml_string_append_with_null(string, inc_buf->data, tmp_len);
             break;
         }
         
         inc_buf = inc_buf->next;
     }
+}
+
+size_t myhtml_parser_add_text_with_charef(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length)
+{
+    myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
+    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, NULL};
+    
+    size_t current_buf_offset = begin - inc_buf->offset;
+    
+    if((current_buf_offset + length) <= inc_buf->size)
+    {
+        myhtml_string_append_char_references(&str_chunk, string, &inc_buf->data[current_buf_offset], length);
+        return length;
+    }
+    
+    size_t save_str_len = string->length;
+    size_t buf_next_offset = inc_buf->size - current_buf_offset;
+    
+    myhtml_string_append_char_references(&str_chunk, string, &inc_buf->data[current_buf_offset], buf_next_offset);
+    
+    size_t tmp_len = length - buf_next_offset;
+    inc_buf = inc_buf->next;
+    
+    while (inc_buf && tmp_len)
+    {
+        if(tmp_len > inc_buf->size) {
+            myhtml_string_append_char_references(&str_chunk, string, inc_buf->data, inc_buf->size);
+            tmp_len -= inc_buf->size;
+        }
+        else {
+            myhtml_string_append_char_references(&str_chunk, string, inc_buf->data, tmp_len);
+            break;
+        }
+        
+        inc_buf = inc_buf->next;
+    }
+    
+    return (string->length - save_str_len);
 }
 
 void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
@@ -94,7 +131,15 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
         token->attr_first = NULL;
         token->attr_last  = NULL;
         
-        myhtml_parser_add_text(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length);
+        if(token->type & MyHTML_TOKEN_TYPE_RCDATA ||
+           token->type & MyHTML_TOKEN_TYPE_CDATA ||
+           token->type & MyHTML_TOKEN_TYPE_DATA)
+        {
+            token->length = myhtml_parser_add_text_with_charef(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length);
+        }
+        else
+            myhtml_parser_add_text(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length);
+        
 //        myhtml_string_append_with_null(string,
 //                                       &qnode->text[qnode->begin],
 //                                       qnode->length);
@@ -132,7 +177,7 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
                 size_t begin = attr->value_begin;
                 attr->value_begin = attr->entry.length;
                 
-                myhtml_parser_add_text(qnode->tree, &attr->entry, qnode->text, begin, attr->value_length);
+                attr->value_length = myhtml_parser_add_text_with_charef(qnode->tree, &attr->entry, qnode->text, begin, attr->value_length);
 //                myhtml_string_append_with_null(&attr->entry,
 //                                               &qnode->text[begin],
 //                                               attr->value_length);

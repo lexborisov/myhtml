@@ -25,11 +25,19 @@ extern "C" {
 #endif
 
 #include "myhtml/myosi.h"
+#include "myhtml/charef.h"
 #include "myhtml/utils/mchar_async.h"
 
 #define myhtml_string_get(__str__, __attr__) __str__->__attr__
 #define myhtml_string_set(__str__, __attr__) myhtml_string_get(__str__, __attr__)
 #define myhtml_string_len(__str__) myhtml_string_get(__str__, length)
+
+#define myhtml_mystring_whithspace(__char__, __action__, __logic__)    \
+    __char__ __action__ ' ' __logic__                    \
+    __char__ __action__ '\t' __logic__                    \
+    __char__ __action__ '\n' __logic__                    \
+    __char__ __action__ '\f' __logic__                    \
+    __char__ __action__ '\r'
 
 struct myhtml_string {
     char*  data;
@@ -40,6 +48,13 @@ struct myhtml_string {
     size_t node_idx;
 }
 typedef myhtml_string_t;
+
+struct myhtml_string_char_ref_chunk {
+    int state;
+    size_t begin;
+    const charef_entry_t *entry;
+}
+typedef myhtml_string_char_ref_chunk_t;
 
 typedef size_t myhtml_string_index_t;
 
@@ -53,6 +68,7 @@ void myhtml_string_append_one(myhtml_string_t* str, const char buff);
 void myhtml_string_append_one_without_check(myhtml_string_t* str, const char buff);
 void myhtml_string_append_lowercase_with_null(myhtml_string_t* str, const char* buff, size_t length);
 void myhtml_string_copy(myhtml_string_t* target, myhtml_string_t* dest);
+void myhtml_string_append_char_references(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t length);
 
 mybool_t myhtml_string_check(myhtml_string_t* str, size_t length);
 

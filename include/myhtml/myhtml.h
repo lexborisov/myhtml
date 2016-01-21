@@ -36,6 +36,7 @@ extern "C" {
 #include "myhtml/tree.h"
 #include "myhtml/rules.h"
 #include "myhtml/token.h"
+#include "myhtml/charef.h"
 
 #define mh_thread_get(__idx__, __attr__) myhtml_thread_get(myhtml->thread, __idx__, __attr__)
 #define mh_thread_set(__idx__, __attr__) myhtml_thread_set(myhtml->thread, __idx__, __attr__)
