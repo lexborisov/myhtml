@@ -33,7 +33,7 @@ extern "C" {
 #define myhtml_string_len(__str__) myhtml_string_get(__str__, length)
 
 #define myhtml_mystring_whithspace(__char__, __action__, __logic__)    \
-    __char__ __action__ ' ' __logic__                    \
+    __char__ __action__ ' ' __logic__                     \
     __char__ __action__ '\t' __logic__                    \
     __char__ __action__ '\n' __logic__                    \
     __char__ __action__ '\f' __logic__                    \
@@ -52,6 +52,7 @@ typedef myhtml_string_t;
 struct myhtml_string_char_ref_chunk {
     int state;
     size_t begin;
+    long l_data;
     const charef_entry_t *entry;
 }
 typedef myhtml_string_char_ref_chunk_t;
@@ -69,6 +70,7 @@ void myhtml_string_append_one_without_check(myhtml_string_t* str, const char buf
 void myhtml_string_append_lowercase_with_null(myhtml_string_t* str, const char* buff, size_t length);
 void myhtml_string_copy(myhtml_string_t* target, myhtml_string_t* dest);
 void myhtml_string_append_char_references(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t length);
+void myhtml_string_append_char_references_end(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str);
 
 mybool_t myhtml_string_check(myhtml_string_t* str, size_t length);
 

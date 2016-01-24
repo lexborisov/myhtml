@@ -28,6 +28,7 @@
 		0E770C111C3E87BA00F68C82 /* mcsync.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BFC1C3E87BA00F68C82 /* mcsync.c */; };
 		0E770C121C3E87BA00F68C82 /* mctree.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BFE1C3E87BA00F68C82 /* mctree.c */; };
 		0E770C151C3FE6A400F68C82 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770C131C3FE6A400F68C82 /* utils.c */; };
+		0EEADE9E1C5550690086B3D6 /* charef.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEADE9C1C5550690086B3D6 /* charef.c */; };
 		0EEF775A1C425D20006DB566 /* tokenizer_end.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEF77581C425D20006DB566 /* tokenizer_end.c */; };
 /* End PBXBuildFile section */
 
@@ -87,6 +88,8 @@
 		0E770BFF1C3E87BA00F68C82 /* mctree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mctree.h; sourceTree = "<group>"; };
 		0E770C131C3FE6A400F68C82 /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
 		0E770C141C3FE6A400F68C82 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		0EEADE9C1C5550690086B3D6 /* charef.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = charef.c; sourceTree = "<group>"; };
+		0EEADE9D1C5550690086B3D6 /* charef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = charef.h; sourceTree = "<group>"; };
 		0EEF77581C425D20006DB566 /* tokenizer_end.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tokenizer_end.c; sourceTree = "<group>"; };
 		0EEF77591C425D20006DB566 /* tokenizer_end.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tokenizer_end.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -140,6 +143,8 @@
 				0E770BDE1C3E87BA00F68C82 /* myosi.c */,
 				0E770BE11C3E87BA00F68C82 /* mystring.h */,
 				0E770BE01C3E87BA00F68C82 /* mystring.c */,
+				0EEADE9D1C5550690086B3D6 /* charef.h */,
+				0EEADE9C1C5550690086B3D6 /* charef.c */,
 				0E770BE31C3E87BA00F68C82 /* parser.h */,
 				0E770BE21C3E87BA00F68C82 /* parser.c */,
 				0E770BE41C3E87BA00F68C82 /* perf.c */,
@@ -263,6 +268,7 @@
 				0E770C0F1C3E87BA00F68C82 /* mchar_async.c in Sources */,
 				0E770C091C3E87BA00F68C82 /* thread.c in Sources */,
 				0E770C101C3E87BA00F68C82 /* mcobject_async.c in Sources */,
+				0EEADE9E1C5550690086B3D6 /* charef.c in Sources */,
 				0EEF775A1C425D20006DB566 /* tokenizer_end.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
