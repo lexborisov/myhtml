@@ -20,7 +20,7 @@
 
 mcobject_async_t * mcobject_async_create(void)
 {
-    return (mcobject_async_t*)calloc(1, sizeof(mcobject_async_t));
+    return (mcobject_async_t*)mycalloc(1, sizeof(mcobject_async_t));
 }
 
 mcobject_async_status_t mcobject_async_chunk_up(mcobject_async_t *mcobj_async)
@@ -48,35 +48,30 @@ mcobject_async_status_t mcobject_async_init(mcobject_async_t *mcobj_async, size_
     mcobj_async->chunks_size       = chunk_len;
     mcobj_async->chunks            = (mcobject_async_chunk_t**)mycalloc(mcobj_async->chunks_pos_size, sizeof(mcobject_async_chunk_t*));
     
-    if(mcobj_async->chunks == NULL) {
-        mcobj_async->nodes = NULL;
-        mcobj_async->mcsync = NULL;
-        mcobj_async->chunk_cache = NULL;
-        
+    if(mcobj_async->chunks == NULL)
         return MCOBJECT_ASYNC_STATUS_CHUNK_ERROR_MEMORY_ALLOCATION;
-    }
     
     mcobject_async_chunk_up(mcobj_async);
     
     mcobj_async->chunk_cache_size = mcobj_async->chunks_size;
     mcobj_async->chunk_cache      = (mcobject_async_chunk_t**)mycalloc(mcobj_async->chunk_cache_size, sizeof(mcobject_async_chunk_t*));
     
-    if(mcobj_async->chunks == NULL) {
-        mcobj_async->nodes = NULL;
-        mcobj_async->mcsync = NULL;
-        
+    if(mcobj_async->chunk_cache == NULL)
         return MCOBJECT_ASYNC_STATUS_CHUNK_CACHE_ERROR_MEMORY_ALLOCATION;
-    }
     
     mcobj_async->nodes_length     = 0;
     mcobj_async->nodes_size       = 64;
     mcobj_async->nodes            = (mcobject_async_node_t*)mycalloc(mcobj_async->nodes_size, sizeof(mcobject_async_node_t));
     
-    if(mcobj_async->chunks == NULL) {
-        mcobj_async->mcsync = NULL;
-        
+    if(mcobj_async->nodes == NULL)
         return MCOBJECT_ASYNC_STATUS_NODES_ERROR_MEMORY_ALLOCATION;
-    }
+    
+    mcobj_async->nodes_cache_length     = 0;
+    mcobj_async->nodes_cache_size       = mcobj_async->nodes_size;
+    mcobj_async->nodes_cache            = (size_t*)mymalloc(mcobj_async->nodes_cache_size * sizeof(size_t));
+    
+    if(mcobj_async->nodes_cache == NULL)
+        return MCOBJECT_ASYNC_STATUS_NODES_ERROR_MEMORY_ALLOCATION;
     
     mcobject_async_clean(mcobj_async);
     
@@ -122,7 +117,10 @@ mcobject_async_t * mcobject_async_destroy(mcobject_async_t *mcobj_async, int des
         }
         
         free(mcobj_async->nodes);
-        mcobj_async->nodes = NULL;
+    }
+    
+    if(mcobj_async->nodes_cache) {
+        free(mcobj_async->nodes_cache);
     }
     
     if(mcobj_async->chunks) {
@@ -139,15 +137,15 @@ mcobject_async_t * mcobject_async_destroy(mcobject_async_t *mcobj_async, int des
         }
         
         free(mcobj_async->chunks);
-        mcobj_async->chunks = NULL;
     }
     
     if(mcobj_async->chunk_cache) {
         free(mcobj_async->chunk_cache);
-        mcobj_async->chunk_cache = NULL;
     }
     
     mcobj_async->mcsync = mcsync_destroy(mcobj_async->mcsync, 1);
+    
+    memset(mcobj_async, 0, sizeof(mcobject_async_t));
     
     if(destroy_self)
         free(mcobj_async);
@@ -244,12 +242,23 @@ size_t mcobject_async_node_add(mcobject_async_t *mcobj_async, mcobject_async_sta
 {
     mcsync_lock(mcobj_async->mcsync);
     
-    if(mcobj_async->nodes_length >= mcobj_async->nodes_size) {
-        mcsync_unlock(mcobj_async->mcsync);
-        return 0;
+    size_t node_idx;
+    
+    if(mcobj_async->nodes_cache_length) {
+        mcobj_async->nodes_cache_length--;
+        
+        node_idx = mcobj_async->nodes_cache[ mcobj_async->nodes_cache_length ];
+    }
+    else {
+        if(mcobj_async->nodes_length >= mcobj_async->nodes_size) {
+            mcsync_unlock(mcobj_async->mcsync);
+            return 0;
+        }
+        
+        node_idx = mcobj_async->nodes_length;
+        mcobj_async->nodes_length++;
     }
     
-    size_t node_idx = mcobj_async->nodes_length;
     mcobject_async_node_t *node = &mcobj_async->nodes[node_idx];
     
     if(status) {
@@ -284,8 +293,6 @@ size_t mcobject_async_node_add(mcobject_async_t *mcobj_async, mcobject_async_sta
         mcsync_unlock(mcobj_async->mcsync);
         return 0;
     }
-    
-    mcobj_async->nodes_length++;
     
     mcsync_unlock(mcobj_async->mcsync);
     
@@ -353,7 +360,21 @@ void mcobject_async_node_delete(mcobject_async_t *mcobj_async, size_t node_idx)
     if(node->cache)
         free(node->cache);
     
-    mcobj_async->nodes_length--;
+    memset(node, 0, sizeof(mcobject_async_node_t));
+    
+    if(mcobj_async->nodes_cache_length >= mcobj_async->nodes_cache_size) {
+        size_t new_size = mcobj_async->nodes_cache_size << 1;
+        
+        size_t *tmp = (size_t*)myrealloc(mcobj_async->nodes_cache, sizeof(size_t) * mcobj_async->nodes_cache_size);
+        
+        if(tmp) {
+            mcobj_async->nodes_cache = tmp;
+            mcobj_async->nodes_cache_size = new_size;
+        }
+    }
+    
+    mcobj_async->nodes_cache[ mcobj_async->nodes_cache_length ] = node_idx;
+    mcobj_async->nodes_cache_length++;
     
     mcsync_unlock(mcobj_async->mcsync);
 }

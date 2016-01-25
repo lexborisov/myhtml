@@ -45,6 +45,10 @@ void mchar_async_init(mchar_async_t *mchar_async, size_t chunk_len, size_t char_
     mchar_async->nodes_size       = 64;
     mchar_async->nodes            = (mchar_async_node_t*)mycalloc(mchar_async->nodes_size, sizeof(mchar_async_node_t));
     
+    mchar_async->nodes_cache_length = 0;
+    mchar_async->nodes_cache_size   = mchar_async->nodes_size;
+    mchar_async->nodes_cache        = (size_t*)mymalloc(mchar_async->nodes_cache_size * sizeof(size_t));
+    
     mchar_async_clean(mchar_async);
     
     mchar_async->mcsync = mcsync_create();
@@ -84,6 +88,10 @@ mchar_async_t * mchar_async_destroy(mchar_async_t *mchar_async, int destroy_self
         mchar_async->nodes = NULL;
     }
     
+    if(mchar_async->nodes_cache) {
+        free(mchar_async->nodes_cache);
+    }
+    
     if(mchar_async->chunks)
     {
         for (size_t pos_idx = 0; pos_idx < mchar_async->chunks_pos_length; pos_idx++) {
@@ -105,6 +113,8 @@ mchar_async_t * mchar_async_destroy(mchar_async_t *mchar_async, int destroy_self
     mchar_async_cache_destroy(&mchar_async->chunk_cache, myfalse);
     
     mchar_async->mcsync = mcsync_destroy(mchar_async->mcsync, 1);
+    
+    memset(mchar_async, 0, sizeof(mchar_async_t));
     
     if(destroy_self)
         free(mchar_async);
@@ -199,12 +209,23 @@ size_t mchar_async_node_add(mchar_async_t *mchar_async)
 {
     mcsync_lock(mchar_async->mcsync);
     
-    if(mchar_async->nodes_length >= mchar_async->nodes_size) {
-        mcsync_unlock(mchar_async->mcsync);
-        return 0;
+    size_t node_idx;
+    
+    if(mchar_async->nodes_cache_length) {
+        mchar_async->nodes_cache_length--;
+        
+        node_idx = mchar_async->nodes_cache[ mchar_async->nodes_cache_length ];
+    }
+    else {
+        if(mchar_async->nodes_length >= mchar_async->nodes_size) {
+            mcsync_unlock(mchar_async->mcsync);
+            return 0;
+        }
+        
+        node_idx = mchar_async->nodes_length;
+        mchar_async->nodes_length++;
     }
     
-    size_t node_idx = mchar_async->nodes_length;
     mchar_async_node_t *node = &mchar_async->nodes[node_idx];
     
     mchar_async_cache_init(&node->cache);
@@ -213,8 +234,6 @@ size_t mchar_async_node_add(mchar_async_t *mchar_async)
     
     node->chunk->next = NULL;
     node->chunk->prev = NULL;
-    
-    mchar_async->nodes_length++;
     
     mcsync_unlock(mchar_async->mcsync);
     
@@ -259,7 +278,21 @@ void mchar_async_node_delete(mchar_async_t *mchar_async, size_t node_idx)
     if(node->cache.nodes)
         free(node->cache.nodes);
     
-    mchar_async->nodes_length--;
+    memset(node, 0, sizeof(mchar_async_node_t));
+    
+    if(mchar_async->nodes_cache_length >= mchar_async->nodes_cache_size) {
+        size_t new_size = mchar_async->nodes_cache_size << 1;
+        
+        size_t *tmp = (size_t*)myrealloc(mchar_async->nodes_cache, sizeof(size_t) * mchar_async->nodes_cache_size);
+        
+        if(tmp) {
+            mchar_async->nodes_cache = tmp;
+            mchar_async->nodes_cache_size = new_size;
+        }
+    }
+    
+    mchar_async->nodes_cache[ mchar_async->nodes_cache_length ] = node_idx;
+    mchar_async->nodes_cache_length++;
     
     mcsync_unlock(mchar_async->mcsync);
 }

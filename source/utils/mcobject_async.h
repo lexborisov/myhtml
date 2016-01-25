@@ -74,6 +74,10 @@ struct mcobject_async {
     size_t nodes_length;
     size_t nodes_size;
     
+    size_t *nodes_cache;
+    size_t nodes_cache_length;
+    size_t nodes_cache_size;
+    
     mcsync_t *mcsync;
 }
 typedef mcobject_async_t;
