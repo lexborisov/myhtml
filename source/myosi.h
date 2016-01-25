@@ -67,6 +67,7 @@ enum mythread_thread_opt {
 }
 typedef mythread_thread_opt_t;
 
+typedef struct mythread_queue_list mythread_queue_list_t;
 typedef struct mythread_queue_node mythread_queue_node_t;
 typedef struct mythread_queue mythread_queue_t;
 

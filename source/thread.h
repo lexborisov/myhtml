@@ -140,6 +140,11 @@ struct mythread_queue_node {
     const char* text;
 };
 
+struct mythread_queue_list {
+    mythread_queue_list_t *next;
+    mythread_queue_t *queue;
+};
+
 struct mythread_queue {
     mythread_queue_node_t **nodes;
     

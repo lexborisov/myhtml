@@ -222,6 +222,8 @@ myhtml_status_t myhtml_hread_sem_wait(mythread_t *mythread, mythread_context_t *
 myhtml_status_t myhtml_hread_sem_close(mythread_t *mythread, mythread_context_t *ctx)
 {
     sem_close(ctx->sem);
+    sem_unlink(ctx->sem_name);
+    //sem_close(ctx->sem);
     return MyHTML_STATUS_OK;
 }
 

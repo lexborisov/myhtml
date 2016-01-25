@@ -132,9 +132,6 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
             break;
     }
     
-    // set ref
-    myhtml->queue = myhtml->thread->queue;
-    
     myhtml_clean(myhtml);
     
     return status;
@@ -142,7 +139,7 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
 
 void myhtml_clean(myhtml_t* myhtml)
 {
-    mythread_queue_clean(myhtml->queue);
+    mythread_queue_clean(myhtml->thread->queue);
     mythread_clean(myhtml->thread);
     mcobject_async_node_all_clean(myhtml->async_incoming_buf);
 }
@@ -157,7 +154,6 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
     
     myhtml->async_incoming_buf  = mcobject_async_destroy(myhtml->async_incoming_buf, mytrue);
     myhtml->tags                = myhtml_tag_destroy(myhtml->tags);
-    myhtml->queue               = NULL;
     
     if(myhtml->insertion_func)
         free(myhtml->insertion_func);
@@ -169,9 +165,11 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
 
 myhtml_status_t myhtml_parse(myhtml_tree_t* tree, const char* html, size_t html_size)
 {
-    myhtml_tree_clean(tree);
-    mythread_queue_clean(tree->myhtml->queue);
-    mythread_clean(tree->myhtml->thread);
+    if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END) {
+        myhtml_tree_clean(tree);
+        mythread_queue_clean(tree->queue);
+        mythread_clean(tree->myhtml->thread);
+    }
     
     myhtml_tokenizer_begin(tree, html, html_size);
     myhtml_tokenizer_end(tree);
@@ -184,7 +182,7 @@ myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, siz
     if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END)
     {
         myhtml_tree_clean(tree);
-        mythread_queue_clean(tree->myhtml->queue);
+        mythread_queue_clean(tree->queue);
         mythread_clean(tree->myhtml->thread);
     }
     
@@ -204,14 +202,43 @@ myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, const char* html, siz
 
 myhtml_status_t myhtml_parse_single(myhtml_tree_t* tree, const char* html, size_t html_size)
 {
+    if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END) {
+        myhtml_tree_clean(tree);
+        mythread_queue_clean(tree->queue);
+        mythread_clean(tree->myhtml->thread);
+    }
+    
     tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
-    return myhtml_parse(tree, html, html_size);
+    
+    myhtml_tokenizer_begin(tree, html, html_size);
+    myhtml_tokenizer_end(tree);
+    
+    return MyHTML_STATUS_OK;
 }
 
 myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
 {
+    if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END)
+    {
+        myhtml_tree_clean(tree);
+        mythread_queue_clean(tree->queue);
+        mythread_clean(tree->myhtml->thread);
+    }
+    
+    if(tag_id == 0)
+        tag_id = MyHTML_TAG_DIV;
+    
+    if(my_namespace == 0)
+        my_namespace = MyHTML_NAMESPACE_HTML;
+    
     tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
-    return myhtml_parse_fragment(tree, html, html_size, tag_id, my_namespace);
+    
+    myhtml_tokenizer_fragment_init(tree, tag_id, my_namespace);
+    
+    myhtml_tokenizer_begin(tree, html, html_size);
+    myhtml_tokenizer_end(tree);
+    
+    return MyHTML_STATUS_OK;
 }
 
 myhtml_status_t myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t html_size)
@@ -219,7 +246,7 @@ myhtml_status_t myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t
     if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END)
     {
         myhtml_tree_clean(tree);
-        mythread_queue_clean(tree->myhtml->queue);
+        mythread_queue_clean(tree->queue);
         mythread_clean(tree->myhtml->thread);
     }
     
@@ -233,7 +260,7 @@ myhtml_status_t myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* htm
     if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END)
     {
         myhtml_tree_clean(tree);
-        mythread_queue_clean(tree->myhtml->queue);
+        mythread_queue_clean(tree->queue);
         mythread_clean(tree->myhtml->thread);
     }
     

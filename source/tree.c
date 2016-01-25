@@ -30,6 +30,8 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     tree->myhtml             = myhtml;
     tree->token              = myhtml_token_create(tree, (4096 * 4));
     tree->temp_tag_name.data = NULL;
+    tree->queue              = myhtml->thread->queue;
+    tree->single_queue       = NULL;
     
     tree->tree_obj = mcobject_async_create();
     if(tree->tree_obj == NULL)
@@ -129,6 +131,9 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->global_offset      = 0;
     tree->current_qnode      = NULL;
     
+    if(tree->single_queue)
+        mythread_queue_clean(tree->single_queue);
+    
     myhtml_tree_active_formatting_clean(tree);
     myhtml_tree_open_elements_clean(tree);
     myhtml_tree_list_clean(tree->other_elements);
@@ -173,6 +178,9 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->global_offset      = 0;
     tree->current_qnode      = NULL;
     
+    if(tree->single_queue)
+        mythread_queue_clean(tree->single_queue);
+    
     myhtml_tree_active_formatting_clean(tree);
     myhtml_tree_open_elements_clean(tree);
     myhtml_tree_list_clean(tree->other_elements);
@@ -199,6 +207,10 @@ myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree)
     tree->tree_obj           = mcobject_async_destroy(tree->tree_obj, mytrue);
     tree->token              = myhtml_token_destroy(tree->token);
     tree->mchar              = mchar_async_destroy(tree->mchar, 1);
+    
+    if(tree->single_queue) {
+        tree->single_queue = mythread_queue_destroy(tree->single_queue);
+    }
     
     mcobject_async_node_delete(tree->myhtml->async_incoming_buf, tree->mcasync_incoming_buf_id);
     myhtml_tree_temp_tag_name_destroy(&tree->temp_tag_name, myfalse);

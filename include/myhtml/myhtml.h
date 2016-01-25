@@ -66,7 +66,7 @@ extern "C" {
         myhtml_parser_worker(0, __tree__->current_qnode); \
         while(myhtml_rules_tree_dispatcher(__tree__, __tree__->current_qnode->token)){}; \
     } \
-    __tree__->current_qnode = mythread_queue_node_malloc(__tree__->myhtml->queue, __html__, (__tree__->global_offset + __begin__), NULL); \
+    __tree__->current_qnode = mythread_queue_node_malloc(__tree__->queue, __html__, (__tree__->global_offset + __begin__), NULL); \
     __tree__->current_qnode->tree = __tree__; \
     myhtml_token_node_malloc(__tree__->token, __tree__->current_qnode->token, __tree__->token->mcasync_token_id)
 
@@ -101,7 +101,6 @@ extern "C" {
 
 struct myhtml {
     myhtml_tag_t        *tags;
-    mythread_queue_t    *queue;
     mythread_t          *thread;
     mcobject_async_t    *async_incoming_buf;
     

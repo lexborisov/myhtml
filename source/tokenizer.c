@@ -52,9 +52,7 @@ static const unsigned char myhtml_tokenizer_chars_map[] = {
 
 void myhtml_tokenizer_set_first_settings(myhtml_tree_t* tree, const char* html, size_t html_length)
 {
-    myhtml_t* myhtml = tree->myhtml;
-    
-    tree->current_qnode       = mythread_queue_get_current_node(myhtml->queue);
+    tree->current_qnode       = mythread_queue_get_current_node(tree->queue);
     tree->current_qnode->text = html;
     tree->current_qnode->tree = tree;
     
@@ -76,16 +74,28 @@ void myhtml_tokenizer_chunk(myhtml_tree_t* tree, const char* html, size_t html_l
     // add for a chunk
     myhtml_incomming_buf_add(myhtml, tree, tree->incoming_buf, html, html_length);
     
-    if(tree->current_qnode == NULL) {
-        myhtml_tokenizer_set_first_settings(tree, html, html_length);
-    }
-    
     if(myhtml->opt & MyHTML_OPTIONS_PARSE_MODE_SINGLE)
         tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
     
-    if((tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
+    if(tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE)
+    {
+        if(tree->single_queue) {
+            tree->queue = tree->single_queue;
+        }
+        else {
+            tree->queue = mythread_queue_create(4096, NULL);
+            tree->single_queue = tree->queue;
+        }
+    }
+    else {
+        tree->queue = myhtml->thread->queue;
         myhtml_tokenizer_post(tree);
+    }
     
+    if(tree->current_qnode == NULL) {
+        myhtml_tokenizer_set_first_settings(tree, html, html_length);
+    }
+
     size_t offset = 0;
     
     while (offset < html_length) {
@@ -250,7 +260,7 @@ size_t myhtml_tokenizer_state_rcdata(myhtml_tree_t* tree, mythread_queue_node_t*
 {
     if(tree->tmp_qnode == NULL) {
         qnode->begin = (html_offset + tree->global_offset);
-        tree->tmp_qnode = mythread_queue_get_prev_node(tree->myhtml->queue);
+        tree->tmp_qnode = mythread_queue_get_prev_node(tree->queue);
     }
     
     while(html_offset < html_size)
@@ -397,7 +407,7 @@ size_t myhtml_tokenizer_state_rawtext(myhtml_tree_t* tree, mythread_queue_node_t
 {
     if(tree->tmp_qnode == NULL) {
         qnode->begin = html_offset + tree->global_offset;
-        tree->tmp_qnode = mythread_queue_get_prev_node(tree->myhtml->queue);
+        tree->tmp_qnode = mythread_queue_get_prev_node(tree->queue);
     }
     
     while(html_offset < html_size)
