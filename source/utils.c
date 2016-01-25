@@ -64,12 +64,13 @@ size_t myhtml_strcasecmp(const char* str1, const char* str2)
     unsigned char *ustr1 = (unsigned char *)str1;
     unsigned char *ustr2 = (unsigned char *)str2;
     
-    for (size_t i = 0;;) {
-        if(myhtml_utils_chars_map[*ustr1] != myhtml_utils_chars_map[*ustr2])
-            return i;
-        
+    for (size_t i = 0;;)
+    {
         if(*ustr1 == '\0')
             return 0;
+        
+        if(myhtml_utils_chars_map[*ustr1] != myhtml_utils_chars_map[*ustr2])
+            return i;
         
         ustr1++;
         ustr2++;
