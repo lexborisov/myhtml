@@ -37,6 +37,7 @@ extern "C" {
 #include "rules.h"
 #include "token.h"
 #include "charef.h"
+#include "encoding.h"
 
 #define mh_thread_get(__idx__, __attr__) myhtml_thread_get(myhtml->thread, __idx__, __attr__)
 #define mh_thread_set(__idx__, __attr__) myhtml_thread_set(myhtml->thread, __idx__, __attr__)

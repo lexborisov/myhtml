@@ -75,6 +75,7 @@ void myhtml_string_append_char_references_end(myhtml_string_char_ref_chunk_t *ch
 mybool_t myhtml_string_check(myhtml_string_t* str, size_t length);
 
 size_t myhtml_string_raw_copy(char* str1, const char* str2, size_t size);
+size_t myhtml_string_convert_dec_to_ansi_utf8(size_t value, char *utf8);
 
 #ifdef __cplusplus
 } /* extern "C" */
