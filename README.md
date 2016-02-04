@@ -7,7 +7,7 @@ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library wit
 ## Now
 
 ```text
-The current version is 0.1.0 - this is a beta version
+The current version is 0.2.1 - this is a beta version
 Release will have major version number 1
 ```
 
@@ -18,11 +18,26 @@ Release will have major version number 1
 - Two API - [high] and [low]-level
 - Manipulation of elements: add, change, delete and other
 - Manipulation of elements attributes: add, change, delete and other
+- Support 34 character encoding by specification [encoding.spec.whatwg.org]
 - Support Single Mode parsing
 - Support for fragment parsing
 - Support for [parsing by chunks]
 - No outside dependencies
 - C99 support
+
+## Support encodings for InputStream
+
+```text
+X_USER_DEFINED, UTF_8, UTF_16LE, UTF_16BE, BIG5, EUC_KR, GB18030,
+IBM866, ISO_8859_10, ISO_8859_13, ISO_8859_14, ISO_8859_15, ISO_8859_16, ISO_8859_2, ISO_8859_3,
+ISO_8859_4, ISO_8859_5, ISO_8859_6, ISO_8859_7, ISO_8859_8, KOI8_R, KOI8_U, MACINTOSH,
+WINDOWS_1250, WINDOWS_1251, WINDOWS_1252, WINDOWS_1253, WINDOWS_1254, WINDOWS_1255, WINDOWS_1256,
+WINDOWS_1257, WINDOWS_1258, WINDOWS_874, X_MAC_CYRILLIC
+```
+
+## Support encodings for output
+
+**Program working in UTF-8 and returns all in UTF-8**
 
 ## Build and Installation
 
@@ -94,7 +109,7 @@ int main(int argc, const char * argv[])
     myhtml_tree_init(tree, myhtml);
     
     // parse html
-    myhtml_parse(tree, html, strlen(html));
+    myhtml_parse(tree, MyHTML_ENCODING_UTF_8, html, strlen(html));
     
     // release resources
     myhtml_tree_destroy(tree);
@@ -126,3 +141,4 @@ See the License for the specific language governing permissions and limitations 
 [low]: https://github.com/lexborisov/myhtml/tree/master/include/myhtml
 [examples]: https://github.com/lexborisov/myhtml/tree/master/examples
 [parsing by chunks]: https://github.com/lexborisov/myhtml/blob/master/examples/chunks_high_level.c
+[encoding.spec.whatwg.org]: https://encoding.spec.whatwg.org/

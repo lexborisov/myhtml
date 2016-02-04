@@ -52,6 +52,8 @@ void chunk_test(void)
     myhtml_tree_t* tree = myhtml_tree_create();
     myhtml_tree_init(tree, myhtml);
     
+    myhtml_encoding_set(tree, MyHTML_ENCODING_UTF_8);
+    
     size_t begin = 0, i = 0;
     while (i < res.size)
     {
@@ -121,7 +123,7 @@ void test_all(void)
 //                printf("%zu: %s\n", count, path);
                 
                 struct res_html res = load_html(path);
-                myhtml_parse(tree, res.html, res.size);
+                myhtml_parse(tree, MyHTML_ENCODING_WINDOWS_1251, res.html, res.size);
                 
 //                myhtml_tree_node_t **node_list = myhtml_get_elements_by_tag_id(tree, MyHTML_TAG_TITLE, NULL);
 //                
@@ -142,8 +144,41 @@ void test_all(void)
     myhtml_destroy(myhtml);
 }
 
+
+
 int main(int argc, const char * argv[])
 {
+//    chunk_test();
+//    return 0;
+//
+    //myhtml_encoding_decode_single_byte(0xf4);
+    
+//    myhtml_encoding_result_t res_data = {0, 0, 0, 0, 0, 0};
+//    
+//    unsigned char data[20];
+//    data[0] = 0xAC;
+//    data[1] = 0xB1;
+//    data[2] = 0x42;
+//    data[3] = 0x4F;
+//    data[4] = 0x51;
+//    data[5] = 0x1B;
+//    data[6] = 0x28;
+//    data[7] = 0x42;
+//    data[8] = 0;
+//    
+//    //myhtml_encoding_dec_to_char(54936, data);
+//    
+//    enum myhtml_encoding_status status = MyHTML_ENCODING_STATUS_CONTINUE;
+//    
+//    size_t i = 0;
+//    while (status & MyHTML_ENCODING_STATUS_CONTINUE) {
+//        status = myhtml_encoding_decode_euc_kr(data[i], &res_data);
+//        i++;
+//    }
+//    
+//    myhtml_string_convert_dec_to_ansi_utf8(res_data.result, (char *)data);
+//    
+//    return 0;
 //    chunk_test();
 //    uint64_t all_start1 = myhtml_hperf_clock(NULL);
 //    test_all();
@@ -181,10 +216,10 @@ int main(int argc, const char * argv[])
     for(size_t i = 0; i < 1; i++)
     {
         //myhtml_parse(tree, text, strlen(text));
-        myhtml_parse_single(tree, res.html, res.size);
-        myhtml_parse(tree, res.html, res.size);
+        myhtml_parse_single(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
+//        myhtml_parse(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
         
-        myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
+//        myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
     }
     //usleep(100000000);
     

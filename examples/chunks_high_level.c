@@ -51,6 +51,8 @@ int main(int argc, const char * argv[])
     myhtml_tree_t* tree = myhtml_tree_create();
     myhtml_tree_init(tree, myhtml);
     
+    myhtml_encoding_set(tree, MyHTML_ENCODING_UTF_8);
+    
     for(size_t i = 0; html[i][0]; i++)
     {
         printf("Parse chunk: %s\n", html[i]);

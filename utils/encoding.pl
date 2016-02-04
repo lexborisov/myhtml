@@ -9,8 +9,8 @@ use MyHTML::Base;
 my $base_path = "tmpl/encoding";
 
 #for_txt_files($base_path);
-#for_json("$base_path/indexes.json");
-for_single_byte("$base_path/encodings.json");
+for_json("$base_path/indexes.json");
+#for_single_byte("$base_path/encodings.json");
 
 sub for_json {
 	my ($filename) = @_;
@@ -101,26 +101,26 @@ sub print_links {
 	my ($myhtml_encoding_list) = @_;
 	
 	print "enum myhtml_encoding_list {\n";
-    print "\tMyHTML_ENCODING_UNDEF = 0x00,\n";
-    print "\tMyHTML_ENCODING_UTF_8 = 0x01,\n";
+    print "\tMyHTML_ENCODING_DEFAULT          = 0x00,\n";
+	print "\tMyHTML_ENCODING_AUTO             = 0x01,\n";
+	print "\tMyHTML_ENCODING_CUSTOM           = 0x02,\n";
+    print "\tMyHTML_ENCODING_UTF_8            = 0x00,\n";
+	print "\tMyHTML_ENCODING_UTF_16LE         = 0x04,\n";
+	print "\tMyHTML_ENCODING_UTF_16BE         = 0x05,\n";
+	print "\tMyHTML_ENCODING_X_USER_DEFINED   = 0x06,\n";
 	
-	my $i = 2; my @links = (0, 0);
+	my $i = 7; my @links = (0, 0);
 	foreach my $id (sort {$a cmp $b} keys %$myhtml_encoding_list) {
 		print "\t$id = ", sprintf("0x%02x", $i), ",\n";
 		$i++;
 		
-		push @links, $myhtml_encoding_list->{$id};
+		push @links, "myhtml_encoding_decode_". $myhtml_encoding_list->{$id};
 	}
 	
 	print "\tMyHTML_ENCODING_LAST_ENTRY = ", sprintf("0x%02x\n", $i);
 	print "};\n\n";
 	
-	print "static const unsigned long *myhtml_encoding_var_index[] = {\n";
-	foreach my $i (0..$#links) {
-		print $links[$i], ", ";
-		print "\n" unless ($i + 1) % 2;
-	}
-	print "\n};\n";
+	print join(", ", @links), "\n";
 }
 
 sub read_file {
@@ -160,7 +160,7 @@ sub print_res {
 	else {
 		print "static const unsigned long $var_name"."[] = {\n";
 		
-		$myhtml_encoding_list->{"MyHTML_ENCODING_". uc($name)} = $var_name;
+		$myhtml_encoding_list->{"MyHTML_ENCODING_". uc($name)} = $name unless $name =~ /JIS02/i;
 	}
 	
 	foreach my $key (0..$#$res) {

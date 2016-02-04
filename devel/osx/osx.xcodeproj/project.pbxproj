@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E7362DC1C568BFE00FF6A0E /* encoding.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E7362DA1C568BFE00FF6A0E /* encoding.c */; };
 		0E770BBD1C3A7FBF00F68C82 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BBC1C3A7FBF00F68C82 /* main.c */; };
 		0E770C001C3E87BA00F68C82 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BDB1C3E87BA00F68C82 /* Makefile */; };
 		0E770C011C3E87BA00F68C82 /* myhtml.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BDC1C3E87BA00F68C82 /* myhtml.c */; };
@@ -45,6 +46,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0E357A9B1C5CDBA8003A6E17 /* api_encoding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = api_encoding.h; sourceTree = "<group>"; };
+		0E7362DA1C568BFE00FF6A0E /* encoding.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = encoding.c; sourceTree = "<group>"; };
+		0E7362DB1C568BFE00FF6A0E /* encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = encoding.h; sourceTree = "<group>"; };
 		0E770BB91C3A7FBF00F68C82 /* osx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = osx; sourceTree = BUILT_PRODUCTS_DIR; };
 		0E770BBC1C3A7FBF00F68C82 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		0E770BC31C3A7FE700F68C82 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
@@ -135,6 +139,7 @@
 			isa = PBXGroup;
 			children = (
 				0E770BD91C3E87BA00F68C82 /* api.h */,
+				0E357A9B1C5CDBA8003A6E17 /* api_encoding.h */,
 				0E770BDA1C3E87BA00F68C82 /* def.h */,
 				0E770BDB1C3E87BA00F68C82 /* Makefile */,
 				0E770BDD1C3E87BA00F68C82 /* myhtml.h */,
@@ -170,10 +175,12 @@
 				0E770BF51C3E87BA00F68C82 /* tree.c */,
 				0E770C141C3FE6A400F68C82 /* utils.h */,
 				0E770C131C3FE6A400F68C82 /* utils.c */,
+				0E7362DB1C568BFE00FF6A0E /* encoding.h */,
+				0E7362DA1C568BFE00FF6A0E /* encoding.c */,
 				0E770BF71C3E87BA00F68C82 /* utils */,
 			);
 			name = source;
-			path = ../../source;
+			path = ../../source/myhtml;
 			sourceTree = "<group>";
 		};
 		0E770BF71C3E87BA00F68C82 /* utils */ = {
@@ -265,6 +272,7 @@
 				0E770C151C3FE6A400F68C82 /* utils.c in Sources */,
 				0E770BBD1C3A7FBF00F68C82 /* main.c in Sources */,
 				0E770C0D1C3E87BA00F68C82 /* tokenizer_script.c in Sources */,
+				0E7362DC1C568BFE00FF6A0E /* encoding.c in Sources */,
 				0E770C0F1C3E87BA00F68C82 /* mchar_async.c in Sources */,
 				0E770C091C3E87BA00F68C82 /* thread.c in Sources */,
 				0E770C101C3E87BA00F68C82 /* mcobject_async.c in Sources */,

@@ -304,7 +304,7 @@ int main(int argc, char** argv)
     }
     
     // parse html
-    myhtml_parse(tree, data.html, data.size);
+    myhtml_parse(tree, MyHTML_ENCODING_UTF_8, data.html, data.size);
     
     // XXX: see myhtml_tree_get_document in myhtml/api.h -- return root of tree,
     //      continue to use myhtml_node_child(root_node)

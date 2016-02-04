@@ -34,7 +34,7 @@ int main(int argc, const char * argv[])
     myhtml_tree_init(tree, myhtml);
     
     // parse html
-    myhtml_parse(tree, html, (sizeof(html) - 1));
+    myhtml_parse(tree, MyHTML_ENCODING_UTF_8, html, (sizeof(html) - 1));
     
     myhtml_tag_index_t *tag_index = myhtml_tree_get_tag_index(tree);
     myhtml_tag_index_node_t *index_node = myhtml_tag_index_first(tag_index, MyHTML_TAG_DIV);

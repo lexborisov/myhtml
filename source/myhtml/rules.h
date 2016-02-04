@@ -1,5 +1,5 @@
 /*
- Copyright 2016 Alexander Borisov
+ Copyright 2015 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,31 +16,30 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#ifndef MyHTML_CHAREF_H
-#define MyHTML_CHAREF_H
+#ifndef MyHTML_RULES_H
+#define MyHTML_RULES_H
 #pragma once
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 #include "myhtml/myosi.h"
+#include "myhtml/myhtml.h"
+#include "myhtml/tree.h"
 
-struct charef_entry {
-    char   ch;
-    size_t next;
-    size_t cur_pos;
-    size_t codepoints[2];
-    size_t codepoints_len;
-}
-typedef charef_entry_t;
 
-const charef_entry_t * myhtml_charef_find(const char *begin, size_t *offset, size_t size, size_t *data_size);
-const charef_entry_t * myhtml_charef_find_by_pos(size_t pos, const char *begin, size_t *offset, size_t size, int *is_done);
-const charef_entry_t * myhtml_charef_get_first_position(const char begin);
+myhtml_status_t myhtml_rules_init(myhtml_t* myhtml);
+void myhtml_rules_stop_parsing(myhtml_tree_t* tree);
+
+mybool_t myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* token);
+mybool_t myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_token_node_t* token);
+mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* token);
+mybool_t myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_node_t* token);
+
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif /* charef_h */
+#endif /* myhtml_rules_h */

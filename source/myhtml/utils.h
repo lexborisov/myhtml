@@ -1,5 +1,5 @@
 /*
- Copyright 2015 Alexander Borisov
+ Copyright 2015-2016 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,10 +16,21 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#ifndef __myhtml__main__
-#define __myhtml__main__
+#ifndef MyHTML_UTILS_H
+#define MyHTML_UTILS_H
+#pragma once
 
-#include "myhtml/myhtml.h"
-#include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif /* defined(__mhtml__main__) */
+#include "myhtml/myosi.h"
+
+size_t myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
+size_t myhtml_strcasecmp(const char* str1, const char* str2);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* utils_h */

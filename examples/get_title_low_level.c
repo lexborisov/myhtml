@@ -81,7 +81,7 @@ int main(int argc, const char * argv[])
     myhtml_tree_init(tree, myhtml);
     
     // parse html
-    myhtml_parse(tree, res.html, res.size);
+    myhtml_parse(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
     
     // get title from index
     if(tree->indexes)

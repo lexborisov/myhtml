@@ -14,7 +14,7 @@ binmode $fh, ":utf8";
 my $json_obj = JSON::XS->new->utf8->decode(join "", <$fh>);
 close $fh;
 
-my $tree = work_now($json_obj, 0);
+my $tree = work_now($json_obj, 1);
 # try find
 my $data = find_value_by_key($tree, "AMP;");
 
@@ -41,11 +41,12 @@ sub work_now {
 		my $real_key = $key;
 		$real_key =~ s/^\&//;
 		
-		my $char = $json_obj->{$key}->{characters};
-		my @chars = map {sprintf '\x%X', ord } split //, $char;
+		#my $char = $json_obj->{$key}->{characters};
+		#my @chars = map {sprintf '\x%X', ord } split //, $char;
 		
 		my $len_key = length($real_key);
-		my $len_chars = scalar(@chars);
+		#my $len_chars = scalar(@chars);
+		my $len_chars = scalar @{$json_obj->{$key}->{codepoints}};
 		
 		$min_to   = $len_chars if !defined $min_to || $min_from > $len_chars;
 		$max_to   = $len_chars if $max_to < $len_chars;
@@ -59,8 +60,8 @@ sub work_now {
 			$ref_pref = $ref_pref->{$char};
 		}
 		
-		$ref_pref->{value} = $json_obj->{$key}->{characters};
-		$ref_pref->{chars} = join "", @chars;
+		$ref_pref->{value} = $json_obj->{$key}->{codepoints};
+		$ref_pref->{chars} = join ",", @{$json_obj->{$key}->{codepoints}};
 		$ref_pref->{key} = $real_key;
 		
 		$count++;
@@ -82,7 +83,7 @@ sub work_now {
 			print "{'$tree->{$pos}[0]', $tree->{$pos}[1], $tree->{$pos}[2], $tree->{$pos}[3], $tree->{$pos}[4]},";
 			
 			unless ($i % 3) {
-				print "\n";
+				print "\n\t";
 			}
 			
 			$i++;
@@ -110,10 +111,10 @@ sub convert {
 		next unless length($char) == 1;
 		
 		if(exists $ref->{$char}->{chars}) {
-			push @entries, [$char, 0, $offset, '"'. $ref->{$char}->{chars} .'"', length($ref->{$char}->{value})];
+			push @entries, [$char, 0, $offset, '{'. $ref->{$char}->{chars} .'}', scalar(@{$ref->{$char}->{value}})];
 		}
 		else {
-			push @entries, [$char, 0, $offset, 'NULL', 0];
+			push @entries, [$char, 0, $offset, "{0}", 0];
 		}
 		
 		$offset++;
@@ -121,7 +122,7 @@ sub convert {
 	}
 	
 	# create last null offset
-	$tree->{$offset} = ['\0', 0, $offset, 'NULL', 0];
+	$tree->{$offset} = ['\0', 0, $offset, "{0}", 0];
 	$offset++;
 	
 	foreach my $entry (@entries)
@@ -149,14 +150,14 @@ sub convert_first {
 	foreach my $first_char_id (0..255)
 	{
 		if (exists $prep->{chr($first_char_id)}) {
-			push @entries, [chr($first_char_id), 0, $first_char_id, 'NULL', 0];
+			push @entries, [chr($first_char_id), 0, $first_char_id, "{0}", 0];
 		}
 		else {
-			$tree->{$first_char_id} = ['\0', 0, $first_char_id, 'NULL', 0];
+			$tree->{$first_char_id} = ['\0', 0, $first_char_id, "{0}", 0];
 		}
 	}
 	
-	$tree->{$offset} = ['\0', 0, $offset, 'NULL', 0];
+	$tree->{$offset} = ['\0', 0, $offset, "{0}", 0];
 	$offset++;
 	
 	my $zav = {};
