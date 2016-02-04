@@ -33,8 +33,8 @@
  */
 
 #define MyHTML_VERSION_MAJOR 0
-#define MyHTML_VERSION_MINOR 1
-#define MyHTML_VERSION_PATCH 0
+#define MyHTML_VERSION_MINOR 2
+#define MyHTML_VERSION_PATCH 1
 
 #include <stddef.h>
 
