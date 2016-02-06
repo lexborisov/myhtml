@@ -1,5 +1,5 @@
 /*
- Copyright 2015 Alexander Borisov
+ Copyright 2015-2016 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -159,7 +159,12 @@ myhtml_tree_node_t * myhtml_node_parent(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_child(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_last_child(myhtml_tree_node_t *node);
 
-myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, enum myhtml_namespace my_namespace);
+myhtml_tree_node_t * myhtml_node_insert_to_appropriate_place(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_insert_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
+
+myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
 myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_node_t *node);
 void myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node);
 void myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node);
@@ -189,6 +194,9 @@ myhtml_collection_t * myhtml_collection_create(size_t size, myhtml_status_t *sta
 void myhtml_collection_clean(myhtml_collection_t *collection);
 myhtml_collection_t * myhtml_collection_destroy(myhtml_collection_t *collection);
 myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, size_t up_to_length);
+
+// strings
+myhtml_string_t * myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
 
 // incoming buffer
 void myhtml_incomming_buf_add(myhtml_t* myhtml, myhtml_tree_t* tree, myhtml_incoming_buf_t *current, const char *html, size_t html_size);

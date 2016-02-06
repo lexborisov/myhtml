@@ -69,8 +69,7 @@ struct myhtml_string {
     
     mchar_async_t *mchar;
     size_t node_idx;
-}
-typedef myhtml_string_t;
+};
 
 struct myhtml_string_char_ref_chunk {
     int state;
@@ -87,6 +86,7 @@ typedef size_t myhtml_string_index_t;
 
 void myhtml_string_init(myhtml_string_t* str, mchar_async_t *mchar, size_t node_idx, size_t size);
 void myhtml_string_clean(myhtml_string_t* str);
+void myhtml_string_clean_all(myhtml_string_t* str);
 myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, mybool_t destroy_obj);
 
 void myhtml_string_append(myhtml_string_t* str, const char* data, size_t length);

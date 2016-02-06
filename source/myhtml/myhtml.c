@@ -417,10 +417,13 @@ myhtml_tree_node_t * myhtml_node_last_child(myhtml_tree_node_t *node)
     return node->last_child;
 }
 
-myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, enum myhtml_namespace my_namespace)
+myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
 {
     myhtml_tree_node_t *node = myhtml_tree_node_create(tree);
+    
+    node->tag_idx      = tag_id;
     node->my_namespace = my_namespace;
+    
     return node;
 }
 
@@ -442,6 +445,92 @@ void myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node)
 void myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node)
 {
     myhtml_tree_node_free(tree, node);
+}
+
+myhtml_tree_node_t * myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node)
+{
+    if(target == NULL || node == NULL)
+        return NULL;
+    
+    myhtml_tree_node_insert_before(tree, target, node);
+    
+    return node;
+}
+
+myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node)
+{
+    if(target == NULL || node == NULL)
+        return NULL;
+    
+    myhtml_tree_node_insert_after(tree, target, node);
+    
+    return node;
+}
+
+myhtml_tree_node_t * myhtml_node_insert_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node)
+{
+    if(target == NULL || node == NULL)
+        return NULL;
+    
+    myhtml_tree_node_add_child(tree, target, node);
+    
+    return node;
+}
+
+myhtml_tree_node_t * myhtml_node_insert_to_appropriate_place(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node)
+{
+    if(target == NULL || node == NULL)
+        return NULL;
+    
+    enum myhtml_tree_insertion_mode mode;
+    target = myhtml_tree_appropriate_place_inserting(tree, target, &mode);
+    
+    myhtml_tree_node_insert_by_mode(tree, target, node, mode);
+    
+    return node;
+}
+
+myhtml_string_t * myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding)
+{
+    if(node == NULL)
+        return NULL;
+    
+    if(encoding >= MyHTML_ENCODING_LAST_ENTRY)
+        return NULL;
+    
+    if(node->token == NULL) {
+        mcobject_async_status_t mcstatus;
+        node->token = (myhtml_token_node_t*)mcobject_async_malloc(tree->token->nodes_obj, tree->mcasync_token_id, &mcstatus);
+        
+        if(mcstatus)
+            return NULL;
+        
+        myhtml_token_node_clean(node->token);
+    }
+    
+    if(node->token->my_str_tm.data == NULL) {
+        myhtml_string_init(&node->token->my_str_tm, tree->mchar, tree->mchar_node_id, (length + 2));
+    }
+    else {
+        if(node->token->my_str_tm.size < length) {
+            mchar_async_free(tree->mchar, node->token->my_str_tm.node_idx, node->token->my_str_tm.data);
+            myhtml_string_init(&node->token->my_str_tm, tree->mchar, tree->mchar_node_id, length);
+        }
+        else
+            node->token->my_str_tm.length = 0;
+    }
+    
+    if(encoding != MyHTML_ENCODING_UTF_8) {
+        myhtml_string_append_with_convert_encoding(&node->token->my_str_tm, text, length, encoding);
+    }
+    else {
+        myhtml_string_append(&node->token->my_str_tm, text, length);
+    }
+    
+    node->token->begin  = 0;
+    node->token->length = node->token->my_str_tm.length;
+    
+    return &node->token->my_str_tm;
 }
 
 enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node)

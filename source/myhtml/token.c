@@ -153,7 +153,7 @@ void myhtml_token_node_clean(myhtml_token_node_t* node)
     node->begin          = 0;
     node->length         = 0;
     
-    myhtml_string_clean(&node->my_str_tm);
+    myhtml_string_clean_all(&node->my_str_tm);
 }
 
 void myhtml_token_attr_clean(myhtml_token_attr_t* attr)
@@ -166,7 +166,7 @@ void myhtml_token_attr_clean(myhtml_token_attr_t* attr)
     attr->value_length = 0;
     attr->my_namespace = MyHTML_NAMESPACE_UNDEF;
     
-    myhtml_string_clean(&attr->entry);
+    myhtml_string_clean_all(&attr->entry);
 }
 
 void myhtml_token_node_wait_for_done(myhtml_token_node_t* node)

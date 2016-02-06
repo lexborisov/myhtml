@@ -358,6 +358,12 @@ typedef struct myhtml_tag_index myhtml_tag_index_t;
 typedef struct myhtml_tag myhtml_tag_t;
 
 /**
+ * MyHTML_STRING structures
+ *
+ */
+typedef struct myhtml_string myhtml_string_t;
+
+/**
  * @struct myhtml_collection_t
  */
 struct myhtml_collection {
@@ -799,12 +805,14 @@ myhtml_node_last_child(myhtml_tree_node_t *node);
  * Create new node
  *
  * @param[in] myhtml_tree_t*
+ * @param[in] tag id, see enum myhtml_tags
  * @param[in] enum myhtml_namespace
  *
  * @return myhtml_tree_node_t* if successful, otherwise a NULL value
  */
 myhtml_tree_node_t*
-myhtml_node_create(myhtml_tree_t* tree, enum myhtml_namespace my_namespace);
+myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id,
+                   enum myhtml_namespace my_namespace);
 
 /**
  * Release allocated resources
@@ -814,7 +822,7 @@ myhtml_node_create(myhtml_tree_t* tree, enum myhtml_namespace my_namespace);
  */
 void
 myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node);
-    
+
 /**
  * Remove node of tree
  *
@@ -843,6 +851,72 @@ myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node);
  */
 void
 myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node);
+
+/**
+ * The appropriate place for inserting a node. Insertion with validation.
+ * If try insert <a> node to <table> node, then <a> node inserted before <table> node
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] target node
+ * @param[in] insertion node
+ *
+ * @return insertion node if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_node_insert_to_appropriate_place(myhtml_tree_t* tree, myhtml_tree_node_t *target,
+                                        myhtml_tree_node_t *node);
+
+/**
+ * Append to target node as last child. Insertion without validation.
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] target node
+ * @param[in] insertion node
+ *
+ * @return insertion node if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_node_insert_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target,
+                                myhtml_tree_node_t *node);
+
+/**
+ * Append sibling node after target node. Insertion without validation.
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] target node
+ * @param[in] insertion node
+ *
+ * @return insertion node if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t *target,
+                                              myhtml_tree_node_t *node);
+
+/**
+ * Append sibling node before target node. Insertion without validation.
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] target node
+ * @param[in] insertion node
+ *
+ * @return insertion node if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t * myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target,
+                                               myhtml_tree_node_t *node);
+
+/**
+ * Add text for a node with convert character encoding.
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] target node
+ * @param[in] text
+ * @param[in] text length
+ * @param[in] character encoding
+ *
+ * @return myhtml_string_t* if successful, otherwise a NULL value
+ */
+myhtml_string_t*
+myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node,
+                     const char* text, size_t length, myhtml_encoding_t encoding);
 
 /**
  * Get node namespace

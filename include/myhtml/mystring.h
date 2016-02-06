@@ -1,5 +1,5 @@
 /*
- Copyright 2015 Alexander Borisov
+ Copyright 2015-2016 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -69,8 +69,7 @@ struct myhtml_string {
     
     mchar_async_t *mchar;
     size_t node_idx;
-}
-typedef myhtml_string_t;
+};
 
 struct myhtml_string_char_ref_chunk {
     int state;
@@ -87,6 +86,7 @@ typedef size_t myhtml_string_index_t;
 
 void myhtml_string_init(myhtml_string_t* str, mchar_async_t *mchar, size_t node_idx, size_t size);
 void myhtml_string_clean(myhtml_string_t* str);
+void myhtml_string_clean_all(myhtml_string_t* str);
 myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, mybool_t destroy_obj);
 
 void myhtml_string_append(myhtml_string_t* str, const char* data, size_t length);

@@ -853,9 +853,6 @@ myhtml_tree_node_t * myhtml_tree_current_node(myhtml_tree_t* tree)
 {
     if(tree->open_elements->length == 0) {
         MyHTML_DEBUG("Current node; Open elements is 0");
-        
-        //myhtml_tree_print_by_tree_idx(tree, tree->document->child, stdout, 0);
-        
         return 0;
     }
     

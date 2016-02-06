@@ -1,5 +1,5 @@
 /*
- Copyright 2015 Alexander Borisov
+ Copyright 2015-2016 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -109,6 +109,9 @@ enum myhtml_encoding_list {
     MyHTML_ENCODING_LAST_ENTRY       = 0x25
 }
 typedef myhtml_encoding_t;
+
+// strings
+typedef struct myhtml_string myhtml_string_t;
 
 // thread
 enum mythread_thread_opt {

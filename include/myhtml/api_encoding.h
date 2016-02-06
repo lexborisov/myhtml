@@ -1,5 +1,5 @@
 /*
- Copyright 2015-2016 Alexander Borisov
+ Copyright 2016 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 #include "myhtml/api.h"
 
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 enum myhtml_encoding_status {

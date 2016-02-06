@@ -110,6 +110,9 @@ enum myhtml_encoding_list {
 }
 typedef myhtml_encoding_t;
 
+// strings
+typedef struct myhtml_string myhtml_string_t;
+
 // thread
 enum mythread_thread_opt {
     MyTHREAD_OPT_UNDEF = 0,

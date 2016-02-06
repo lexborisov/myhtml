@@ -129,6 +129,11 @@ void myhtml_string_clean(myhtml_string_t* str)
     str->length = 0;
 }
 
+void myhtml_string_clean_all(myhtml_string_t* str)
+{
+    memset(str, 0, sizeof(myhtml_string_t));
+}
+
 myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, mybool_t destroy_obj)
 {
     if(str == NULL)
