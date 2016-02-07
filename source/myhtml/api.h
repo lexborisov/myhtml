@@ -1395,6 +1395,30 @@ myhtml_encoding_set(myhtml_tree_t* tree, myhtml_encoding_t encoding);
 myhtml_encoding_t
 myhtml_encoding_get(myhtml_tree_t* tree);
 
+/**
+ * Convert Unicode Codepoint to UTF-8
+ *
+ * @param[in] Codepoint
+ * @param[in] Data to set characters. Minimum data length is 1 bytes, maximum is 4 byte
+ *   data length must be always available 4 bytes
+ *
+ * @return size character set
+ */
+size_t
+myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data);
+
+/**
+ * Convert Unicode Codepoint to UTF-16LE
+ *
+ * @param[in] Codepoint
+ * @param[in] Data to set characters. Minimum data length is 2 bytes, maximum is 4 byte
+ *   data length must be always available 4 bytes
+ *
+ * @return size character set
+ */
+size_t
+myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data)
+
 /***********************************************************************************
  *
  * MyHTML_STRING
