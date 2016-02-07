@@ -533,6 +533,48 @@ myhtml_string_t * myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *
     return &node->token->my_str_tm;
 }
 
+myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding)
+{
+    if(node == NULL)
+        return NULL;
+    
+    if(encoding >= MyHTML_ENCODING_LAST_ENTRY)
+        return NULL;
+    
+    if(node->token == NULL) {
+        mcobject_async_status_t mcstatus;
+        node->token = (myhtml_token_node_t*)mcobject_async_malloc(tree->token->nodes_obj, tree->mcasync_token_id, &mcstatus);
+        
+        if(mcstatus)
+            return NULL;
+        
+        myhtml_token_node_clean(node->token);
+    }
+    
+    if(node->token->my_str_tm.data == NULL) {
+        myhtml_string_init(&node->token->my_str_tm, tree->mchar, tree->mchar_node_id, (length + 2));
+    }
+    else {
+        if(node->token->my_str_tm.size < length) {
+            mchar_async_free(tree->mchar, node->token->my_str_tm.node_idx, node->token->my_str_tm.data);
+            myhtml_string_init(&node->token->my_str_tm, tree->mchar, tree->mchar_node_id, length);
+        }
+        else
+            node->token->my_str_tm.length = 0;
+    }
+    
+    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, NULL, encoding};
+    myhtml_encoding_result_clean(&str_chunk.res);
+    
+    myhtml_string_append_charef(&str_chunk, &node->token->my_str_tm, text, length);
+    myhtml_string_append_charef_end(&str_chunk, &node->token->my_str_tm);
+    
+    node->token->begin  = 0;
+    node->token->length = node->token->my_str_tm.length;
+    
+    return &node->token->my_str_tm;
+}
+
 enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node)
 {
     return node->my_namespace;
@@ -661,7 +703,7 @@ myhtml_tree_attr_t * myhtml_attribute_by_key(myhtml_tree_node_t *node, const cha
     return myhtml_token_attr_by_name(node->token, key, key_len);
 }
 
-myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node, const char *key, size_t key_len, const char *value, size_t value_len)
+myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node, const char *key, size_t key_len, const char *value, size_t value_len, myhtml_encoding_t encoding)
 {
     if(node == NULL)
         return NULL;
@@ -676,8 +718,8 @@ myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_
         myhtml_token_node_clean(node->token);
     }
     
-    return myhtml_token_node_attr_append(tree->token, node->token, key, key_len,
-                                  value, value_len, tree->mcasync_token_id);
+    return myhtml_token_node_attr_append_with_convert_encoding(tree->token, node->token, key, key_len,
+                                                               value, value_len, tree->mcasync_token_id, encoding);
 }
 
 myhtml_tree_attr_t * myhtml_attribute_remove(myhtml_tree_node_t *node, myhtml_tree_attr_t *attr)

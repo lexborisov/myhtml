@@ -97,6 +97,8 @@ void myhtml_string_append_charef_end(myhtml_string_char_ref_chunk_t *chunk, myht
 void myhtml_string_append_with_convert_encoding(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding);
 void myhtml_string_append_chunk_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding);
 void myhtml_string_append_one_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char data, myhtml_encoding_t encoding);
+void myhtml_string_append_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding);
+void myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding);
 
 void myhtml_string_copy(myhtml_string_t* target, myhtml_string_t* dest);
 size_t myhtml_string_raw_copy(char* str1, const char* str2, size_t size);

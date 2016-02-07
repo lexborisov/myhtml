@@ -25,5 +25,5 @@ $(TARGET): $(OBJS)
 
 clean:
 	rm -f `ls | grep -v '.c\|Makefile$\'`
-	rm -f ../bin/*
+	rm -fr ../bin/*
 .PHONY: all clean

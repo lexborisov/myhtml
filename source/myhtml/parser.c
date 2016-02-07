@@ -111,34 +111,61 @@ size_t myhtml_parser_add_text_lowercase(myhtml_tree_t *tree, myhtml_string_t* st
 {
     myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
     
+    myhtml_encoding_result_t str_res;
+    myhtml_encoding_result_clean(&str_res);
+    
     size_t current_buf_offset = begin - inc_buf->offset;
     size_t save_str_len = string->length;
     
     if((current_buf_offset + length) <= inc_buf->size)
     {
-        myhtml_string_append_lowercase(string, &inc_buf->data[current_buf_offset], length);
+        if(tree->encoding == MyHTML_ENCODING_UTF_8)
+            myhtml_string_append_lowercase(string, &inc_buf->data[current_buf_offset], length);
+        else
+            myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_res, &inc_buf->data[current_buf_offset], length, tree->encoding);
+        
         return (string->length - save_str_len);
     }
     
     size_t buf_next_offset = inc_buf->size - current_buf_offset;
     
-    myhtml_string_append_lowercase(string, &inc_buf->data[current_buf_offset], buf_next_offset);
+    if(tree->encoding == MyHTML_ENCODING_UTF_8)
+        myhtml_string_append_lowercase(string, &inc_buf->data[current_buf_offset], buf_next_offset);
+    else
+        myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_res, &inc_buf->data[current_buf_offset], buf_next_offset, tree->encoding);
     
     length = length - buf_next_offset;
     inc_buf = inc_buf->next;
     
-    while (inc_buf && length)
-    {
-        if(length > inc_buf->size) {
-            myhtml_string_append_lowercase(string, inc_buf->data, inc_buf->size);
-            length -= inc_buf->size;
+    if(tree->encoding == MyHTML_ENCODING_UTF_8) {
+        while (inc_buf && length)
+        {
+            if(length > inc_buf->size) {
+                myhtml_string_append_lowercase(string, inc_buf->data, inc_buf->size);
+                length -= inc_buf->size;
+            }
+            else {
+                myhtml_string_append_lowercase(string, inc_buf->data, length);
+                break;
+            }
+            
+            inc_buf = inc_buf->next;
         }
-        else {
-            myhtml_string_append_lowercase(string, inc_buf->data, length);
-            break;
+    }
+    else {
+        while (inc_buf && length)
+        {
+            if(length > inc_buf->size) {
+                myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_res, inc_buf->data, inc_buf->size, tree->encoding);
+                length -= inc_buf->size;
+            }
+            else {
+                myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_res, inc_buf->data, length, tree->encoding);
+                break;
+            }
+            
+            inc_buf = inc_buf->next;
         }
-        
-        inc_buf = inc_buf->next;
     }
     
     return (string->length - save_str_len);

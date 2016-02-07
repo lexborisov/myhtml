@@ -477,6 +477,37 @@ void myhtml_string_append_lowercase(myhtml_string_t* str, const char* data, size
     str->length += length;
 }
 
+void myhtml_string_append_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding)
+{
+    myhtml_encoding_result_t res;
+    myhtml_encoding_result_clean(&res);
+    
+    myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(str, &res, buff, length, encoding);
+}
+
+void myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding)
+{
+    unsigned const char* u_buff = (unsigned const char*)buff;
+    myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
+    
+    for (size_t i = 0; i < length; i++)
+    {
+        if(func(u_buff[i], res) == MyHTML_ENCODING_STATUS_OK) {
+            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
+            
+            size_t insert_len = myhtml_encoding_codepoint_to_ascii_utf_8(res->result, &str->data[str->length]);
+            
+            if(insert_len == 1) {
+                str->data[str->length] = myhtml_string_chars_lowercase_map[ u_buff[i] ];
+            }
+            
+            str->length += insert_len;
+        }
+    }
+    
+    MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT('\0', str, 1);
+}
+
 void myhtml_string_copy(myhtml_string_t* target, myhtml_string_t* dest)
 {
     myhtml_string_append(dest, target->data, target->length);

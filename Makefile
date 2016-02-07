@@ -20,7 +20,7 @@ all: create
 clean:
 	$(MAKE) -C $(SRCDIR) clean
 	for f in $(SUBDIRS); do $(MAKE) -C $$f clean; done
-	rm -f lib/*
+	rm -rf lib/*
 
 clone: create
 	cp $(SRCDIR)/*.h include/myhtml

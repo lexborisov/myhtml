@@ -919,6 +919,21 @@ myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node,
                      const char* text, size_t length, myhtml_encoding_t encoding);
 
 /**
+ * Add text for a node with convert character encoding.
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] target node
+ * @param[in] text
+ * @param[in] text length
+ * @param[in] character encoding
+ *
+ * @return myhtml_string_t* if successful, otherwise a NULL value
+ */
+myhtml_string_t*
+myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_tree_node_t *node,
+                                 const char* text, size_t length, myhtml_encoding_t encoding);
+
+/**
  * Get node namespace
  *
  * @param[in] myhtml_tree_node_t*
@@ -1073,13 +1088,15 @@ myhtml_attribute_by_key(myhtml_tree_node_t *node,
  * @param[in] attr key name length
  * @param[in] attr value name
  * @param[in] attr value name length
+ * @param[in] character encoding; Default: MyHTML_ENCODING_UTF_8 or MyHTML_ENCODING_DEFAULT or 0
  *
  * @return created myhtml_tree_attr_t* if successful, otherwise a NULL value
  */
 myhtml_tree_attr_t*
 myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node,
                      const char *key, size_t key_len,
-                     const char *value, size_t value_len);
+                     const char *value, size_t value_len,
+                     myhtml_encoding_t encoding);
 
 /**
  * Remove attribute reference. Do not release the resources

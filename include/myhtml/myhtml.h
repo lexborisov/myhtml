@@ -184,7 +184,7 @@ enum myhtml_namespace myhtml_attribute_namespace(myhtml_tree_attr_t *attr);
 const char * myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length);
 const char * myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length);
 myhtml_tree_attr_t * myhtml_attribute_by_key(myhtml_tree_node_t *node, const char *key, size_t key_len);
-myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node, const char *key, size_t key_len, const char *value, size_t value_len);
+myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node, const char *key, size_t key_len, const char *value, size_t value_len, myhtml_encoding_t encoding);
 myhtml_tree_attr_t * myhtml_attribute_remove(myhtml_tree_node_t *node, myhtml_tree_attr_t *attr);
 myhtml_tree_attr_t * myhtml_attribute_remove_by_key(myhtml_tree_node_t *node, const char *key, size_t key_len);
 void myhtml_attribute_delete(myhtml_tree_t *tree, myhtml_tree_node_t *node, myhtml_tree_attr_t *attr);
@@ -197,6 +197,7 @@ myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, si
 
 // strings
 myhtml_string_t * myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
+myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
 
 // incoming buffer
 void myhtml_incomming_buf_add(myhtml_t* myhtml, myhtml_tree_t* tree, myhtml_incoming_buf_t *current, const char *html, size_t html_size);

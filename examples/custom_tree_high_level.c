@@ -55,14 +55,14 @@ int main(int argc, const char * argv[])
         
         sprintf(tmp_buf_key, "best_key_for_%zu", i);
         sprintf(tmp_buf_value, "for best value %zu", i);
-        sprintf(tmp_buf_text, "text for %zu", i);
+        sprintf(tmp_buf_text, "Text! Entity &#x26;#%zu = &#%zu", i, i);
         
-        myhtml_node_text_set(tree, new_text_node,
+        myhtml_node_text_set_with_charef(tree, new_text_node,
                              tmp_buf_text, strlen(tmp_buf_text), MyHTML_ENCODING_UTF_8);
         
         myhtml_attribute_add(tree, new_p_node,
                              tmp_buf_key, strlen(tmp_buf_key),
-                             tmp_buf_value, strlen(tmp_buf_value));
+                             tmp_buf_value, strlen(tmp_buf_value), MyHTML_ENCODING_UTF_8);
     }
     
     // print

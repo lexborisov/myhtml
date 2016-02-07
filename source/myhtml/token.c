@@ -225,8 +225,7 @@ myhtml_token_attr_t * myhtml_token_node_attr_append(myhtml_token_t* token, myhtm
         new_attr->name_length = key_len;
         
         myhtml_string_append_lowercase(&new_attr->entry,
-                                                 key,
-                                                 key_len);
+                                       key, key_len);
     }
     else {
         new_attr->name_begin  = 0;
@@ -238,9 +237,67 @@ myhtml_token_attr_t * myhtml_token_node_attr_append(myhtml_token_t* token, myhtm
         new_attr->value_begin = new_attr->entry.length;
         new_attr->value_length = value_len;
         
-        myhtml_string_append_lowercase(&new_attr->entry,
-                                                 value,
-                                                 value_len);
+        myhtml_string_append(&new_attr->entry,
+                             value, value_len);
+    }
+    else {
+        new_attr->value_begin  = 0;
+        new_attr->value_length = 0;
+    }
+    
+    if(dest->attr_first == NULL) {
+        new_attr->prev = 0;
+        
+        dest->attr_first = new_attr;
+        dest->attr_last = new_attr;
+    }
+    else {
+        dest->attr_last->next = new_attr;
+        new_attr->prev = dest->attr_last;
+        
+        dest->attr_last = new_attr;
+    }
+    
+    return new_attr;
+}
+
+myhtml_token_attr_t * myhtml_token_node_attr_append_with_convert_encoding(myhtml_token_t* token, myhtml_token_node_t* dest,
+                                                                          const char* key, size_t key_len,
+                                                                          const char* value, size_t value_len,
+                                                                          size_t thread_idx, myhtml_encoding_t encoding)
+{
+    myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx, NULL);
+    new_attr->next = 0;
+    
+    myhtml_string_init(&new_attr->entry, token->tree->mchar,
+                       token->tree->mchar_node_id, (key_len + value_len + 16));
+    
+    if(key_len)
+    {
+        new_attr->name_begin = new_attr->entry.length;
+        new_attr->name_length = key_len;
+        
+        if(encoding == MyHTML_ENCODING_UTF_8)
+            myhtml_string_append_lowercase(&new_attr->entry, key, key_len);
+        else
+            myhtml_string_append_lowercase_ascii_with_convert_encoding(&new_attr->entry,
+                                                                       key, key_len, encoding);
+    }
+    else {
+        new_attr->name_begin  = 0;
+        new_attr->name_length = 0;
+    }
+    
+    if(value_len)
+    {
+        new_attr->value_begin = new_attr->entry.length;
+        new_attr->value_length = value_len;
+        
+        if(encoding == MyHTML_ENCODING_UTF_8)
+            myhtml_string_append(&new_attr->entry, value, value_len);
+        else
+            myhtml_string_append_with_convert_encoding(&new_attr->entry,
+                                                       value, value_len, encoding);
     }
     else {
         new_attr->value_begin  = 0;
