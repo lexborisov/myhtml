@@ -9293,7 +9293,7 @@ static const unsigned long myhtml_encoding_map_x_mac_cyrillic[] = {
 };
 
 myhtml_encoding_custom_f myhtml_encoding_function_index[] = {
-    NULL, NULL, NULL, myhtml_encoding_decode_utf_8, myhtml_encoding_decode_utf_16le,
+    myhtml_encoding_decode_utf_8, NULL, NULL, myhtml_encoding_decode_utf_8, myhtml_encoding_decode_utf_16le,
     myhtml_encoding_decode_utf_16be, myhtml_encoding_decode_x_user_defined,
     myhtml_encoding_decode_big5, myhtml_encoding_decode_euc_kr, myhtml_encoding_decode_gb18030,
     myhtml_encoding_decode_ibm866, myhtml_encoding_decode_iso_8859_10, myhtml_encoding_decode_iso_8859_13,
