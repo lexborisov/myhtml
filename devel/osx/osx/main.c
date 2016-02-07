@@ -123,7 +123,7 @@ void test_all(void)
 //                printf("%zu: %s\n", count, path);
                 
                 struct res_html res = load_html(path);
-                myhtml_parse(tree, MyHTML_ENCODING_WINDOWS_1251, res.html, res.size);
+                myhtml_parse(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
                 
 //                myhtml_tree_node_t **node_list = myhtml_get_elements_by_tag_id(tree, MyHTML_TAG_TITLE, NULL);
 //                

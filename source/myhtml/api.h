@@ -1410,8 +1410,10 @@ myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data);
 /**
  * Convert Unicode Codepoint to UTF-16LE
  *
+ * I advise not to use UTF-16! Use UTF-8 and be happy!
+ *
  * @param[in] Codepoint
- * @param[in] Data to set characters. Minimum data length is 2 bytes, maximum is 4 byte
+ * @param[in] Data to set characters. Data length is 2 or 4 bytes
  *   data length must be always available 4 bytes
  *
  * @return size character set
