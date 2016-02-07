@@ -222,7 +222,7 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
     if(token->tag_ctx_idx == MyHTML_TAG__TEXT ||
        token->tag_ctx_idx == MyHTML_TAG__COMMENT)
     {
-        myhtml_string_init(&token->my_str_tm, qnode->tree->mchar, mchar_node_id, (qnode->length));
+        myhtml_string_init(qnode->tree->mchar, mchar_node_id, &token->my_str_tm, (qnode->length));
         
         token->begin      = token->my_str_tm.length;
         token->length     = qnode->length;
@@ -253,7 +253,7 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
         
         while(attr)
         {
-            myhtml_string_init(&attr->entry, qnode->tree->mchar, mchar_node_id, (attr->name_length + attr->value_length + 32));
+            myhtml_string_init(qnode->tree->mchar, mchar_node_id, &attr->entry, (attr->name_length + attr->value_length + 32));
             
             if(attr->name_length)
             {

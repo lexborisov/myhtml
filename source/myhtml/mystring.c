@@ -114,7 +114,7 @@ static const unsigned char myhtml_string_chars_lowercase_map[] = {
     0xfc, 0xfd, 0xfe, 0xff
 };
 
-void myhtml_string_init(myhtml_string_t* str, mchar_async_t *mchar, size_t node_idx, size_t size)
+char * myhtml_string_init(mchar_async_t *mchar, size_t node_idx, myhtml_string_t* str, size_t size)
 {
     str->data     = mchar_async_malloc(mchar, node_idx, size);
     str->size     = size;
@@ -122,6 +122,8 @@ void myhtml_string_init(myhtml_string_t* str, mchar_async_t *mchar, size_t node_
     str->mchar    = mchar;
     
     myhtml_string_clean(str);
+    
+    return str->data;
 }
 
 void myhtml_string_clean(myhtml_string_t* str)
@@ -146,6 +148,99 @@ myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, mybool_t destroy_o
         free(str);
     
     return NULL;
+}
+
+char * myhtml_string_data_alloc(mchar_async_t *mchar, size_t node_id, size_t size)
+{
+    return mchar_async_malloc(mchar, node_id, size);
+}
+
+char * myhtml_string_data_realloc(mchar_async_t *mchar, size_t node_id, char *data,  size_t len_to_copy, size_t size)
+{
+    return mchar_async_realloc(mchar, node_id, data, len_to_copy, size);
+}
+
+void myhtml_string_data_free(mchar_async_t *mchar, size_t node_id, char *data)
+{
+    mchar_async_free(mchar, node_id, data);
+}
+
+char * myhtml_string_data(myhtml_string_t *str)
+{
+    if(str == NULL)
+        return NULL;
+    
+    return str->data;
+}
+
+size_t myhtml_string_length(myhtml_string_t *str)
+{
+    if(str == NULL)
+        return 0;
+    
+    return str->length;
+}
+
+size_t myhtml_string_size(myhtml_string_t *str)
+{
+    if(str == NULL)
+        return 0;
+    
+    return str->size;
+}
+
+char * myhtml_string_data_set(myhtml_string_t *str, char *data)
+{
+    if(str == NULL)
+        return NULL;
+    
+    str->data = data;
+    return str->data;
+}
+
+size_t myhtml_string_size_set(myhtml_string_t *str, size_t size)
+{
+    if(str == NULL)
+        return 0;
+    
+    str->size = size;
+    return str->size;
+}
+
+size_t myhtml_string_length_set(myhtml_string_t *str, size_t length)
+{
+    if(str == NULL)
+        return 0;
+    
+    str->length = length;
+    return str->length;
+}
+
+char * myhtml_string_realloc(mchar_async_t *mchar, size_t node_id, myhtml_string_t *str, size_t new_size)
+{
+    if(str == NULL)
+        return 0;
+    
+    char *tmp;
+    
+    if(str->data) {
+        tmp = mchar_async_realloc(str->mchar, str->node_idx, str->data, str->length, new_size);
+    }
+    else {
+        tmp = mchar_async_malloc(mchar, node_id, new_size);
+        
+        str->mchar    = mchar;
+        str->node_idx = node_id;
+    }
+    
+    if(tmp) {
+        str->size = new_size;
+        str->data = tmp;
+    }
+    else
+        return NULL;
+    
+    return str->data;
 }
 
 mybool_t myhtml_string_release(myhtml_string_t* str, size_t size)

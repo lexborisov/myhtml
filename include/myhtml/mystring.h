@@ -84,10 +84,23 @@ typedef myhtml_string_char_ref_chunk_t;
 
 typedef size_t myhtml_string_index_t;
 
-void myhtml_string_init(myhtml_string_t* str, mchar_async_t *mchar, size_t node_idx, size_t size);
+char * myhtml_string_init(mchar_async_t *mchar, size_t node_idx, myhtml_string_t* str, size_t size);
+char * myhtml_string_realloc(mchar_async_t *mchar, size_t node_id, myhtml_string_t *str, size_t new_size);
+
 void myhtml_string_clean(myhtml_string_t* str);
 void myhtml_string_clean_all(myhtml_string_t* str);
 myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, mybool_t destroy_obj);
+
+char * myhtml_string_data_alloc(mchar_async_t *mchar, size_t node_id, size_t size);
+char * myhtml_string_data_realloc(mchar_async_t *mchar, size_t node_id, char *data,  size_t len_to_copy, size_t size);
+void myhtml_string_data_free(mchar_async_t *mchar, size_t node_id, char *data);
+
+char * myhtml_string_data(myhtml_string_t *str);
+size_t myhtml_string_length(myhtml_string_t *str);
+size_t myhtml_string_size(myhtml_string_t *str);
+char * myhtml_string_data_set(myhtml_string_t *str, char *data);
+size_t myhtml_string_size_set(myhtml_string_t *str, size_t size);
+size_t myhtml_string_length_set(myhtml_string_t *str, size_t length);
 
 void myhtml_string_append(myhtml_string_t* str, const char* data, size_t length);
 void myhtml_string_append_one(myhtml_string_t* str, const char data);

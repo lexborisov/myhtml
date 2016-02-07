@@ -190,7 +190,7 @@ myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_toke
     new_node->begin       = node->begin;
     new_node->length      = node->length;
     
-    myhtml_string_init(&new_node->my_str_tm,  tree->mchar, tree->mchar_node_id, node->my_str_tm.size);
+    myhtml_string_init(tree->mchar, tree->mchar_node_id, &new_node->my_str_tm, node->my_str_tm.size);
     myhtml_token_node_attr_copy(token, node, new_node, attr_thread_idx);
     
     return new_node;
@@ -198,8 +198,7 @@ myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_toke
 
 void myhtml_token_node_text_append(myhtml_token_t* token, myhtml_token_node_t* dest, const char* text, size_t text_len)
 {
-    myhtml_string_init(&dest->my_str_tm, token->tree->mchar,
-                       token->tree->mchar_node_id, (text_len + 32));
+    myhtml_string_init(token->tree->mchar, token->tree->mchar_node_id, &dest->my_str_tm, (text_len + 32));
     
     myhtml_string_t* string = &dest->my_str_tm;
     
@@ -216,8 +215,7 @@ myhtml_token_attr_t * myhtml_token_node_attr_append(myhtml_token_t* token, myhtm
     myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx, NULL);
     new_attr->next = 0;
     
-    myhtml_string_init(&new_attr->entry, token->tree->mchar,
-                       token->tree->mchar_node_id, (key_len + value_len + 16));
+    myhtml_string_init(token->tree->mchar, token->tree->mchar_node_id, &new_attr->entry, (key_len + value_len + 16));
     
     if(key_len)
     {
@@ -269,8 +267,7 @@ myhtml_token_attr_t * myhtml_token_node_attr_append_with_convert_encoding(myhtml
     myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx, NULL);
     new_attr->next = 0;
     
-    myhtml_string_init(&new_attr->entry, token->tree->mchar,
-                       token->tree->mchar_node_id, (key_len + value_len + 16));
+    myhtml_string_init(token->tree->mchar, token->tree->mchar_node_id, &new_attr->entry, (key_len + value_len + 16));
     
     if(key_len)
     {
@@ -337,8 +334,7 @@ mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_attr_t* attr
     myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx, NULL);
     new_attr->next = 0;
     
-    myhtml_string_init(&new_attr->entry,  token->tree->mchar, token->tree->mchar_node_id,
-                       (attr->name_length + attr->value_begin + 16));
+    myhtml_string_init(token->tree->mchar, token->tree->mchar_node_id, &new_attr->entry, (attr->name_length + attr->value_begin + 16));
     
     if(attr->name_length)
     {

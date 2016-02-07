@@ -361,7 +361,21 @@ typedef struct myhtml_tag myhtml_tag_t;
  * MyHTML_STRING structures
  *
  */
-typedef struct myhtml_string myhtml_string_t;
+struct myhtml_string {
+    char*  data;
+    size_t size;
+    size_t length;
+    
+    mchar_async_t *mchar;
+    size_t node_idx;
+}
+typedef myhtml_string_t;
+
+/**
+ * MCHAR_ASYNC structures
+ *
+ */
+typedef struct mchar_async mchar_async_t;
 
 /**
  * @struct myhtml_collection_t
@@ -681,6 +695,26 @@ myhtml_tree_get_tag_index(myhtml_tree_t* tree);
  */
 myhtml_tree_node_t*
 myhtml_tree_get_document(myhtml_tree_t* tree);
+
+/**
+ * Get mchar_async_t object
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return mchar_async_t* if exists, otherwise a NULL value
+ */
+mchar_async_t*
+myhtml_tree_get_mchar(myhtml_tree_t* tree);
+
+/**
+ * Get node_id from main thread for mchar_async_t object
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return size_t, node id
+ */
+size_t
+myhtml_tree_get_mchar_node_id(myhtml_tree_t* tree);
 
 /**
  * Print tree of a node. Print including current node
@@ -1007,6 +1041,15 @@ myhtml_node_attribute_last(myhtml_tree_node_t *node);
 const char*
 myhtml_node_text(myhtml_tree_node_t *node, size_t *length);
 
+/**
+ * Get myhtml_string_t object by Tree node
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return myhtml_string_t* if exists, otherwise an NULL value
+ */
+myhtml_string_t*
+myhtml_node_string(myhtml_tree_node_t *node);
 
 /***********************************************************************************
  *
@@ -1351,6 +1394,187 @@ myhtml_encoding_set(myhtml_tree_t* tree, myhtml_encoding_t encoding);
  */
 myhtml_encoding_t
 myhtml_encoding_get(myhtml_tree_t* tree);
+
+/***********************************************************************************
+ *
+ * MyHTML_STRING
+ *
+ ***********************************************************************************/
+
+/**
+ * Init myhtml_string_t structure
+ *
+ * @param[in] mchar_async_t*. It can be obtained from myhtml_tree_t object
+ *  (see myhtml_tree_get_mchar function) or create manualy
+ *  For each Tree creates its object, I recommend to use it (myhtml_tree_get_mchar).
+ *
+ * @param[in] node_id. For all threads (and Main thread) identifier that is unique.
+ *  if created mchar_async_t object manually you know it, if not then take from the Tree 
+ *  (see myhtml_tree_get_mchar_node_id)
+ *
+ * @param[in] myhtml_string_t*. It can be obtained from myhtml_tree_node_t object
+ *  (see myhtml_node_string function) or create manualy
+ *
+ * @param[in] data size. Set the size you want for char*
+ *
+ * @return char* of the size if successful, otherwise a NULL value
+ */
+char*
+myhtml_string_init(mchar_async_t *mchar, size_t node_id,
+                   myhtml_string_t* str, size_t size);
+
+/**
+ * Increase the current size for myhtml_string_t object
+ *
+ * @param[in] mchar_async_t*. See description for myhtml_string_init function
+ * @param[in] node_id. See description for myhtml_string_init function
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] data size. Set the new size you want for myhtml_string_t object
+ *
+ * @return char* of the size if successful, otherwise a NULL value
+ */
+char*
+myhtml_string_realloc(mchar_async_t *mchar, size_t node_id,
+                      myhtml_string_t *str, size_t new_size);
+
+/**
+ * Clean myhtml_string_t object. In reality, data length set to 0
+ * Equivalently: myhtml_string_length_set(str, 0);
+ *
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ */
+void
+myhtml_string_clean(myhtml_string_t* str);
+
+/**
+ * Clean myhtml_string_t object. Equivalently: memset(str, 0, sizeof(myhtml_string_t))
+ *
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ */
+void
+myhtml_string_clean_all(myhtml_string_t* str);
+
+/**
+ * Release all resources for myhtml_string_t object
+ *
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] call free function for current object or not
+ *
+ * @return NULL if destroy_obj set mytrue, otherwise a current myhtml_string_t object
+ */
+myhtml_string_t*
+myhtml_string_destroy(myhtml_string_t* str, mybool_t destroy_obj);
+
+/**
+ * Get data (char*) from a myhtml_string_t object
+ *
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ *
+ * @return char* if exists, otherwise a NULL value
+ */
+char*
+myhtml_string_data(myhtml_string_t *str);
+
+/**
+ * Get data length from a myhtml_string_t object
+ *
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ *
+ * @return data length
+ */
+size_t
+myhtml_string_length(myhtml_string_t *str);
+
+/**
+ * Get data size from a myhtml_string_t object
+ *
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ *
+ * @return data size
+ */
+size_t
+myhtml_string_size(myhtml_string_t *str);
+
+/**
+ * Set data (char *) for a myhtml_string_t object.
+ *
+ * Attention!!! Attention!!! Attention!!!
+ *
+ * You can assign only that it has been allocated from functions:
+ * myhtml_string_data_alloc
+ * myhtml_string_data_realloc
+ * or obtained manually created from mchar_async_t object
+ *
+ * Attention!!! Do not try set chat* from allocated by malloc or realloc!!!
+ *
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] you data to want assign
+ *
+ * @return assigned data if successful, otherwise a NULL value
+ */
+char*
+myhtml_string_data_set(myhtml_string_t *str, char *data);
+
+/**
+ * Set data size for a myhtml_string_t object.
+ *
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] you size to want assign
+ *
+ * @return assigned size
+ */
+size_t
+myhtml_string_size_set(myhtml_string_t *str, size_t size);
+
+/**
+ * Set data length for a myhtml_string_t object.
+ *
+ * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] you length to want assign
+ *
+ * @return assigned length
+ */
+size_t
+myhtml_string_length_set(myhtml_string_t *str, size_t length);
+
+/**
+ * Allocate data (char*) from a mchar_async_t object
+ *
+ * @param[in] mchar_async_t*. See description for myhtml_string_init function
+ * @param[in] node id. See description for myhtml_string_init function
+ * @param[in] you size to want assign
+ *
+ * @return data if successful, otherwise a NULL value
+ */
+char*
+myhtml_string_data_alloc(mchar_async_t *mchar, size_t node_id, size_t size);
+
+/**
+ * Allocate data (char*) from a mchar_async_t object
+ *
+ * @param[in] mchar_async_t*. See description for myhtml_string_init function
+ * @param[in] node id. See description for myhtml_string_init function
+ * @param[in] old data
+ * @param[in] how much data is copied from the old data to new data
+ * @param[in] new size
+ *
+ * @return data if successful, otherwise a NULL value
+ */
+char*
+myhtml_string_data_realloc(mchar_async_t *mchar, size_t node_id,
+                           char *data,  size_t len_to_copy, size_t size);
+
+/**
+ * Release allocated data
+ *
+ * @param[in] mchar_async_t*. See description for myhtml_string_init function
+ * @param[in] node id. See description for myhtml_string_init function
+ * @param[in] data to release
+ *
+ * @return data if successful, otherwise a NULL value
+ */
+void
+myhtml_string_data_free(mchar_async_t *mchar, size_t node_id, char *data);
 
 /***********************************************************************************
  *

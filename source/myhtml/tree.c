@@ -325,6 +325,16 @@ myhtml_tree_node_t * myhtml_tree_get_document(myhtml_tree_t* tree)
     return tree->document;
 }
 
+mchar_async_t * myhtml_tree_get_mchar(myhtml_tree_t* tree)
+{
+    return tree->mchar;
+}
+
+size_t myhtml_tree_get_mchar_node_id(myhtml_tree_t* tree)
+{
+    return tree->mchar_node_id;
+}
+
 myhtml_tree_node_t * myhtml_tree_node_create(myhtml_tree_t* tree)
 {
     myhtml_tree_node_t* node = (myhtml_tree_node_t*)mcobject_async_malloc(tree->tree_obj, tree->mcasync_tree_id, NULL);

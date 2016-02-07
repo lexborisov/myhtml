@@ -177,6 +177,7 @@ mybool_t myhtml_node_is_close_self(myhtml_tree_node_t *node);
 myhtml_tree_attr_t * myhtml_node_attribute_first(myhtml_tree_node_t *node);
 myhtml_tree_attr_t * myhtml_node_attribute_last(myhtml_tree_node_t *node);
 const char * myhtml_node_text(myhtml_tree_node_t *node, size_t *length);
+myhtml_string_t * myhtml_node_string(myhtml_tree_node_t *node);
 
 myhtml_tree_attr_t * myhtml_attribute_next(myhtml_tree_attr_t *attr);
 myhtml_tree_attr_t * myhtml_attribute_prev(myhtml_tree_attr_t *attr);

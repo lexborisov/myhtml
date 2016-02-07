@@ -509,12 +509,12 @@ myhtml_string_t * myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *
     }
     
     if(node->token->my_str_tm.data == NULL) {
-        myhtml_string_init(&node->token->my_str_tm, tree->mchar, tree->mchar_node_id, (length + 2));
+        myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->my_str_tm, (length + 2));
     }
     else {
         if(node->token->my_str_tm.size < length) {
             mchar_async_free(tree->mchar, node->token->my_str_tm.node_idx, node->token->my_str_tm.data);
-            myhtml_string_init(&node->token->my_str_tm, tree->mchar, tree->mchar_node_id, length);
+            myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->my_str_tm, length);
         }
         else
             node->token->my_str_tm.length = 0;
@@ -552,12 +552,12 @@ myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_t
     }
     
     if(node->token->my_str_tm.data == NULL) {
-        myhtml_string_init(&node->token->my_str_tm, tree->mchar, tree->mchar_node_id, (length + 2));
+        myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->my_str_tm, (length + 2));
     }
     else {
         if(node->token->my_str_tm.size < length) {
             mchar_async_free(tree->mchar, node->token->my_str_tm.node_idx, node->token->my_str_tm.data);
-            myhtml_string_init(&node->token->my_str_tm, tree->mchar, tree->mchar_node_id, length);
+            myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->my_str_tm, length);
         }
         else
             node->token->my_str_tm.length = 0;
@@ -641,6 +641,14 @@ const char * myhtml_node_text(myhtml_tree_node_t *node, size_t *length)
     
     if(length)
         *length = 0;
+    
+    return NULL;
+}
+
+myhtml_string_t * myhtml_node_string(myhtml_tree_node_t *node)
+{
+    if(node && node->token)
+        return &node->token->my_str_tm;
     
     return NULL;
 }
