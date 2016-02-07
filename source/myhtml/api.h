@@ -358,6 +358,12 @@ typedef struct myhtml_tag_index myhtml_tag_index_t;
 typedef struct myhtml_tag myhtml_tag_t;
 
 /**
+ * MCHAR_ASYNC structures
+ *
+ */
+typedef struct mchar_async mchar_async_t;
+
+/**
  * MyHTML_STRING structures
  *
  */
@@ -370,12 +376,6 @@ struct myhtml_string {
     size_t node_idx;
 }
 typedef myhtml_string_t;
-
-/**
- * MCHAR_ASYNC structures
- *
- */
-typedef struct mchar_async mchar_async_t;
 
 /**
  * @struct myhtml_collection_t
