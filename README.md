@@ -19,6 +19,7 @@ Release will have major version number 1
 - Manipulation of elements: add, change, delete and other
 - Manipulation of elements attributes: add, change, delete and other
 - Support 34 character encoding by specification [encoding.spec.whatwg.org]
+- Support detecting character encodings
 - Support Single Mode parsing
 - Support for fragment parsing
 - Support for [parsing by chunks]
@@ -38,6 +39,10 @@ WINDOWS_1257, WINDOWS_1258, WINDOWS_874, X_MAC_CYRILLIC
 ## Support encodings for output
 
 **Program working in UTF-8 and returns all in UTF-8**
+
+## Detecting character encodings
+
+Now it UTF-8, UTF-16LE, UTF16BE and russian windows-1251,  koi8-r, iso-8859-5, x-mac-cyrillic, ibm866
 
 ## Build and Installation
 
