@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E1ED9B41C68AE0E001B5FD6 /* encoding_detect.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E1ED9B31C68AE0E001B5FD6 /* encoding_detect.c */; };
 		0E7362DC1C568BFE00FF6A0E /* encoding.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E7362DA1C568BFE00FF6A0E /* encoding.c */; };
 		0E770BBD1C3A7FBF00F68C82 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BBC1C3A7FBF00F68C82 /* main.c */; };
 		0E770C001C3E87BA00F68C82 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BDB1C3E87BA00F68C82 /* Makefile */; };
@@ -46,6 +47,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0E1ED9B31C68AE0E001B5FD6 /* encoding_detect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = encoding_detect.c; sourceTree = "<group>"; };
 		0E357A9B1C5CDBA8003A6E17 /* api_encoding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = api_encoding.h; sourceTree = "<group>"; };
 		0E7362DA1C568BFE00FF6A0E /* encoding.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = encoding.c; sourceTree = "<group>"; };
 		0E7362DB1C568BFE00FF6A0E /* encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = encoding.h; sourceTree = "<group>"; };
@@ -177,6 +179,7 @@
 				0E770C131C3FE6A400F68C82 /* utils.c */,
 				0E7362DB1C568BFE00FF6A0E /* encoding.h */,
 				0E7362DA1C568BFE00FF6A0E /* encoding.c */,
+				0E1ED9B31C68AE0E001B5FD6 /* encoding_detect.c */,
 				0E770BF71C3E87BA00F68C82 /* utils */,
 			);
 			name = source;
@@ -256,6 +259,7 @@
 			files = (
 				0E770C051C3E87BA00F68C82 /* perf.c in Sources */,
 				0E770C011C3E87BA00F68C82 /* myhtml.c in Sources */,
+				0E1ED9B41C68AE0E001B5FD6 /* encoding_detect.c in Sources */,
 				0E770C0C1C3E87BA00F68C82 /* tokenizer_doctype.c in Sources */,
 				0E770C021C3E87BA00F68C82 /* myosi.c in Sources */,
 				0E770C061C3E87BA00F68C82 /* rules.c in Sources */,

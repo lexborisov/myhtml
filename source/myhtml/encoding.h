@@ -44,6 +44,25 @@ struct myhtml_encoding_result {
 }
 typedef myhtml_encoding_result_t;
 
+struct myhtml_encoding_trigram {
+    const char trigram[3];
+    size_t value;
+}
+typedef myhtml_encoding_trigram_t;
+
+struct myhtml_encoding_trigram_result {
+    size_t count;
+    size_t value;
+}
+typedef myhtml_encoding_trigram_result_t;
+
+struct myhtml_encoding_unicode_result {
+    size_t count_ascii;
+    size_t count_good;
+    size_t count_bad;
+}
+typedef myhtml_encoding_unicode_result_t;
+
 typedef myhtml_encoding_status_t (*myhtml_encoding_custom_f)(unsigned const char data, myhtml_encoding_result_t *res);
 
 myhtml_encoding_custom_f myhtml_encoding_get_function_by_id(myhtml_encoding_t idx);
@@ -94,6 +113,11 @@ size_t myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data);
 
 void myhtml_encoding_result_clean(myhtml_encoding_result_t *res);
 
+mybool_t myhtml_encoding_detect(const char *text, size_t length, myhtml_encoding_t *encoding);
+mybool_t myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_encoding_t *encoding);
+mybool_t myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding);
+mybool_t myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding);
+    
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

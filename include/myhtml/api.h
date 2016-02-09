@@ -1421,6 +1421,64 @@ myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data);
 size_t
 myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data);
 
+/**
+ * Detect character encoding
+ *
+ * Now available for detect UTF-8, UTF-16LE, UTF-16BE
+ * and Russians: windows-1251,  koi8-r, iso-8859-5, x-mac-cyrillic, ibm866
+ * Other in progress
+ *
+ * @param[in]  text
+ * @param[in]  text length
+ * @param[out] detected encoding
+ *
+ * @return mytrue if encoding found, otherwise myfalse
+ */
+mybool_t
+myhtml_encoding_detect(const char *text, size_t length, myhtml_encoding_t *encoding);
+
+/**
+ * Detect Russian character encoding
+ *
+ * Now available for detect windows-1251,  koi8-r, iso-8859-5, x-mac-cyrillic, ibm866
+ *
+ * @param[in]  text
+ * @param[in]  text length
+ * @param[out] detected encoding
+ *
+ * @return mytrue if encoding found, otherwise myfalse
+ */
+mybool_t
+myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_encoding_t *encoding);
+
+/**
+ * Detect Unicode character encoding
+ *
+ * Now available for detect UTF-8, UTF-16LE, UTF-16BE
+ *
+ * @param[in]  text
+ * @param[in]  text length
+ * @param[out] detected encoding
+ *
+ * @return mytrue if encoding found, otherwise myfalse
+ */
+mybool_t
+myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding);
+
+/**
+ * Detect Unicode character encoding by BOM
+ *
+ * Now available for detect UTF-8, UTF-16LE, UTF-16BE
+ *
+ * @param[in]  text
+ * @param[in]  text length
+ * @param[out] detected encoding
+ *
+ * @return mytrue if encoding found, otherwise myfalse
+ */
+mybool_t
+myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding);
+
 /***********************************************************************************
  *
  * MyHTML_STRING
