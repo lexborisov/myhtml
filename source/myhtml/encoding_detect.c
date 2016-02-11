@@ -5186,11 +5186,11 @@ myhtml_encoding_unicode_result_t myhtml_encoding_detect_utf_16(unsigned const ch
             if((i % 2) == 0) {
                 i++;
                 
-                if(u_text[i] == 0x20 || u_text[i] == 0x0A)
+                if(u_text[i] > 0x1F && u_text[i] < 0x7F)
                     res.count_bad++;
             }
             else {
-                if(u_text[(i - 1)] == 0x20 || u_text[(i - 1)] == 0x0A)
+                if(u_text[(i - 1)] > 0x1F && u_text[(i - 1)] < 0x7F)
                     res.count_good++;
                 
                 i++;
@@ -5259,6 +5259,7 @@ mybool_t myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_
     *encoding = MyHTML_ENCODING_DEFAULT;
     
     myhtml_encoding_unicode_result_t res = myhtml_encoding_detect_utf_16(u_text, length);
+    
     if(res.count_bad == 0 && res.count_good >= 3) {
         *encoding = MyHTML_ENCODING_UTF_16LE;
         return mytrue;
