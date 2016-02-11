@@ -98,6 +98,7 @@ int main(int argc, const char * argv[])
     }
     
     // release resources
+    myhtml_collection_destroy(collection);
     myhtml_tree_destroy(tree);
     myhtml_destroy(myhtml);
     

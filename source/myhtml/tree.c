@@ -386,6 +386,17 @@ void myhtml_tree_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t* root
     root->next   = node;
 }
 
+myhtml_tree_node_t * myhtml_tree_node_find_parent_by_tag_id(myhtml_tree_node_t* node, myhtml_tag_id_t tag_id)
+{
+    node = node->parent;
+    
+    while (node && node->tag_idx != tag_id) {
+        node = node->parent;
+    }
+    
+    return node;
+}
+
 myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_node_t* node)
 {
     if(node->next)
@@ -1959,6 +1970,103 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree
     // step 3-4
     return adjusted_location;
 }
+
+myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting_in_tree(myhtml_tree_t* tree, myhtml_tree_node_t* target,
+                                                                     enum myhtml_tree_insertion_mode* mode)
+{
+    *mode = MyHTML_TREE_INSERTION_MODE_BEFORE;
+    
+    // step 2
+    myhtml_tree_node_t* adjusted_location;
+    
+    if(tree->foster_parenting) {
+#ifdef DEBUG_MODE
+        if(target == NULL) {
+            MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 2; target is NULL in return value! This IS very bad");
+        }
+#endif
+        
+        switch (target->tag_idx) {
+            case MyHTML_TAG_TABLE:
+            case MyHTML_TAG_TBODY:
+            case MyHTML_TAG_TFOOT:
+            case MyHTML_TAG_THEAD:
+            case MyHTML_TAG_TR:
+            {
+                // step 2.1-2
+                myhtml_tree_node_t* last_template = myhtml_tree_node_find_parent_by_tag_id(target, MyHTML_TAG_TEMPLATE);
+                myhtml_tree_node_t* last_table = myhtml_tree_node_find_parent_by_tag_id(target, MyHTML_TAG_TABLE);
+                myhtml_tree_node_t* last_table_in_template = NULL;
+                
+                if(last_template) {
+                    last_table_in_template = myhtml_tree_node_find_parent_by_tag_id(last_template, MyHTML_TAG_TABLE);
+                }
+                
+                // step 2.3
+                if(last_template && (last_table == NULL || last_table != last_table_in_template))
+                {
+                    *mode = MyHTML_TREE_INSERTION_MODE_DEFAULT;
+                    adjusted_location = last_template;
+                    break;
+                }
+                
+                // step 2.4
+                else if(last_table == NULL)
+                {
+                    adjusted_location = target;
+                    break;
+                }
+                
+                // step 2.5
+                else if(last_table->parent)
+                {
+                    //adjusted_location = last_table->parent;
+                    
+                    if(last_table->prev) {
+                        adjusted_location = last_table->prev;
+                        *mode = MyHTML_TREE_INSERTION_MODE_AFTER;
+                    }
+                    else {
+                        adjusted_location = last_table;
+                    }
+                    
+                    break;
+                }
+                
+#ifdef DEBUG_MODE
+                if(idx_table == 0) {
+                    MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 2.5; idx_table is 0");
+                }
+#endif
+                
+                // step 2.6-7
+                adjusted_location = target;
+                
+                break;
+            }
+                
+            default:
+                *mode = MyHTML_TREE_INSERTION_MODE_DEFAULT;
+                adjusted_location = target;
+                break;
+        }
+    }
+    else {
+#ifdef DEBUG_MODE
+        if(target == NULL) {
+            MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 3-5; target is NULL in return value! This IS very bad");
+        }
+#endif
+        
+        *mode = MyHTML_TREE_INSERTION_MODE_DEFAULT;
+        // step 3-4
+        return target;
+    }
+    
+    // step 3-4
+    return adjusted_location;
+}
+
 
 // stack of template insertion modes
 myhtml_tree_insertion_list_t * myhtml_tree_template_insertion_init(myhtml_tree_t* tree)

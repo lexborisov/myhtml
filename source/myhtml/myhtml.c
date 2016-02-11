@@ -483,7 +483,10 @@ myhtml_tree_node_t * myhtml_node_insert_to_appropriate_place(myhtml_tree_t* tree
         return NULL;
     
     enum myhtml_tree_insertion_mode mode;
-    target = myhtml_tree_appropriate_place_inserting(tree, target, &mode);
+    
+    tree->foster_parenting = mytrue;
+    target = myhtml_tree_appropriate_place_inserting_in_tree(tree, target, &mode);
+    tree->foster_parenting = myfalse;
     
     myhtml_tree_node_insert_by_mode(tree, target, node, mode);
     
