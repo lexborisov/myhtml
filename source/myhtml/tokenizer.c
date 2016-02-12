@@ -53,6 +53,9 @@ static const unsigned char myhtml_tokenizer_chars_map[] = {
 void myhtml_tokenizer_set_first_settings(myhtml_tree_t* tree, const char* html, size_t html_length)
 {
     tree->current_qnode       = mythread_queue_get_current_node(tree->queue);
+    
+    mythread_queue_node_clean(tree->current_qnode);
+    
     tree->current_qnode->text = html;
     tree->current_qnode->tree = tree;
     
@@ -671,6 +674,9 @@ size_t myhtml_tokenizer_state_tag_open(myhtml_tree_t* tree, mythread_queue_node_
     else if(html[html_offset] == '?')
     {
         qnode = myhtml_tokenizer_queue_create_text_node_if_need(tree, qnode, html, ((tree->global_offset + html_offset) - 1), MyHTML_TOKEN_TYPE_DATA);
+        
+        qnode->begin = tree->global_offset + html_offset;
+        
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BOGUS_COMMENT;
     }
     else {
@@ -1183,6 +1189,8 @@ size_t myhtml_tokenizer_state_comment_end(myhtml_tree_t* tree, mythread_queue_no
         
         if(qnode->length >= 2)
             qnode->length -= 2;
+        else
+            qnode->length = 0;
         
         html_offset++;
         mh_queue_add(tree, html, html_offset);
@@ -1208,7 +1216,7 @@ size_t myhtml_tokenizer_state_comment_end_bang(myhtml_tree_t* tree, mythread_que
 {
     if(html[html_offset] == '>')
     {
-        qnode->length = ((tree->global_offset + html_offset) - qnode->begin) - 2;
+        qnode->length = ((tree->global_offset + html_offset) - qnode->begin) - 3;
         
         html_offset++;
         mh_queue_add(tree, html, html_offset);

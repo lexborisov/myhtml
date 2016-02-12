@@ -1810,10 +1810,6 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
             if(last->parent)
                 myhtml_tree_node_remove(last);
             
-            last->child      = NULL;
-            last->last_child = NULL;
-            last->prev       = NULL;
-            
             myhtml_tree_node_add_child(tree, node, last);
             
             // step 13.10

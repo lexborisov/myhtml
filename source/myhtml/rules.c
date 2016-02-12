@@ -1794,8 +1794,15 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
                     
                     return mytrue;
                 }
+                else {
+                    tree->foster_parenting = mytrue;
+                    myhtml_insertion_mode_in_body(tree, token);
+                    tree->foster_parenting = myfalse;
+                    
+                    break;
+                }
             }
-                
+            
             case MyHTML_TAG__COMMENT:
                 myhtml_tree_node_insert_comment(tree, token, 0);
                 break;
@@ -1933,14 +1940,9 @@ mybool_t myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_n
         myhtml_tree_token_list_t* token_list = tree->token_list;
         
         for(size_t i = 0; i < token_list->length; i++) {
-            if((token->type & MyHTML_TOKEN_TYPE_WHITESPACE) == 0)
-            {
-                tree->foster_parenting = mytrue;
-                myhtml_insertion_mode_in_body(tree, token_list->list[i]);
-                tree->foster_parenting = myfalse;
-            }
-            else
-                myhtml_tree_node_insert_text(tree, token_list->list[i]);
+            tree->foster_parenting = mytrue;
+            myhtml_insertion_mode_in_body(tree, token_list->list[i]);
+            tree->foster_parenting = myfalse;
         }
         
         tree->insert_mode = tree->orig_insert_mode;
