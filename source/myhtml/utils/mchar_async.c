@@ -164,7 +164,7 @@ mchar_async_chunk_t * mchar_async_chunk_malloc_without_lock(mchar_async_t *mchar
         size_t current_idx = mchar_async->chunks_pos_length;
         mchar_async->chunks_pos_length++;
         
-        if(mchar_async->chunks_pos_length > mchar_async->chunks_pos_size)
+        if(mchar_async->chunks_pos_length >= mchar_async->chunks_pos_size)
         {
             mchar_async->chunks_pos_size <<= 1;
             mchar_async_chunk_t **tmp_pos = myrealloc(mchar_async->chunks,
@@ -179,7 +179,7 @@ mchar_async_chunk_t * mchar_async_chunk_malloc_without_lock(mchar_async_t *mchar
         }
         
         if(mchar_async->chunks[current_idx] == NULL) {
-            mchar_async_chunk_t *tmp = mymalloc(sizeof(mchar_async_chunk_t) * mchar_async->chunks_size);
+            mchar_async_chunk_t *tmp = mycalloc(mchar_async->chunks_size, sizeof(mchar_async_chunk_t));
             
             if(tmp)
                 mchar_async->chunks[current_idx] = tmp;
@@ -353,14 +353,16 @@ char * mchar_async_malloc(mchar_async_t *mchar_async, size_t node_idx, size_t si
     {
         if((chunk->length + sizeof(size_t)) < chunk->size)
         {
-            size_t size = chunk->size - chunk->length;
+            size_t size = (chunk->size - chunk->length) - sizeof(size_t);
             
-            char *tmp = &chunk->begin[(chunk->length + sizeof(size_t))];
-            *(size_t*)(&chunk->begin[chunk->length]) = size;
-            
-            chunk->length = chunk->size;
-            
-            mchar_async_cache_add(&node->cache, tmp, size);
+            if(size) {
+                char *tmp = &chunk->begin[(chunk->length + sizeof(size_t))];
+                *(size_t*)(&chunk->begin[chunk->length]) = size;
+                
+                chunk->length = chunk->size;
+                
+                mchar_async_cache_add(&node->cache, tmp, size);
+            }
         }
         
         chunk = mchar_sync_chunk_find_by_size(node, size);
@@ -368,10 +370,10 @@ char * mchar_async_malloc(mchar_async_t *mchar_async, size_t node_idx, size_t si
         if(chunk)
             chunk->length = 0;
         else {
-            if(size > mchar_async->origin_size)
-                size = (size + mchar_async->origin_size + sizeof(size_t));
-            
-            chunk = mchar_async_chunk_malloc(mchar_async, node, size);
+            if((size + sizeof(size_t)) > mchar_async->origin_size)
+                chunk = mchar_async_chunk_malloc(mchar_async, node, (size + mchar_async->origin_size + sizeof(size_t)));
+            else
+                chunk = mchar_async_chunk_malloc(mchar_async, node, mchar_async->origin_size);
         }
         
         mchar_sync_chunk_insert_after(node->chunk, chunk);
