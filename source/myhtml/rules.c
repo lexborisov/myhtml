@@ -1443,10 +1443,10 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_token_node_malloc(tree->token, text_node->token, tree->mcasync_token_id);
                 myhtml_token_node_set_done(text_node->token);
                 
-                const char message[] = "This is a searchable index. Enter search keywords: (input field)";
+                const char message[] = "This is a searchable index. Enter search keywords: ";
                 
                 if(attr_prompt && attr_prompt->value_length) {
-                    myhtml_token_node_text_append(tree->token, text_node->token, &token->my_str_tm.data[ attr_prompt->value_begin ], attr_prompt->value_length);
+                    myhtml_token_node_text_append(tree->token, text_node->token, &attr_prompt->entry.data[ attr_prompt->value_begin ], attr_prompt->value_length);
                 }
                 else {
                     myhtml_token_node_text_append(tree->token, text_node->token, message, strlen(message));
@@ -1482,7 +1482,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_token_node_set_done(text_node->token);
                 
                 if(attr_prompt && attr_prompt->value_length) {
-                    myhtml_token_node_text_append(tree->token, text_node->token, &token->my_str_tm.data[ attr_prompt->value_begin ], attr_prompt->value_length);
+                    myhtml_token_node_text_append(tree->token, text_node->token, &attr_prompt->entry.data[ attr_prompt->value_begin ], attr_prompt->value_length);
                 }
                 else {
                     myhtml_token_node_text_append(tree->token, text_node->token, message, strlen(message));
