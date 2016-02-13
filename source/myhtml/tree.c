@@ -420,7 +420,7 @@ myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_node_t* node)
 
 void myhtml_tree_node_free(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 {
-    if(node)
+    if(node == NULL)
         return;
     
     if(node->token) {
@@ -433,7 +433,7 @@ void myhtml_tree_node_free(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 
 void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 {
-    if(node)
+    if(node == NULL)
         return;
     
     myhtml_tree_node_remove(node);
@@ -454,7 +454,7 @@ void _myhtml_tree_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t*
 
 void myhtml_tree_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 {
-    if(node)
+    if(node == NULL)
         return;
     
     if(node->child)

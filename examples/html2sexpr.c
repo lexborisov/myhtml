@@ -284,7 +284,7 @@ int main(int argc, char** argv)
     }
 
     struct res_html data = load_html_file(argv[1]);
-    myhtml_status_t res = MyHTML_STATUS_OK;
+    myhtml_status_t res;
 
 	// basic init
     myhtml_t* myhtml = myhtml_create();

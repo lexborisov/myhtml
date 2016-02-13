@@ -918,9 +918,15 @@ const char * myhtml_tree_incomming_buf_make_data(myhtml_tree_t *tree, mythread_q
     
     myhtml_incoming_buf_t *inc_buf = tree->incoming_buf;
     
+    if(inc_buf == NULL)
+        return NULL;
+    
     // find original chunk
-    while (inc_buf && inc_buf->offset > qnode->begin) {
-        inc_buf = inc_buf->prev;
+    while (inc_buf->offset > qnode->begin) {
+        if(inc_buf->prev)
+            inc_buf = inc_buf->prev;
+        else
+            break;
     }
     
     size_t relative_current_buf_offset = qnode->begin - inc_buf->offset;

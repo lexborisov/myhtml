@@ -69,12 +69,11 @@ uint64_t myhtml_hperf_clock(myhtml_status_t *status)
  */
 uint64_t myhtml_hperf_res(myhtml_status_t *status)
 {
-    unsigned long long freq = 0;
-    
     if(status)
         *status = MyHTML_STATUS_OK;
     
 #if defined(__APPLE__) && defined(CTL_HW) && defined(HW_CPU_FREQ)
+    unsigned long long freq = 0;
     
     /* OSX kernel: sysctl(CTL_HW | HW_CPU_FREQ) */
     size_t len = sizeof(freq);
@@ -91,7 +90,8 @@ uint64_t myhtml_hperf_res(myhtml_status_t *status)
     return freq;
 
 #elif defined(__linux__)
-
+    unsigned long long freq = 0;
+    
     /* Use procfs on linux */
     FILE* fp = NULL;
     fp = fopen("/proc/cpuinfo", "r");

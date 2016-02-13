@@ -5341,7 +5341,6 @@ mybool_t myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_
     
     if(max_value < res.value) {
         *encoding = MyHTML_ENCODING_IBM866;
-        max_value = res.value;
     }
     
     return myfalse;

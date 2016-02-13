@@ -104,7 +104,8 @@ myhtml_status_t myhtml_hread_sem_post(mythread_t *mythread, mythread_context_t *
 
 myhtml_status_t myhtml_hread_sem_wait(mythread_t *mythread, mythread_context_t *ctx)
 {
-    DWORD dwWaitResult = WaitForSingleObject(ctx->sem, INFINITE);
+    //DWORD dwWaitResult =
+    WaitForSingleObject(ctx->sem, INFINITE);
     
     return MyHTML_STATUS_OK;
 }
@@ -654,7 +655,7 @@ void mythread_batch_pause_all(mythread_t *mythread)
 void mythread_resume_all(mythread_t *mythread)
 {
     if(mythread->stream_opt == MyTHREAD_OPT_UNDEF &&
-       mythread->stream_opt == MyTHREAD_OPT_UNDEF)
+       mythread->batch_opt  == MyTHREAD_OPT_UNDEF)
         return;
     
     mythread->stream_opt = MyTHREAD_OPT_UNDEF;

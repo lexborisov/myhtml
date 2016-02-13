@@ -9387,7 +9387,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_utf_8(unsigned const char dat
 
 enum myhtml_encoding_status myhtml_encoding_decode_ibm866(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_ibm866[(data - 0x80)]);
@@ -9397,7 +9397,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_ibm866(unsigned const char da
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_2(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_2[(data - 0x80)]);
@@ -9407,7 +9407,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_2(unsigned const cha
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_3(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_3[(data - 0x80)]);
@@ -9417,7 +9417,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_3(unsigned const cha
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_4(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_4[(data - 0x80)]);
@@ -9427,7 +9427,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_4(unsigned const cha
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_5(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_5[(data - 0x80)]);
@@ -9437,7 +9437,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_5(unsigned const cha
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_6(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_6[(data - 0x80)]);
@@ -9447,7 +9447,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_6(unsigned const cha
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_7(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_7[(data - 0x80)]);
@@ -9457,7 +9457,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_7(unsigned const cha
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_8(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_8[(data - 0x80)]);
@@ -9467,7 +9467,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_8(unsigned const cha
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_8_i(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_8[(data - 0x80)]);
@@ -9477,7 +9477,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_8_i(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_10(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_10[(data - 0x80)]);
@@ -9487,7 +9487,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_10(unsigned const ch
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_13(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_13[(data - 0x80)]);
@@ -9497,7 +9497,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_13(unsigned const ch
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_14(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_14[(data - 0x80)]);
@@ -9507,7 +9507,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_14(unsigned const ch
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_15(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_15[(data - 0x80)]);
@@ -9517,7 +9517,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_15(unsigned const ch
 
 enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_16(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_iso_8859_16[(data - 0x80)]);
@@ -9527,7 +9527,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_8859_16(unsigned const ch
 
 enum myhtml_encoding_status myhtml_encoding_decode_koi8_r(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_koi8_r[(data - 0x80)]);
@@ -9537,7 +9537,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_koi8_r(unsigned const char da
 
 enum myhtml_encoding_status myhtml_encoding_decode_koi8_u(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_koi8_u[(data - 0x80)]);
@@ -9547,7 +9547,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_koi8_u(unsigned const char da
 
 enum myhtml_encoding_status myhtml_encoding_decode_macintosh(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_macintosh[(data - 0x80)]);
@@ -9557,7 +9557,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_macintosh(unsigned const char
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_874(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_874[(data - 0x80)]);
@@ -9567,7 +9567,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_874(unsigned const ch
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_1250(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_1250[(data - 0x80)]);
@@ -9577,7 +9577,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_1250(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_1251(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_1251[(data - 0x80)]);
@@ -9587,7 +9587,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_1251(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_1252(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_1252[(data - 0x80)]);
@@ -9597,7 +9597,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_1252(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_1253(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_1253[(data - 0x80)]);
@@ -9607,7 +9607,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_1253(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_1254(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_1254[(data - 0x80)]);
@@ -9617,7 +9617,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_1254(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_1255(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_1255[(data - 0x80)]);
@@ -9627,7 +9627,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_1255(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_1256(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_1256[(data - 0x80)]);
@@ -9637,7 +9637,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_1256(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_1257(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_1257[(data - 0x80)]);
@@ -9647,7 +9647,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_1257(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_windows_1258(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_windows_1258[(data - 0x80)]);
@@ -9657,7 +9657,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_windows_1258(unsigned const c
 
 enum myhtml_encoding_status myhtml_encoding_decode_x_mac_cyrillic(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         (res->result = data);
     else
         (res->result = myhtml_encoding_map_x_mac_cyrillic[(data - 0x80)]);
@@ -9756,7 +9756,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_gb18030(unsigned const char d
         return MyHTML_ENCODING_STATUS_OK;
     }
     
-    if(data >= 0x00 && data <= 0x7F) {
+    if(data <= 0x7F) {
         res->result = data;
         return MyHTML_ENCODING_STATUS_OK;
     }
@@ -9829,7 +9829,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_big5(unsigned const char data
         return MyHTML_ENCODING_STATUS_OK;
     }
     
-    if(data >= 0x00 && data <= 0x7F) {
+    if(data <= 0x7F) {
         res->result = data;
         return MyHTML_ENCODING_STATUS_OK;
     }
@@ -9881,7 +9881,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_euc_jp(unsigned const char da
         }
     }
     
-    if(data >= 0x00 && data <= 0x7F) {
+    if(data <= 0x7F) {
         res->result = data;
         return MyHTML_ENCODING_STATUS_OK;
     }
@@ -9910,7 +9910,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_2022_jp(unsigned const ch
                 res->second = 6;
                 return MyHTML_ENCODING_STATUS_CONTINUE;
             }
-            else if((data >= 0x00 && data <= 0x7F) &&
+            else if((data <= 0x7F) &&
                     data != 0x0E && data != 0x0F && data != 0x1B)
             {
                 res->flag   = 0;
@@ -9938,7 +9938,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_iso_2022_jp(unsigned const ch
                 res->result = 0x203E;
                 return MyHTML_ENCODING_STATUS_OK;
             }
-            else if((data >= 0x00 && data <= 0x7F) &&
+            else if((data <= 0x7F) &&
                     data != 0x0E && data != 0x0F &&
                     data != 0x1B && data != 0x5C &&
                     data != 0x7E)
@@ -10111,7 +10111,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_shift_jis(unsigned const char
         return MyHTML_ENCODING_STATUS_ERROR;
     }
     
-    if((data >= 0x00 && data <= 0x7F) || data == 0x80) {
+    if((data <= 0x7F) || data == 0x80) {
         res->result = data;
         return MyHTML_ENCODING_STATUS_OK;
     }
@@ -10152,7 +10152,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_euc_kr(unsigned const char da
         return MyHTML_ENCODING_STATUS_ERROR;
     }
     
-    if(data >= 0x00 && data <= 0x7F) {
+    if(data <= 0x7F) {
         res->result = data;
         return MyHTML_ENCODING_STATUS_OK;
     }
@@ -10240,7 +10240,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_utf_16le(unsigned const char 
 
 enum myhtml_encoding_status myhtml_encoding_decode_x_user_defined(unsigned const char data, myhtml_encoding_result_t *res)
 {
-    if(data >= 0x00 && data <= 0x7F)
+    if(data <= 0x7F)
         res->result = data;
     else
         res->result = 0xF780 + data - 0x80;
