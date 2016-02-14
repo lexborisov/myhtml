@@ -52,7 +52,7 @@ if(${CMAKE_C_COMPILER_ID} STREQUAL MSVC)
   
   message(STATUS "Windows set definitions")
 else()
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -pthread")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99 -fPIC -pthread")
 endif()
 
 ################
