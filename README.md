@@ -46,6 +46,8 @@ Now it UTF-8, UTF-16LE, UTF16BE and russian windows-1251,  koi8-r, iso-8859-5, x
 
 ## Build and Installation
 
+**Make**
+
 ```bash
 make
 ```
@@ -56,6 +58,29 @@ If successful copy lib/* and include/* at the right place for you
 cp lib/* /usr/local/lib
 cp -r include/* /usr/local/include
 ```
+
+**CMake**
+
+In myhtml/project directory:
+
+```bash
+cmake .
+make
+sudo make install
+```
+
+Flags that can be passed to CMake:
+- `MyHTML_OPTIMIZATION_LEVEL=-O2` set compiler optimization level. Default: -O2
+- `CMAKE_INSTALL_LIBDIR=lib` set path to install created library. Default: lib
+- `MyHTML_BUILD_SHARED=ON` build shared library. Default: ON
+- `MyHTML_BUILD_STATIC=ON` build static library. Default: ON
+- `MyHTML_INSTALL_HEADER=OFF` install header files. Default OFF
+
+*for example*
+```bash
+cmake . -DCMAKE_INSTALL_LIBDIR=lib64 -DMyHTML_INSTALL_HEADER=ON
+```
+
 
 ## Build with your program
 
