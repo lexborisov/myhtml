@@ -5950,7 +5950,6 @@ static const charef_entry_t named_character_references[] = {
 	{';', 0, 17784, {8204}, 1},{'\0', 0, 17785, {0}, 0}
 };
 
-
 const charef_entry_t * myhtml_charef_find(const char *begin, size_t *offset, size_t size, size_t *data_size)
 {
     unsigned const char* u_begin = (unsigned const char*)begin;
@@ -5990,42 +5989,72 @@ const charef_entry_t * myhtml_charef_get_first_position(const char begin)
     return &named_character_references[ (unsigned const char)begin ];
 }
 
-const charef_entry_t * myhtml_charef_find_by_pos(size_t pos, const char *begin, size_t *offset, size_t size, int *is_done)
+const charef_entry_t * myhtml_charef_find_by_pos(size_t pos, const char *begin, size_t *offset, size_t size, charef_entry_result_t *result)
 {
     unsigned const char* u_begin = (unsigned const char*)begin;
     
     if(u_begin[*offset] == '&') {
-        if(is_done)
-            *is_done = 1;
+        result->is_done = 1;
         
-        return &named_character_references[pos];
+        if(result->curr_entry->codepoints_len)
+            return result->curr_entry;
+        else if(result->last_entry) {
+            *offset = result->last_offset;
+            return result->last_entry;
+        }
+        
+        return &named_character_references[0];
     }
     
-    if(is_done)
-        *is_done = 0;
+    result->is_done = 0;
     
     while (named_character_references[pos].ch)
     {
         if(named_character_references[pos].ch == u_begin[*offset])
         {
+            if(u_begin[*offset] == ';') {
+                result->is_done = 1;
+                
+                result->curr_entry = &named_character_references[pos];
+                return result->curr_entry;
+            }
+            
             (*offset)++;
             
             if(named_character_references[pos].next == 0) {
-                if(is_done)
-                    *is_done = 1;
-                
+                result->is_done = 1;
                 return &named_character_references[pos];
             }
             
-            if(*offset >= size) {
-                return &named_character_references[pos];
+            if(*offset >= size)
+            {
+                result->curr_entry = &named_character_references[pos];
+                
+                if(named_character_references[pos].codepoints_len) {
+                    result->last_offset = *offset;
+                    result->last_entry = &named_character_references[pos];
+                }
+                
+                return result->curr_entry;
             }
             
             if(u_begin[*offset] == '&') {
-                if(is_done)
-                    *is_done = 1;
+                result->is_done = 1;
+                result->curr_entry = &named_character_references[pos];
                 
-                return &named_character_references[pos];
+                if(result->curr_entry->codepoints_len)
+                    return result->curr_entry;
+                else if(result->last_entry) {
+                    *offset = result->last_offset;
+                    return result->last_entry;
+                }
+                
+                return &named_character_references[0];
+            }
+            
+            if(named_character_references[pos].codepoints_len) {
+                result->last_offset = *offset;
+                result->last_entry = &named_character_references[pos];
             }
             
             pos = named_character_references[pos].next;
@@ -6038,8 +6067,14 @@ const charef_entry_t * myhtml_charef_find_by_pos(size_t pos, const char *begin, 
         }
     }
     
-    if(is_done)
-        *is_done = 1;
+    result->is_done = 1;
+    
+    if(named_character_references[pos].codepoints_len)
+        return &named_character_references[pos];
+    else if(result->last_entry) {
+        *offset = result->last_offset;
+        return result->last_entry;
+    }
     
     return &named_character_references[pos];
 }

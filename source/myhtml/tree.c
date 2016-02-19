@@ -123,8 +123,8 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->insert_mode        = MyHTML_INSERTION_MODE_INITIAL;
     tree->orig_insert_mode   = MyHTML_INSERTION_MODE_INITIAL;
     tree->compat_mode        = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
-    tree->tmp_qnode          = NULL;
-    tree->flags              = MyHTML_TREE_FLAGS_CLEAN;
+    tree->tmp_tag_id         = MyHTML_TAG__UNDEF;
+    tree->flags              = MyHTML_TREE_FLAGS_CLEAN|MyHTML_TREE_FLAGS_FRAMESET_OK;
     tree->foster_parenting   = myfalse;
     tree->my_namespace       = MyHTML_NAMESPACE_HTML;
     tree->incoming_buf       = NULL;
@@ -175,8 +175,8 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->insert_mode        = MyHTML_INSERTION_MODE_INITIAL;
     tree->orig_insert_mode   = MyHTML_INSERTION_MODE_INITIAL;
     tree->compat_mode        = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
-    tree->tmp_qnode          = NULL;
-    tree->flags              = MyHTML_TREE_FLAGS_CLEAN;
+    tree->tmp_tag_id         = MyHTML_TAG__UNDEF;
+    tree->flags              = MyHTML_TREE_FLAGS_CLEAN|MyHTML_TREE_FLAGS_FRAMESET_OK;
     tree->foster_parenting   = myfalse;
     tree->my_namespace       = MyHTML_NAMESPACE_HTML;
     tree->incoming_buf       = NULL;
@@ -587,6 +587,28 @@ myhtml_tree_node_t * myhtml_tree_node_insert_text(myhtml_tree_t* tree, myhtml_to
     if(adjusted_location == tree->document)
         return NULL;
     
+    if(mode == MyHTML_TREE_INSERTION_MODE_AFTER) {
+        if(adjusted_location->tag_idx == MyHTML_TAG__TEXT && adjusted_location->token)
+        {
+            myhtml_token_merged_two_token_string(tree, adjusted_location->token, token, myfalse);
+            return adjusted_location;
+        }
+    }
+    if(mode == MyHTML_TREE_INSERTION_MODE_BEFORE) {
+        if(adjusted_location->tag_idx == MyHTML_TAG__TEXT && adjusted_location->token) {
+            myhtml_token_merged_two_token_string(tree, token, adjusted_location->token, mytrue);
+            return adjusted_location;
+        }
+    }
+    else {
+        if(adjusted_location->last_child && adjusted_location->last_child->tag_idx == MyHTML_TAG__TEXT &&
+           adjusted_location->last_child->token)
+        {
+            myhtml_token_merged_two_token_string(tree, adjusted_location->last_child->token, token, myfalse);
+            return adjusted_location->last_child;
+        }
+    }
+    
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
     node->tag_idx      = MyHTML_TAG__TEXT;
@@ -646,7 +668,7 @@ myhtml_tree_node_t * myhtml_tree_node_insert_html_element(myhtml_tree_t* tree, m
     return node;
 }
 
-myhtml_tree_node_t * myhtml_tree_element_in_scope(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, enum myhtml_tag_categories category)
+myhtml_tree_node_t * myhtml_tree_element_in_scope(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, myhtml_namespace_t mynamespace, enum myhtml_tag_categories category)
 {
     myhtml_tree_node_t** list = tree->open_elements->list;
     myhtml_tag_context_t* tags_context = tree->myhtml->tags->context;
@@ -655,8 +677,13 @@ myhtml_tree_node_t * myhtml_tree_element_in_scope(myhtml_tree_t* tree, myhtml_ta
     while(i) {
         i--;
         
-        if(list[i]->tag_idx == tag_idx)
+        if(list[i]->tag_idx == tag_idx &&
+           (mynamespace == MyHTML_NAMESPACE_UNDEF || list[i]->my_namespace == mynamespace))
             return list[i];
+        else if(category == MyHTML_TAG_CATEGORIES_SCOPE_SELECT) {
+            if((tags_context[list[i]->tag_idx].cats[list[i]->my_namespace] & category) == 0)
+                break;
+        }
         else if(tags_context[list[i]->tag_idx].cats[list[i]->my_namespace] & category)
             break;
     }
@@ -675,6 +702,10 @@ mybool_t myhtml_tree_element_in_scope_by_node(myhtml_tree_t* tree, myhtml_tree_n
         
         if(list[i] == node)
             return mytrue;
+        else if(category == MyHTML_TAG_CATEGORIES_SCOPE_SELECT) {
+            if((tags_context[list[i]->tag_idx].cats[list[i]->my_namespace] & category) == 0)
+                break;
+        }
         else if(tags_context[list[i]->tag_idx].cats[list[i]->my_namespace] & category)
             break;
     }
@@ -935,7 +966,7 @@ void myhtml_tree_open_elements_remove(myhtml_tree_t* tree, myhtml_tree_node_t* n
 #endif
 }
 
-void myhtml_tree_open_elements_pop_until(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, mybool_t is_exclude)
+void myhtml_tree_open_elements_pop_until(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, myhtml_namespace_t mynamespace, mybool_t is_exclude)
 {
     myhtml_tree_node_t** list = tree->open_elements->list;
     
@@ -943,7 +974,11 @@ void myhtml_tree_open_elements_pop_until(myhtml_tree_t* tree, myhtml_tag_id_t ta
     {
         tree->open_elements->length--;
         
-        if(list[ tree->open_elements->length ]->tag_idx == tag_idx) {
+        if(list[ tree->open_elements->length ]->tag_idx == tag_idx &&
+           // check namespace if set
+           (mynamespace == MyHTML_NAMESPACE_UNDEF ||
+            list[ tree->open_elements->length ]->my_namespace == mynamespace))
+        {
             if(is_exclude)
                 tree->open_elements->length++;
             
@@ -1039,7 +1074,7 @@ mybool_t myhtml_tree_open_elements_find(myhtml_tree_t* tree, myhtml_tree_node_t*
     return myfalse;
 }
 
-myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx_reverse(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, size_t* return_index)
+myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx_reverse(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, myhtml_namespace_t mynamespace, size_t* return_index)
 {
     myhtml_tree_node_t** list = tree->open_elements->list;
     
@@ -1048,7 +1083,9 @@ myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx_reverse(myhtml_tr
     {
         i--;
         
-        if(list[i]->tag_idx == tag_idx) {
+        if(list[i]->tag_idx == tag_idx &&
+           (mynamespace == MyHTML_NAMESPACE_UNDEF || list[i]->my_namespace == mynamespace))
+        {
             if(return_index)
                 *return_index = i;
             
@@ -1059,13 +1096,15 @@ myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx_reverse(myhtml_tr
     return NULL;
 }
 
-myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, size_t* return_index)
+myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, myhtml_namespace_t mynamespace, size_t* return_index)
 {
     myhtml_tree_node_t** list = tree->open_elements->list;
     
     for (size_t i = 0; i < tree->open_elements->length; i++)
     {
-        if(list[i]->tag_idx == tag_idx) {
+        if(list[i]->tag_idx == tag_idx &&
+           (mynamespace == MyHTML_NAMESPACE_UNDEF || list[i]->my_namespace == mynamespace))
+        {
             if(return_index)
                 *return_index = i;
             
@@ -1076,89 +1115,93 @@ myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx(myhtml_tree_t* tr
     return NULL;
 }
 
-void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx)
+void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx, myhtml_namespace_t mynamespace)
 {
     if(tree->open_elements->length == 0) {
         MyHTML_DEBUG("Generate implied end tags; Open elements is 0");
         return;
     }
     
-    myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-    
+    while(tree->open_elements->length > 0)
+    {
+        myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+        
 #ifdef DEBUG_MODE
-    if(current_node == NULL) {
-        MyHTML_DEBUG_ERROR("Generate implied end tags; Current node is NULL! This is very bad");
-    }
+        if(current_node == NULL) {
+            MyHTML_DEBUG_ERROR("Generate implied end tags; Current node is NULL! This is very bad");
+        }
 #endif
-    
-    switch (current_node->tag_idx) {
-        case MyHTML_TAG_DD:
-        case MyHTML_TAG_DT:
-        case MyHTML_TAG_LI:
-        case MyHTML_TAG_OPTGROUP:
-        case MyHTML_TAG_OPTION:
-        case MyHTML_TAG_P:
-        case MyHTML_TAG_RB:
-        case MyHTML_TAG_RP:
-        case MyHTML_TAG_RT:
-        case MyHTML_TAG_RTC:
-            if(exclude_tag_idx == current_node->tag_idx)
-                break;
-            
-            myhtml_tree_open_elements_pop(tree);
-            myhtml_tree_generate_implied_end_tags(tree, exclude_tag_idx);
-            
-            break;
-            
-        default:
-            break;
+        
+        switch (current_node->tag_idx) {
+            case MyHTML_TAG_DD:
+            case MyHTML_TAG_DT:
+            case MyHTML_TAG_LI:
+            case MyHTML_TAG_OPTGROUP:
+            case MyHTML_TAG_OPTION:
+            case MyHTML_TAG_P:
+            case MyHTML_TAG_RB:
+            case MyHTML_TAG_RP:
+            case MyHTML_TAG_RT:
+            case MyHTML_TAG_RTC:
+                if(exclude_tag_idx == current_node->tag_idx &&
+                   (mynamespace == MyHTML_NAMESPACE_UNDEF || current_node->my_namespace == mynamespace))
+                    return;
+                
+                myhtml_tree_open_elements_pop(tree);
+                continue;
+                
+            default:
+                return;
+        }
     }
 }
 
-void myhtml_tree_generate_all_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx)
+void myhtml_tree_generate_all_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx, myhtml_namespace_t mynamespace)
 {
     if(tree->open_elements->length == 0) {
         MyHTML_DEBUG("Generate all implied end tags; Open elements is 0");
         return;
     }
     
-    myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-    
+    while(tree->open_elements->length > 0)
+    {
+        myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+        
 #ifdef DEBUG_MODE
-    if(current_node == NULL) {
-        MyHTML_DEBUG_ERROR("Generate all implied end tags; Current node is NULL! This is very bad");
-    }
+        if(current_node == NULL) {
+            MyHTML_DEBUG_ERROR("Generate all implied end tags; Current node is NULL! This is very bad");
+        }
 #endif
-    
-    switch (current_node->tag_idx) {
-        case MyHTML_TAG_CAPTION:
-        case MyHTML_TAG_COLGROUP:
-        case MyHTML_TAG_DD:
-        case MyHTML_TAG_DT:
-        case MyHTML_TAG_LI:
-        case MyHTML_TAG_OPTGROUP:
-        case MyHTML_TAG_OPTION:
-        case MyHTML_TAG_P:
-        case MyHTML_TAG_RB:
-        case MyHTML_TAG_RP:
-        case MyHTML_TAG_RT:
-        case MyHTML_TAG_RTC:
-        case MyHTML_TAG_TBODY:
-        case MyHTML_TAG_TD:
-        case MyHTML_TAG_TFOOT:
-        case MyHTML_TAG_TH:
-        case MyHTML_TAG_THEAD:
-        case MyHTML_TAG_TR:
-            if(exclude_tag_idx == current_node->tag_idx)
-                break;
-            
-            myhtml_tree_open_elements_pop(tree);
-            myhtml_tree_generate_all_implied_end_tags(tree, exclude_tag_idx);
-            
-            break;
-            
-        default:
-            break;
+        
+        switch (current_node->tag_idx) {
+            case MyHTML_TAG_CAPTION:
+            case MyHTML_TAG_COLGROUP:
+            case MyHTML_TAG_DD:
+            case MyHTML_TAG_DT:
+            case MyHTML_TAG_LI:
+            case MyHTML_TAG_OPTGROUP:
+            case MyHTML_TAG_OPTION:
+            case MyHTML_TAG_P:
+            case MyHTML_TAG_RB:
+            case MyHTML_TAG_RP:
+            case MyHTML_TAG_RT:
+            case MyHTML_TAG_RTC:
+            case MyHTML_TAG_TBODY:
+            case MyHTML_TAG_TD:
+            case MyHTML_TAG_TFOOT:
+            case MyHTML_TAG_TH:
+            case MyHTML_TAG_THEAD:
+            case MyHTML_TAG_TR:
+                if(exclude_tag_idx == current_node->tag_idx &&
+                   (mynamespace == MyHTML_NAMESPACE_UNDEF || current_node->my_namespace == mynamespace))
+                    return;
+                
+                myhtml_tree_open_elements_pop(tree);
+                continue;
+                
+            default:
+                return;
+        }
     }
 }
 
@@ -1197,13 +1240,22 @@ void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree)
             }
         }
         
+        if(node->my_namespace != MyHTML_NAMESPACE_HTML) {
+            if(last)
+                tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
+            else
+                tree->insert_mode = MyHTML_INSERTION_MODE_INITIAL;
+            
+            return;
+        }
+        
         // step 4
         if(node->tag_idx == MyHTML_TAG_SELECT)
         {
             // step 4.1
             if(last) {
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_SELECT;
-                break;
+                return;
             }
             
             // step 4.2
@@ -1308,11 +1360,13 @@ void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree)
         // step 16
         if(last) {
             tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-            break;
+            return;
         }
         
         // step 17
     }
+    
+    tree->insert_mode = MyHTML_INSERTION_MODE_INITIAL;
 }
 
 // stack of active formatting elements
@@ -1338,6 +1392,9 @@ mybool_t myhtml_tree_active_formatting_is_marker(myhtml_tree_t* tree, myhtml_tre
         MyHTML_DEBUG_ERROR("Active formatting is marker; node is NULL!");
     }
 #endif
+    
+    if(tree->myhtml->marker == node)
+        return mytrue;
     
     switch (node->tag_idx) {
         case MyHTML_TAG_APPLET:
@@ -1496,17 +1553,12 @@ void myhtml_tree_active_formatting_up_to_last_marker(myhtml_tree_t* tree)
     // Step 2: Remove entry from the list of active formatting elements.
     if(tree->active_formatting->length == 0)
         return;
-        
-    tree->active_formatting->length--;
     
 #ifdef DEBUG_MODE
     if(list[ tree->active_formatting->length ] == NULL) {
         MyHTML_DEBUG("Up to last marker active formatting; list[%zu] is NULL", tree->active_formatting->length);
     }
 #endif
-    
-    if(myhtml_tree_active_formatting_is_marker(tree, list[tree->active_formatting->length]))
-        return;
     
     while(tree->active_formatting->length)
     {
@@ -1520,7 +1572,7 @@ void myhtml_tree_active_formatting_up_to_last_marker(myhtml_tree_t* tree)
         
         if(myhtml_tree_active_formatting_is_marker(tree, list[ tree->active_formatting->length ])) {
             // include marker
-            tree->active_formatting->length++;
+            //tree->active_formatting->length++;
             break;
         }
     }
@@ -1543,7 +1595,7 @@ myhtml_tree_node_t * myhtml_tree_active_formatting_between_last_marker(myhtml_tr
         
         if(myhtml_tree_active_formatting_is_marker(tree, list[i]))
             break;
-        else if(list[i]->tag_idx == tag_idx) {
+        else if(list[i]->tag_idx == tag_idx && list[i]->my_namespace == MyHTML_NAMESPACE_HTML) {
             if(return_idx)
                 *return_idx = i;
             return list[i];
@@ -1612,10 +1664,10 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
     
     size_t oel_curr_index = tree->open_elements->length - 1;
     
-    myhtml_tree_node_t** oel_list     = tree->open_elements->list;
-    myhtml_tree_node_t** afe_list     = tree->active_formatting->list;
-    myhtml_tree_node_t*  current_node = oel_list[oel_curr_index];
-    myhtml_tag_context_t*    tags_context = tree->myhtml->tags->context;
+    myhtml_tree_node_t**  oel_list     = tree->open_elements->list;
+    myhtml_tree_node_t**  afe_list     = tree->active_formatting->list;
+    myhtml_tree_node_t*   current_node = oel_list[oel_curr_index];
+    myhtml_tag_context_t* tags_context = tree->myhtml->tags->context;
     
 #ifdef DEBUG_MODE
     if(current_node == NULL) {
@@ -1708,6 +1760,7 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
             
             myhtml_tree_open_elements_pop(tree); // and including formatting element
             myhtml_tree_active_formatting_remove(tree, formatting_element);
+            
             return myfalse;
         }
         
@@ -1833,11 +1886,11 @@ mybool_t myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_i
         myhtml_tree_node_t * furthest_block_child = furthest_block->child;
         
         while (furthest_block_child) {
-            if(furthest_block_child->parent)
-                myhtml_tree_node_remove(furthest_block_child);
+            myhtml_tree_node_t *next = furthest_block_child->next;
+            myhtml_tree_node_remove(furthest_block_child);
             
             myhtml_tree_node_add_child(tree, new_formatting_element, furthest_block_child);
-            furthest_block_child = furthest_block_child->next;
+            furthest_block_child = next;
         }
         
         // step 17
@@ -1890,6 +1943,8 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree
             MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 2; target is NULL in return value! This IS very bad");
         }
 #endif
+        if(target->my_namespace != MyHTML_NAMESPACE_HTML)
+            return target;
         
         switch (target->tag_idx) {
             case MyHTML_TAG_TABLE:
@@ -1901,14 +1956,13 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree
                 size_t idx_template, idx_table;
                 
                 // step 2.1-2
-                myhtml_tree_node_t* last_template = myhtml_tree_open_elements_find_by_tag_idx(tree, MyHTML_TAG_TEMPLATE, &idx_template);
-                myhtml_tree_node_t* last_table = myhtml_tree_open_elements_find_by_tag_idx(tree, MyHTML_TAG_TABLE, &idx_table);
+                myhtml_tree_node_t* last_template = myhtml_tree_open_elements_find_by_tag_idx_reverse(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, &idx_template);
+                myhtml_tree_node_t* last_table = myhtml_tree_open_elements_find_by_tag_idx_reverse(tree, MyHTML_TAG_TABLE, MyHTML_NAMESPACE_HTML, &idx_table);
                 
                 // step 2.3
                 if(last_template && (last_table == NULL || idx_template > idx_table))
                 {
-                    adjusted_location = last_template;
-                    break;
+                    return last_template;
                 }
                 
                 // step 2.4
@@ -1981,6 +2035,9 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting_in_tree(myhtml_tree
             MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 2; target is NULL in return value! This IS very bad");
         }
 #endif
+        
+        if(target->my_namespace != MyHTML_NAMESPACE_HTML)
+            return target;
         
         switch (target->tag_idx) {
             case MyHTML_TAG_TABLE:
@@ -2149,6 +2206,24 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
         else
             fprintf(out, "<%.*s>\n", (int)tag_name_size, mctree_nodes[mctree_id].str);
     }
+    else if(node->tag_idx == MyHTML_TAG__DOCTYPE)
+    {
+        fprintf(out, "<!DOCTYPE");
+        
+        if(tree->doctype.attr_name) {
+            fprintf(out, " %s", tree->doctype.attr_name);
+        }
+        
+        if(tree->doctype.attr_public) {
+            fprintf(out, " %s", tree->doctype.attr_public);
+        }
+        
+        if(tree->doctype.attr_system) {
+            fprintf(out, " %s", tree->doctype.attr_system);
+        }
+        
+        fprintf(out, ">\n");
+    }
     else
     {
 #ifdef DEBUG_MODE
@@ -2156,6 +2231,20 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
                 mh_tags_get(node->tag_idx, id), (size_t)node);
 #else
         fprintf(out, "<%.*s", (int)tag_name_size, mctree_nodes[mctree_id].str);
+        
+        if(node->my_namespace != MyHTML_NAMESPACE_HTML) {
+            switch (node->my_namespace) {
+                case MyHTML_NAMESPACE_SVG:
+                    fprintf(out, ":svg");
+                    break;
+                case MyHTML_NAMESPACE_MATHML:
+                    fprintf(out, ":math");
+                    break;
+                default:
+                    break;
+            }
+            
+        }
 #endif
         
         if(node->token)
@@ -2282,8 +2371,8 @@ myhtml_token_node_t * myhtml_tree_token_list_current_node(myhtml_tree_token_list
 // other
 void myhtml_tree_tags_close_p(myhtml_tree_t* tree)
 {
-    myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_P);
-    myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_P, myfalse);
+    myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML);
+    myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, myfalse);
 }
 
 myhtml_tree_node_t * myhtml_tree_generic_raw_text_element_parsing_algorithm(myhtml_tree_t* tree, myhtml_token_node_t* token_node)
@@ -2300,9 +2389,10 @@ void myhtml_tree_clear_stack_back_table_context(myhtml_tree_t* tree)
 {
     myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
     
-    while(current_node->tag_idx != MyHTML_TAG_TABLE &&
-          current_node->tag_idx != MyHTML_TAG_TEMPLATE &&
-          current_node->tag_idx != MyHTML_TAG_HTML)
+    while(!((current_node->tag_idx   == MyHTML_TAG_TABLE       ||
+             current_node->tag_idx      == MyHTML_TAG_TEMPLATE ||
+             current_node->tag_idx      == MyHTML_TAG_HTML)    &&
+            current_node->my_namespace == MyHTML_NAMESPACE_HTML))
     {
         myhtml_tree_open_elements_pop(tree);
         current_node = myhtml_tree_current_node(tree);
@@ -2313,11 +2403,12 @@ void myhtml_tree_clear_stack_back_table_body_context(myhtml_tree_t* tree)
 {
     myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
     
-    while(current_node->tag_idx != MyHTML_TAG_TBODY &&
-          current_node->tag_idx != MyHTML_TAG_TFOOT &&
-          current_node->tag_idx != MyHTML_TAG_THEAD &&
-          current_node->tag_idx != MyHTML_TAG_TEMPLATE &&
-          current_node->tag_idx != MyHTML_TAG_HTML)
+    while(!((current_node->tag_idx == MyHTML_TAG_TBODY    ||
+             current_node->tag_idx == MyHTML_TAG_TFOOT    ||
+             current_node->tag_idx == MyHTML_TAG_THEAD    ||
+             current_node->tag_idx == MyHTML_TAG_TEMPLATE ||
+             current_node->tag_idx == MyHTML_TAG_HTML)    &&
+            current_node->my_namespace == MyHTML_NAMESPACE_HTML))
     {
         myhtml_tree_open_elements_pop(tree);
         current_node = myhtml_tree_current_node(tree);
@@ -2328,9 +2419,10 @@ void myhtml_tree_clear_stack_back_table_row_context(myhtml_tree_t* tree)
 {
     myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
     
-    while(current_node->tag_idx != MyHTML_TAG_TR &&
-          current_node->tag_idx != MyHTML_TAG_TEMPLATE &&
-          current_node->tag_idx != MyHTML_TAG_HTML)
+    while(!((current_node->tag_idx == MyHTML_TAG_TR       ||
+            current_node->tag_idx == MyHTML_TAG_TEMPLATE  ||
+            current_node->tag_idx == MyHTML_TAG_HTML)     &&
+           current_node->my_namespace == MyHTML_NAMESPACE_HTML))
     {
         myhtml_tree_open_elements_pop(tree);
         current_node = myhtml_tree_current_node(tree);
@@ -2340,18 +2432,19 @@ void myhtml_tree_clear_stack_back_table_row_context(myhtml_tree_t* tree)
 void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_node)
 {
     // step 1
-    myhtml_tree_generate_implied_end_tags(tree, 0);
+    myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
     
     // step 2
     myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-    if(current_node->tag_idx != MyHTML_TAG_TD &&
-       current_node->tag_idx != MyHTML_TAG_TH)
+    if(!((current_node->tag_idx == MyHTML_TAG_TD ||
+       current_node->tag_idx == MyHTML_TAG_TH)  &&
+       current_node->my_namespace == MyHTML_NAMESPACE_HTML))
     {
         // parse error
     }
     
     // step 3
-    myhtml_tree_open_elements_pop_until_by_node(tree, tr_or_th_node, myfalse);
+    myhtml_tree_open_elements_pop_until(tree, tr_or_th_node->tag_idx, tr_or_th_node->my_namespace, myfalse);
     
     // step 4
     myhtml_tree_active_formatting_up_to_last_marker(tree);

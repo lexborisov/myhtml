@@ -27,7 +27,7 @@ extern "C" {
 #include "myhtml/myosi.h"
 
 struct charef_entry {
-    char   ch;
+    unsigned char ch;
     size_t next;
     size_t cur_pos;
     size_t codepoints[2];
@@ -35,8 +35,16 @@ struct charef_entry {
 }
 typedef charef_entry_t;
 
+struct charef_entry_result {
+    const charef_entry_t *curr_entry;
+    const charef_entry_t *last_entry;
+    size_t last_offset;
+    int is_done;
+}
+typedef charef_entry_result_t;
+
 const charef_entry_t * myhtml_charef_find(const char *begin, size_t *offset, size_t size, size_t *data_size);
-const charef_entry_t * myhtml_charef_find_by_pos(size_t pos, const char *begin, size_t *offset, size_t size, int *is_done);
+const charef_entry_t * myhtml_charef_find_by_pos(size_t pos, const char *begin, size_t *offset, size_t size, charef_entry_result_t *result);
 const charef_entry_t * myhtml_charef_get_first_position(const char begin);
 
 #ifdef __cplusplus

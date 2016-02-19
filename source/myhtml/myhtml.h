@@ -28,12 +28,12 @@ extern "C" {
 
 #include "myhtml/utils/mctree.h"
 #include "myhtml/utils/mcobject_async.h"
+#include "myhtml/tree.h"
 #include "myhtml/tag.h"
 #include "myhtml/def.h"
 #include "myhtml/parser.h"
 #include "myhtml/tokenizer.h"
 #include "myhtml/thread.h"
-#include "myhtml/tree.h"
 #include "myhtml/rules.h"
 #include "myhtml/token.h"
 #include "myhtml/charef.h"
@@ -62,13 +62,14 @@ extern "C" {
 #define mh_queue_current_get(__attr__) mh_queue_get(mh_queue_current(), __attr__)
 #define mh_queue_current_set(__attr__) mh_queue_current_get(__attr__)
 
-#define mh_queue_add(__tree__, __html__, __begin__)                                                           \
+#define mh_queue_add(__tree__, __html__, __begin__, __current__)       \
     if(__tree__->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) { \
         myhtml_parser_worker(0, __tree__->current_qnode); \
         while(myhtml_rules_tree_dispatcher(__tree__, __tree__->current_qnode->token)){}; \
     } \
     __tree__->current_qnode = mythread_queue_node_malloc(__tree__->queue, __html__, (__tree__->global_offset + __begin__), NULL); \
     __tree__->current_qnode->tree = __tree__; \
+    __tree__->current_qnode->prev = __current__; \
     myhtml_token_node_malloc(__tree__->token, __tree__->current_qnode->token, __tree__->token->mcasync_token_id)
 
 #define mh_token_get(__idx__, __attr__) tree->token->nodes[__idx__].__attr__
@@ -109,6 +110,7 @@ struct myhtml {
     myhtml_insertion_f* insertion_func;
     
     enum myhtml_options opt;
+    myhtml_tree_node_t *marker;
 };
 
 struct myhtml_collection {
@@ -153,6 +155,7 @@ myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_colle
 
 myhtml_tag_t * myhtml_get_tag(myhtml_t* myhtml);
 
+myhtml_tree_node_t * myhtml_node_first(myhtml_tree_t* tree);
 myhtml_tree_node_t * myhtml_node_next(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_prev(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_parent(myhtml_tree_node_t *node);
@@ -173,6 +176,7 @@ void myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node);
 enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node);
 myhtml_tag_id_t myhtml_node_tag_id(myhtml_tree_node_t *node);
 const char * myhtml_tag_name_by_id(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, size_t *length);
+myhtml_tag_id_t myhtml_tag_id_by_name(myhtml_tree_t* tree, const char *tag_name, size_t length);
 mybool_t myhtml_node_is_close_self(myhtml_tree_node_t *node);
 myhtml_tree_attr_t * myhtml_node_attribute_first(myhtml_tree_node_t *node);
 myhtml_tree_attr_t * myhtml_node_attribute_last(myhtml_tree_node_t *node);
@@ -207,6 +211,7 @@ const char * myhtml_tree_incomming_buf_get_last(myhtml_tree_t *tree, myhtml_inco
 const char * myhtml_tree_incomming_buf_make_data(myhtml_tree_t *tree, mythread_queue_node_t *qnode, size_t len);
 
 mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
+mybool_t myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id);
 
 /** 
  * Platform-specific hdef performance clock queries.

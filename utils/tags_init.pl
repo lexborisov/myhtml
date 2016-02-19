@@ -4,7 +4,7 @@ use utf8;
 use strict;
 use MyHTML::Base;
 
-my $utils = MyHTML::Base->new(dirs => {source => "../source", template => "tmpl"});
+my $utils = MyHTML::Base->new(dirs => {source => "../source/myhtml", template => "tmpl"});
 
 my $data = $utils->read_tmpl("tag_init.c");
 my $data_const = $utils->read_tmpl("tag_const.h");
@@ -29,12 +29,11 @@ foreach my $line (@$tags) {
                 my ($tagname, $args) = split /\:\s*/, $line, 2;
                 my @options = split /\s*,\s*/, $args;
                 
-                $tagname = lc($tagname);
                 $count++;
                 
                 $parse_tag_data = $options[0] if defined $options[0] && $options[0] ne "";
                 
-                push @body, "\t". qq~myhtml_tag_add(tags, "$tagname", ~. length($tagname) .qq~, $parse_tag_data);~;
+                push @body, "\t". qq~myhtml_tag_add(tags, "$tagname", ~. length($tagname) .qq~, $parse_tag_data, myfalse);~;
                 
                 if($tagname eq "!--") {
                         $tagname = "_comment";

@@ -167,7 +167,8 @@ enum myhtml_token_type {
     MyHTML_TOKEN_TYPE_PLAINTEXT        = 0x080,
     MyHTML_TOKEN_TYPE_CDATA            = 0x100,
     MyHTML_TOKEN_TYPE_DATA             = 0x200,
-    MyHTML_TOKEN_TYPE_COMMENT          = 0x400
+    MyHTML_TOKEN_TYPE_COMMENT          = 0x400,
+    MyHTML_TOKEN_TYPE_NULL             = 0x800
 };
 
 typedef size_t myhtml_token_index_t;
@@ -350,7 +351,8 @@ enum myhtml_namespace {
     MyHTML_NAMESPACE_XML        = 0x05,
     MyHTML_NAMESPACE_XMLNS      = 0x06,
     MyHTML_NAMESPACE_LAST_ENTRY = 0x07
-};
+}
+typedef myhtml_namespace_t;
 
 enum myhtml_options {
     MyHTML_OPTIONS_DEFAULT                 = 0x00,

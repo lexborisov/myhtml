@@ -33,8 +33,8 @@
  */
 
 #define MyHTML_VERSION_MAJOR 0
-#define MyHTML_VERSION_MINOR 2
-#define MyHTML_VERSION_PATCH 1
+#define MyHTML_VERSION_MINOR 3
+#define MyHTML_VERSION_PATCH 4
 
 #include <stddef.h>
 
@@ -755,6 +755,16 @@ myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out)
  * MyHTML_NODE
  *
  ***********************************************************************************/
+
+/**
+ * Get first (begin) node of tree
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_node_first(myhtml_tree_t* tree);
 
 /**
  * Get nodes by tag id

@@ -161,7 +161,7 @@ struct myhtml_tree {
     size_t                  mchar_node_id;
     size_t                  mcasync_incoming_buf_id;
     myhtml_token_attr_t*    attr_current;
-    mythread_queue_node_t*  tmp_qnode;
+    myhtml_tag_id_t         tmp_tag_id;
     mythread_queue_node_t*  current_qnode;
     myhtml_incoming_buf_t*  incoming_buf;
     myhtml_incoming_buf_t*  incoming_buf_first;
@@ -264,19 +264,19 @@ myhtml_tree_node_t * myhtml_tree_adjusted_current_node(myhtml_tree_t* tree);
 void myhtml_tree_open_elements_append(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 void myhtml_tree_open_elements_append_after_index(myhtml_tree_t* tree, myhtml_tree_node_t* node, size_t index);
 void myhtml_tree_open_elements_pop(myhtml_tree_t* tree);
-void myhtml_tree_open_elements_pop_until(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, mybool_t is_exclude);
+void myhtml_tree_open_elements_pop_until(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, myhtml_namespace_t mynamespace, mybool_t is_exclude);
 void myhtml_tree_open_elements_pop_until_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node_idx, mybool_t is_exclude);
 void myhtml_tree_open_elements_pop_until_by_index(myhtml_tree_t* tree, size_t idx, mybool_t is_exclude);
 void myhtml_tree_open_elements_remove(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 
 mybool_t myhtml_tree_open_elements_find(myhtml_tree_t* tree, myhtml_tree_node_t* idx, size_t* pos);
 mybool_t myhtml_tree_open_elements_find_reverse(myhtml_tree_t* tree, myhtml_tree_node_t* idx, size_t* pos);
-myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, size_t* return_index);
-myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx_reverse(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, size_t* return_index);
-myhtml_tree_node_t * myhtml_tree_element_in_scope(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, enum myhtml_tag_categories category);
+myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, myhtml_namespace_t mynamespace, size_t* return_index);
+myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx_reverse(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, myhtml_namespace_t mynamespace, size_t* return_index);
+myhtml_tree_node_t * myhtml_tree_element_in_scope(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, myhtml_namespace_t mynamespace, enum myhtml_tag_categories category);
 mybool_t myhtml_tree_element_in_scope_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, enum myhtml_tag_categories category);
-void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx);
-void myhtml_tree_generate_all_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx);
+void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx, myhtml_namespace_t mynamespace);
+void myhtml_tree_generate_all_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx, myhtml_namespace_t mynamespace);
 myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree, myhtml_tree_node_t* override_target, enum myhtml_tree_insertion_mode* mode);
 myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting_in_tree(myhtml_tree_t* tree, myhtml_tree_node_t* target, enum myhtml_tree_insertion_mode* mode);
 

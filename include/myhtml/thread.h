@@ -131,6 +131,7 @@ void myhtml_thread_nanosleep(const struct timespec *tomeout);
 
 // queue
 struct mythread_queue_node {
+    mythread_queue_node_t *prev;
     myhtml_token_node_t *token;
     myhtml_tree_t *tree;
     

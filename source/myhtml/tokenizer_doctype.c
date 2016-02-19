@@ -48,7 +48,7 @@ size_t myhtml_tokenizer_state_before_doctype_name(myhtml_tree_t* tree, mythread_
         tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
         
         html_offset++;
-        mh_queue_add(tree, html, html_offset);
+        mh_queue_add(tree, html, html_offset, qnode);
         myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
@@ -77,7 +77,7 @@ size_t myhtml_tokenizer_state_doctype_name(myhtml_tree_t* tree, mythread_queue_n
             
             html_offset++;
             
-            mh_queue_add(tree, html, html_offset);
+            mh_queue_add(tree, html, html_offset, qnode);
             myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
             
             mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
@@ -116,7 +116,7 @@ size_t myhtml_tokenizer_state_after_doctype_name(myhtml_tree_t* tree, mythread_q
     if(html[html_offset] == '>')
     {
         html_offset++;
-        mh_queue_add(tree, html, html_offset);
+        mh_queue_add(tree, html, html_offset, qnode);
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
         return html_offset;
@@ -139,8 +139,8 @@ size_t myhtml_tokenizer_state_custom_after_doctype_name_a_z(myhtml_tree_t* tree,
     if(myhtml_strncasecmp(param, "PUBLIC", 6) == 0) {
         myhtml_parser_queue_set_attr(tree, qnode);
         
-        tree->attr_current->name_begin  = qnode->begin;
-        tree->attr_current->name_length = 6;
+        tree->attr_current->value_begin  = qnode->begin;
+        tree->attr_current->value_length = 6;
         
         myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
         
@@ -151,8 +151,8 @@ size_t myhtml_tokenizer_state_custom_after_doctype_name_a_z(myhtml_tree_t* tree,
     else if(myhtml_strncasecmp(param, "SYSTEM", 6) == 0) {
         myhtml_parser_queue_set_attr(tree, qnode);
         
-        tree->attr_current->name_begin  = qnode->begin;
-        tree->attr_current->name_length = 6;
+        tree->attr_current->value_begin  = qnode->begin;
+        tree->attr_current->value_length = 6;
         
         myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
         
@@ -180,14 +180,14 @@ size_t myhtml_tokenizer_state_before_doctype_public_identifier(myhtml_tree_t* tr
         return html_offset;
     
     if(html[html_offset] == '"') {
-        tree->attr_current->name_begin  = (html_offset + tree->global_offset) + 1;
-        tree->attr_current->name_length = 0;
+        tree->attr_current->value_begin  = (html_offset + tree->global_offset) + 1;
+        tree->attr_current->value_length = 0;
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED;
     }
     else if(html[html_offset] == '\'') {
-        tree->attr_current->name_begin  = (html_offset + tree->global_offset) + 1;
-        tree->attr_current->name_length = 0;
+        tree->attr_current->value_begin  = (html_offset + tree->global_offset) + 1;
+        tree->attr_current->value_length = 0;
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED;
     }
@@ -196,7 +196,7 @@ size_t myhtml_tokenizer_state_before_doctype_public_identifier(myhtml_tree_t* tr
         tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
         
         html_offset++;
-        mh_queue_add(tree, html, html_offset);
+        mh_queue_add(tree, html, html_offset, qnode);
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
         return html_offset;
@@ -219,7 +219,7 @@ size_t myhtml_tokenizer_doctype_public_identifier_dsq(myhtml_tree_t* tree, mythr
     {
         if(html[html_offset] == quote)
         {
-            tree->attr_current->name_length = (html_offset + tree->global_offset) - tree->attr_current->name_begin;
+            tree->attr_current->value_length = (html_offset + tree->global_offset) - tree->attr_current->value_begin;
             
             myhtml_parser_queue_set_attr(tree, qnode);
             myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
@@ -233,15 +233,15 @@ size_t myhtml_tokenizer_doctype_public_identifier_dsq(myhtml_tree_t* tree, mythr
         {
             tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
             
-            if(tree->attr_current->name_begin < (html_offset + tree->global_offset)) {
-                tree->attr_current->name_length = (html_offset + tree->global_offset) - tree->attr_current->name_begin;
+            if(tree->attr_current->value_begin < (html_offset + tree->global_offset)) {
+                tree->attr_current->value_length = (html_offset + tree->global_offset) - tree->attr_current->value_begin;
                 
                 myhtml_parser_queue_set_attr(tree, qnode);
                 myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
             }
             
             html_offset++;
-            mh_queue_add(tree, html, html_offset);
+            mh_queue_add(tree, html, html_offset, qnode);
             
             mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             break;
@@ -276,22 +276,22 @@ size_t myhtml_tokenizer_state_after_doctype_public_identifier(myhtml_tree_t* tre
     
     if(html[html_offset] == '"')
     {
-        tree->attr_current->name_begin  = (html_offset + tree->global_offset) + 1;
-        tree->attr_current->name_length = 0;
+        tree->attr_current->value_begin  = (html_offset + tree->global_offset) + 1;
+        tree->attr_current->value_length = 0;
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
     }
     else if(html[html_offset] == '\'')
     {
-        tree->attr_current->name_begin  = (html_offset + tree->global_offset) + 1;
-        tree->attr_current->name_length = 0;
+        tree->attr_current->value_begin  = (html_offset + tree->global_offset) + 1;
+        tree->attr_current->value_length = 0;
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
     }
     else if(html[html_offset] == '>')
     {
         html_offset++;
-        mh_queue_add(tree, html, html_offset);
+        mh_queue_add(tree, html, html_offset, qnode);
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
         return html_offset;
@@ -318,7 +318,7 @@ size_t myhtml_tokenizer_doctype_system_identifier_dsq(myhtml_tree_t* tree, mythr
     {
         if(html[html_offset] == quote)
         {
-            tree->attr_current->name_length = (html_offset + tree->global_offset) - tree->attr_current->name_begin;
+            tree->attr_current->value_length = (html_offset + tree->global_offset) - tree->attr_current->value_begin;
             
             myhtml_parser_queue_set_attr(tree, qnode);
             myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
@@ -332,15 +332,15 @@ size_t myhtml_tokenizer_doctype_system_identifier_dsq(myhtml_tree_t* tree, mythr
         {
             tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
             
-            if(tree->attr_current->name_begin < (html_offset + tree->global_offset)) {
-                tree->attr_current->name_length = (html_offset + tree->global_offset) - tree->attr_current->name_begin;
+            if(tree->attr_current->value_begin < (html_offset + tree->global_offset)) {
+                tree->attr_current->value_length = (html_offset + tree->global_offset) - tree->attr_current->value_begin;
                 
                 myhtml_parser_queue_set_attr(tree, qnode);
                 myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
             }
             
             html_offset++;
-            mh_queue_add(tree, html, html_offset);
+            mh_queue_add(tree, html, html_offset, qnode);
             
             mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             break;
@@ -376,7 +376,7 @@ size_t myhtml_tokenizer_state_after_doctype_system_identifier(myhtml_tree_t* tre
     if(html[html_offset] == '>')
     {
         html_offset++;
-        mh_queue_add(tree, html, html_offset);
+        mh_queue_add(tree, html, html_offset, qnode);
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
     }
@@ -398,7 +398,7 @@ size_t myhtml_tokenizer_state_bogus_doctype(myhtml_tree_t* tree, mythread_queue_
         if(html[html_offset] == '>')
         {
             html_offset++;
-            mh_queue_add(tree, html, html_offset);
+            mh_queue_add(tree, html, html_offset, qnode);
             
             mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             break;

@@ -75,7 +75,9 @@ struct myhtml_string_char_ref_chunk {
     int state;
     size_t begin;
     long l_data;
-    const charef_entry_t *entry;
+    
+    charef_entry_result_t charef_res;
+    mybool_t is_attributes;
     
     myhtml_encoding_t encoding;
     myhtml_encoding_result_t res;
@@ -108,12 +110,31 @@ void myhtml_string_append_lowercase(myhtml_string_t* str, const char* data, size
 void myhtml_string_append_charef(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t length);
 void myhtml_string_append_charef_end(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str);
 void myhtml_string_append_with_convert_encoding(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding);
-void myhtml_string_append_chunk_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding);
-void myhtml_string_append_one_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char data, myhtml_encoding_t encoding);
-void myhtml_string_append_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding);
-void myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding);
 
-void myhtml_string_copy(myhtml_string_t* target, myhtml_string_t* dest);
+void myhtml_string_append_chunk_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res,
+                                                      const char* buff, size_t length, myhtml_encoding_t encoding);
+
+void myhtml_string_append_one_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res,
+                                                    const char data, myhtml_encoding_t encoding);
+
+void myhtml_string_append_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, const char* buff, size_t length,
+                                                                myhtml_encoding_t encoding);
+
+void myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res,
+                                                                      const char* buff, size_t length, myhtml_encoding_t encoding);
+
+void myhtml_string_append_with_convert_encoding_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length,
+                                                                   myhtml_encoding_t encoding);
+    
+void myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(myhtml_string_t* str, myhtml_encoding_result_t* res,
+                                                                         const char* buff, size_t length,
+                                                                         myhtml_encoding_t encoding);
+    
+void myhtml_string_append_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length);
+void myhtml_string_append_lowercase_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length);
+size_t myhtml_string_raw_set_replacement_character(myhtml_string_t* target, size_t position);
+
+void myhtml_string_copy(myhtml_string_t* dest, myhtml_string_t* target);
 size_t myhtml_string_raw_copy(char* str1, const char* str2, size_t size);
 
 #ifdef __cplusplus

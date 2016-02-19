@@ -18,6 +18,20 @@
 
 #include "myhtml.h"
 
+void myhtml_init_marker(myhtml_t* myhtml)
+{
+    myhtml->marker = (myhtml_tree_node_t*)mymalloc(sizeof(myhtml_tree_node_t));
+    
+    if(myhtml->marker)
+        myhtml_tree_node_clean(myhtml->marker);
+}
+
+void myhtml_destroy_marker(myhtml_t* myhtml)
+{
+    if(myhtml->marker)
+        free(myhtml->marker);
+}
+
 myhtml_t * myhtml_create(void)
 {
     return (myhtml_t*)mymalloc(sizeof(myhtml_t));
@@ -26,6 +40,8 @@ myhtml_t * myhtml_create(void)
 myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t thread_count, size_t queue_size)
 {
     myhtml_status_t status;
+    
+    myhtml_init_marker(myhtml);
     
     myhtml->async_incoming_buf = mcobject_async_create();
     if(myhtml->async_incoming_buf == NULL)
@@ -148,6 +164,8 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
 {
     if(myhtml == NULL)
         return NULL;
+    
+    myhtml_destroy_marker(myhtml);
     
     mythread_destroy(myhtml->thread, mytrue);
     myhtml_tokenizer_state_destroy(myhtml);
@@ -392,6 +410,21 @@ myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_colle
 /*
  * Manipulate Nodes
  */
+myhtml_tree_node_t * myhtml_node_first(myhtml_tree_t* tree)
+{
+    if(tree->fragment) {
+        // document -> html -> need element
+        if(tree->document && tree->document->child)
+            return tree->document->child->child;
+    }
+    else if(tree->document) {
+        // document -> html
+        return tree->document->child;
+    }
+    
+    return NULL;
+}
+
 myhtml_tree_node_t * myhtml_node_next(myhtml_tree_node_t *node)
 {
     return node->next;
@@ -566,7 +599,7 @@ myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_t
             node->token->my_str_tm.length = 0;
     }
     
-    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, NULL, encoding};
+    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, {}, 0, encoding};
     myhtml_encoding_result_clean(&str_chunk.res);
     
     myhtml_string_append_charef(&str_chunk, &node->token->my_str_tm, text, length);
@@ -606,6 +639,19 @@ const char * myhtml_tag_name_by_id(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, 
         *length = mctree_nodes[mcid].str_size;
     
     return mctree_nodes[mcid].str;
+}
+
+myhtml_tag_id_t myhtml_tag_id_by_name(myhtml_tree_t* tree, const char *tag_name, size_t length)
+{
+    if(tree == NULL || tree->myhtml == NULL || tree->myhtml->tags == NULL)
+        return MyHTML_TAG__UNDEF;
+    
+    myhtml_tag_t* tags = tree->myhtml->tags;
+    mctree_t* tags_tree = tags->tree;
+    
+    mctree_index_t idx = mctree_search_lowercase(tree->myhtml->tags->tree, tag_name, length);
+    
+    return (myhtml_tag_id_t)(tags_tree->nodes[idx].value);
 }
 
 mybool_t myhtml_node_is_close_self(myhtml_tree_node_t *node)
@@ -976,3 +1022,12 @@ mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t si
     
     return myfalse;
 }
+
+mybool_t myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id)
+{
+    if(node == NULL)
+        return myfalse;
+    
+    return node->tag_idx == tag_id && node->my_namespace == MyHTML_NAMESPACE_HTML;
+}
+

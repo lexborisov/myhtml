@@ -143,6 +143,8 @@ myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_toke
 mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_attr_t* attr, myhtml_token_node_t* dest, size_t thread_idx);
 myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const char* name, size_t name_size);
 mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_node_t* dest);
+myhtml_token_node_t * myhtml_token_merged_two_token_string(myhtml_tree_t* tree, myhtml_token_node_t* token_to, myhtml_token_node_t* token_from, mybool_t cp_reverse);
+void myhtml_token_set_replacement_character_for_null_token(myhtml_token_node_t* node);
 
 void myhtml_token_print_param_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out);
 void myhtml_token_print_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out);

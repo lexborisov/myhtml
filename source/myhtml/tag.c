@@ -243,7 +243,7 @@ myhtml_tree_node_t * myhtml_tag_index_tree_node(myhtml_tag_index_node_t *index_n
 }
 
 myhtml_tag_id_t myhtml_tag_add(myhtml_tag_t* tags, const char* key, size_t key_size,
-                              enum myhtml_tokenizer_state data_parser)
+                              enum myhtml_tokenizer_state data_parser, mybool_t to_lcase)
 {
     // cache set
     size_t cache_begin = tags->cache_name_length;
@@ -258,11 +258,17 @@ myhtml_tag_id_t myhtml_tag_add(myhtml_tag_t* tags, const char* key, size_t key_s
     
     char* cache = &tags->cache_name[cache_begin];
     
-    size_t i;
-    for(i = 0; i < key_size; i++) {
-        cache[i] = key[i] > 0x40 && key[i] < 0x5b ? (key[i]|0x60) : key[i];
+    if(to_lcase) {
+        size_t i;
+        for(i = 0; i < key_size; i++) {
+            cache[i] = key[i] > 0x40 && key[i] < 0x5b ? (key[i]|0x60) : key[i];
+        }
+        cache[i] = '\0';
     }
-    cache[i] = '\0';
+    else {
+        strncpy(cache, key, key_size);
+        cache[key_size] = '\0';
+    }
     
     // add tags
     myhtml_tag_id_t new_ctx_id = myhtml_tag_context_get_free_id(tags);

@@ -38,6 +38,31 @@ myhtml_incoming_buf_t * myhtml_parser_find_first_buf(myhtml_tree_t *tree, size_t
     return inc_buf;
 }
 
+void myhtml_parser_drop_first_newline(myhtml_tree_t *tree, size_t *begin, size_t *length)
+{
+    if(*length == 0)
+        return;
+    
+    myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, *begin);
+    
+    size_t current_buf_offset = *begin - inc_buf->offset;
+    
+    if(inc_buf->data[current_buf_offset] == '\n') {
+        (*begin)++;
+        (*length)--;
+    }
+    else if(inc_buf->data[current_buf_offset] == '\r') {
+        current_buf_offset++;
+        (*begin)++;
+        (*length)--;
+        
+        if(*length > 1 && inc_buf->data[current_buf_offset] == '\n') {
+            (*begin)++;
+            (*length)--;
+        }
+    }
+}
+
 size_t myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length)
 {
     myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
@@ -48,7 +73,7 @@ size_t myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, cons
     if((current_buf_offset + length) <= inc_buf->size)
     {
         if(tree->encoding == MyHTML_ENCODING_UTF_8)
-            myhtml_string_append(string, &inc_buf->data[current_buf_offset], length);
+            myhtml_string_append_with_preprocessing(string, &inc_buf->data[current_buf_offset], length);
         else
             myhtml_string_append_with_convert_encoding(string,
                                                        &inc_buf->data[current_buf_offset],
@@ -63,7 +88,7 @@ size_t myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, cons
     myhtml_encoding_result_clean(&res);
     
     if(tree->encoding == MyHTML_ENCODING_UTF_8)
-        myhtml_string_append(string, &inc_buf->data[current_buf_offset], buf_next_offset);
+        myhtml_string_append_with_preprocessing(string, &inc_buf->data[current_buf_offset], buf_next_offset);
     else
         myhtml_string_append_chunk_with_convert_encoding(string, &res, &inc_buf->data[current_buf_offset],
                                                          buf_next_offset, tree->encoding);
@@ -75,11 +100,11 @@ size_t myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, cons
         while (inc_buf && length)
         {
             if(length > inc_buf->size) {
-                myhtml_string_append(string, inc_buf->data, inc_buf->size);
+                myhtml_string_append_with_preprocessing(string, inc_buf->data, inc_buf->size);
                 length -= inc_buf->size;
             }
             else {
-                myhtml_string_append(string, inc_buf->data, length);
+                myhtml_string_append_with_preprocessing(string, inc_buf->data, length);
                 break;
             }
             
@@ -120,7 +145,7 @@ size_t myhtml_parser_add_text_lowercase(myhtml_tree_t *tree, myhtml_string_t* st
     if((current_buf_offset + length) <= inc_buf->size)
     {
         if(tree->encoding == MyHTML_ENCODING_UTF_8)
-            myhtml_string_append_lowercase(string, &inc_buf->data[current_buf_offset], length);
+            myhtml_string_append_lowercase_with_preprocessing(string, &inc_buf->data[current_buf_offset], length);
         else
             myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_res, &inc_buf->data[current_buf_offset], length, tree->encoding);
         
@@ -130,7 +155,7 @@ size_t myhtml_parser_add_text_lowercase(myhtml_tree_t *tree, myhtml_string_t* st
     size_t buf_next_offset = inc_buf->size - current_buf_offset;
     
     if(tree->encoding == MyHTML_ENCODING_UTF_8)
-        myhtml_string_append_lowercase(string, &inc_buf->data[current_buf_offset], buf_next_offset);
+        myhtml_string_append_lowercase_with_preprocessing(string, &inc_buf->data[current_buf_offset], buf_next_offset);
     else
         myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_res, &inc_buf->data[current_buf_offset], buf_next_offset, tree->encoding);
     
@@ -141,11 +166,11 @@ size_t myhtml_parser_add_text_lowercase(myhtml_tree_t *tree, myhtml_string_t* st
         while (inc_buf && length)
         {
             if(length > inc_buf->size) {
-                myhtml_string_append_lowercase(string, inc_buf->data, inc_buf->size);
+                myhtml_string_append_lowercase_with_preprocessing(string, inc_buf->data, inc_buf->size);
                 length -= inc_buf->size;
             }
             else {
-                myhtml_string_append_lowercase(string, inc_buf->data, length);
+                myhtml_string_append_lowercase_with_preprocessing(string, inc_buf->data, length);
                 break;
             }
             
@@ -171,11 +196,11 @@ size_t myhtml_parser_add_text_lowercase(myhtml_tree_t *tree, myhtml_string_t* st
     return (string->length - save_str_len);
 }
 
-size_t myhtml_parser_add_text_with_charef(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length)
+size_t myhtml_parser_add_text_with_charef(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length, mybool_t is_attibutes)
 {
     myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
     
-    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, NULL, tree->encoding};
+    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, {}, is_attibutes, tree->encoding};
     myhtml_encoding_result_clean(&str_chunk.res);
     
     size_t current_buf_offset = begin - inc_buf->offset;
@@ -222,18 +247,43 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
     if(token->tag_ctx_idx == MyHTML_TAG__TEXT ||
        token->tag_ctx_idx == MyHTML_TAG__COMMENT)
     {
-        myhtml_string_init(qnode->tree->mchar, mchar_node_id, &token->my_str_tm, (qnode->length + 2));
+        myhtml_string_init(qnode->tree->mchar, mchar_node_id, &token->my_str_tm, (qnode->length + 4));
         
         token->begin      = token->my_str_tm.length;
         token->length     = qnode->length;
         token->attr_first = NULL;
         token->attr_last  = NULL;
         
-        if(token->type & MyHTML_TOKEN_TYPE_RCDATA ||
-           token->type & MyHTML_TOKEN_TYPE_CDATA ||
-           token->type & MyHTML_TOKEN_TYPE_DATA)
+        // for NULL token; NULL Token contains only one char == \0
+        // The further processing may be changed (in rules processing) to 'REPLACEMENT CHARACTER' (U+FFFD)
+        if(token->type & MyHTML_TOKEN_TYPE_NULL) {
+            token->length = 1;
+            
+            token->my_str_tm.length = 1;
+            token->my_str_tm.data[0] = '\0';
+        }
+        else if(token->type & MyHTML_TOKEN_TYPE_DATA ||
+           token->type & MyHTML_TOKEN_TYPE_RCDATA ||
+           token->type & MyHTML_TOKEN_TYPE_CDATA)
         {
-            token->length = myhtml_parser_add_text_with_charef(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length);
+            if(qnode->prev) {
+                /* A start tag whose tag name is one of: "pre", "listing"
+                // If the next token is a U+000A LINE FEED (LF) character token, then ignore that token and move on to the next one.
+                // (Newlines at the start of pre blocks are ignored as an authoring convenience.)
+                */
+                switch (qnode->prev->token->tag_ctx_idx) {
+                    case MyHTML_TAG_LISTING:
+                    case MyHTML_TAG_PRE:
+                    {
+                        myhtml_parser_drop_first_newline(qnode->tree, &qnode->begin, &qnode->length);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+            
+            token->length = myhtml_parser_add_text_with_charef(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length, myfalse);
         }
         else
             token->length = myhtml_parser_add_text(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length);
@@ -268,7 +318,7 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
                 size_t begin = attr->value_begin;
                 attr->value_begin = attr->entry.length;
                 
-                attr->value_length = myhtml_parser_add_text_with_charef(qnode->tree, &attr->entry, qnode->text, begin, attr->value_length);
+                attr->value_length = myhtml_parser_add_text_with_charef(qnode->tree, &attr->entry, qnode->text, begin, attr->value_length, mytrue);
             }
             
             attr = attr->next;

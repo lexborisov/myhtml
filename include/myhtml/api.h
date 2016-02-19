@@ -757,6 +757,16 @@ myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out)
  ***********************************************************************************/
 
 /**
+ * Get first (begin) node of tree
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_node_first(myhtml_tree_t* tree);
+
+/**
  * Get nodes by tag id
  *
  * @param[in] myhtml_tree_t*

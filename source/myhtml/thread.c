@@ -544,11 +544,7 @@ mythread_queue_t * mythread_queue_destroy(mythread_queue_t* queue)
 
 void mythread_queue_node_clean(mythread_queue_node_t* qnode)
 {
-    qnode->tree           = NULL;
-    qnode->text           = NULL;
-    qnode->token          = NULL;
-    qnode->begin          = 0;
-    qnode->length         = 0;
+    memset(qnode, 0, sizeof(mythread_queue_node_t));
 }
 
 mythread_queue_node_t * mythread_queue_get_prev_node(mythread_queue_t* queue)
