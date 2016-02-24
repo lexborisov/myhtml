@@ -2546,12 +2546,15 @@ mybool_t myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t*
                     // parse error
                     break;
                 
-                if((node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TD, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE)))
+                node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TD, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
+                if(node) {
                     myhtml_tree_close_cell(tree, node);
-                else if((node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TH, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE)))
-                    myhtml_tree_close_cell(tree, node);
-                else
-                    myhtml_tree_close_cell(tree, node);
+                }
+                else {
+                    node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TH, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
+                    if(node)
+                        myhtml_tree_close_cell(tree, node);
+                }
                 
                 return mytrue;
             }
