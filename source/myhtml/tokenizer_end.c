@@ -89,8 +89,6 @@ size_t myhtml_tokenizer_end_state_markup_declaration_open(myhtml_tree_t* tree, m
             }
         }
         else {
-            qnode->length = (html_size + tree->global_offset) - qnode->begin;
-            
             qnode->token->type       ^= (qnode->token->type & MyHTML_TOKEN_TYPE_WHITESPACE);
             qnode->token->tag_ctx_idx = MyHTML_TAG__COMMENT;
             qnode->token->type       |= MyHTML_TOKEN_TYPE_COMMENT;
