@@ -266,23 +266,6 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
            token->type & MyHTML_TOKEN_TYPE_RCDATA ||
            token->type & MyHTML_TOKEN_TYPE_CDATA)
         {
-            if(qnode->prev) {
-                /* A start tag whose tag name is one of: "pre", "listing"
-                // If the next token is a U+000A LINE FEED (LF) character token, then ignore that token and move on to the next one.
-                // (Newlines at the start of pre blocks are ignored as an authoring convenience.)
-                */
-                switch (qnode->prev->token->tag_ctx_idx) {
-                    case MyHTML_TAG_LISTING:
-                    case MyHTML_TAG_PRE:
-                    {
-                        myhtml_parser_drop_first_newline(qnode->tree, &qnode->begin, &qnode->length);
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-            
             token->length = myhtml_parser_add_text_with_charef(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length, myfalse);
         }
         else
@@ -320,6 +303,8 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
                 
                 attr->value_length = myhtml_parser_add_text_with_charef(qnode->tree, &attr->entry, qnode->text, begin, attr->value_length, mytrue);
             }
+            
+            attr->my_namespace = MyHTML_NAMESPACE_HTML;
             
             attr = attr->next;
         }

@@ -13,6 +13,7 @@ my $tags = $utils->read_tmpl("tags.txt");
 my (@body, @cats, @list);
 my $count = 0;
 my $last_tag_idx;
+my $tag_exists = {};
 
 foreach my $line (@$tags) {
         next unless $line;
@@ -43,6 +44,13 @@ foreach my $line (@$tags) {
                 $tagname = uc($tagname);
                 
                 $last_tag_idx = "MyHTML_TAG_$tagname";
+                
+                if ($tag_exists->{$last_tag_idx}) {
+                        print "Conflict! Tag exists: $last_tag_idx\n";
+				}
+                else {
+                        $tag_exists->{$last_tag_idx} = 1;
+                }
                 
                 push @list, [$last_tag_idx, sprintf("0x%03x", $count)];
         }

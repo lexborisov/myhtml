@@ -113,7 +113,7 @@ struct myhtml_tree_indexes {
 
 struct myhtml_tree_list {
     myhtml_tree_node_t** list;
-    size_t length;
+    volatile size_t length;
     size_t size;
 };
 
@@ -134,6 +134,19 @@ struct myhtml_tree_temp_tag_name {
     size_t  length;
     size_t  size;
 };
+
+struct myhtml_tree_special_token {
+    myhtml_token_node_t *token;
+    myhtml_namespace_t my_namespace;
+}
+typedef myhtml_tree_special_token_t;
+
+struct myhtml_tree_special_token_list {
+    myhtml_tree_special_token_t *list;
+    size_t  length;
+    size_t  size;
+}
+typedef myhtml_tree_special_token_list_t;
 
 struct myhtml_tree_temp_stream {
     struct myhtml_tree_temp_tag_name** data;
@@ -169,10 +182,10 @@ struct myhtml_tree {
     myhtml_tree_indexes_t* indexes;
     
     // ref for nodes
-    myhtml_tree_node_t*  document;
-    myhtml_tree_node_t*  fragment;
-    myhtml_tree_node_t*  node_head;
-    myhtml_tree_node_t*  node_form;
+    myhtml_tree_node_t*   document;
+    myhtml_tree_node_t*   fragment;
+    myhtml_tree_node_t*   node_head;
+    myhtml_tree_node_t*   node_form;
     myhtml_tree_doctype_t doctype;
     
     // for build tree
@@ -183,16 +196,20 @@ struct myhtml_tree {
     myhtml_tree_insertion_list_t* template_insertion;
     myhtml_async_args_t*          async_args;
     myhtml_tree_temp_stream_t*    temp_stream;
+    volatile myhtml_token_node_t* token_last_done;
+    
+    // for detect namespace out of tree builder
+    myhtml_token_node_t*          token_namespace;
     
     // tree params
-    enum myhtml_tokenizer_state  state;
-    enum myhtml_insertion_mode   insert_mode;
-    enum myhtml_insertion_mode   orig_insert_mode;
-    enum myhtml_tree_compat_mode compat_mode;
-    enum myhtml_tree_flags       flags;
-    enum myhtml_namespace        my_namespace;
-    mybool_t                     foster_parenting;
-    size_t                       global_offset;
+    enum myhtml_tokenizer_state     state;
+    enum myhtml_tokenizer_state     state_of_builder;
+    enum myhtml_insertion_mode      insert_mode;
+    enum myhtml_insertion_mode      orig_insert_mode;
+    enum myhtml_tree_compat_mode    compat_mode;
+    volatile enum myhtml_tree_flags flags;
+    mybool_t                        foster_parenting;
+    size_t                          global_offset;
     
     myhtml_encoding_t            encoding;
     myhtml_encoding_t            encoding_usereq;
@@ -331,6 +348,7 @@ void myhtml_tree_index_append(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 myhtml_tree_node_t * myhtml_tree_index_get(myhtml_tree_t* tree, myhtml_tag_id_t tag_id);
 
 // other
+void myhtml_tree_wait_for_last_done_token(myhtml_tree_t* tree, myhtml_token_node_t* token_for_wait);
 
 void myhtml_tree_tags_close_p(myhtml_tree_t* tree);
 myhtml_tree_node_t * myhtml_tree_generic_raw_text_element_parsing_algorithm(myhtml_tree_t* tree, myhtml_token_node_t* token_node);
@@ -354,7 +372,13 @@ struct myhtml_tree_temp_tag_name * myhtml_tree_temp_stream_alloc(myhtml_tree_t* 
 void myhtml_tree_temp_stream_clean(myhtml_tree_t* tree);
 myhtml_tree_temp_stream_t * myhtml_tree_temp_stream_free(myhtml_tree_t* tree);
 
-    
+/* special tonek list */
+myhtml_status_t myhtml_tree_special_list_init(myhtml_tree_special_token_list_t* special);
+myhtml_status_t myhtml_tree_special_list_append(myhtml_tree_special_token_list_t* special, myhtml_token_node_t *token, myhtml_namespace_t my_namespace);
+size_t myhtml_tree_special_list_length(myhtml_tree_special_token_list_t* special);
+myhtml_tree_special_token_t * myhtml_tree_special_list_get_last(myhtml_tree_special_token_list_t* special);
+size_t myhtml_tree_special_list_pop(myhtml_tree_special_token_list_t* special);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

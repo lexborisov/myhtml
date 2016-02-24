@@ -434,6 +434,29 @@ char * mchar_async_realloc(mchar_async_t *mchar_async, size_t node_idx, char *da
     return tmp;
 }
 
+char * mchar_async_crop_first_chars(mchar_async_t *mchar_async, size_t node_idx, char *data, size_t crop_len)
+{
+    if(data == NULL)
+        return NULL;
+    
+    size_t curr_size = *((size_t*)(data - sizeof(size_t)));
+    
+    char *tmp_old = data;
+    data = &data[crop_len];
+    
+    *((size_t*)(data - sizeof(size_t))) = curr_size - crop_len;
+    
+    if((crop_len + 4) > sizeof(size_t)) {
+        crop_len = crop_len - sizeof(size_t);
+        *((size_t*)(tmp_old - sizeof(size_t))) = crop_len;
+        
+        mchar_async_node_t *node = &mchar_async->nodes[node_idx];
+        mchar_async_cache_add(&node->cache, tmp_old, crop_len);
+    }
+    
+    return data;
+}
+
 void mchar_async_free(mchar_async_t *mchar_async, size_t node_idx, char *entry)
 {
     mchar_async_cache_add(&mchar_async->nodes[node_idx].cache, entry, *(size_t*)(entry - sizeof(size_t)));

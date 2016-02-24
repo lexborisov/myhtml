@@ -55,12 +55,12 @@ extern "C" {
     MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT(__byte__, __str__, __upto__); \
     __str__->length++
 
-#define myhtml_mystring_whithspace(__char__, __action__, __logic__)    \
-    __char__ __action__ ' ' __logic__                     \
-    __char__ __action__ '\t' __logic__                    \
-    __char__ __action__ '\n' __logic__                    \
-    __char__ __action__ '\f' __logic__                    \
-    __char__ __action__ '\r'
+#define myhtml_mystring_whitespace(__char__, __action__, __logic__)    \
+    (__char__ __action__ ' ' __logic__                     \
+    __char__ __action__ '\t' __logic__                     \
+    __char__ __action__ '\n' __logic__                     \
+    __char__ __action__ '\f' __logic__                     \
+    __char__ __action__ '\r')
 
 struct myhtml_string {
     char*  data;
@@ -136,6 +136,7 @@ size_t myhtml_string_raw_set_replacement_character(myhtml_string_t* target, size
 
 void myhtml_string_copy(myhtml_string_t* dest, myhtml_string_t* target);
 size_t myhtml_string_raw_copy(char* str1, const char* str2, size_t size);
+void myhtml_string_stay_only_whitespace(myhtml_string_t* target);
 
 #ifdef __cplusplus
 } /* extern "C" */

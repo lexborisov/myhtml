@@ -123,6 +123,7 @@ myhtml_token_attr_t * myhtml_token_attr_remove_by_name(myhtml_token_node_t* node
 void myhtml_token_attr_delete_all(myhtml_token_t* token, myhtml_token_node_t* node);
 void myhtml_token_delete(myhtml_token_t* token, myhtml_token_node_t* node);
 void myhtml_token_node_wait_for_done(myhtml_token_node_t* node);
+void myhtml_token_set_done(myhtml_token_node_t* node);
 
 mybool_t myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* node);
 
@@ -139,6 +140,7 @@ myhtml_token_attr_t * myhtml_token_node_attr_append(myhtml_token_t* token, myhtm
 myhtml_token_attr_t * myhtml_token_node_attr_append_with_convert_encoding(myhtml_token_t* token, myhtml_token_node_t* dest, const char* key, size_t key_len, const char* value, size_t value_len, size_t thread_idx, myhtml_encoding_t encoding);
 void myhtml_token_node_text_append(myhtml_token_t* token, myhtml_token_node_t* dest, const char* text, size_t text_len);
 void myhtml_token_node_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx);
+void myhtml_token_node_attr_copy_with_check(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx);
 myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_token_node_t* node, size_t token_thread_idx, size_t attr_thread_idx);
 mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_attr_t* attr, myhtml_token_node_t* dest, size_t thread_idx);
 myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const char* name, size_t name_size);

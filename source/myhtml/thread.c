@@ -616,18 +616,6 @@ mythread_queue_node_t * mythread_queue_node_malloc(mythread_queue_t* queue, cons
 }
 
 // mythread functions
-
-void mythread_wait_all(mythread_t *mythread)
-{
-    const struct timespec tomeout = {0, 10000};
-    
-    for (size_t idx = mythread->pth_list_root; idx < mythread->pth_list_length; idx++) {
-        while(mythread->pth_list[idx].data.use < mythread->queue->nodes_uses) {
-            myhtml_thread_nanosleep(&tomeout);
-        }
-    }
-}
-
 void mythread_stream_quit_all(mythread_t *mythread)
 {
     mythread->stream_opt = MyTHREAD_OPT_QUIT;
@@ -662,45 +650,15 @@ void mythread_resume_all(mythread_t *mythread)
     }
 }
 
-void mythread_function_stream(void *arg)
+void mythread_wait_all(mythread_t *mythread)
 {
-    mythread_context_t *ctx = (mythread_context_t*)arg;
-    mythread_t * mythread = ctx->mythread;
-    mythread_queue_t *queue = mythread->queue;
-    
     const struct timespec tomeout = {0, 10000};
     
-    myhtml_hread_sem_wait(mythread, ctx);
-    
-    do {
-        while (ctx->use >= queue->nodes_uses) {
-            if(mythread->stream_opt & MyTHREAD_OPT_WAIT) {
-                if(ctx->use >= queue->nodes_uses) {
-                    ctx->opt = MyTHREAD_OPT_WAIT;
-                    myhtml_hread_sem_wait(mythread, ctx);
-                    ctx->opt = MyTHREAD_OPT_UNDEF;
-                }
-            }
-            else if(mythread->stream_opt & MyTHREAD_OPT_QUIT) {
-                if(ctx->use >= queue->nodes_uses) {
-                    myhtml_hread_sem_close(mythread, ctx);
-                    ctx->opt = MyTHREAD_OPT_QUIT;
-                    return;
-                }
-            }
-            
+    for (size_t idx = mythread->pth_list_root; idx < mythread->pth_list_length; idx++) {
+        while(mythread->pth_list[idx].data.use < mythread->queue->nodes_uses) {
             myhtml_thread_nanosleep(&tomeout);
         }
-        
-        size_t pos = ctx->use / queue->nodes_size;
-        size_t len = ctx->use % queue->nodes_size;
-        
-        mythread_queue_node_t *qnode = &queue->nodes[pos][len];
-        
-        ctx->func(ctx->id, qnode);
-        ctx->use++;
     }
-    while (1);
 }
 
 void mythread_function_batch(void *arg)
@@ -738,8 +696,53 @@ void mythread_function_batch(void *arg)
         
         mythread_queue_node_t *qnode = &queue->nodes[pos][len];
         
-        ctx->func(ctx->id, qnode);
+        if((qnode->tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
+            ctx->func(ctx->id, qnode);
+        
         ctx->use += ctx->t_count;
+    }
+    while (1);
+}
+
+void mythread_function_stream(void *arg)
+{
+    mythread_context_t *ctx = (mythread_context_t*)arg;
+    mythread_t * mythread = ctx->mythread;
+    mythread_queue_t *queue = mythread->queue;
+    
+    const struct timespec tomeout = {0, 10000};
+    
+    myhtml_hread_sem_wait(mythread, ctx);
+    
+    do {
+        while (ctx->use >= queue->nodes_uses) {
+            if(mythread->stream_opt & MyTHREAD_OPT_WAIT) {
+                if(ctx->use >= queue->nodes_uses) {
+                    ctx->opt = MyTHREAD_OPT_WAIT;
+                    myhtml_hread_sem_wait(mythread, ctx);
+                    ctx->opt = MyTHREAD_OPT_UNDEF;
+                }
+            }
+            else if(mythread->stream_opt & MyTHREAD_OPT_QUIT) {
+                if(ctx->use >= queue->nodes_uses) {
+                    myhtml_hread_sem_close(mythread, ctx);
+                    ctx->opt = MyTHREAD_OPT_QUIT;
+                    return;
+                }
+            }
+            
+            myhtml_thread_nanosleep(&tomeout);
+        }
+        
+        size_t pos = ctx->use / queue->nodes_size;
+        size_t len = ctx->use % queue->nodes_size;
+        
+        mythread_queue_node_t *qnode = &queue->nodes[pos][len];
+        
+        if((qnode->tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
+            ctx->func(ctx->id, qnode);
+        
+        ctx->use++;
     }
     while (1);
 }

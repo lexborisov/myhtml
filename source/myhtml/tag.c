@@ -167,7 +167,6 @@ myhtml_status_t myhtml_tag_index_add(myhtml_tag_t* tags, myhtml_tag_index_t* idx
     
     if(tag->first == NULL) {
         tag->first = new_node;
-        
         new_node->prev = NULL;
     }
     else {

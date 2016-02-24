@@ -314,10 +314,26 @@ myhtml_token_attr_t * myhtml_token_node_attr_append_with_convert_encoding(myhtml
         dest->attr_last = new_attr;
     }
     
+    new_attr->my_namespace = MyHTML_NAMESPACE_HTML;
+    
     return new_attr;
 }
 
 // TODO: use tree for this
+void myhtml_token_node_attr_copy_with_check(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx)
+{
+    myhtml_token_attr_t* attr = target->attr_first;
+    
+    while (attr)
+    {
+        if(attr->name_length && myhtml_token_attr_by_name(dest, &attr->entry.data[ attr->name_begin ], attr->name_length) == NULL) {
+            myhtml_token_attr_copy(token, attr, dest, thread_idx);
+        }
+        
+        attr = attr->next;
+    }
+}
+
 void myhtml_token_node_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx)
 {
     myhtml_token_attr_t* attr = target->attr_first;
@@ -837,6 +853,11 @@ void myhtml_token_set_replacement_character_for_null_token(myhtml_token_node_t* 
     node->length = node->my_str_tm.length;
 }
 
+void myhtml_token_set_done(myhtml_token_node_t* node)
+{
+    node->type |= MyHTML_TOKEN_TYPE_DONE;
+}
+
 void myhtml_token_print_param_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out)
 {
     if(node->type & MyHTML_TOKEN_TYPE_CLOSE) {
@@ -906,14 +927,34 @@ void myhtml_token_print_attr(myhtml_tree_t* tree, myhtml_token_node_t* node, FIL
     
     while(attr)
     {
-        if(attr->value_begin)
+        fprintf(out, " %.*s", (int)attr->name_length, &attr->entry.data[attr->name_begin]);
+        
+        if(attr->my_namespace != MyHTML_NAMESPACE_HTML)
         {
-            fprintf(out, " %.*s=\"%.*s\"",
-                    (int)attr->name_length, &attr->entry.data[attr->name_begin],
-                    (int)attr->value_length, &attr->entry.data[attr->value_begin]);
+            switch (attr->my_namespace) {
+                case MyHTML_NAMESPACE_SVG:
+                    fprintf(out, ":svg");
+                    break;
+                case MyHTML_NAMESPACE_MATHML:
+                    fprintf(out, ":math");
+                    break;
+                case MyHTML_NAMESPACE_XLINK:
+                    fprintf(out, ":xlink");
+                    break;
+                case MyHTML_NAMESPACE_XML:
+                    fprintf(out, ":xml");
+                    break;
+                case MyHTML_NAMESPACE_XMLNS:
+                    fprintf(out, ":xmlns");
+                    break;
+                default:
+                    fprintf(out, ":UNDEF");
+                    break;
+            }
         }
-        else {
-            fprintf(out, " %.*s", (int)attr->name_length, &attr->entry.data[attr->name_begin]);
+        
+        if(attr->value_begin) {
+            fprintf(out, "=\"%.*s\"",(int)attr->value_length, &attr->entry.data[attr->value_begin]);
         }
         
         attr = attr->next;

@@ -70,6 +70,8 @@ extern "C" {
     __tree__->current_qnode = mythread_queue_node_malloc(__tree__->queue, __html__, (__tree__->global_offset + __begin__), NULL); \
     __tree__->current_qnode->tree = __tree__; \
     __tree__->current_qnode->prev = __current__; \
+    if(__current__) \
+        myhtml_tokenizer_calc_current_namespace(__tree__, __current__); \
     myhtml_token_node_malloc(__tree__->token, __tree__->current_qnode->token, __tree__->token->mcasync_token_id)
 
 #define mh_token_get(__idx__, __attr__) tree->token->nodes[__idx__].__attr__

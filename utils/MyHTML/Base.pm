@@ -50,6 +50,7 @@ sub read_tmpl {
         {
                 $line =~ s/\s+$//;
                 $line =~ s/^\s+//;
+                next if $line =~ /^#\%/;
                 
                 push @data, $line;
         }

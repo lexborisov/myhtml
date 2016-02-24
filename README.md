@@ -7,7 +7,7 @@ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library wit
 ## Now
 
 ```text
-The current version is 0.3.4 - this is a beta version
+The current version is 0.4.4 - this is a beta version
 Release will have major version number 1
 ```
 
@@ -25,6 +25,7 @@ Release will have major version number 1
 - Support for [parsing by chunks]
 - No outside dependencies
 - C99 support
+- Passes all tree construction tests from [html5lib-tests]
 
 ## Support encodings for InputStream
 
@@ -172,3 +173,4 @@ See the License for the specific language governing permissions and limitations 
 [examples]: https://github.com/lexborisov/myhtml/tree/master/examples
 [parsing by chunks]: https://github.com/lexborisov/myhtml/blob/master/examples/chunks_high_level.c
 [encoding.spec.whatwg.org]: https://encoding.spec.whatwg.org/
+[html5lib-tests]: https://github.com/html5lib/html5lib-tests

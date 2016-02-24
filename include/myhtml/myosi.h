@@ -133,13 +133,15 @@ typedef struct mythread mythread_t;
 
 // tree
 enum myhtml_tree_flags {
-    MyHTML_TREE_FLAGS_CLEAN           = 0x00,
-    MyHTML_TREE_FLAGS_SCRIPT          = 0x01,
-    MyHTML_TREE_FLAGS_FRAMESET_OK     = 0x02,
-    MyHTML_TREE_FLAGS_IFRAME_SRCDOC   = 0x04,
-    MyHTML_TREE_FLAGS_ALREADY_STARTED = 0x08,
-    MyHTML_TREE_FLAGS_SINGLE_MODE     = 0x10,
-    MyHTML_TREE_FLAGS_PARSE_END       = 0x20
+    MyHTML_TREE_FLAGS_CLEAN                   = 0x000,
+    MyHTML_TREE_FLAGS_SCRIPT                  = 0x001,
+    MyHTML_TREE_FLAGS_FRAMESET_OK             = 0x002,
+    MyHTML_TREE_FLAGS_IFRAME_SRCDOC           = 0x004,
+    MyHTML_TREE_FLAGS_ALREADY_STARTED         = 0x008,
+    MyHTML_TREE_FLAGS_SINGLE_MODE             = 0x010,
+    MyHTML_TREE_FLAGS_PARSE_END               = 0x020,
+    MyHTML_TREE_FLAGS_PARSE_FLAG              = 0x040,
+    MyHTML_TREE_FLAGS_PARSE_FLAG_EMIT_NEWLINE = 0x080
 };
 
 typedef struct myhtml_tree_temp_stream myhtml_tree_temp_stream_t;

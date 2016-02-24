@@ -587,10 +587,7 @@ void myhtml_string_append_charef(myhtml_string_char_ref_chunk_t *chunk, myhtml_s
 
 void myhtml_string_append_charef_end(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str)
 {
-    if(chunk->state == 4 || chunk->state == 5) {
-        _myhtml_string_append_char_references_state_end(chunk, str);
-    }
-    else if(chunk->state == 2 && chunk->charef_res.last_entry)
+    if(chunk->state == 2 && chunk->charef_res.last_entry)
     {
         const charef_entry_t *entry = chunk->charef_res.last_entry;
         
@@ -601,6 +598,14 @@ void myhtml_string_append_charef_end(myhtml_string_char_ref_chunk_t *chunk, myht
         }
         
         str->length = chunk->begin;
+    }
+    else if(chunk->state == 4) {
+        if((str->length - (chunk->begin + 2)))
+            _myhtml_string_append_char_references_state_end(chunk, str);
+    }
+    else if(chunk->state == 5) {
+        if((str->length - (chunk->begin + 3)))
+            _myhtml_string_append_char_references_state_end(chunk, str);
     }
     
     if(str->length) {
@@ -861,5 +866,20 @@ size_t myhtml_string_raw_set_replacement_character(myhtml_string_t* target, size
     return 3;
 }
 
+void myhtml_string_stay_only_whitespace(myhtml_string_t* target)
+{
+    char *data = target->data;
+    size_t pos = 0;
+    
+    for(size_t i = 0; i < target->length; i++)
+    {
+        if(myhtml_mystring_whitespace(data[i], ==, ||)) {
+            data[pos] = data[i];
+            pos++;
+        }
+    }
+    
+    target->length = pos;
+}
 
 

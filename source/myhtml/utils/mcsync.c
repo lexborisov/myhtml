@@ -24,12 +24,12 @@
 #endif
 
 #if defined(MyHTML_FORCE_SPINLOCK)
-static int atomic_compare_exchange(int* ptr, int compare, int exchange)
+static int mcsync_atomic_compare_exchange(int* ptr, int compare, int exchange)
 {
     return __atomic_compare_exchange_n(ptr, &compare, exchange, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 }
 
-static void atomic_store(int* ptr, int value)
+static void mcsync_atomic_store(int* ptr, int value)
 {
     __atomic_store_n(ptr, 0, __ATOMIC_SEQ_CST);
 }
@@ -99,7 +99,7 @@ void mcsync_clean(mcsync_t* mcsync)
 mcsync_status_t mcsync_lock(mcsync_t* mcsync)
 {
 #if defined(MyHTML_FORCE_SPINLOCK)
-    while (!atomic_compare_exchange(&mcsync->spinlock, 0, 1)) {}
+    while (!mcsync_atomic_compare_exchange(&mcsync->spinlock, 0, 1)) {}
 #else
     mcsync_mutex_lock(mcsync);
 #endif
@@ -110,7 +110,7 @@ mcsync_status_t mcsync_lock(mcsync_t* mcsync)
 mcsync_status_t mcsync_unlock(mcsync_t* mcsync)
 {
 #if defined(MyHTML_FORCE_SPINLOCK)
-    atomic_store(&mcsync->spinlock, 0);
+    mcsync_atomic_store(&mcsync->spinlock, 0);
 #else
     mcsync_mutex_unlock(mcsync);
 #endif

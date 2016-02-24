@@ -61,11 +61,10 @@ struct mythread_context {
     
     size_t sem_name_size;
     
-    volatile size_t use;
-    volatile mythread_queue_node_t *qnode;
-    
     mythread_f func;
     
+    volatile size_t use;
+    volatile mythread_queue_node_t *qnode;
     volatile size_t t_count;
     volatile mythread_thread_opt_t opt;
     

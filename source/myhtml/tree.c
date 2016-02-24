@@ -119,21 +119,23 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->node_head = 0;
     tree->node_form = 0;
     
-    tree->state              = MyHTML_TOKENIZER_STATE_DATA;
-    tree->insert_mode        = MyHTML_INSERTION_MODE_INITIAL;
-    tree->orig_insert_mode   = MyHTML_INSERTION_MODE_INITIAL;
-    tree->compat_mode        = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
-    tree->tmp_tag_id         = MyHTML_TAG__UNDEF;
-    tree->flags              = MyHTML_TREE_FLAGS_CLEAN|MyHTML_TREE_FLAGS_FRAMESET_OK;
-    tree->foster_parenting   = myfalse;
-    tree->my_namespace       = MyHTML_NAMESPACE_HTML;
-    tree->incoming_buf       = NULL;
-    tree->incoming_buf_first = NULL;
-    tree->global_offset      = 0;
-    tree->current_qnode      = NULL;
+    tree->state               = MyHTML_TOKENIZER_STATE_DATA;
+    tree->state_of_builder    = MyHTML_TOKENIZER_STATE_DATA;
+    tree->insert_mode         = MyHTML_INSERTION_MODE_INITIAL;
+    tree->orig_insert_mode    = MyHTML_INSERTION_MODE_INITIAL;
+    tree->compat_mode         = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
+    tree->tmp_tag_id          = MyHTML_TAG__UNDEF;
+    tree->flags               = MyHTML_TREE_FLAGS_CLEAN|MyHTML_TREE_FLAGS_FRAMESET_OK;
+    tree->foster_parenting    = myfalse;
+    tree->token_namespace     = NULL;
+    tree->incoming_buf        = NULL;
+    tree->incoming_buf_first  = NULL;
+    tree->global_offset       = 0;
+    tree->current_qnode       = NULL;
+    tree->token_last_done     = NULL;
     
-    tree->encoding           = MyHTML_ENCODING_UTF_8;
-    tree->encoding_usereq    = MyHTML_ENCODING_DEFAULT;
+    tree->encoding            = MyHTML_ENCODING_UTF_8;
+    tree->encoding_usereq     = MyHTML_ENCODING_DEFAULT;
     
     if(tree->single_queue)
         mythread_queue_clean(tree->single_queue);
@@ -171,21 +173,23 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->node_head = 0;
     tree->node_form = 0;
     
-    tree->state              = MyHTML_TOKENIZER_STATE_DATA;
-    tree->insert_mode        = MyHTML_INSERTION_MODE_INITIAL;
-    tree->orig_insert_mode   = MyHTML_INSERTION_MODE_INITIAL;
-    tree->compat_mode        = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
-    tree->tmp_tag_id         = MyHTML_TAG__UNDEF;
-    tree->flags              = MyHTML_TREE_FLAGS_CLEAN|MyHTML_TREE_FLAGS_FRAMESET_OK;
-    tree->foster_parenting   = myfalse;
-    tree->my_namespace       = MyHTML_NAMESPACE_HTML;
-    tree->incoming_buf       = NULL;
-    tree->incoming_buf_first = NULL;
-    tree->global_offset      = 0;
-    tree->current_qnode      = NULL;
+    tree->state               = MyHTML_TOKENIZER_STATE_DATA;
+    tree->state_of_builder    = MyHTML_TOKENIZER_STATE_DATA;
+    tree->insert_mode         = MyHTML_INSERTION_MODE_INITIAL;
+    tree->orig_insert_mode    = MyHTML_INSERTION_MODE_INITIAL;
+    tree->compat_mode         = MyHTML_TREE_COMPAT_MODE_NO_QUIRKS;
+    tree->tmp_tag_id          = MyHTML_TAG__UNDEF;
+    tree->flags               = MyHTML_TREE_FLAGS_CLEAN|MyHTML_TREE_FLAGS_FRAMESET_OK;
+    tree->foster_parenting    = myfalse;
+    tree->token_namespace     = NULL;
+    tree->incoming_buf        = NULL;
+    tree->incoming_buf_first  = NULL;
+    tree->global_offset       = 0;
+    tree->current_qnode       = NULL;
+    tree->token_last_done     = NULL;
     
-    tree->encoding           = MyHTML_ENCODING_UTF_8;
-    tree->encoding_usereq    = MyHTML_ENCODING_DEFAULT;
+    tree->encoding            = MyHTML_ENCODING_UTF_8;
+    tree->encoding_usereq     = MyHTML_ENCODING_DEFAULT;
     
     if(tree->single_queue)
         mythread_queue_clean(tree->single_queue);
@@ -594,7 +598,7 @@ myhtml_tree_node_t * myhtml_tree_node_insert_text(myhtml_tree_t* tree, myhtml_to
             return adjusted_location;
         }
     }
-    if(mode == MyHTML_TREE_INSERTION_MODE_BEFORE) {
+    else if(mode == MyHTML_TREE_INSERTION_MODE_BEFORE) {
         if(adjusted_location->tag_idx == MyHTML_TAG__TEXT && adjusted_location->token) {
             myhtml_token_merged_two_token_string(tree, token, adjusted_location->token, mytrue);
             return adjusted_location;
@@ -1241,12 +1245,12 @@ void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree)
         }
         
         if(node->my_namespace != MyHTML_NAMESPACE_HTML) {
-            if(last)
+            if(last) {
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-            else
-                tree->insert_mode = MyHTML_INSERTION_MODE_INITIAL;
+                return;
+            }
             
-            return;
+            continue;
         }
         
         // step 4
@@ -2240,10 +2244,18 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
                 case MyHTML_NAMESPACE_MATHML:
                     fprintf(out, ":math");
                     break;
+                case MyHTML_NAMESPACE_XLINK:
+                    fprintf(out, ":xlink");
+                    break;
+                case MyHTML_NAMESPACE_XML:
+                    fprintf(out, ":xml");
+                    break;
+                case MyHTML_NAMESPACE_XMLNS:
+                    fprintf(out, ":xmlns");
+                    break;
                 default:
                     break;
             }
-            
         }
 #endif
         
@@ -2477,10 +2489,17 @@ mybool_t myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_
         return mytrue;
     
     if(node->my_namespace == MyHTML_NAMESPACE_MATHML &&
-       node->tag_idx == MyHTML_TAG_ANNOTATION_XML && node->token)
+       node->tag_idx == MyHTML_TAG_ANNOTATION_XML && node->token &&
+       (node->token->type & MyHTML_TOKEN_TYPE_CLOSE) == 0)
     {
         myhtml_token_node_wait_for_done(node->token);
+        
         myhtml_token_attr_t* attr = myhtml_token_attr_match_case(tree->token, node->token,
+                                                                 "encoding", 8, "text/html", 9);
+        if(attr)
+            return mytrue;
+        
+        attr = myhtml_token_attr_match_case(tree->token, node->token,
                                                             "encoding", 8, "application/xhtml+xml", 21);
         if(attr)
             return mytrue;
@@ -2567,6 +2586,91 @@ myhtml_status_t myhtml_tree_temp_tag_name_append(myhtml_tree_temp_tag_name_t* te
     
     temp_tag_name->length += name_len;
     return MyHTML_STATUS_OK;
+}
+
+void myhtml_tree_wait_for_last_done_token(myhtml_tree_t* tree, myhtml_token_node_t* token_for_wait)
+{
+    const struct timespec tomeout = {0, 1000};
+    while(tree->token_last_done != token_for_wait) {myhtml_thread_nanosleep(&tomeout);}
+}
+
+/* special tonek list */
+myhtml_status_t myhtml_tree_special_list_init(myhtml_tree_special_token_list_t* special)
+{
+    special->size   = 1024;
+    special->length = 0;
+    special->list   = (myhtml_tree_special_token_t *)mymalloc(special->size * sizeof(myhtml_tree_special_token_t));
+    
+    if(special->list == NULL)
+        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+    
+    return MyHTML_STATUS_OK;
+}
+
+void myhtml_tree_special_list_clean(myhtml_tree_temp_tag_name_t* temp_tag_name)
+{
+    temp_tag_name->length = 0;
+}
+
+myhtml_tree_special_token_list_t * myhtml_tree_special_list_destroy(myhtml_tree_special_token_list_t* special, mybool_t self_destroy)
+{
+    if(special == NULL)
+        return NULL;
+    
+    if(special->list) {
+        free(special->list);
+        special->list = NULL;
+    }
+    
+    if(self_destroy) {
+        free(special);
+        return NULL;
+    }
+    
+    return special;
+}
+
+myhtml_status_t myhtml_tree_special_list_append(myhtml_tree_special_token_list_t* special, myhtml_token_node_t *token, myhtml_namespace_t my_namespace)
+{
+    if(special->length >= special->size) {
+        size_t nsize = special->size << 1;
+        myhtml_tree_special_token_t *tmp = (myhtml_tree_special_token_t *)myrealloc(special->list, nsize * sizeof(myhtml_tree_special_token_t));
+        
+        if(tmp) {
+            special->size = nsize;
+            special->list = tmp;
+        }
+        else
+            return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+    }
+    
+    special->list[special->length].my_namespace = my_namespace;
+    special->list[special->length].token = token;
+    
+    special->length++;
+    return MyHTML_STATUS_OK;
+}
+
+size_t myhtml_tree_special_list_length(myhtml_tree_special_token_list_t* special)
+{
+    return special->length;
+}
+
+size_t myhtml_tree_special_list_pop(myhtml_tree_special_token_list_t* special)
+{
+    if(special->length)
+        special->length--;
+    
+    return special->length;
+}
+
+
+myhtml_tree_special_token_t * myhtml_tree_special_list_get_last(myhtml_tree_special_token_list_t* special)
+{
+    if(special->length == 0)
+        return NULL;
+    
+    return &special->list[special->length];
 }
 
 

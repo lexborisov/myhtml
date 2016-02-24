@@ -45,6 +45,9 @@ extern "C" {
 void myhtml_tokenizer_begin(myhtml_tree_t* tree, const char* html, size_t html_length);
 void myhtml_tokenizer_chunk(myhtml_tree_t* tree, const char* html, size_t html_length);
 void myhtml_tokenizer_end(myhtml_tree_t* tree);
+void myhtml_tokenizer_set_state(myhtml_tree_t* tree, mythread_queue_node_t* qnode);
+
+void myhtml_tokenizer_calc_current_namespace(myhtml_tree_t* tree, mythread_queue_node_t* qnode);
 
 myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, myhtml_tag_id_t tag_idx, enum myhtml_namespace my_namespace);
 
