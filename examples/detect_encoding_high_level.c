@@ -58,7 +58,7 @@ struct res_html load_html_file(const char* filename)
     return res;
 }
 
-int print_encoding(myhtml_encoding_t encoding)
+void print_encoding(myhtml_encoding_t encoding)
 {
     printf("Character encoding is ");
     
@@ -77,8 +77,6 @@ int print_encoding(myhtml_encoding_t encoding)
     }
     
     printf("\n");
-    
-    return 0;
 }
 
 int main(int argc, const char * argv[])
@@ -98,20 +96,18 @@ int main(int argc, const char * argv[])
     myhtml_encoding_t encoding;
     
     // try detect by BOM
-    if(myhtml_encoding_detect_bom(res.html, res.size, &encoding)) {
-        return print_encoding(encoding);
-    }
-    
-    if(myhtml_encoding_detect(res.html, res.size, &encoding)) {
-        return print_encoding(encoding);
-    }
-    
-    if(encoding != MyHTML_ENCODING_DEFAULT) {
+    if (myhtml_encoding_detect_bom(res.html, res.size, &encoding)) {
+        print_encoding(encoding);
+    } else if (myhtml_encoding_detect(res.html, res.size, &encoding)) {
+        print_encoding(encoding);
+    } else if (encoding != MyHTML_ENCODING_DEFAULT) {
         printf("It is possible that ");
-        return print_encoding(encoding);
+        print_encoding(encoding);
+    } else {
+        printf("I could not identify character encoding\n");
     }
-    
-    printf("I could not identify character encoding\n");
+
+    free(res.html);
     return 0;
 }
 
