@@ -224,9 +224,6 @@ size_t myhtml_tokenizer_state_script_data_escaped_dash_dash(myhtml_tree_t* tree,
     else if(html[html_offset] == '>') {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
     }
-    else if(html[html_offset] == '\0') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
-    }
     else {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
     }
@@ -500,9 +497,6 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_dash(myhtml_tree_t* tre
     {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
     }
-    else if(html[html_offset] == '\0') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
-    }
     else {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
     }
@@ -526,9 +520,6 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_dash_dash(myhtml_tree_t
     else if(html[html_offset] == '>')
     {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
-    }
-    else if(html[html_offset] == '\0') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
     }
     else {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
