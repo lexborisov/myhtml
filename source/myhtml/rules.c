@@ -18,23 +18,44 @@
 
 #include "rules.h"
 
-//void myhtml_insertion_fix_for_text(myhtml_token_node_t* token)
-//{
-//    myhtml_token_node_wait_for_done(token);
-//    
-//    if(token->my_str_tm.data == NULL || token->length == 0)
-//        return;
-//    
-//    char *data = token->my_str_tm.data;
-//    
-//    while(token->begin < token->length)
-//    {
-//        if(myhtml_whithspace(data[token->begin], !=, &&))
-//            break;
-//        
-//        token->begin++;
-//    }
-//}
+void myhtml_insertion_fix_emit_for_text_begin_ws(myhtml_token_node_t* token)
+{
+    myhtml_token_node_wait_for_done(token);
+    myhtml_string_crop_whitespace_from_begin(&token->my_str_tm);
+    
+    if(token->length != token->my_str_tm.length)
+        token->length = token->my_str_tm.length;
+}
+
+myhtml_token_node_t * myhtml_insertion_fix_split_for_text_begin_ws(myhtml_tree_t* tree, myhtml_token_node_t* token)
+{
+    myhtml_token_node_wait_for_done(token);
+    size_t len = myhtml_string_whitespace_from_begin(&token->my_str_tm);
+    
+    if(len == 0)
+        return NULL;
+    
+    // create new ws token and insert
+    mcobject_async_status_t mcstatus;
+    myhtml_token_node_t* new_token = (myhtml_token_node_t*)mcobject_async_malloc(tree->token->nodes_obj, tree->mcasync_token_id, &mcstatus);
+    
+    if(mcstatus)
+        return NULL;
+    
+    myhtml_token_node_clean(new_token);
+    
+    myhtml_string_init(tree->mchar, tree->mchar_node_id, &new_token->my_str_tm, (len + 2));
+    
+    myhtml_string_append(&new_token->my_str_tm, token->my_str_tm.data, len);
+    new_token->length = len;
+    
+    // and cut ws for original
+    token->my_str_tm.data = mchar_async_crop_first_chars_without_cache(token->my_str_tm.data, len);
+    token->my_str_tm.length -= len;
+    token->length = token->my_str_tm.length;
+    
+    return new_token;
+}
 
 mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
@@ -45,6 +66,8 @@ mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t*
             if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
                 return myfalse;
             }
+            
+            myhtml_insertion_fix_emit_for_text_begin_ws(token);
             
             // default, other token
             tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
@@ -123,6 +146,8 @@ mybool_t myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_nod
                     break;
                 }
                 
+                myhtml_insertion_fix_emit_for_text_begin_ws(token);
+                
                 // default, other token
                 myhtml_tree_node_insert_root(tree, NULL, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_BEFORE_HEAD;
@@ -175,6 +200,8 @@ mybool_t myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_nod
                 if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
                     break;
                 }
+                
+                myhtml_insertion_fix_emit_for_text_begin_ws(token);
                 
                 // default, other token
                 tree->node_head = myhtml_tree_node_insert(tree, MyHTML_TAG_HEAD, MyHTML_NAMESPACE_HTML);
@@ -265,6 +292,10 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
                     myhtml_tree_node_insert_text(tree, token);
                     break;
                 }
+                
+                myhtml_token_node_t* new_token = myhtml_insertion_fix_split_for_text_begin_ws(tree, token);
+                if(new_token)
+                    myhtml_tree_node_insert_text(tree, new_token);
                 
                 // default, other token
                 myhtml_tree_open_elements_pop(tree);
@@ -501,6 +532,10 @@ mybool_t myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node
                     myhtml_tree_node_insert_text(tree, token);
                     break;
                 }
+                
+                myhtml_token_node_t* new_token = myhtml_insertion_fix_split_for_text_begin_ws(tree, token);
+                if(new_token)
+                    myhtml_tree_node_insert_text(tree, new_token);
                 
                 // default, other token
                 myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
@@ -2216,6 +2251,10 @@ mybool_t myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token
                     break;
                 }
                 
+                myhtml_token_node_t* new_token = myhtml_insertion_fix_split_for_text_begin_ws(tree, token);
+                if(new_token)
+                    myhtml_tree_node_insert_text(tree, new_token);
+                
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
                 if(current_node && current_node->tag_idx == MyHTML_TAG_COLGROUP)
@@ -3231,6 +3270,10 @@ mybool_t myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_
                 if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
                     return myhtml_insertion_mode_in_body(tree, token);
                 
+                myhtml_token_node_t* new_token = myhtml_insertion_fix_split_for_text_begin_ws(tree, token);
+                if(new_token)
+                    return myhtml_insertion_mode_in_body(tree, new_token);
+                
                 // parse error
                 break;
             }
@@ -3454,9 +3497,7 @@ mybool_t myhtml_rules_check_for_first_newline(myhtml_tree_t* tree, myhtml_token_
                 
                 if(token->length > 0) {
                     if(token->my_str_tm.data[0] == '\n') {
-                        token->my_str_tm.data = mchar_async_crop_first_chars(token->my_str_tm.mchar,
-                                                                             token->my_str_tm.node_idx,
-                                                                             token->my_str_tm.data, 1);
+                        token->my_str_tm.data = mchar_async_crop_first_chars_without_cache(token->my_str_tm.data, 1);
                         
                         token->my_str_tm.length--;
                         token->length--;

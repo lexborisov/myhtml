@@ -738,30 +738,30 @@ size_t myhtml_tokenizer_state_data(myhtml_tree_t* tree, mythread_queue_node_t* q
             
             qnode = tree->current_qnode;
         }
-        else if(qnode->token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
-        {
-            if(myhtml_tokenizer_chars_map[ (unsigned char)html[html_offset] ] != MyHTML_TOKENIZER_CHAR_WHITESPACE)
-            {
-                size_t ab_offset = (tree->global_offset + html_offset);
-                
-                if(ab_offset > qnode->begin)
-                {
-                    qnode->token->type |= MyHTML_TOKEN_TYPE_DATA;
-                    qnode->token->tag_ctx_idx = MyHTML_TAG__TEXT;
-                    qnode->length = ab_offset - qnode->begin;
-                    mh_queue_add(tree, html, ab_offset, qnode);
-                    
-                    qnode = tree->current_qnode;
-                }
-                
-                qnode->token->type ^= (qnode->token->type & MyHTML_TOKEN_TYPE_WHITESPACE);
-            }
-        }
-//        else if(qnode->token->type & MyHTML_TOKEN_TYPE_WHITESPACE &&
-//                myhtml_tokenizer_chars_map[ (unsigned char)html[html_offset] ] != MyHTML_TOKENIZER_CHAR_WHITESPACE) {
-//            qnode->token->type ^= (qnode->token->type & MyHTML_TOKEN_TYPE_WHITESPACE);
-//            qnode->token->type = MyHTML_TOKEN_TYPE_DATA;
+//        else if(qnode->token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
+//        {
+//            if(myhtml_tokenizer_chars_map[ (unsigned char)html[html_offset] ] != MyHTML_TOKENIZER_CHAR_WHITESPACE)
+//            {
+//                size_t ab_offset = (tree->global_offset + html_offset);
+//                
+//                if(ab_offset > qnode->begin)
+//                {
+//                    qnode->token->type |= MyHTML_TOKEN_TYPE_DATA;
+//                    qnode->token->tag_ctx_idx = MyHTML_TAG__TEXT;
+//                    qnode->length = ab_offset - qnode->begin;
+//                    mh_queue_add(tree, html, ab_offset, qnode);
+//                    
+//                    qnode = tree->current_qnode;
+//                }
+//                
+//                qnode->token->type ^= (qnode->token->type & MyHTML_TOKEN_TYPE_WHITESPACE);
+//            }
 //        }
+        else if(qnode->token->type & MyHTML_TOKEN_TYPE_WHITESPACE &&
+                myhtml_tokenizer_chars_map[ (unsigned char)html[html_offset] ] != MyHTML_TOKENIZER_CHAR_WHITESPACE) {
+            qnode->token->type ^= (qnode->token->type & MyHTML_TOKEN_TYPE_WHITESPACE);
+            qnode->token->type = MyHTML_TOKEN_TYPE_DATA;
+        }
         
         html_offset++;
     }

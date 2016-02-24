@@ -109,6 +109,7 @@ void mchar_async_node_delete(mchar_async_t *mchar_async, size_t node_idx);
 
 mchar_async_chunk_t * mchar_async_chunk_malloc(mchar_async_t *mchar_async, mchar_async_node_t *node, size_t length);
 char * mchar_async_crop_first_chars(mchar_async_t *mchar_async, size_t node_idx, char *data, size_t crop_len);
+char * mchar_async_crop_first_chars_with_out_cache(char *data, size_t crop_len);
 
 // cache
 void mchar_async_cache_init(mchar_async_cache_t *cache);

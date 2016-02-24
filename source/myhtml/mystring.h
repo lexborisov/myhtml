@@ -137,6 +137,8 @@ size_t myhtml_string_raw_set_replacement_character(myhtml_string_t* target, size
 void myhtml_string_copy(myhtml_string_t* dest, myhtml_string_t* target);
 size_t myhtml_string_raw_copy(char* str1, const char* str2, size_t size);
 void myhtml_string_stay_only_whitespace(myhtml_string_t* target);
+size_t myhtml_string_crop_whitespace_from_begin(myhtml_string_t* target);
+size_t myhtml_string_whitespace_from_begin(myhtml_string_t* target);
 
 #ifdef __cplusplus
 } /* extern "C" */

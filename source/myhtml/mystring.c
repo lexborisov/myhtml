@@ -882,4 +882,35 @@ void myhtml_string_stay_only_whitespace(myhtml_string_t* target)
     target->length = pos;
 }
 
+size_t myhtml_string_crop_whitespace_from_begin(myhtml_string_t* target)
+{
+    char *data = target->data;
+    size_t i;
+    
+    for(i = 0; i < target->length; i++) {
+        if(myhtml_mystring_whitespace(data[i], !=, &&))
+            break;
+    }
+    
+    if(i)
+        target->data = mchar_async_crop_first_chars_without_cache(target->data, i);
+    
+    target->length -= i;
+    
+    return i;
+}
+
+size_t myhtml_string_whitespace_from_begin(myhtml_string_t* target)
+{
+    char *data = target->data;
+    size_t i;
+    
+    for(i = 0; i < target->length; i++) {
+        if(myhtml_mystring_whitespace(data[i], !=, &&))
+            break;
+    }
+    
+    return i;
+}
+
 
