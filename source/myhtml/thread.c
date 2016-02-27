@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "thread.h"
+#include "myhtml/thread.h"
 
 #if defined(IS_OS_WINDOWS)
 /***********************************************************************************

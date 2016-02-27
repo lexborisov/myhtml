@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "mchar_async.h"
+#include "myhtml/utils/mchar_async.h"
 
 mchar_async_t * mchar_async_create(size_t pos_size, size_t size)
 {

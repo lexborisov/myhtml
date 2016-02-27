@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "token.h"
+#include "myhtml/token.h"
 
 // all key size == value size
 static const myhtml_token_replacement_entry_t myhtml_token_attr_svg_replacement[] = {

@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "encoding.h"
+#include "myhtml/encoding.h"
 
 
 static const myhtml_encoding_trigram_t myhtml_encoding_detect_trigrams_index_ibm866[] = {

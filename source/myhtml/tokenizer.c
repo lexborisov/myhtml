@@ -1,5 +1,5 @@
 /*
- Copyright 2015 Alexander Borisov
+ Copyright 2015-2016 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "tokenizer.h"
+#include "myhtml/tokenizer.h"
 
 static const unsigned char myhtml_tokenizer_chars_map[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -171,6 +171,7 @@ void myhtml_tokenizer_end(myhtml_tree_t* tree)
        (tree->myhtml->opt & MyHTML_OPTIONS_PARSE_MODE_SINGLE) == 0)
     {
         myhtml_tokenizer_wait(tree);
+        myhtml_tokenizer_pause(tree);
     }
     
     tree->flags |= MyHTML_TREE_FLAGS_PARSE_END;

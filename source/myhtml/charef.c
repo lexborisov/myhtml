@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "charef.h"
+#include "myhtml/charef.h"
 
 static const charef_entry_t named_character_references[] = {
     {'\0', 0, 0, {0}, 0},{'\0', 0, 1, {0}, 0},{'\0', 0, 2, {0}, 0},

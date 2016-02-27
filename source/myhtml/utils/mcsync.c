@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "mcsync.h"
+#include "myhtml/utils/mcsync.h"
 
 #if !defined(MyHTML_WITHOUT_THREADS) && ((defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)) || \
     defined(__ATOMIC_SEQ_CST))

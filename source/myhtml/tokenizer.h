@@ -1,5 +1,5 @@
 /*
- Copyright 2015 Alexander Borisov
+ Copyright 2015-2016 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, myhtml_
 
 void myhtml_tokenizer_wait(myhtml_tree_t* tree);
 void myhtml_tokenizer_post(myhtml_tree_t* tree);
+void myhtml_tokenizer_pause(myhtml_tree_t* tree);
 
 myhtml_status_t myhtml_tokenizer_state_init(myhtml_t* myhtml);
 void myhtml_tokenizer_state_destroy(myhtml_t* myhtml);

@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "tree.h"
+#include "myhtml/tree.h"
 
 myhtml_tree_t * myhtml_tree_create(void)
 {

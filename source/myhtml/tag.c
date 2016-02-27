@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "tag.h"
+#include "myhtml/tag.h"
 
 
 myhtml_tag_t * myhtml_tag_create(void)

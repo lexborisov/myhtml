@@ -6,7 +6,7 @@
 //  Copyright © 2016 Alexander Borisov. All rights reserved.
 //
 
-#include "utils.h"
+#include "myhtml/utils.h"
 
 static const unsigned char myhtml_utils_chars_map[] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,

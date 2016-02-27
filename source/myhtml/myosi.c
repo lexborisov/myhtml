@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "myosi.h"
+#include "myhtml/myosi.h"
 
 void * mymalloc(size_t size)
 {

@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "myhtml.h"
+#include "myhtml/myhtml.h"
 
 void myhtml_init_marker(myhtml_t* myhtml)
 {

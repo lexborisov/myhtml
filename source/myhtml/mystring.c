@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "mystring.h"
+#include "myhtml/mystring.h"
 
 static const unsigned char myhtml_string_chars_num_map[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,

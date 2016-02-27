@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "tokenizer_end.h"
+#include "myhtml/tokenizer_end.h"
 
 
 size_t myhtml_tokenizer_end_state_data(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)

@@ -20,7 +20,7 @@
  * Platform-specific hdef performance clock value. 
  */ 
 
-#include "myhtml.h"
+#include "myhtml/myhtml.h"
 #include <time.h>
 
 #if !defined(IS_OS_WINDOWS)

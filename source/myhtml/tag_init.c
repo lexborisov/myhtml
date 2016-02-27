@@ -16,7 +16,7 @@ limitations under the License.
 Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "tag.h"
+#include "myhtml/tag.h"
 
 void myhtml_tag_init_tags(myhtml_tag_t* tags)
 {

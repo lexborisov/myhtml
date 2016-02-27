@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "parser.h"
+#include "myhtml/parser.h"
 
 void myhtml_parser_index(mythread_id_t thread_id, mythread_queue_node_t *qnode)
 {

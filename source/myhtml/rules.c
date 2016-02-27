@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "rules.h"
+#include "myhtml/rules.h"
 
 void myhtml_insertion_fix_emit_for_text_begin_ws(myhtml_token_node_t* token)
 {

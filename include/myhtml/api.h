@@ -34,7 +34,7 @@
 
 #define MyHTML_VERSION_MAJOR 0
 #define MyHTML_VERSION_MINOR 4
-#define MyHTML_VERSION_PATCH 4
+#define MyHTML_VERSION_PATCH 5
 
 #include <stddef.h>
 
@@ -668,7 +668,8 @@ myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t myhtml_parse_chunk_end(myhtml_tree_t* tree);
+myhtml_status_t
+myhtml_parse_chunk_end(myhtml_tree_t* tree);
 
 /**
  * Get myhtml_tag_t* from a myhtml_t*
@@ -1029,8 +1030,9 @@ myhtml_node_insert_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target,
  *
  * @return insertion node if successful, otherwise a NULL value
  */
-myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t *target,
-                                              myhtml_tree_node_t *node);
+myhtml_tree_node_t*
+myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t *target,
+                         myhtml_tree_node_t *node);
 
 /**
  * Append sibling node before target node. Insertion without validation.
@@ -1041,8 +1043,9 @@ myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_n
  *
  * @return insertion node if successful, otherwise a NULL value
  */
-myhtml_tree_node_t * myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target,
-                                               myhtml_tree_node_t *node);
+myhtml_tree_node_t*
+myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target,
+                          myhtml_tree_node_t *node);
 
 /**
  * Add text for a node with convert character encoding.

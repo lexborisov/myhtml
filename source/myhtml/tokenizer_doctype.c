@@ -16,7 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "tokenizer_doctype.h"
+#include "myhtml/tokenizer_doctype.h"
 
 /////////////////////////////////////////////////////////
 //// BEFORE DOCTYPE NAME
