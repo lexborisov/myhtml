@@ -114,6 +114,11 @@ Works are in full swing
 
 None
 
+## In other languages, external bindings
+
+- [Perl 5] module
+
+
 ## Examples
 
 See [examples] directory
@@ -174,3 +179,5 @@ See the License for the specific language governing permissions and limitations 
 [parsing by chunks]: https://github.com/lexborisov/myhtml/blob/master/examples/chunks_high_level.c
 [encoding.spec.whatwg.org]: https://encoding.spec.whatwg.org/
 [html5lib-tests]: https://github.com/html5lib/html5lib-tests
+[Perl 5]: https://metacpan.org/release/HTML-MyHTML
+
