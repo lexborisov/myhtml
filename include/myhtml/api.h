@@ -1111,6 +1111,19 @@ myhtml_tag_name_by_id(myhtml_tree_t* tree,
                       myhtml_tag_id_t tag_id, size_t *length);
 
 /**
+ * Get tag id by name
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] tag name
+ * @param[in] tag name length
+ *
+ * @return tag id
+ */
+myhtml_tag_id_t
+myhtml_tag_id_by_name(myhtml_tree_t* tree,
+                      const char *tag_name, size_t length);
+
+/**
  * Node has self-closing flag?
  *
  * @param[in] myhtml_tree_node_t*
