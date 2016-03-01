@@ -40,13 +40,13 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#if defined(_MSC_VER)
-#  define MyHTML_DEPRECATED(func, message) __declspec(deprecated(message)) func
-#elif defined(__GNUC__) || defined(__INTEL_COMPILER)
-#  define MyHTML_DEPRECATED(func, message) func __attribute__((deprecated(message)))
-#else
+//#if defined(_MSC_VER)
+//#  define MyHTML_DEPRECATED(func, message) __declspec(deprecated(message)) func
+//#elif defined(__GNUC__) || defined(__INTEL_COMPILER)
+//#  define MyHTML_DEPRECATED(func, message) func __attribute__((deprecated(message)))
+//#else
 #  define MyHTML_DEPRECATED(func, message) func
-#endif
+//#endif
 
 #ifdef __cplusplus
 extern "C" {
