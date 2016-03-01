@@ -32,13 +32,13 @@
 #include <windows.h>
 #endif
 
-//#if defined(_MSC_VER)
-//#  define MyHTML_DEPRECATED(func, message) __declspec(deprecated(message)) func
-//#elif defined(__GNUC__) || defined(__INTEL_COMPILER)
-//#  define MyHTML_DEPRECATED(func, message) func __attribute__((deprecated(message)))
-//#else
+#if defined(_MSC_VER)
+#  define MyHTML_DEPRECATED(func, message) __declspec(deprecated(message)) func
+#elif defined(__GNUC__) || defined(__INTEL_COMPILER)
+#  define MyHTML_DEPRECATED(func, message) func __attribute__((deprecated(message)))
+#else
 #  define MyHTML_DEPRECATED(func, message) func
-//#endif
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,8 +68,8 @@ extern "C" {
 
 
 typedef enum {
-    MyHTML_DEPRECATED(myfalse, "use boolean false") = 0,
-    MyHTML_DEPRECATED(mytrue, "use boolean true") = 1
+    myfalse = 0,
+    mytrue  = 1
 } MyHTML_DEPRECATED(mybool_t, "use bool");
 
 // encoding
