@@ -196,7 +196,7 @@ size_t myhtml_parser_add_text_lowercase(myhtml_tree_t *tree, myhtml_string_t* st
     return (string->length - save_str_len);
 }
 
-size_t myhtml_parser_add_text_with_charef(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length, mybool_t is_attibutes)
+size_t myhtml_parser_add_text_with_charef(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length, bool is_attibutes)
 {
     myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
     
@@ -266,7 +266,7 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
            token->type & MyHTML_TOKEN_TYPE_RCDATA ||
            token->type & MyHTML_TOKEN_TYPE_CDATA)
         {
-            token->length = myhtml_parser_add_text_with_charef(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length, myfalse);
+            token->length = myhtml_parser_add_text_with_charef(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length, false);
         }
         else
             token->length = myhtml_parser_add_text(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length);
@@ -301,7 +301,7 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
                 size_t begin = attr->value_begin;
                 attr->value_begin = attr->entry.length;
                 
-                attr->value_length = myhtml_parser_add_text_with_charef(qnode->tree, &attr->entry, qnode->text, begin, attr->value_length, mytrue);
+                attr->value_length = myhtml_parser_add_text_with_charef(qnode->tree, &attr->entry, qnode->text, begin, attr->value_length, true);
             }
             
             attr->my_namespace = MyHTML_NAMESPACE_HTML;

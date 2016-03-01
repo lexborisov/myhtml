@@ -108,7 +108,7 @@ void myhtml_tag_init_tags_categories(myhtml_tag_t* tags);
 void myhtml_tag_clean(myhtml_tag_t* tags);
 
 myhtml_tag_id_t myhtml_tag_add(myhtml_tag_t* tags, const char* key, size_t key_size,
-                              enum myhtml_tokenizer_state data_parser, mybool_t to_lcase);
+                              enum myhtml_tokenizer_state data_parser, bool to_lcase);
 
 void myhtml_tag_set_category(myhtml_tag_t* tags, myhtml_tag_id_t tag_idx,
                          enum myhtml_namespace my_namespace, enum myhtml_tag_categories cats);

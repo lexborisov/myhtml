@@ -112,7 +112,7 @@ struct mythread {
 mythread_t * mythread_create(void);
 myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size_t thread_count, size_t queue_size);
 void mythread_clean(mythread_t *mythread);
-mythread_t * mythread_destroy(mythread_t *mythread, mybool_t self_destroy);
+mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy);
 
 mythread_id_t myhread_create_stream(mythread_t *mythread, mythread_f func, myhtml_status_t *status);
 mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml_status_t *status, size_t count);

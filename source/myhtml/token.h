@@ -108,7 +108,7 @@ struct myhtml_token {
     size_t mcasync_token_id;
     size_t mcasync_attr_id;
     
-    mybool_t is_new_tmp;
+    bool is_new_tmp;
 };
 
 myhtml_token_t * myhtml_token_create(myhtml_tree_t* tree, size_t size);
@@ -125,12 +125,12 @@ void myhtml_token_delete(myhtml_token_t* token, myhtml_token_node_t* node);
 void myhtml_token_node_wait_for_done(myhtml_token_node_t* node);
 void myhtml_token_set_done(myhtml_token_node_t* node);
 
-mybool_t myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* node);
+bool myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* node);
 
 myhtml_token_attr_t * myhtml_token_attr_match(myhtml_token_t* token, myhtml_token_node_t* target, const char* key, size_t key_size, const char* value, size_t value_size);
 myhtml_token_attr_t * myhtml_token_attr_match_case(myhtml_token_t* token, myhtml_token_node_t* target, const char* key, size_t key_size, const char* value, size_t value_size);
 
-mybool_t myhtml_token_release_and_check_doctype_attributes(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype);
+bool myhtml_token_release_and_check_doctype_attributes(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype);
 
 void myhtml_token_adjust_mathml_attributes(myhtml_token_node_t* target);
 void myhtml_token_adjust_svg_attributes(myhtml_token_node_t* target);
@@ -142,10 +142,10 @@ void myhtml_token_node_text_append(myhtml_token_t* token, myhtml_token_node_t* d
 void myhtml_token_node_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx);
 void myhtml_token_node_attr_copy_with_check(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx);
 myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_token_node_t* node, size_t token_thread_idx, size_t attr_thread_idx);
-mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_attr_t* attr, myhtml_token_node_t* dest, size_t thread_idx);
+bool myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_attr_t* attr, myhtml_token_node_t* dest, size_t thread_idx);
 myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const char* name, size_t name_size);
-mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_node_t* dest);
-myhtml_token_node_t * myhtml_token_merged_two_token_string(myhtml_tree_t* tree, myhtml_token_node_t* token_to, myhtml_token_node_t* token_from, mybool_t cp_reverse);
+bool myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_node_t* dest);
+myhtml_token_node_t * myhtml_token_merged_two_token_string(myhtml_tree_t* tree, myhtml_token_node_t* token_to, myhtml_token_node_t* token_from, bool cp_reverse);
 void myhtml_token_set_replacement_character_for_null_token(myhtml_token_node_t* node);
 
 void myhtml_token_print_param_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out);

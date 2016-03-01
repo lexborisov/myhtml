@@ -57,14 +57,14 @@ myhtml_token_node_t * myhtml_insertion_fix_split_for_text_begin_ws(myhtml_tree_t
     return new_token;
 }
 
-mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     switch (token->tag_ctx_idx)
     {
         case MyHTML_TAG__TEXT:
         {
             if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
-                return myfalse;
+                return false;
             }
             
             myhtml_insertion_fix_emit_for_text_begin_ws(token);
@@ -78,7 +78,7 @@ mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t*
         case MyHTML_TAG__COMMENT:
         {
             myhtml_tree_node_insert_comment(tree, token, tree->document);
-            return myfalse;
+            return false;
         }
             
         case MyHTML_TAG__DOCTYPE:
@@ -89,7 +89,7 @@ mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t*
             myhtml_tree_node_insert_doctype(tree, token);
             
             // fix for tokenizer
-            if(tree->doctype.is_html == myfalse &&
+            if(tree->doctype.is_html == false &&
                (tree->doctype.attr_public == NULL ||
                tree->doctype.attr_system == NULL))
             {
@@ -97,7 +97,7 @@ mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t*
             }
             
             tree->insert_mode = MyHTML_INSERTION_MODE_BEFORE_HTML;
-            return myfalse;
+            return false;
         }
             
         default:
@@ -106,10 +106,10 @@ mybool_t myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t*
             break;
     }
     
-    return mytrue;
+    return true;
 }
 
-mybool_t myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -121,7 +121,7 @@ mybool_t myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_nod
             {
                 myhtml_tree_node_insert_root(tree, NULL, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_BEFORE_HEAD;
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -151,7 +151,7 @@ mybool_t myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_nod
                 // default, other token
                 myhtml_tree_node_insert_root(tree, NULL, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_BEFORE_HEAD;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_HTML:
@@ -165,15 +165,15 @@ mybool_t myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_nod
             {
                 myhtml_tree_node_insert_root(tree, NULL, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_BEFORE_HEAD;
-                return mytrue;
+                return true;
             }
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -185,7 +185,7 @@ mybool_t myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_nod
             {
                 tree->node_head = myhtml_tree_node_insert(tree, MyHTML_TAG_HEAD, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -206,7 +206,7 @@ mybool_t myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_nod
                 // default, other token
                 tree->node_head = myhtml_tree_node_insert(tree, MyHTML_TAG_HEAD, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG__COMMENT:
@@ -234,15 +234,15 @@ mybool_t myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_nod
             {
                 tree->node_head = myhtml_tree_node_insert(tree, MyHTML_TAG_HEAD, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
-                return mytrue;
+                return true;
             }
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -260,7 +260,7 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
             {
                 myhtml_tree_open_elements_pop(tree);
                 tree->insert_mode = MyHTML_INSERTION_MODE_AFTER_HEAD;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_TEMPLATE:
@@ -270,7 +270,7 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
                 
                 // oh God...
                 myhtml_tree_generate_all_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
-                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
                 myhtml_tree_template_insertion_pop(tree);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
@@ -300,7 +300,7 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
                 // default, other token
                 myhtml_tree_open_elements_pop(tree);
                 tree->insert_mode = MyHTML_INSERTION_MODE_AFTER_HEAD;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG__COMMENT:
@@ -421,15 +421,15 @@ mybool_t myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_tree_open_elements_pop(tree);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_AFTER_HEAD;
-                return mytrue;
+                return true;
             }
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_head_noscript(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_head_noscript(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -445,7 +445,7 @@ mybool_t myhtml_insertion_mode_in_head_noscript(myhtml_tree_t* tree, myhtml_toke
             {
                 myhtml_tree_open_elements_pop(tree);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -471,7 +471,7 @@ mybool_t myhtml_insertion_mode_in_head_noscript(myhtml_tree_t* tree, myhtml_toke
                 // default, other token
                 myhtml_tree_open_elements_pop(tree);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_BASEFONT:
@@ -491,15 +491,15 @@ mybool_t myhtml_insertion_mode_in_head_noscript(myhtml_tree_t* tree, myhtml_toke
             {
                 myhtml_tree_open_elements_pop(tree);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
-                return mytrue;
+                return true;
             }
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -510,7 +510,7 @@ mybool_t myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node
             {
                 myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_TEMPLATE:
@@ -540,7 +540,7 @@ mybool_t myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node
                 // default, other token
                 myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG__COMMENT:
@@ -592,15 +592,15 @@ mybool_t myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node
             {
                 myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-                return mytrue;
+                return true;
             }
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     myhtml_tag_context_t* tags_context = tree->myhtml->tags->context;
     
@@ -615,9 +615,9 @@ mybool_t myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml
         while (node->tag_idx == token->tag_ctx_idx && node->my_namespace == MyHTML_NAMESPACE_HTML)
         {
             myhtml_tree_generate_implied_end_tags(tree, token->tag_ctx_idx, MyHTML_NAMESPACE_HTML);
-            myhtml_tree_open_elements_pop_until_by_node(tree, node, myfalse);
+            myhtml_tree_open_elements_pop_until_by_node(tree, node, false);
             
-            return myfalse;
+            return false;
         }
         
         if(tags_context[node->tag_idx].cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL) {
@@ -625,10 +625,10 @@ mybool_t myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -713,7 +713,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 }
                 tree->insert_mode = MyHTML_INSERTION_MODE_AFTER_BODY;
                 
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_ADDRESS:
@@ -755,7 +755,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 //    parse error
                 
                 // step 3
-                myhtml_tree_open_elements_pop_until(tree, token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, false);
                 break;
             }
                 
@@ -772,7 +772,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                     tree->node_form = NULL;
                     
                     // step 3
-                    if(node == NULL || myhtml_tree_element_in_scope_by_node(tree, node, MyHTML_TAG_CATEGORIES_SCOPE) == myfalse) {
+                    if(node == NULL || myhtml_tree_element_in_scope_by_node(tree, node, MyHTML_TAG_CATEGORIES_SCOPE) == false) {
                         // parse error
                         break;
                     }
@@ -805,7 +805,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                     //    // parse error
                     
                     // step 4
-                    myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_FORM, MyHTML_NAMESPACE_HTML, myfalse);
+                    myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_FORM, MyHTML_NAMESPACE_HTML, false);
                 }
                 
                 break;
@@ -838,7 +838,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 //    // parse error
                 
                 // step 3
-                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML, false);
                 
                 break;
             }
@@ -860,7 +860,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 //    // parse error
                 
                 // step 3
-                myhtml_tree_open_elements_pop_until(tree, token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, false);
                 
                 break;
             }
@@ -966,7 +966,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 //    // parse error
                 
                 // step 3
-                myhtml_tree_open_elements_pop_until(tree, token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, false);
                 
                 // step 4
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
@@ -1108,7 +1108,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                 myhtml_tree_node_t* node = tree->open_elements->list[1];
                 
                 myhtml_tree_node_remove(node);
-                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_HTML, MyHTML_NAMESPACE_HTML, mytrue);
+                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_HTML, MyHTML_NAMESPACE_HTML, true);
                 
                 myhtml_tree_node_insert_html_element(tree, token);
                 
@@ -1259,7 +1259,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                     
                     if(myhtml_is_html_node(node, MyHTML_TAG_LI)) {
                         myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML);
-                        myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML, myfalse);
+                        myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML, false);
                         break;
                     }
                     else if(tags_context[node->tag_idx].cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL)
@@ -1294,12 +1294,12 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
                     
                     if(myhtml_is_html_node(node, MyHTML_TAG_DD)) {
                         myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_DD, MyHTML_NAMESPACE_HTML);
-                        myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_DD, MyHTML_NAMESPACE_HTML, myfalse);
+                        myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_DD, MyHTML_NAMESPACE_HTML, false);
                         break;
                     }
                     else if(myhtml_is_html_node(node, MyHTML_TAG_DT)) {
                         myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_DT, MyHTML_NAMESPACE_HTML);
-                        myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_DT, MyHTML_NAMESPACE_HTML, myfalse);
+                        myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_DT, MyHTML_NAMESPACE_HTML, false);
                         break;
                     }
                     else if(tags_context[node->tag_idx].cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL)
@@ -1334,7 +1334,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_BUTTON, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE)) {
                     myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
-                    myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_BUTTON, MyHTML_NAMESPACE_HTML, myfalse);
+                    myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_BUTTON, MyHTML_NAMESPACE_HTML, false);
                 }
                 
                 myhtml_tree_active_formatting_reconstruction(tree);
@@ -1484,7 +1484,7 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
             case MyHTML_TAG_IMAGE:
             {
                 token->tag_ctx_idx = MyHTML_TAG_IMG;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_ISINDEX:
@@ -1792,10 +1792,10 @@ mybool_t myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t*
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_text(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_text(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -1827,16 +1827,16 @@ mybool_t myhtml_insertion_mode_text(myhtml_tree_t* tree, myhtml_token_node_t* to
             myhtml_tree_open_elements_pop(tree);
             
             tree->insert_mode = tree->orig_insert_mode;
-            return mytrue;
+            return true;
         }
         
         myhtml_tree_node_insert_text(tree, token);
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -1849,7 +1849,7 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
                      // parse error
                     break;
                 
-                myhtml_tree_open_elements_pop_until_by_node(tree, table_node, myfalse);
+                myhtml_tree_open_elements_pop_until_by_node(tree, table_node, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
                 
                 break;
@@ -1878,9 +1878,9 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
                 
             default: {
                 // parse error
-                tree->foster_parenting = mytrue;
+                tree->foster_parenting = true;
                 myhtml_insertion_mode_in_body(tree, token);
-                tree->foster_parenting = myfalse;
+                tree->foster_parenting = false;
                 
                 break;
             }
@@ -1905,12 +1905,12 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
                     tree->orig_insert_mode = tree->insert_mode;
                     tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE_TEXT;
                     
-                    return mytrue;
+                    return true;
                 }
                 else {
-                    tree->foster_parenting = mytrue;
+                    tree->foster_parenting = true;
                     myhtml_insertion_mode_in_body(tree, token);
-                    tree->foster_parenting = myfalse;
+                    tree->foster_parenting = false;
                     
                     break;
                 }
@@ -1950,7 +1950,7 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
                 myhtml_tree_node_insert(tree, MyHTML_TAG_COLGROUP, MyHTML_NAMESPACE_HTML);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_COLUMN_GROUP;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_TBODY:
@@ -1973,7 +1973,7 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
                 myhtml_tree_node_insert(tree, MyHTML_TAG_TBODY, MyHTML_NAMESPACE_HTML);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE_BODY;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_TABLE:
@@ -1984,10 +1984,10 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
                 if(table_node == NULL)
                     break;
                 
-                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_TABLE, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_TABLE, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
                 
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_STYLE:
@@ -2001,9 +2001,9 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
             {
                 myhtml_token_node_wait_for_done(token);
                 if(myhtml_token_attr_match_case(tree->token, token, "type", 4, "hidden", 6) == NULL) {
-                    tree->foster_parenting = mytrue;
+                    tree->foster_parenting = true;
                     myhtml_insertion_mode_in_body(tree, token);
-                    tree->foster_parenting = myfalse;
+                    tree->foster_parenting = false;
                     
                     break;
                 }
@@ -2035,35 +2035,35 @@ mybool_t myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t
             default:
             {
                 // parse error
-                tree->foster_parenting = mytrue;
+                tree->foster_parenting = true;
                 myhtml_insertion_mode_in_body(tree, token);
-                tree->foster_parenting = myfalse;
+                tree->foster_parenting = false;
                 
                 break;
             }
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     // skip NULL, we replaced earlier
     if(token->tag_ctx_idx == MyHTML_TAG__TEXT)
     {
         if(token->type & MyHTML_TOKEN_TYPE_NULL)
-            return myfalse;
+            return false;
         
         myhtml_tree_token_list_append(tree->token_list, token);
     }
     else {
         myhtml_tree_token_list_t* token_list = tree->token_list;
-        mybool_t is_not_ws = myfalse;
+        bool is_not_ws = false;
         
         for(size_t i = 0; i < token_list->length; i++) {
             if((token_list->list[i]->type & MyHTML_TOKEN_TYPE_WHITESPACE) == 0) {
-                is_not_ws = mytrue;
+                is_not_ws = true;
                 break;
             }
         }
@@ -2071,9 +2071,9 @@ mybool_t myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_n
         if(is_not_ws)
         {
             for(size_t i = 0; i < token_list->length; i++) {
-                tree->foster_parenting = mytrue;
+                tree->foster_parenting = true;
                 myhtml_insertion_mode_in_body(tree, token_list->list[i]);
-                tree->foster_parenting = myfalse;
+                tree->foster_parenting = false;
             }
         }
         else {
@@ -2083,13 +2083,13 @@ mybool_t myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_n
         }
         
         tree->insert_mode = tree->orig_insert_mode;
-        return mytrue;
+        return true;
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -2108,7 +2108,7 @@ mybool_t myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node
                 //    // parse error
                 //}
                 
-                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
@@ -2129,11 +2129,11 @@ mybool_t myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node
                 //    // parse error
                 //}
                 
-                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_BODY:
@@ -2179,11 +2179,11 @@ mybool_t myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node
                 //    // parse error
                 //}
                 
-                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -2191,10 +2191,10 @@ mybool_t myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -2234,7 +2234,7 @@ mybool_t myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token
                     myhtml_tree_open_elements_pop(tree);
                     
                     tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
-                    return mytrue;
+                    return true;
                 }
                 
                 break;
@@ -2262,7 +2262,7 @@ mybool_t myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token
                     myhtml_tree_open_elements_pop(tree);
                     
                     tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
-                    return mytrue;
+                    return true;
                 }
                 
                 // parse error
@@ -2308,7 +2308,7 @@ mybool_t myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token
                     myhtml_tree_open_elements_pop(tree);
                     
                     tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
-                    return mytrue;
+                    return true;
                 }
                 
                 // parse error
@@ -2317,10 +2317,10 @@ mybool_t myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -2356,7 +2356,7 @@ mybool_t myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_n
                 myhtml_tree_open_elements_pop(tree);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
-                return mytrue;
+                return true;
             }
                
             case MyHTML_TAG_BODY:
@@ -2398,7 +2398,7 @@ mybool_t myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_n
                 myhtml_tree_node_insert(tree, MyHTML_TAG_TR, MyHTML_NAMESPACE_HTML);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_ROW;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_CAPTION:
@@ -2420,7 +2420,7 @@ mybool_t myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_n
                 myhtml_tree_open_elements_pop(tree);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -2428,10 +2428,10 @@ mybool_t myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_n
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -2464,7 +2464,7 @@ mybool_t myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* 
                 myhtml_tree_open_elements_pop(tree);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE_BODY;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_TBODY:
@@ -2484,7 +2484,7 @@ mybool_t myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* 
                 myhtml_tree_open_elements_pop(tree);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE_BODY;
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -2523,7 +2523,7 @@ mybool_t myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* 
                 myhtml_tree_open_elements_pop(tree);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE_BODY;
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -2531,10 +2531,10 @@ mybool_t myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* 
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -2558,7 +2558,7 @@ mybool_t myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t*
                     // parse error
                 }
                 
-                myhtml_tree_open_elements_pop_until(tree, token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, false);
                 
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
                 
@@ -2595,7 +2595,7 @@ mybool_t myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t*
                         myhtml_tree_close_cell(tree, node);
                 }
                 
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -2624,7 +2624,7 @@ mybool_t myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t*
                 
                 myhtml_tree_close_cell(tree, (td_node == NULL ? th_node : td_node));
                 
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -2632,10 +2632,10 @@ mybool_t myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t*
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -2696,7 +2696,7 @@ mybool_t myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_
                     // parse error
                     break;
                 
-                myhtml_tree_open_elements_pop_until_by_node(tree, select_node, myfalse);
+                myhtml_tree_open_elements_pop_until_by_node(tree, select_node, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
                 
                 break;
@@ -2768,7 +2768,7 @@ mybool_t myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_
                 if(select_node == NULL)
                     break;
                 
-                myhtml_tree_open_elements_pop_until_by_node(tree, select_node, myfalse);
+                myhtml_tree_open_elements_pop_until_by_node(tree, select_node, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
                 
                 break;
@@ -2784,10 +2784,10 @@ mybool_t myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_
                 if(select_node == NULL)
                     break;
                 
-                myhtml_tree_open_elements_pop_until_by_node(tree, select_node, myfalse);
+                myhtml_tree_open_elements_pop_until_by_node(tree, select_node, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
                 
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_SCRIPT:
@@ -2803,10 +2803,10 @@ mybool_t myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_select_in_table(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_select_in_table(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -2826,10 +2826,10 @@ mybool_t myhtml_insertion_mode_in_select_in_table(myhtml_tree_t* tree, myhtml_to
                 if(some_node == NULL)
                     break;
                 
-                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_SELECT, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_SELECT, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
                 
-                return mytrue;
+                return true;
             }
                 
             default:
@@ -2849,10 +2849,10 @@ mybool_t myhtml_insertion_mode_in_select_in_table(myhtml_tree_t* tree, myhtml_to
             case MyHTML_TAG_TH:
             {
                 // parse error
-                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_SELECT, MyHTML_NAMESPACE_HTML, myfalse);
+                myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_SELECT, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
                 
-                return mytrue;
+                return true;
             }
             
             default:
@@ -2860,10 +2860,10 @@ mybool_t myhtml_insertion_mode_in_select_in_table(myhtml_tree_t* tree, myhtml_to
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -2904,21 +2904,21 @@ mybool_t myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_nod
                 myhtml_tree_template_insertion_append(tree, MyHTML_INSERTION_MODE_IN_TABLE);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
-                return mytrue;
+                return true;
                 
             case MyHTML_TAG_COL:
                 myhtml_tree_template_insertion_pop(tree);
                 myhtml_tree_template_insertion_append(tree, MyHTML_INSERTION_MODE_IN_COLUMN_GROUP);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_COLUMN_GROUP;
-                return mytrue;
+                return true;
                 
             case MyHTML_TAG_TR:
                 myhtml_tree_template_insertion_pop(tree);
                 myhtml_tree_template_insertion_append(tree, MyHTML_INSERTION_MODE_IN_TABLE_BODY);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE_BODY;
-                return mytrue;
+                return true;
                 
             case MyHTML_TAG_TD:
             case MyHTML_TAG_TH:
@@ -2926,7 +2926,7 @@ mybool_t myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_nod
                 myhtml_tree_template_insertion_append(tree, MyHTML_INSERTION_MODE_IN_ROW);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_ROW;
-                return mytrue;
+                return true;
                 
             case MyHTML_TAG__END_OF_FILE:
             {
@@ -2938,12 +2938,12 @@ mybool_t myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_nod
                 }
                 
                 // parse error
-                myhtml_tree_open_elements_pop_until_by_node(tree, node, myfalse);
+                myhtml_tree_open_elements_pop_until_by_node(tree, node, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
                 myhtml_tree_template_insertion_pop(tree);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
                 
-                return mytrue;
+                return true;
             }
                 
              default:
@@ -2951,14 +2951,14 @@ mybool_t myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_nod
                 myhtml_tree_template_insertion_append(tree, MyHTML_INSERTION_MODE_IN_BODY);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-                return mytrue;
+                return true;
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -2976,7 +2976,7 @@ mybool_t myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node
                 
             default:
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-                return mytrue;
+                return true;
         }
     }
     else {
@@ -2988,7 +2988,7 @@ mybool_t myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node
                     return myhtml_insertion_mode_in_body(tree, token);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG__COMMENT:
@@ -3025,14 +3025,14 @@ mybool_t myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node
                 
             default:
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-                return mytrue;
+                return true;
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -3128,10 +3128,10 @@ mybool_t myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_nod
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
@@ -3192,15 +3192,15 @@ mybool_t myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE)
     {
         tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-        return mytrue;
+        return true;
     }
     else {
         switch (token->tag_ctx_idx)
@@ -3224,7 +3224,7 @@ mybool_t myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_toke
                     return myhtml_insertion_mode_in_body(tree, token);
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-                return mytrue;
+                return true;
             }
                 
             case MyHTML_TAG_HTML:
@@ -3237,17 +3237,17 @@ mybool_t myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_toke
                 
             default:
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
-                return mytrue;
+                return true;
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE) {
-        return myfalse;
+        return false;
     }
     else {
         switch (token->tag_ctx_idx)
@@ -3295,10 +3295,10 @@ mybool_t myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_foreign_content_end_other(myhtml_tree_t* tree, myhtml_tree_node_t* current_node, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_foreign_content_end_other(myhtml_tree_t* tree, myhtml_tree_node_t* current_node, myhtml_token_node_t* token)
 {
     if(current_node->tag_idx != token->tag_ctx_idx) {
         // parse error
@@ -3314,8 +3314,8 @@ mybool_t myhtml_insertion_mode_in_foreign_content_end_other(myhtml_tree_t* tree,
             current_node = list[i];
             
             if(current_node->tag_idx == token->tag_ctx_idx) {
-                myhtml_tree_open_elements_pop_until_by_node(tree, current_node, myfalse);
-                return myfalse;
+                myhtml_tree_open_elements_pop_until_by_node(tree, current_node, false);
+                return false;
             }
             
             i--;
@@ -3328,7 +3328,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content_end_other(myhtml_tree_t* tree,
     return tree->myhtml->insertion_func[tree->insert_mode](tree, token);
 }
 
-mybool_t myhtml_insertion_mode_in_foreign_content_start_other(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_foreign_content_start_other(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     myhtml_tree_node_t* adjusted_node = myhtml_tree_adjusted_current_node(tree);
     
@@ -3358,10 +3358,10 @@ mybool_t myhtml_insertion_mode_in_foreign_content_start_other(myhtml_tree_t* tre
         }
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE) {
         myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
@@ -3372,7 +3372,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_to
         {
             myhtml_tree_open_elements_pop(tree);
             // TODO: now script is disable, skip this
-            return myfalse;
+            return false;
         }
         
         return myhtml_insertion_mode_in_foreign_content_end_other(tree, current_node, token);
@@ -3470,7 +3470,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_to
                                             myhtml_tree_is_html_integration_point(tree, current_node) ||
                                             current_node->my_namespace == MyHTML_NAMESPACE_HTML));
                     
-                    return mytrue;
+                    return true;
                 }
             }
                 
@@ -3479,7 +3479,7 @@ mybool_t myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_to
         }
     }
     
-    return myfalse;
+    return false;
 }
 
 void myhtml_rules_stop_parsing(myhtml_tree_t* tree)
@@ -3487,7 +3487,7 @@ void myhtml_rules_stop_parsing(myhtml_tree_t* tree)
     // THIS! IS! -(SPARTA!)- STOP PARSING
 }
 
-mybool_t myhtml_rules_check_for_first_newline(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_rules_check_for_first_newline(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(tree->flags & MyHTML_TREE_FLAGS_PARSE_FLAG) {
         if(tree->flags &MyHTML_TREE_FLAGS_PARSE_FLAG_EMIT_NEWLINE)
@@ -3504,31 +3504,31 @@ mybool_t myhtml_rules_check_for_first_newline(myhtml_tree_t* tree, myhtml_token_
                         
                         if(token->length == 0) {
                             tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_PARSE_FLAG);
-                            return mytrue;
+                            return true;
                         }
                     }
                 }
                 else
-                    return mytrue;
+                    return true;
             }
         }
         
         tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_PARSE_FLAG);
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* token)
+bool myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     // for textarea && pre && listen
     if(myhtml_rules_check_for_first_newline(tree, token))
-        return myfalse;
+        return false;
     
     if(tree->state_of_builder != MyHTML_TOKENIZER_STATE_DATA)
         tree->state_of_builder = MyHTML_TOKENIZER_STATE_DATA;
     
-    mybool_t reprocess = myfalse;
+    bool reprocess = false;
     myhtml_tree_node_t* adjusted_node = myhtml_tree_adjusted_current_node(tree);
     
     if(tree->open_elements->length == 0 || adjusted_node->my_namespace == MyHTML_NAMESPACE_HTML) {
@@ -3557,7 +3557,7 @@ mybool_t myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* 
     else
         reprocess = myhtml_insertion_mode_in_foreign_content(tree, token);
     
-    if(reprocess == myfalse) {
+    if(reprocess == false) {
         tree->token_last_done = token;
     }
     

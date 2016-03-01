@@ -320,10 +320,10 @@ void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, 
     else {
         if(html_offset < qnode->length) {
             const char *tagname = myhtml_tree_incomming_buf_make_data(tree, qnode, qnode->length);
-            qnode->token->tag_ctx_idx = myhtml_tag_add(tags, tagname, qnode->length, MyHTML_TOKENIZER_STATE_DATA, mytrue);
+            qnode->token->tag_ctx_idx = myhtml_tag_add(tags, tagname, qnode->length, MyHTML_TOKENIZER_STATE_DATA, true);
         }
         else {
-            qnode->token->tag_ctx_idx = myhtml_tag_add(tags, &html[ (qnode->begin - tree->global_offset) ], qnode->length, MyHTML_TOKENIZER_STATE_DATA, mytrue);
+            qnode->token->tag_ctx_idx = myhtml_tag_add(tags, &html[ (qnode->begin - tree->global_offset) ], qnode->length, MyHTML_TOKENIZER_STATE_DATA, true);
         }
         
         myhtml_tag_set_category(tags, qnode->token->tag_ctx_idx, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_ORDINARY);
@@ -428,7 +428,7 @@ size_t myhtml_tokenizer_state_rcdata_end_tag_open(myhtml_tree_t* tree, mythread_
     return html_offset;
 }
 
-mybool_t _myhtml_tokenizer_state_andata_end_tag_name(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t *html_offset, size_t tmp_begin, enum myhtml_token_type type)
+bool _myhtml_tokenizer_state_andata_end_tag_name(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t *html_offset, size_t tmp_begin, enum myhtml_token_type type)
 {
     qnode->length = (*html_offset + tree->global_offset) - qnode->begin;
     myhtml_check_tag_parser(tree, qnode, html, *html_offset);
@@ -441,7 +441,7 @@ mybool_t _myhtml_tokenizer_state_andata_end_tag_name(myhtml_tree_t* tree, mythre
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_RCDATA;
         
         (*html_offset)++;
-        return myfalse;
+        return false;
     }
     
     if((qnode->begin - 2) > tmp_begin)
@@ -458,7 +458,7 @@ mybool_t _myhtml_tokenizer_state_andata_end_tag_name(myhtml_tree_t* tree, mythre
     qnode->token->tag_ctx_idx = tree->tmp_tag_id;
     qnode->token->type |= MyHTML_TOKEN_TYPE_CLOSE;
     
-    return mytrue;
+    return true;
 }
 
 size_t myhtml_tokenizer_state_rcdata_end_tag_name(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)

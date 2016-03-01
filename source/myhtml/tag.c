@@ -81,7 +81,7 @@ myhtml_tag_t * myhtml_tag_destroy(myhtml_tag_t* tags)
         free(tags->cache_name);
     
     tags->tree = mctree_destroy(tags->tree);
-    tags->index_nodes = mcobject_async_destroy(tags->index_nodes, mytrue);
+    tags->index_nodes = mcobject_async_destroy(tags->index_nodes, true);
     
     free(tags);
     
@@ -242,7 +242,7 @@ myhtml_tree_node_t * myhtml_tag_index_tree_node(myhtml_tag_index_node_t *index_n
 }
 
 myhtml_tag_id_t myhtml_tag_add(myhtml_tag_t* tags, const char* key, size_t key_size,
-                              enum myhtml_tokenizer_state data_parser, mybool_t to_lcase)
+                              enum myhtml_tokenizer_state data_parser, bool to_lcase)
 {
     // cache set
     size_t cache_begin = tags->cache_name_length;

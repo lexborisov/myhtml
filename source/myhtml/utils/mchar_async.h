@@ -113,7 +113,7 @@ char * mchar_async_crop_first_chars_without_cache(char *data, size_t crop_len);
 
 // cache
 void mchar_async_cache_init(mchar_async_cache_t *cache);
-mchar_async_cache_t * mchar_async_cache_destroy(mchar_async_cache_t *cache, mybool_t self_destroy);
+mchar_async_cache_t * mchar_async_cache_destroy(mchar_async_cache_t *cache, bool self_destroy);
 void mchar_async_cache_clean(mchar_async_cache_t *cache);
 
 void mchar_async_cache_add(mchar_async_cache_t *cache, void* value, size_t size);

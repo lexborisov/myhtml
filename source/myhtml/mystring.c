@@ -189,7 +189,7 @@ void myhtml_string_clean_all(myhtml_string_t* str)
     memset(str, 0, sizeof(myhtml_string_t));
 }
 
-myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, mybool_t destroy_obj)
+myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, bool destroy_obj)
 {
     if(str == NULL)
         return NULL;
@@ -296,7 +296,7 @@ char * myhtml_string_realloc(mchar_async_t *mchar, size_t node_id, myhtml_string
     return str->data;
 }
 
-mybool_t myhtml_string_release(myhtml_string_t* str, size_t size)
+bool myhtml_string_release(myhtml_string_t* str, size_t size)
 {
     char* tmp = mchar_async_realloc(str->mchar, str->node_idx, str->data, str->length, size);
     
@@ -305,9 +305,9 @@ mybool_t myhtml_string_release(myhtml_string_t* str, size_t size)
         str->data = tmp;
     }
     else
-        return myfalse;
+        return false;
     
-    return mytrue;
+    return true;
 }
 
 void _myhtml_string_charef_append(myhtml_string_t* str, const char sm)

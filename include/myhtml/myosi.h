@@ -20,10 +20,7 @@
 #define MyHTML_MYOSI_H
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -33,6 +30,18 @@ extern "C" {
 #if defined(_WIN32) || defined(_WIN64)
 #define IS_OS_WINDOWS
 #include <windows.h>
+#endif
+
+#if defined(_MSC_VER)
+#  define MyHTML_DEPRECATED(func, message) __declspec(deprecated(message)) func
+#elif defined(__GNUC__) || defined(__INTEL_COMPILER)
+#  define MyHTML_DEPRECATED(func, message) func __attribute__((deprecated(message)))
+#else
+#  define MyHTML_DEPRECATED(func, message) func
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #ifdef DEBUG_MODE
@@ -57,7 +66,11 @@ extern "C" {
             sizeof(__strcn__) * __myhtml__->__sizen__);                                     \
     }
 
-typedef enum {myfalse = 0, mytrue = 1} mybool_t;
+
+typedef enum {
+    MyHTML_DEPRECATED(myfalse, "use boolean false") = 0,
+    MyHTML_DEPRECATED(mytrue, "use boolean true") = 1
+} MyHTML_DEPRECATED(mybool_t, "use bool");
 
 // encoding
 // https://encoding.spec.whatwg.org/#the-encoding
@@ -379,7 +392,7 @@ typedef size_t (*myhtml_tokenizer_state_f)(myhtml_tree_t* tree, mythread_queue_n
 typedef void (*mythread_f)(mythread_id_t thread_id, mythread_queue_node_t *qnode);
 
 // parser insertion mode function
-typedef mybool_t (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_node_t* token);
+typedef bool (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_node_t* token);
 
 void * mymalloc(size_t size);
 void * myrealloc(void* dst, size_t size);

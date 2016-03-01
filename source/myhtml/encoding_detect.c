@@ -5091,30 +5091,30 @@ myhtml_encoding_trigram_result_t myhtml_encoding_detect_by_trigram(unsigned cons
     return res;
 }
 
-mybool_t myhtml_encoding_detect_russian_has_end(myhtml_encoding_trigram_result_t *res, size_t min_count, size_t min_value)
+bool myhtml_encoding_detect_russian_has_end(myhtml_encoding_trigram_result_t *res, size_t min_count, size_t min_value)
 {
     if(res->value >= min_value || res->count >= min_count)
-        return mytrue;
+        return true;
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_encoding_detect_unicode_has_end(myhtml_encoding_unicode_result_t *res, size_t max_bad_percent)
+bool myhtml_encoding_detect_unicode_has_end(myhtml_encoding_unicode_result_t *res, size_t max_bad_percent)
 {
     if(res->count_good == 0) {
         if(res->count_bad)
-            return myfalse;
+            return false;
         
-        return mytrue;
+        return true;
     }
     else if(res->count_bad == 0)
-        return mytrue;
+        return true;
     
     size_t percent_bad = (res->count_bad * 100) / res->count_good;
     if(percent_bad < max_bad_percent)
-        return mytrue;
+        return true;
     
-    return myfalse;
+    return false;
 }
 
 myhtml_encoding_unicode_result_t myhtml_encoding_detect_utf_8(unsigned const char *u_text, size_t length)
@@ -5203,7 +5203,7 @@ myhtml_encoding_unicode_result_t myhtml_encoding_detect_utf_16(unsigned const ch
     return res;
 }
 
-mybool_t myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding)
+bool myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding)
 {
     unsigned const char *u_text = (unsigned const char*)text;
     
@@ -5213,19 +5213,19 @@ mybool_t myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_enco
            u_text[2] == 0xBF)
         {
             *encoding = MyHTML_ENCODING_UTF_8;
-            return mytrue;
+            return true;
         }
     }
     
     if(length > 1) {
         if(u_text[0] == 0xFE && u_text[1] == 0xFF) {
             *encoding = MyHTML_ENCODING_UTF_16BE;
-            return mytrue;
+            return true;
         }
         
         if(u_text[0] == 0xFF && u_text[1] == 0xFE) {
             *encoding = MyHTML_ENCODING_UTF_16LE;
-            return mytrue;
+            return true;
         }
     }
     
@@ -5237,7 +5237,7 @@ mybool_t myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_enco
 //           u_text[3] == 0xFF)
 //        {
 //            *encoding = MyHTML_ENCODING_UTF_32BE;
-//            return mytrue;
+//            return true;
 //        }
 //        
 //        if(u_text[0] == 0xFF &&
@@ -5246,14 +5246,14 @@ mybool_t myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_enco
 //           u_text[3] == 0x00)
 //        {
 //            *encoding = MyHTML_ENCODING_UTF_32LE;
-//            return mytrue;
+//            return true;
 //        }
 //    }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding)
+bool myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding)
 {
     unsigned const char *u_text = (unsigned const char*)text;
     *encoding = MyHTML_ENCODING_DEFAULT;
@@ -5262,23 +5262,23 @@ mybool_t myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_
     
     if(res.count_bad == 0 && res.count_good >= 3) {
         *encoding = MyHTML_ENCODING_UTF_16LE;
-        return mytrue;
+        return true;
     }
     else if(res.count_bad >= 3 && res.count_good == 0) {
         *encoding = MyHTML_ENCODING_UTF_16BE;
-        return mytrue;
+        return true;
     }
     
     res = myhtml_encoding_detect_utf_8(u_text, length);
     if(myhtml_encoding_detect_unicode_has_end(&res, 10)) {
         *encoding = MyHTML_ENCODING_UTF_8;
-        return mytrue;
+        return true;
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_encoding_t *encoding)
+bool myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_encoding_t *encoding)
 {
     unsigned const char *u_text = (unsigned const char*)text;
     
@@ -5292,7 +5292,7 @@ mybool_t myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_
     res = myhtml_encoding_detect_by_trigram(u_text, length, myhtml_encoding_detect_trigrams_index_windows_1251, 1000, min_value);
     if(myhtml_encoding_detect_russian_has_end(&res, min_count, min_value)) {
         *encoding = MyHTML_ENCODING_WINDOWS_1251;
-        return mytrue;
+        return true;
     }
     
     max_value = res.value;
@@ -5303,7 +5303,7 @@ mybool_t myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_
     res = myhtml_encoding_detect_by_trigram(u_text, length, myhtml_encoding_detect_trigrams_index_koi8_r, 1000, min_value);
     if(myhtml_encoding_detect_russian_has_end(&res, min_count, min_value)) {
         *encoding = MyHTML_ENCODING_KOI8_R;
-        return mytrue;
+        return true;
     }
     
     if(max_value < res.value) {
@@ -5314,7 +5314,7 @@ mybool_t myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_
     res = myhtml_encoding_detect_by_trigram(u_text, length, myhtml_encoding_detect_trigrams_index_iso_8859_5, 1000, min_value);
     if(myhtml_encoding_detect_russian_has_end(&res, min_count, min_value)) {
         *encoding = MyHTML_ENCODING_ISO_8859_5;
-        return mytrue;
+        return true;
     }
     
     if(max_value < res.value) {
@@ -5325,7 +5325,7 @@ mybool_t myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_
     res = myhtml_encoding_detect_by_trigram(u_text, length, myhtml_encoding_detect_trigrams_index_x_mac_cyrillic, 1000, min_value);
     if(myhtml_encoding_detect_russian_has_end(&res, min_count, min_value)) {
         *encoding = MyHTML_ENCODING_X_MAC_CYRILLIC;
-        return mytrue;
+        return true;
     }
     
     if(max_value < res.value) {
@@ -5336,27 +5336,27 @@ mybool_t myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_
     res = myhtml_encoding_detect_by_trigram(u_text, length, myhtml_encoding_detect_trigrams_index_ibm866, 1000, min_value);
     if(myhtml_encoding_detect_russian_has_end(&res, min_count, min_value)) {
         *encoding = MyHTML_ENCODING_IBM866;
-        return mytrue;
+        return true;
     }
     
     if(max_value < res.value) {
         *encoding = MyHTML_ENCODING_IBM866;
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_encoding_detect(const char *text, size_t length, myhtml_encoding_t *encoding)
+bool myhtml_encoding_detect(const char *text, size_t length, myhtml_encoding_t *encoding)
 {
     *encoding = MyHTML_ENCODING_DEFAULT;
     
     if(myhtml_encoding_detect_unicode(text, length, encoding))
-        return mytrue;
+        return true;
     
     if(myhtml_encoding_detect_russian(text, length, encoding))
-        return mytrue;
+        return true;
     
-    return myfalse;
+    return false;
 }
 
 

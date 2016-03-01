@@ -320,7 +320,7 @@ void mythread_clean(mythread_t *mythread)
     }
 }
 
-mythread_t * mythread_destroy(mythread_t *mythread, mybool_t self_destroy)
+mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
 {
     if(mythread == NULL)
         return NULL;
@@ -429,15 +429,15 @@ mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml
     size_t start = mythread->pth_list_length;
     *status = MyHTML_STATUS_OK;
     
-    mybool_t init_first = myfalse;
+    bool init_first = false;
     
     for (size_t i = 0; i < count; i++) {
         
         mythread_id_t curr_id = _myhread_create_stream_raw(mythread, func, mythread_function_batch, status, count);
         
-        if(init_first == myfalse) {
+        if(init_first == false) {
             mythread->batch_first_id = curr_id;
-            init_first = mytrue;
+            init_first = true;
         }
         
         if(*status)

@@ -345,7 +345,7 @@ void myhtml_token_node_attr_copy(myhtml_token_t* token, myhtml_token_node_t* tar
     }
 }
 
-mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_attr_t* attr, myhtml_token_node_t* dest, size_t thread_idx)
+bool myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_attr_t* attr, myhtml_token_node_t* dest, size_t thread_idx)
 {
     myhtml_token_attr_t* new_attr = mcobject_async_malloc(token->attr_obj, thread_idx, NULL);
     new_attr->next = 0;
@@ -393,7 +393,7 @@ mybool_t myhtml_token_attr_copy(myhtml_token_t* token, myhtml_token_attr_t* attr
         dest->attr_last = new_attr;
     }
     
-    return mytrue;
+    return true;
 }
 
 myhtml_token_attr_t * myhtml_token_attr_match(myhtml_token_t* token, myhtml_token_node_t* target,
@@ -475,12 +475,12 @@ void myhtml_token_strict_doctype_by_token(myhtml_token_t* token, myhtml_token_no
         _myhtml_token_create_copy_srt(token, &data[attr->name_begin], attr->name_length, &return_doctype->attr_name);
         
         if(strcmp("html", return_doctype->attr_name))
-            return_doctype->is_html = myfalse;
+            return_doctype->is_html = false;
         else
-            return_doctype->is_html = mytrue;
+            return_doctype->is_html = true;
     }
     else {
-        return_doctype->is_html = myfalse;
+        return_doctype->is_html = false;
         
         //        if(return_doctype->attr_name)
         //            myfree(return_doctype->attr_name);
@@ -571,52 +571,52 @@ void myhtml_token_strict_doctype_by_token(myhtml_token_t* token, myhtml_token_no
     }
 }
 
-mybool_t myhtml_token_doctype_check_html_4_0(myhtml_tree_doctype_t* return_doctype)
+bool myhtml_token_doctype_check_html_4_0(myhtml_tree_doctype_t* return_doctype)
 {
     return strcmp(return_doctype->attr_public, "-//W3C//DTD HTML 4.0//EN") &&
     (return_doctype->attr_system == NULL || strcmp(return_doctype->attr_system, "http://www.w3.org/TR/REC-html40/strict.dtd"));
 }
 
-mybool_t myhtml_token_doctype_check_html_4_01(myhtml_tree_doctype_t* return_doctype)
+bool myhtml_token_doctype_check_html_4_01(myhtml_tree_doctype_t* return_doctype)
 {
     return strcmp(return_doctype->attr_public, "-//W3C//DTD HTML 4.01//EN") &&
     (return_doctype->attr_system == NULL || strcmp(return_doctype->attr_system, "http://www.w3.org/TR/html4/strict.dtd"));
 }
 
-mybool_t myhtml_token_doctype_check_xhtml_1_0(myhtml_tree_doctype_t* return_doctype)
+bool myhtml_token_doctype_check_xhtml_1_0(myhtml_tree_doctype_t* return_doctype)
 {
     if(return_doctype->attr_system == NULL)
-        return mytrue;
+        return true;
     
     return strcmp(return_doctype->attr_public, "-//W3C//DTD XHTML 1.0 Strict//EN") &&
     strcmp(return_doctype->attr_system, "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd");
 }
 
-mybool_t myhtml_token_doctype_check_xhtml_1_1(myhtml_tree_doctype_t* return_doctype)
+bool myhtml_token_doctype_check_xhtml_1_1(myhtml_tree_doctype_t* return_doctype)
 {
     if(return_doctype->attr_system == NULL)
-        return mytrue;
+        return true;
     
     return strcmp(return_doctype->attr_public, "-//W3C//DTD XHTML 1.1//EN") &&
     strcmp(return_doctype->attr_system, "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
 }
 
-mybool_t myhtml_token_release_and_check_doctype_attributes(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)
+bool myhtml_token_release_and_check_doctype_attributes(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_tree_doctype_t* return_doctype)
 {
     if(return_doctype == NULL)
-        return myfalse;
+        return false;
     
     myhtml_token_strict_doctype_by_token(token, target, return_doctype);
     
     if(return_doctype->attr_name == NULL)
-        return myfalse;
+        return false;
     
     if((return_doctype->is_html ||
        return_doctype->attr_public ||
        (return_doctype->attr_system && strcmp(return_doctype->attr_system, "about:legacy-compat"))))
     {
         if(return_doctype->attr_public == NULL)
-            return myfalse;
+            return false;
         
         if(return_doctype->is_html &&
            myhtml_token_doctype_check_html_4_0(return_doctype) &&
@@ -624,11 +624,11 @@ mybool_t myhtml_token_release_and_check_doctype_attributes(myhtml_token_t* token
            myhtml_token_doctype_check_xhtml_1_0(return_doctype) &&
            myhtml_token_doctype_check_xhtml_1_1(return_doctype))
         {
-            return myfalse;
+            return false;
         }
     }
     
-    return mytrue;
+    return true;
 }
 
 // oh
@@ -673,10 +673,10 @@ void myhtml_token_adjust_foreign_attributes(myhtml_token_node_t* target)
     }
 }
 
-mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_node_t* dest)
+bool myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_node_t* dest)
 {
     if(target == NULL || dest == NULL)
-        return myfalse;
+        return false;
     
     myhtml_token_attr_t* target_attr = target->attr_first;
     myhtml_token_attr_t* dest_attr   = dest->attr_first;
@@ -700,9 +700,9 @@ mybool_t myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_nod
     }
     
     if(target_attr == NULL && dest_attr == NULL)
-        return mytrue;
+        return true;
     
-    return myfalse;
+    return false;
 }
 
 myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const char* name, size_t name_length)
@@ -775,7 +775,7 @@ myhtml_token_attr_t * myhtml_token_attr_remove_by_name(myhtml_token_node_t* node
     return myhtml_token_attr_remove(node, myhtml_token_attr_by_name(node, name, name_length));
 }
 
-mybool_t myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* node)
+bool myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* node)
 {
     const char* html = node->my_str_tm.data;
     
@@ -785,14 +785,14 @@ mybool_t myhtml_token_is_whithspace(myhtml_tree_t* tree, myhtml_token_node_t* no
         // TODO: see and use myhtml_whithspace
         // U+0009 // U+000A // U+000C // U+000D // U+0020
         if(html[i] != '\t' && html[i] != '\n' && html[i] != '\f' && html[i] != '\r' && html[i] != ' ') {
-            return myfalse;
+            return false;
         }
     }
     
-    return mytrue;
+    return true;
 }
 
-myhtml_token_node_t * myhtml_token_merged_two_token_string(myhtml_tree_t* tree, myhtml_token_node_t* token_to, myhtml_token_node_t* token_from, mybool_t cp_reverse)
+myhtml_token_node_t * myhtml_token_merged_two_token_string(myhtml_tree_t* tree, myhtml_token_node_t* token_to, myhtml_token_node_t* token_from, bool cp_reverse)
 {
     myhtml_token_node_wait_for_done(token_to);
     myhtml_token_node_wait_for_done(token_from);

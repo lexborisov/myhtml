@@ -167,10 +167,10 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
     
     myhtml_destroy_marker(myhtml);
     
-    mythread_destroy(myhtml->thread, mytrue);
+    mythread_destroy(myhtml->thread, true);
     myhtml_tokenizer_state_destroy(myhtml);
     
-    myhtml->async_incoming_buf  = mcobject_async_destroy(myhtml->async_incoming_buf, mytrue);
+    myhtml->async_incoming_buf  = mcobject_async_destroy(myhtml->async_incoming_buf, true);
     myhtml->tags                = myhtml_tag_destroy(myhtml->tags);
     
     if(myhtml->insertion_func)
@@ -517,9 +517,9 @@ myhtml_tree_node_t * myhtml_node_insert_to_appropriate_place(myhtml_tree_t* tree
     
     enum myhtml_tree_insertion_mode mode;
     
-    tree->foster_parenting = mytrue;
+    tree->foster_parenting = true;
     target = myhtml_tree_appropriate_place_inserting_in_tree(tree, target, &mode);
-    tree->foster_parenting = myfalse;
+    tree->foster_parenting = false;
     
     myhtml_tree_node_insert_by_mode(tree, target, node, mode);
     
@@ -654,12 +654,12 @@ myhtml_tag_id_t myhtml_tag_id_by_name(myhtml_tree_t* tree, const char *tag_name,
     return (myhtml_tag_id_t)(tags_tree->nodes[idx].value);
 }
 
-mybool_t myhtml_node_is_close_self(myhtml_tree_node_t *node)
+bool myhtml_node_is_close_self(myhtml_tree_node_t *node)
 {
     if(node->token)
         return (node->token->type & MyHTML_TOKEN_TYPE_CLOSE_SELF);
     
-    return myfalse;
+    return false;
 }
 
 myhtml_tree_attr_t * myhtml_node_attribute_first(myhtml_tree_node_t *node)
@@ -1003,30 +1003,30 @@ const char * myhtml_tree_incomming_buf_make_data(myhtml_tree_t *tree, mythread_q
     return tree->temp_tag_name.data;
 }
 
-mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size)
+bool myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size)
 {
     size_t i = 0;
     
     for(;;) {
         if(i == size)
-            return mytrue;
+            return true;
         
         if((const unsigned char)(to_lowercase[i] > 0x40 && to_lowercase[i] < 0x5b ?
                                  (to_lowercase[i]|0x60) : to_lowercase[i]) != (const unsigned char)ab[i])
         {
-            return myfalse;
+            return false;
         }
         
         i++;
     }
     
-    return myfalse;
+    return false;
 }
 
-mybool_t myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id)
+bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id)
 {
     if(node == NULL)
-        return myfalse;
+        return false;
     
     return node->tag_idx == tag_id && node->my_namespace == MyHTML_NAMESPACE_HTML;
 }

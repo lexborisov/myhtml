@@ -113,10 +113,10 @@ size_t myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data);
 
 void myhtml_encoding_result_clean(myhtml_encoding_result_t *res);
 
-mybool_t myhtml_encoding_detect(const char *text, size_t length, myhtml_encoding_t *encoding);
-mybool_t myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_encoding_t *encoding);
-mybool_t myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding);
-mybool_t myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding);
+bool myhtml_encoding_detect(const char *text, size_t length, myhtml_encoding_t *encoding);
+bool myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_encoding_t *encoding);
+bool myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding);
+bool myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding);
     
 #ifdef __cplusplus
 } /* extern "C" */

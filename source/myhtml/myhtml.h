@@ -179,7 +179,7 @@ enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node);
 myhtml_tag_id_t myhtml_node_tag_id(myhtml_tree_node_t *node);
 const char * myhtml_tag_name_by_id(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, size_t *length);
 myhtml_tag_id_t myhtml_tag_id_by_name(myhtml_tree_t* tree, const char *tag_name, size_t length);
-mybool_t myhtml_node_is_close_self(myhtml_tree_node_t *node);
+bool myhtml_node_is_close_self(myhtml_tree_node_t *node);
 myhtml_tree_attr_t * myhtml_node_attribute_first(myhtml_tree_node_t *node);
 myhtml_tree_attr_t * myhtml_node_attribute_last(myhtml_tree_node_t *node);
 const char * myhtml_node_text(myhtml_tree_node_t *node, size_t *length);
@@ -212,8 +212,8 @@ void myhtml_incomming_buf_clean(myhtml_tree_t* tree, myhtml_incoming_buf_t *curr
 const char * myhtml_tree_incomming_buf_get_last(myhtml_tree_t *tree, myhtml_incoming_buf_t *inc_buf, size_t current_offset, size_t len);
 const char * myhtml_tree_incomming_buf_make_data(myhtml_tree_t *tree, mythread_queue_node_t *qnode, size_t len);
 
-mybool_t myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
-mybool_t myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id);
+bool myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
+bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id);
 
 /** 
  * Platform-specific hdef performance clock queries.
