@@ -45,7 +45,7 @@ struct myhtml_encoding_result {
 typedef myhtml_encoding_result_t;
 
 struct myhtml_encoding_trigram {
-    const char trigram[3];
+    const unsigned char trigram[3];
     size_t value;
 }
 typedef myhtml_encoding_trigram_t;
