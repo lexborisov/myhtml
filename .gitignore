@@ -5,3 +5,6 @@
 *.swo
 bin/*
 .tags*
+source/mycss/*
+source/myselectors/*
+docs/*
