@@ -19,19 +19,19 @@
     </section>
 
     <section class="main-content">
-      <p>Hi, there!  </p>
+      <p>Hi, there!</p>
 
 <p>As you might have guessed from the title, today's topic is HTML parsing.</p>
 
 <h3>
-<a id="preface" class="anchor" href="#preface" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>  Preface  </h3>
+<a id="preface" class="anchor" href="#preface" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Preface</h3>
 
 <p>Once I got an X idea, but its implementation required a calculated DOM with all its styles and goodies. Googling retrieved nothing useful. There are all kinds of bindings for WebKit, but they work not on all platforms, being very crippled to boot. In some projects, WebKit is wrapped in a frontend you work with via JavaScript. Something was tried out — with a poor outcome though. Resource consumption alone required a lot.</p>
 
 <h3>
 <a id="wants-and-wishes" class="anchor" href="#wants-and-wishes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Wants and Wishes</h3>
 
-<p>What was wanted didn't seemed much: </p>
+<p>What was wanted didn't seemed much:</p>
 
 <ul>
 <li>HTML renderer without super dependencies. Only a renderer, without the network layer. In other words, complete HTML computation till drawing in a window</li>
@@ -42,7 +42,7 @@
 <h3>
 <a id="and-so-i-joined-the-unequal-battle" class="anchor" href="#and-so-i-joined-the-unequal-battle" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>And so I joined the unequal battle!</h3>
 
-<p>I studied existing HTML and CSS parsers. They all fell into 3 conventional categories: </p>
+<p>I studied existing HTML and CSS parsers. They all fell into 3 conventional categories:</p>
 
 <ul>
 <li>Those parsing at random, with their own approach to HTML tokenization</li>
@@ -64,7 +64,7 @@
 
 <p>So, a fully featured DIV element will come out. By the way, SCRIPT tag tokenization is a hell of an effort. I had to draw a graph</p>
 
-<p>After all that had been seen, the decision was to code from scratch on C. And requirements to code appeared at once: </p>
+<p>After all that had been seen, the decision was to code from scratch on C. And requirements to code appeared at once:</p>
 
 <ul>
 <li>C99 support</li>
@@ -72,9 +72,9 @@
 <li>No external dependencies</li>
 </ul>
 
-<p> Why so tough — on C?! The solution had to be embedded so as to enable relatively easy framing for an external programming language.  </p>
+<p>Why so tough — on C?! The solution had to be embedded so as to enable relatively easy framing for an external programming language.</p>
 
-<p>Here's what was managed to be drafted hit and miss: </p>
+<p>Here's what was managed to be drafted hit and miss:</p>
 
 <ul>
 <li>HTML parser</li>
@@ -85,11 +85,11 @@
 
 <p>The renderer may deserve a long description, as the short phrase 'Renderer of inline elements' conceals a lot: handling fonts under specs, calculating text size, computing 'vertical-align', building an auxiliary tree to draw text and a whole lot more.</p>
 
-<p>As a result of 2–3 years of unhurried development, I started rewriting the draft copy into a production version. The first was — quite logically — the HTML parser. </p>
+<p>As a result of 2–3 years of unhurried development, I started rewriting the draft copy into a production version. The first was — quite logically — the HTML parser.</p>
 
-<p>As a result of 2–3 years of unhurried development, I started rewriting the draft copy into a production version. The first was — quite logically — the HTML parser.  </p>
+<p>As a result of 2–3 years of unhurried development, I started rewriting the draft copy into a production version. The first was — quite logically — the HTML parser.</p>
 
-<p>Now it has the following capabilities: </p>
+<p>Now it has the following capabilities:</p>
 
 <ul>
 <li>Parsing HTML asynchronously, processing tokens, building the tree</li>
@@ -115,11 +115,12 @@
 <p>Next in turn are the CSS parser and Renderer. 
 I'm writing them all by myself, still full of energy. </p>
 
-<p> Any help is very welcome!</p>
+<p>Any help is very welcome!</p>
 
 <p>Thanks for attention! Hope you'll enjoy it!</p>
 
 <p><a href="https://github.com/lexborisov/myhtml">The parser itself</a> </p>
+
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/lexborisov/myhtml">Myhtml</a> is maintained by <a href="https://github.com/lexborisov">lexborisov</a>.</span>
@@ -129,6 +130,15 @@ I'm writing them all by myself, still full of energy. </p>
 
     </section>
 
-  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-74753465-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
   </body>
 </html>
