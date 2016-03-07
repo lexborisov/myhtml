@@ -12,203 +12,114 @@
   <body>
     <section class="page-header">
       <h1 class="project-name">Myhtml</h1>
-      <h2 class="project-tagline">HTML Parser on Pure C with POSIX Threads Support</h2>
+      <h2 class="project-tagline">MyHTML — HTML Parser on Pure C with POSIX Threads Support</h2>
       <a href="https://github.com/lexborisov/myhtml" class="btn">View on GitHub</a>
       <a href="https://github.com/lexborisov/myhtml/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/lexborisov/myhtml/tarball/master" class="btn">Download .tar.gz</a>
     </section>
 
     <section class="main-content">
-      <h1>
-<a id="myhtml-cc-html-5-parser-using-threads" class="anchor" href="#myhtml-cc-html-5-parser-using-threads" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>MyHTML C/C++ HTML 5 Parser. Using threads.</h1>
+      <p>Hi, there!  </p>
 
-<p><a href="https://travis-ci.org/lexborisov/myhtml"><img src="https://travis-ci.org/lexborisov/myhtml.svg?branch=master" alt="Build Status"></a></p>
+<p>As you might have guessed from the title, today's topic is HTML parsing.</p>
 
-<p>MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.</p>
+<h3>
+<a id="preface" class="anchor" href="#preface" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>  Preface  </h3>
 
-<h2>
-<a id="now" class="anchor" href="#now" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Now</h2>
+<p>Once I got an X idea, but its implementation required a calculated DOM with all its styles and goodies. Googling retrieved nothing useful. There are all kinds of bindings for WebKit, but they work not on all platforms, being very crippled to boot. In some projects, WebKit is wrapped in a frontend you work with via JavaScript. Something was tried out — with a poor outcome though. Resource consumption alone required a lot.</p>
 
-<pre lang="text"><code>The current version is 0.4.5 - this is a beta version
-Release will have major version number 1
-</code></pre>
+<h3>
+<a id="wants-and-wishes" class="anchor" href="#wants-and-wishes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Wants and Wishes</h3>
 
-<h2>
-<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h2>
+<p>What was wanted didn't seemed much: </p>
 
 <ul>
-<li>Asynchronous Parsing, Build Tree and Indexation</li>
-<li>Fully conformant with the <a href="https://html.spec.whatwg.org/multipage/">HTML5 specification</a>
+<li>HTML renderer without super dependencies. Only a renderer, without the network layer. In other words, complete HTML computation till drawing in a window</li>
+<li>Ability to fit the envelop to a JavaScript engine</li>
+<li>Ability to easily make bindings for other programming languages</li>
+</ul>
+
+<h3>
+<a id="and-so-i-joined-the-unequal-battle" class="anchor" href="#and-so-i-joined-the-unequal-battle" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>And so I joined the unequal battle!</h3>
+
+<p>I studied existing HTML and CSS parsers. They all fell into 3 conventional categories: </p>
+
+<ul>
+<li>Those parsing at random, with their own approach to HTML tokenization</li>
+<li>Those parsing somehow under specs</li>
+<li>Those parsing strictly under specs</li>
+</ul>
+
+<p>Given No. 3, the subject seems to be dropped, doesn't it?! Nope, and here's why: all existing parsers are made on the principle 'Parse and Die'. It's when you give the program complete HTML, the program returns a result, but all subsequent manipulations except reading are impossible. This fact limits the operation of parsers. Remarkably, some push operating DOM off a level up. Here's the principle: we parse with a C parser and then — via bindings — try to work with DOM on, say, Python, which is a bit absurd.</p>
+
+<p>Further on, nobody allowed for wedging into the thread (HTML meant here) during parsing. This is critical for fitting a JavaScript engine. It's a long story — I'd better show:</p>
+
+<p>HTML document fragment:</p>
+
+<div class="highlight highlight-text-html-basic"><pre><span class="pl-s1">&lt;<span class="pl-ent">script</span>&gt;<span class="pl-c1">document</span>.<span class="pl-c1">write</span>(<span class="pl-s"><span class="pl-pds">"</span>&lt;div cl<span class="pl-pds">"</span></span>);&lt;/<span class="pl-ent">script</span>&gt;</span>ass="future"&gt;&lt;/<span class="pl-ent">div</span>&gt;</pre></div>
+
+<p>Outcome of any browser with JS:</p>
+
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">div</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>future<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">div</span>&gt;</pre></div>
+
+<p>So, a fully featured DIV element will come out. By the way, SCRIPT tag tokenization is a hell of an effort. I had to draw a graph</p>
+
+<p>After all that had been seen, the decision was to code from scratch on C. And requirements to code appeared at once: </p>
+
+<ul>
+<li>C99 support</li>
+<li>Capability to separate the HTML parser from the renderer, to be used standalone</li>
+<li>No external dependencies</li>
+</ul>
+
+<p> Why so tough — on C?! The solution had to be embedded so as to enable relatively easy framing for an external programming language.  </p>
+
+<p>Here's what was managed to be drafted hit and miss: </p>
+
+<ul>
+<li>HTML parser</li>
+<li>CSS parser</li>
+<li>Selectors</li>
+<li>Renderer of 'inline', 'inline-block', 'block', 'table'...</li>
+</ul>
+
+<p>The renderer may deserve a long description, as the short phrase 'Renderer of inline elements' conceals a lot: handling fonts under specs, calculating text size, computing 'vertical-align', building an auxiliary tree to draw text and a whole lot more.</p>
+
+<p>As a result of 2–3 years of unhurried development, I started rewriting the draft copy into a production version. The first was — quite logically — the HTML parser. </p>
+
+<p>As a result of 2–3 years of unhurried development, I started rewriting the draft copy into a production version. The first was — quite logically — the HTML parser.  </p>
+
+<p>Now it has the following capabilities: </p>
+
+<ul>
+<li>Parsing HTML asynchronously, processing tokens, building the tree</li>
+<li>Full HTML 5 support under specs <a href="https://html.spec.whatwg.org/multipage/">html.spec.whatwg.org/multipage</a>
 </li>
-<li>Two API - <a href="https://github.com/lexborisov/myhtml/blob/master/include/myhtml/api.h">high</a> and <a href="https://github.com/lexborisov/myhtml/tree/master/include/myhtml">low</a>-level</li>
-<li>Manipulation of elements: add, change, delete and other</li>
-<li>Manipulation of elements attributes: add, change, delete and other</li>
-<li>Support 34 character encoding by specification <a href="https://encoding.spec.whatwg.org/">encoding.spec.whatwg.org</a>
-</li>
-<li>Support detecting character encodings</li>
-<li>Support Single Mode parsing</li>
-<li>Support for fragment parsing</li>
-<li>Support for <a href="https://github.com/lexborisov/myhtml/blob/master/examples/chunks_high_level.c">parsing by chunks</a>
-</li>
-<li>No outside dependencies</li>
+<li>Having 2 APIs: <a href="https://github.com/lexborisov/myhtml/blob/master/include/myhtml/api.h">high</a> and <a href="https://github.com/lexborisov/myhtml/tree/master/include/myhtml">low</a>-level. The former is a public API having a description and everything it should, but unable to see structures. The latter is using sources directly</li>
+<li>Ability to manipulate elements: addition, removal, modification</li>
+<li>Ability to manipulate element attributes: addition, removal, modification</li>
+<li>Support of 34 input encodings. Output and all internal work is in UTF-8 only</li>
+<li>Ability to define text encoding Unicode now available: UTF-8, UTF-16LE, UTF-16BE (+ definition by BOM), and Russian ones: windows-1251, koi8-r, iso-8859-5, x-mac-Cyrillic, ibm866</li>
+<li>Ability to run in single mode — without threads</li>
+<li>Parsing HTML fragments</li>
+<li>
+<a href="https://github.com/lexborisov/myhtml/blob/master/examples/chunks_high_level.c">Parsing chunks</a>. Parsing HTML cuts (broken in arbitrary places) without prebuffering</li>
+<li>No external dependencies</li>
 <li>C99 support</li>
 <li>Passes all tree construction tests from <a href="https://github.com/html5lib/html5lib-tests">html5lib-tests</a>
 </li>
+<li><p>Advanced memory management. Memory is cashed, allocated in chunks and for objects. For example, removing 10 elements and then adding other 10 won't eat away memory for the new ones</p></li>
+<li><p>a whole lot more small but useful features to be described for long.</p></li>
 </ul>
 
-<h2>
-<a id="support-encodings-for-inputstream" class="anchor" href="#support-encodings-for-inputstream" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Support encodings for InputStream</h2>
+<p>Next in turn are the CSS parser and Renderer. 
+I'm writing them all by myself, still full of energy. </p>
 
-<pre lang="text"><code>X_USER_DEFINED, UTF_8, UTF_16LE, UTF_16BE, BIG5, EUC_KR, GB18030,
-IBM866, ISO_8859_10, ISO_8859_13, ISO_8859_14, ISO_8859_15, ISO_8859_16, ISO_8859_2, ISO_8859_3,
-ISO_8859_4, ISO_8859_5, ISO_8859_6, ISO_8859_7, ISO_8859_8, KOI8_R, KOI8_U, MACINTOSH,
-WINDOWS_1250, WINDOWS_1251, WINDOWS_1252, WINDOWS_1253, WINDOWS_1254, WINDOWS_1255, WINDOWS_1256,
-WINDOWS_1257, WINDOWS_1258, WINDOWS_874, X_MAC_CYRILLIC
-</code></pre>
+<p> Any help is very welcome!</p>
 
-<h2>
-<a id="support-encodings-for-output" class="anchor" href="#support-encodings-for-output" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Support encodings for output</h2>
+<p>Thanks for attention! Hope you'll enjoy it!</p>
 
-<p><strong>Program working in UTF-8 and returns all in UTF-8</strong></p>
-
-<h2>
-<a id="detecting-character-encodings" class="anchor" href="#detecting-character-encodings" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Detecting character encodings</h2>
-
-<p>Now it UTF-8, UTF-16LE, UTF16BE and russian windows-1251,  koi8-r, iso-8859-5, x-mac-cyrillic, ibm866</p>
-
-<h2>
-<a id="build-and-installation" class="anchor" href="#build-and-installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Build and Installation</h2>
-
-<p><strong>Make</strong></p>
-
-<div class="highlight highlight-source-shell"><pre>make</pre></div>
-
-<p>If successful copy lib/* and include/* at the right place for you</p>
-
-<div class="highlight highlight-source-shell"><pre>cp lib/<span class="pl-k">*</span> /usr/local/lib
-cp -r include/<span class="pl-k">*</span> /usr/local/include</pre></div>
-
-<p><strong>CMake</strong></p>
-
-<p>In myhtml/project directory:</p>
-
-<div class="highlight highlight-source-shell"><pre>cmake <span class="pl-c1">.</span>
-make
-sudo make install</pre></div>
-
-<p>Flags that can be passed to CMake:</p>
-
-<ul>
-<li>
-<code>MyHTML_OPTIMIZATION_LEVEL=-O2</code> set compiler optimization level. Default: -O2</li>
-<li>
-<code>CMAKE_INSTALL_LIBDIR=lib</code> set path to install created library. Default: lib</li>
-<li>
-<code>MyHTML_BUILD_SHARED=ON</code> build shared library. Default: ON</li>
-<li>
-<code>MyHTML_BUILD_STATIC=ON</code> build static library. Default: ON</li>
-<li>
-<code>MyHTML_INSTALL_HEADER=OFF</code> install header files. Default OFF</li>
-</ul>
-
-<p><em>for example</em></p>
-
-<div class="highlight highlight-source-shell"><pre>cmake <span class="pl-c1">.</span> -DCMAKE_INSTALL_LIBDIR=lib64 -DMyHTML_INSTALL_HEADER=ON</pre></div>
-
-<h2>
-<a id="build-with-your-program" class="anchor" href="#build-with-your-program" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Build with your program</h2>
-
-<p>I advise to build using clang, but decided to show examples of gcc</p>
-
-<p><strong>for example</strong></p>
-
-<p><em>build with shared library</em></p>
-
-<div class="highlight highlight-source-shell"><pre>gcc -Wall -Werror -O2 -lmyhtml your_program.c -o your_program</pre></div>
-
-<p><em>build with static library</em></p>
-
-<div class="highlight highlight-source-shell"><pre>gcc -Wall -Werror -O2 your_program.c /path/to/static_libmyhtml.a -o your_program</pre></div>
-
-<h2>
-<a id="future" class="anchor" href="#future" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Future</h2>
-
-<p>Works are in full swing</p>
-
-<ul>
-<li>make test &amp;&amp; make install</li>
-<li>Build in Windows OS</li>
-<li>external bindings (Perl, PHP, Python, Erlang, Node.js, C#, R, Ruby, Rust and other)</li>
-<li>...</li>
-<li>css parsing &amp;&amp; selectors (is ready, but I do not like it and will remodel)</li>
-<li>html render without js (in fact, he is ready, we do refactoring before publication, see previous)</li>
-</ul>
-
-<h2>
-<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h2>
-
-<p>None</p>
-
-<h2>
-<a id="in-other-languages-external-bindings" class="anchor" href="#in-other-languages-external-bindings" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>In other languages, external bindings</h2>
-
-<ul>
-<li>
-<a href="https://metacpan.org/release/HTML-MyHTML">Perl 5</a> module</li>
-</ul>
-
-<h2>
-<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h2>
-
-<p>See <a href="https://github.com/lexborisov/myhtml/tree/master/examples">examples</a> directory</p>
-
-<p><strong>Simple example</strong></p>
-
-<div class="highlight highlight-source-c"><pre>#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>stdio.h<span class="pl-pds">&gt;</span></span>
-#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>stdlib.h<span class="pl-pds">&gt;</span></span>
-#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>string.h<span class="pl-pds">&gt;</span></span>
-
-#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>myhtml/api.h<span class="pl-pds">&gt;</span></span>
-
-<span class="pl-k">int</span> <span class="pl-en">main</span>(<span class="pl-k">int</span> argc, <span class="pl-k">const</span> <span class="pl-k">char</span> * argv[])
-{
-    <span class="pl-k">char</span> html[] = <span class="pl-s"><span class="pl-pds">"</span>&lt;div&gt;&lt;span&gt;HTML&lt;/span&gt;&lt;/div&gt;<span class="pl-pds">"</span></span>;
-
-    <span class="pl-c">// basic init</span>
-    <span class="pl-c1">myhtml_t</span>* myhtml = <span class="pl-c1">myhtml_create</span>();
-    <span class="pl-c1">myhtml_init</span>(myhtml, MyHTML_OPTIONS_DEFAULT, <span class="pl-c1">1</span>, <span class="pl-c1">0</span>);
-
-    <span class="pl-c">// first tree init </span>
-    <span class="pl-c1">myhtml_tree_t</span>* tree = <span class="pl-c1">myhtml_tree_create</span>();
-    <span class="pl-c1">myhtml_tree_init</span>(tree, myhtml);
-
-    <span class="pl-c">// parse html</span>
-    <span class="pl-c1">myhtml_parse</span>(tree, MyHTML_ENCODING_UTF_8, html, <span class="pl-c1">strlen</span>(html));
-
-    <span class="pl-c">// release resources</span>
-    <span class="pl-c1">myhtml_tree_destroy</span>(tree);
-    <span class="pl-c1">myhtml_destroy</span>(myhtml);
-
-    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
-}</pre></div>
-
-<h2>
-<a id="author" class="anchor" href="#author" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>AUTHOR</h2>
-
-<p>Alexander Borisov <a href="mailto:lex.borisov@gmail.com">lex.borisov@gmail.com</a></p>
-
-<h2>
-<a id="copyright-and-license" class="anchor" href="#copyright-and-license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>COPYRIGHT AND LICENSE</h2>
-
-<p>Copyright 2015-2016 Alexander Borisov</p>
-
-<p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
-You may obtain a copy of the License at</p>
-
-<p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
-
-<p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and limitations under the License.</p>
+<p><a href="https://github.com/lexborisov/myhtml">The parser itself</a> </p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/lexborisov/myhtml">Myhtml</a> is maintained by <a href="https://github.com/lexborisov">lexborisov</a>.</span>
