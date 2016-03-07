@@ -2,16 +2,17 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
-    <title>Myhtml by lexborisov</title>
+    <title>MyHTML — HTML Parser on Pure C with POSIX Threads Support by Alexander Borisov</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <script src="js/jquery-2.2.1.min.js"></script>
+    <script src="js/work.js"></script>
   </head>
   <body>
     <section class="page-header">
-      <h1 class="project-name">Myhtml</h1>
       <h2 class="project-tagline">MyHTML — HTML Parser on Pure C with POSIX Threads Support</h2>
       <a href="https://github.com/lexborisov/myhtml" class="btn">View on GitHub</a>
       <a href="https://github.com/lexborisov/myhtml/zipball/master" class="btn">Download .zip</a>
@@ -32,7 +33,6 @@
 <a id="wants-and-wishes" class="anchor" href="#wants-and-wishes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Wants and Wishes</h3>
 
 <p>What was wanted didn't seemed much:</p>
-
 <ul>
 <li>HTML renderer without super dependencies. Only a renderer, without the network layer. In other words, complete HTML computation till drawing in a window</li>
 <li>Ability to fit the envelop to a JavaScript engine</li>
@@ -43,7 +43,6 @@
 <a id="and-so-i-joined-the-unequal-battle" class="anchor" href="#and-so-i-joined-the-unequal-battle" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>And so I joined the unequal battle!</h3>
 
 <p>I studied existing HTML and CSS parsers. They all fell into 3 conventional categories:</p>
-
 <ul>
 <li>Those parsing at random, with their own approach to HTML tokenization</li>
 <li>Those parsing somehow under specs</li>
@@ -53,19 +52,16 @@
 <p>Given No. 3, the subject seems to be dropped, doesn't it?! Nope, and here's why: all existing parsers are made on the principle 'Parse and Die'. It's when you give the program complete HTML, the program returns a result, but all subsequent manipulations except reading are impossible. This fact limits the operation of parsers. Remarkably, some push operating DOM off a level up. Here's the principle: we parse with a C parser and then — via bindings — try to work with DOM on, say, Python, which is a bit absurd.</p>
 
 <p>Further on, nobody allowed for wedging into the thread (HTML meant here) during parsing. This is critical for fitting a JavaScript engine. It's a long story — I'd better show:</p>
-
-<p>HTML document fragment:</p>
-
+HTML document fragment:
 <div class="highlight highlight-text-html-basic"><pre><span class="pl-s1">&lt;<span class="pl-ent">script</span>&gt;<span class="pl-c1">document</span>.<span class="pl-c1">write</span>(<span class="pl-s"><span class="pl-pds">"</span>&lt;div cl<span class="pl-pds">"</span></span>);&lt;/<span class="pl-ent">script</span>&gt;</span>ass="future"&gt;&lt;/<span class="pl-ent">div</span>&gt;</pre></div>
 
-<p>Outcome of any browser with JS:</p>
-
+Outcome of any browser with JS:
 <div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">div</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>future<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">div</span>&gt;</pre></div>
 
-<p>So, a fully featured DIV element will come out. By the way, SCRIPT tag tokenization is a hell of an effort. I had to draw a graph</p>
+<p>So, a fully featured DIV element will come out. By the way, SCRIPT tag tokenization is a hell of an effort. I had to draw a <span class="spoiler_title">graph</span>.</p>
+<div class="spoiler_text"><img src="img/script_data.png" alt="Script data tokenization. HTML 5"/></div>
 
 <p>After all that had been seen, the decision was to code from scratch on C. And requirements to code appeared at once:</p>
-
 <ul>
 <li>C99 support</li>
 <li>Capability to separate the HTML parser from the renderer, to be used standalone</li>
@@ -75,7 +71,6 @@
 <p>Why so tough — on C?! The solution had to be embedded so as to enable relatively easy framing for an external programming language.</p>
 
 <p>Here's what was managed to be drafted hit and miss:</p>
-
 <ul>
 <li>HTML parser</li>
 <li>CSS parser</li>
@@ -84,13 +79,9 @@
 </ul>
 
 <p>The renderer may deserve a long description, as the short phrase 'Renderer of inline elements' conceals a lot: handling fonts under specs, calculating text size, computing 'vertical-align', building an auxiliary tree to draw text and a whole lot more.</p>
-
-<p>As a result of 2–3 years of unhurried development, I started rewriting the draft copy into a production version. The first was — quite logically — the HTML parser.</p>
-
 <p>As a result of 2–3 years of unhurried development, I started rewriting the draft copy into a production version. The first was — quite logically — the HTML parser.</p>
 
 <p>Now it has the following capabilities:</p>
-
 <ul>
 <li>Parsing HTML asynchronously, processing tokens, building the tree</li>
 <li>Full HTML 5 support under specs <a href="https://html.spec.whatwg.org/multipage/">html.spec.whatwg.org/multipage</a>
@@ -108,8 +99,9 @@
 <li>C99 support</li>
 <li>Passes all tree construction tests from <a href="https://github.com/html5lib/html5lib-tests">html5lib-tests</a>
 </li>
-<li><p>Advanced memory management. Memory is cashed, allocated in chunks and for objects. For example, removing 10 elements and then adding other 10 won't eat away memory for the new ones</p></li>
-<li><p>a whole lot more small but useful features to be described for long.</p></li>
+<li>Advanced memory management. Memory is cashed, allocated in chunks and for objects. For example, removing 10 elements and then adding other 10 won't eat away memory for the new ones</li>
+<li style="list-style-type: none">&nbsp;</li>
+<li style="list-style-type: none">+ a whole lot more small but useful features to be described for long.</li>
 </ul>
 
 <p>Next in turn are the CSS parser and Renderer. 
@@ -120,8 +112,6 @@ I'm writing them all by myself, still full of energy. </p>
 <p>Thanks for attention! Hope you'll enjoy it!</p>
 
 <p><a href="https://github.com/lexborisov/myhtml">The parser itself</a> </p>
-
-
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/lexborisov/myhtml">Myhtml</a> is maintained by <a href="https://github.com/lexborisov">lexborisov</a>.</span>
 
@@ -129,7 +119,7 @@ I'm writing them all by myself, still full of energy. </p>
       </footer>
 
     </section>
-
+ 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

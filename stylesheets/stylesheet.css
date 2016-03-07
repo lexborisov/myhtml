@@ -15,6 +15,20 @@ a {
   a:hover {
     text-decoration: underline; }
 
+.spoiler_text {
+    display: none;
+}
+
+.spoiler_title {
+    font-weight: bold;
+    border-bottom: 1px dashed;
+    cursor: pointer;
+}
+
+.spoiler_title:hover {
+    color: #159957;
+}
+
 .btn {
   display: inline-block;
   margin-bottom: 1rem;
