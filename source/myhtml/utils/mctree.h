@@ -51,7 +51,8 @@ extern "C" {
     mctree_node_clean(__mctree__, __mctree__->nodes_length)
 
 #define mctree_make_first_idx(__mctree__, __key__, __size__) \
-    (((int)(__key__[0]) + (int)(__key__[__size__ - 1])) % __mctree__->start_size) + 1
+    ((myhtml_string_chars_lowercase_map[ (const unsigned char)(__key__[0]) ] + myhtml_string_chars_lowercase_map[ (const unsigned char)(__key__[__size__ - 1]) ]) % __mctree__->start_size) + 1
+
 
 typedef size_t mctree_index_t;
 

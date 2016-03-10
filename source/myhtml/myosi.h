@@ -384,7 +384,6 @@ typedef myhtml_token_attr_t myhtml_tree_attr_t;
 typedef struct myhtml_collection myhtml_collection_t;
 typedef struct myhtml myhtml_t;
 
-
 // parser state function
 typedef size_t (*myhtml_tokenizer_state_f)(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);
 

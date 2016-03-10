@@ -41,7 +41,7 @@ extern "C" {
 #include "myhtml/tree.h"
 #include "myhtml/mystring.h"
 
-#define MyTHREAD_SEM_NAME "mythread"
+#define MyTHREAD_SEM_NAME "myhtml"
 
 
 void mythread_function_stream(void *arg);
@@ -163,6 +163,8 @@ mythread_queue_t * mythread_queue_destroy(mythread_queue_t* token);
 
 void mythread_queue_node_clean(mythread_queue_node_t* qnode);
 
+size_t mythread_queue_count_used_node(mythread_queue_t* queue);
+mythread_queue_node_t * mythread_queue_get_first_node(mythread_queue_t* queue);
 mythread_queue_node_t * mythread_queue_get_prev_node(mythread_queue_t* queue);
 mythread_queue_node_t * mythread_queue_get_current_node(mythread_queue_t* queue);
 mythread_queue_node_t * mythread_queue_node_malloc(mythread_queue_t* queue, const char* text, size_t begin, myhtml_status_t *status);

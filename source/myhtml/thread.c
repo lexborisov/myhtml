@@ -565,6 +565,16 @@ mythread_queue_node_t * mythread_queue_get_current_node(mythread_queue_t* queue)
     return &queue->nodes[queue->nodes_pos][queue->nodes_length];
 }
 
+mythread_queue_node_t * mythread_queue_get_first_node(mythread_queue_t* queue)
+{
+    return &queue->nodes[0][0];
+}
+
+size_t mythread_queue_count_used_node(mythread_queue_t* queue)
+{
+    return queue->nodes_uses;
+}
+
 mythread_queue_node_t * mythread_queue_node_malloc(mythread_queue_t* queue, const char* text, size_t begin, myhtml_status_t *status)
 {
     queue->nodes_length++;

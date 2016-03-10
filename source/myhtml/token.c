@@ -881,21 +881,17 @@ void myhtml_token_print_param_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_no
 
 void myhtml_token_print_by_idx(myhtml_tree_t* tree, myhtml_token_node_t* node, FILE* out)
 {
-    myhtml_t* myhtml            = tree->myhtml;
-    mctree_node_t* mctree_nodes = myhtml->tags->tree->nodes;
-    
-    size_t mctree_id = mh_tags_get(node->tag_ctx_idx, mctree_id);
-    size_t tag_name_size = mctree_nodes[mctree_id].str_size;
+    const myhtml_tag_context_t *ctx = myhtml_tag_get_by_id(tree->tags, node->tag_ctx_idx);
     
     if(node->tag_ctx_idx == MyHTML_TAG__TEXT ||
        node->tag_ctx_idx == MyHTML_TAG__COMMENT)
     {
         if(node->length) {
-            fprintf(out, "%.*s: %.*s\n", (int)tag_name_size, mctree_nodes[mctree_id].str,
+            fprintf(out, "%.*s: %.*s\n", (int)ctx->name_length, ctx->name,
                     (int)node->length, &node->my_str_tm.data[node->begin]);
         }
         else {
-            fprintf(out, "%.*s is empty\n", (int)tag_name_size, mctree_nodes[mctree_id].str);
+            fprintf(out, "%.*s is empty\n", (int)ctx->name_length, ctx->name);
         }
     }
     else
@@ -907,8 +903,7 @@ void myhtml_token_print_by_idx(myhtml_tree_t* tree, myhtml_token_node_t* node, F
             fprintf(out, "<");
         }
         
-        fprintf(out, "%.*s tagid=\"%zu\"", (int)tag_name_size, mctree_nodes[mctree_id].str,
-                mh_tags_get(node->tag_ctx_idx, id));
+        fprintf(out, "%.*s tagid=\"%zu\"", (int)ctx->name_length, ctx->name, node->tag_ctx_idx);
         
         myhtml_token_print_attr(tree, node, out);
         

@@ -51,23 +51,14 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
     if(mcstatus != MCOBJECT_ASYNC_STATUS_OK)
         return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
     
-    myhtml->tags = myhtml_tag_create();
-    if(myhtml->tags == NULL) {
-        myhtml->parse_state_func = NULL;
-        myhtml->insertion_func = NULL;
-        myhtml->thread = NULL;
-        
-        return MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION;
-    }
+    // for tags node and other
+    myhtml->mchar = mchar_async_create(64, 4096);
     
-    status = myhtml_tag_init(myhtml->tags);
-    if(status) {
-        myhtml->parse_state_func = NULL;
-        myhtml->insertion_func = NULL;
-        myhtml->thread = NULL;
-        
-        return status;
-    }
+    myhtml->tag_index = mcobject_async_create();
+    mcstatus = mcobject_async_init(myhtml->tag_index, 128, 1024, sizeof(myhtml_tag_index_node_t));
+    
+    if(mcstatus != MCOBJECT_ASYNC_STATUS_OK)
+        return MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE;
     
     status = myhtml_tokenizer_state_init(myhtml);
     if(status) {
@@ -170,8 +161,8 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
     mythread_destroy(myhtml->thread, true);
     myhtml_tokenizer_state_destroy(myhtml);
     
-    myhtml->async_incoming_buf  = mcobject_async_destroy(myhtml->async_incoming_buf, true);
-    myhtml->tags                = myhtml_tag_destroy(myhtml->tags);
+    myhtml->async_incoming_buf = mcobject_async_destroy(myhtml->async_incoming_buf, true);
+    myhtml->tag_index = mcobject_async_destroy(myhtml->tag_index, true);
     
     if(myhtml->insertion_func)
         free(myhtml->insertion_func);
@@ -337,18 +328,6 @@ myhtml_encoding_t myhtml_encoding_get(myhtml_tree_t* tree)
     return tree->encoding;
 }
 
-
-/*
- * Helpers
- */
-myhtml_tag_t * myhtml_get_tag(myhtml_t* myhtml)
-{
-    if(myhtml)
-        return myhtml->tags;
-    
-    return NULL;
-}
-
 /*
  * Nodes
  */
@@ -402,9 +381,8 @@ myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_col
 
 myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection, const char* html, size_t length, myhtml_status_t *status)
 {
-    mctree_index_t tag_ctx_idx = mctree_search_lowercase(tree->myhtml->tags->tree, html, length);
-    
-    return myhtml_get_nodes_by_tag_id(tree, collection, tag_ctx_idx, status);
+    const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_name(tree->tags, html, length);
+    return myhtml_get_nodes_by_tag_id(tree, collection, tag_ctx->id, status);
 }
 
 /*
@@ -623,35 +601,34 @@ myhtml_tag_id_t myhtml_node_tag_id(myhtml_tree_node_t *node)
 
 const char * myhtml_tag_name_by_id(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, size_t *length)
 {
-    if(tree == NULL || tree->myhtml == NULL || tree->myhtml->tags == NULL ||
-       tree->myhtml->tags->context_length <= tag_id)
-    {
-        if(length)
-            *length = 0;
-        
-        return NULL;
-    }
+    if(length)
+        *length = 0;
     
-    mctree_node_t* mctree_nodes = tree->myhtml->tags->tree->nodes;
-    size_t mcid = tree->myhtml->tags->context[tag_id].mctree_id;
+    if(tree == NULL || tree->tags == NULL)
+        return NULL;
+    
+    const myhtml_tag_context_t *ctx = myhtml_tag_get_by_id(tree->tags, tag_id);
+    
+    if(ctx == NULL)
+        return NULL;
     
     if(length)
-        *length = mctree_nodes[mcid].str_size;
+        *length = ctx->name_length;
     
-    return mctree_nodes[mcid].str;
+    return ctx->name;
 }
 
 myhtml_tag_id_t myhtml_tag_id_by_name(myhtml_tree_t* tree, const char *tag_name, size_t length)
 {
-    if(tree == NULL || tree->myhtml == NULL || tree->myhtml->tags == NULL)
+    if(tree == NULL || tree->tags == NULL)
         return MyHTML_TAG__UNDEF;
     
-    myhtml_tag_t* tags = tree->myhtml->tags;
-    mctree_t* tags_tree = tags->tree;
+    const myhtml_tag_context_t *ctx = myhtml_tag_get_by_name(tree->tags, tag_name, length);
     
-    mctree_index_t idx = mctree_search_lowercase(tree->myhtml->tags->tree, tag_name, length);
+    if(ctx == NULL)
+        return MyHTML_TAG__UNDEF;
     
-    return (myhtml_tag_id_t)(tags_tree->nodes[idx].value);
+    return ctx->id;
 }
 
 bool myhtml_node_is_close_self(myhtml_tree_node_t *node)

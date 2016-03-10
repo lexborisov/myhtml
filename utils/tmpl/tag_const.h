@@ -20,6 +20,8 @@
 #define MyHTML_TAG_CONST_H
 #pragma once
 
+%DEFINED%
+
 #ifdef __cplusplus
 extern "C" {
 #endif

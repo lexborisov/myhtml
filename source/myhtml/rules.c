@@ -602,8 +602,6 @@ bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* 
 
 bool myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
-    myhtml_tag_context_t* tags_context = tree->myhtml->tags->context;
-    
     // step 1
     size_t i = tree->open_elements->length;
     while(i) {
@@ -620,7 +618,8 @@ bool myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_tok
             return false;
         }
         
-        if(tags_context[node->tag_idx].cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL) {
+        const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, node->tag_idx);
+        if(tag_ctx->cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL) {
             break;
         }
     }
@@ -873,12 +872,13 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_H6:
             {
                 myhtml_tree_node_t** list = tree->open_elements->list;
-                myhtml_tag_context_t* tags_context = tree->myhtml->tags->context;
                 
                 myhtml_tree_node_t* node = NULL;
                 size_t i = tree->open_elements->length;
                 while(i) {
                     i--;
+                    
+                    const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, list[i]->tag_idx);
                     
                     if((list[i]->tag_idx == MyHTML_TAG_H1 ||
                        list[i]->tag_idx == MyHTML_TAG_H2  ||
@@ -891,7 +891,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                         break;
                     }
                     // TODO: This is wrong!!!
-                    else if(tags_context[list[i]->tag_idx].cats[list[i]->my_namespace] & MyHTML_TAG_CATEGORIES_SCOPE)
+                    else if(tag_ctx->cats[list[i]->my_namespace] & MyHTML_TAG_CATEGORIES_SCOPE)
                         break;
                 }
                 
@@ -1249,20 +1249,20 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
                 
-                myhtml_tag_context_t* tags_context = tree->myhtml->tags->context;
                 size_t oel_index = tree->open_elements->length;
                 
                 while (oel_index) {
                     oel_index--;
                     
                     myhtml_tree_node_t* node = tree->open_elements->list[oel_index];
+                    const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, node->tag_idx);
                     
                     if(myhtml_is_html_node(node, MyHTML_TAG_LI)) {
                         myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML);
                         myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML, false);
                         break;
                     }
-                    else if(tags_context[node->tag_idx].cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL)
+                    else if(tag_ctx->cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL)
                     {
                         if(!((node->tag_idx == MyHTML_TAG_ADDRESS || node->tag_idx == MyHTML_TAG_DIV ||
                              node->tag_idx == MyHTML_TAG_P) && node->my_namespace == MyHTML_NAMESPACE_HTML))
@@ -1284,13 +1284,13 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 // this is copy/past
                 tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
                 
-                myhtml_tag_context_t* tags_context = tree->myhtml->tags->context;
                 size_t oel_index = tree->open_elements->length;
                 
                 while (oel_index) {
                     oel_index--;
                     
                     myhtml_tree_node_t* node = tree->open_elements->list[oel_index];
+                    const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, node->tag_idx);
                     
                     if(myhtml_is_html_node(node, MyHTML_TAG_DD)) {
                         myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_DD, MyHTML_NAMESPACE_HTML);
@@ -1302,7 +1302,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                         myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_DT, MyHTML_NAMESPACE_HTML, false);
                         break;
                     }
-                    else if(tags_context[node->tag_idx].cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL)
+                    else if(tag_ctx->cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL)
                     {
                         if(!((node->tag_idx == MyHTML_TAG_ADDRESS || node->tag_idx == MyHTML_TAG_DIV ||
                              node->tag_idx == MyHTML_TAG_P) && node->my_namespace == MyHTML_NAMESPACE_HTML))

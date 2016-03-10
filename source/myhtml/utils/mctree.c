@@ -16,6 +16,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
+#include "myhtml/utils/resources.h"
 #include "myhtml/utils/mctree.h"
 
 

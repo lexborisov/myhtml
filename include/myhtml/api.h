@@ -680,16 +680,6 @@ myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t
 myhtml_status_t
 myhtml_parse_chunk_end(myhtml_tree_t* tree);
 
-/**
- * Get myhtml_tag_t* from a myhtml_t*
- *
- * @param[in] myhtml_t*
- *
- * @return myhtml_tag_t* if exists, otherwise a NULL value
- */
-myhtml_tag_t*
-myhtml_get_tag(myhtml_t* myhtml);
-
 /***********************************************************************************
  *
  * MyHTML_TREE

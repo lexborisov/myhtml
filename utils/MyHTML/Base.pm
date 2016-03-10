@@ -37,7 +37,7 @@ sub save_src {
 }
 
 sub read_tmpl {
-        my ($self, $filename) = @_;
+        my ($self, $filename, $emit_start_ws) = @_;
         
         $filename = $self->{dirs}->{template}."/$filename";
         
@@ -49,7 +49,7 @@ sub read_tmpl {
         while (my $line = <$fh>)
         {
                 $line =~ s/\s+$//;
-                $line =~ s/^\s+//;
+                $line =~ s/^\s+// if $emit_start_ws;
                 next if $line =~ /^#\%/;
                 
                 push @data, $line;

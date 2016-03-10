@@ -166,6 +166,7 @@ struct myhtml_tree {
     mcsync_t*             sync;
     mythread_queue_t*     queue;
     mythread_queue_t*     single_queue;
+    myhtml_tag_t*         tags;
     
     // init id's
     size_t                  mcasync_token_id;
