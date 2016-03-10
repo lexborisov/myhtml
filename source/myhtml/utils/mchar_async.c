@@ -276,7 +276,7 @@ void mchar_async_node_delete(mchar_async_t *mchar_async, size_t node_idx)
     }
     
     if(node->cache.nodes)
-        free(node->cache.nodes);
+        mchar_async_cache_destroy(&node->cache, false);
     
     memset(node, 0, sizeof(mchar_async_node_t));
     

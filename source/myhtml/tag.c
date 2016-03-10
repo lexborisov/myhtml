@@ -62,7 +62,7 @@ myhtml_tag_t * myhtml_tag_destroy(myhtml_tag_t* tags)
     
     tags->tree = mctree_destroy(tags->tree);
     
-    mchar_async_destroy(tags->mchar, true);
+    mchar_async_node_delete(tags->mchar, tags->mchar_node);
     
     free(tags);
     

@@ -163,6 +163,7 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
     
     myhtml->async_incoming_buf = mcobject_async_destroy(myhtml->async_incoming_buf, true);
     myhtml->tag_index = mcobject_async_destroy(myhtml->tag_index, true);
+    myhtml->mchar = mchar_async_destroy(myhtml->mchar, true);
     
     if(myhtml->insertion_func)
         free(myhtml->insertion_func);
