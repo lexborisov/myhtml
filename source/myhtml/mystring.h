@@ -35,7 +35,7 @@ extern "C" {
 
 #define MyHTML_STRING_REALLOC_IF_NEED(__str__, __count__, __upto__)         \
     if((__str__->length + __count__) >= __str__->size) {                    \
-        myhtml_string_release(__str__, (str->size + __upto__));             \
+        myhtml_string_release(__str__, (__str__->length + __count__ + __upto__)); \
     }                                                                       \
 
 #define MyHTML_STRING_APPEND_BYTE_WITHOUT_REALLOC(__byte__, __str__)   \

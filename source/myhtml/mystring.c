@@ -165,7 +165,7 @@ bool myhtml_string_release(myhtml_string_t* str, size_t size)
 
 void _myhtml_string_charef_append(myhtml_string_t* str, const char sm)
 {
-    MyHTML_STRING_REALLOC_IF_NEED(str, (str->length + 2), 32);
+    MyHTML_STRING_REALLOC_IF_NEED(str, 2, 32);
     
     str->data[str->length] = sm;
     str->length++;
@@ -276,7 +276,7 @@ size_t _myhtml_string_append_char_references_state_2(myhtml_string_char_ref_chun
         if(current_entry->codepoints_len)
         {
             for (size_t i = 0; i < current_entry->codepoints_len; i++) {
-                MyHTML_STRING_REALLOC_IF_NEED(str, (chunk->begin + 4), 32);
+                MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
                 
                 chunk->begin += myhtml_encoding_codepoint_to_ascii_utf_8(current_entry->codepoints[i], &str->data[chunk->begin]);
             }
@@ -321,7 +321,7 @@ void _myhtml_string_append_char_references_state_end(myhtml_string_char_ref_chun
     str->length = chunk->begin;
     
     /* 4 is max utf8 byte + \0 */
-    MyHTML_STRING_REALLOC_IF_NEED(str, (chunk->begin + 5), 12);
+    MyHTML_STRING_REALLOC_IF_NEED(str, 5, 12);
     
     if(chunk->l_data <= 0x9F)
         chunk->l_data = replacement_character[chunk->l_data];
@@ -445,7 +445,7 @@ void myhtml_string_append_charef_end(myhtml_string_char_ref_chunk_t *chunk, myht
         const charef_entry_t *entry = chunk->charef_res.last_entry;
         
         for (size_t i = 0; i < entry->codepoints_len; i++) {
-            MyHTML_STRING_REALLOC_IF_NEED(str, (chunk->begin + 4), 32);
+            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
             
             chunk->begin += myhtml_encoding_codepoint_to_ascii_utf_8(entry->codepoints[i], &str->data[chunk->begin]);
         }
@@ -497,7 +497,10 @@ void myhtml_string_append_with_preprocessing(myhtml_string_t* str, const char* b
         }
         else if(u_buff[i] == 0x00)
         {
-            MyHTML_STRING_REALLOC_IF_NEED(str, (length + 4), 32);
+            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
+            
+            if((unsigned char *)str->data != data)
+                data = (unsigned char*)str->data;
             
             // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
             data[str->length] = 0xEF; str->length++;
@@ -533,7 +536,10 @@ void myhtml_string_append_lowercase_with_preprocessing(myhtml_string_t* str, con
         }
         else if(u_buff[i] == 0x00)
         {
-            MyHTML_STRING_REALLOC_IF_NEED(str, (length + 4), 32);
+            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
+            
+            if((unsigned char *)str->data != data)
+                data = (unsigned char*)str->data;
             
             // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
             data[str->length] = 0xEF; str->length++;
@@ -586,7 +592,7 @@ void myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(myhtml_
                 
                 if(str->data[str->length] == 0x00)
                 {
-                    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 4), 32);
+                    MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
                     
                     // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
                     str->data[str->length] = 0xEF; str->length++;
@@ -647,7 +653,7 @@ void myhtml_string_append_one_with_convert_encoding(myhtml_string_t* str, myhtml
 
 void myhtml_string_append_lowercase(myhtml_string_t* str, const char* data, size_t length)
 {
-    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), (length + 32));
+    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 32);
     
     unsigned char *ref = (unsigned char*)&str->data[str->length];
     unsigned char *buf = (unsigned char*)data;

@@ -141,7 +141,7 @@ void mchar_async_mem_malloc(mchar_async_t *mchar_async, mchar_async_node_t *node
         chunk->size = mchar_async->origin_size;
         
         if(length > chunk->size)
-            chunk->size += length;
+            chunk->size = length;
         
         chunk->begin = (char*)mymalloc(chunk->size * sizeof(char));
     }
@@ -406,10 +406,10 @@ char * mchar_async_realloc(mchar_async_t *mchar_async, size_t node_idx, char *da
         size_t next_size = (node->chunk->length - curr_size) + new_size;
         
         if(next_size <= node->chunk->size) {
-            node->chunk->length = next_size;
-            
             /* it`s Magic */
-            *((size_t*)(&node->chunk->begin[ ((node->chunk->length - new_size) - sizeof(size_t)) ])) = new_size;
+            *((size_t*)(&node->chunk->begin[ ((node->chunk->length - curr_size) - sizeof(size_t)) ])) = new_size;
+            
+            node->chunk->length = next_size;
             
             return data;
         }
