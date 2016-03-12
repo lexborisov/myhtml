@@ -508,7 +508,7 @@ bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* 
             case MyHTML_TAG_HTML:
             case MyHTML_TAG_BODY:
             {
-                myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
+                tree->node_body = myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return true;
             }
@@ -538,7 +538,7 @@ bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* 
                     myhtml_tree_node_insert_text(tree, new_token);
                 
                 // default, other token
-                myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
+                tree->node_body = myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return true;
             }
@@ -555,7 +555,7 @@ bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* 
                 
             case MyHTML_TAG_BODY:
             {
-                myhtml_tree_node_insert_html_element(tree, token);
+                tree->node_body = myhtml_tree_node_insert_html_element(tree, token);
                 
                 tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
@@ -590,7 +590,7 @@ bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* 
                 
             default:
             {
-                myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
+                tree->node_body = myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return true;
             }

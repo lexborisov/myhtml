@@ -794,6 +794,26 @@ myhtml_tree_node_t*
 myhtml_tree_get_document(myhtml_tree_t* tree);
 
 /**
+ * Get node HTML (Document -> HTML, Root of HTML Document)
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_tree_get_node_html(myhtml_tree_t* tree);
+
+/**
+ * Get node BODY (Document -> HTML -> BODY)
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_tree_get_node_body(myhtml_tree_t* tree);
+
+/**
  * Get mchar_async_t object
  *
  * @param[in] myhtml_tree_t*

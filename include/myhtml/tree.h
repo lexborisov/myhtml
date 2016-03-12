@@ -186,6 +186,8 @@ struct myhtml_tree {
     myhtml_tree_node_t*   document;
     myhtml_tree_node_t*   fragment;
     myhtml_tree_node_t*   node_head;
+    myhtml_tree_node_t*   node_html;
+    myhtml_tree_node_t*   node_body;
     myhtml_tree_node_t*   node_form;
     myhtml_tree_doctype_t doctype;
     
@@ -228,6 +230,8 @@ myhtml_t * myhtml_tree_get_myhtml(myhtml_tree_t* tree);
 myhtml_tag_t * myhtml_tree_get_tag(myhtml_tree_t* tree);
 myhtml_tag_index_t * myhtml_tree_get_tag_index(myhtml_tree_t* tree);
 myhtml_tree_node_t * myhtml_tree_get_document(myhtml_tree_t* tree);
+myhtml_tree_node_t * myhtml_tree_get_node_html(myhtml_tree_t* tree);
+myhtml_tree_node_t * myhtml_tree_get_node_body(myhtml_tree_t* tree);
 
 mchar_async_t * myhtml_tree_get_mchar(myhtml_tree_t* tree);
 size_t myhtml_tree_get_mchar_node_id(myhtml_tree_t* tree);

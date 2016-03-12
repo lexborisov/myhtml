@@ -127,6 +127,8 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->doctype.attr_public  = NULL;
     tree->doctype.attr_system  = NULL;
     
+    tree->node_html = 0;
+    tree->node_body = 0;
     tree->node_head = 0;
     tree->node_form = 0;
     
@@ -182,6 +184,8 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->doctype.attr_public  = NULL;
     tree->doctype.attr_system  = NULL;
     
+    tree->node_html = 0;
+    tree->node_body = 0;
     tree->node_head = 0;
     tree->node_form = 0;
     
@@ -341,6 +345,16 @@ myhtml_tag_index_t * myhtml_tree_get_tag_index(myhtml_tree_t* tree)
 myhtml_tree_node_t * myhtml_tree_get_document(myhtml_tree_t* tree)
 {
     return tree->document;
+}
+
+myhtml_tree_node_t * myhtml_tree_get_node_html(myhtml_tree_t* tree)
+{
+    return tree->node_html;
+}
+
+myhtml_tree_node_t * myhtml_tree_get_node_body(myhtml_tree_t* tree)
+{
+    return tree->node_body;
 }
 
 mchar_async_t * myhtml_tree_get_mchar(myhtml_tree_t* tree)
@@ -593,6 +607,8 @@ myhtml_tree_node_t * myhtml_tree_node_insert_root(myhtml_tree_t* tree, myhtml_to
     myhtml_tree_node_add_child(tree, tree->document, node);
     myhtml_tree_open_elements_append(tree, node);
     myhtml_tree_index_append(tree, node);
+    
+    tree->node_html = node;
     
     return node;
 }
