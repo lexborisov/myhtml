@@ -7,7 +7,10 @@ LIBPOSTFIX := .so
 LIBNAME    := myhtml
 LIBSTATIC_PREFIX  := static_
 
-CFLAGS ?= -Wall -Werror -O2 -fPIC --std=c99 -pthread -I..
+OPTIMIZATION_LEVEL ?= -O2
+
+CFLAGS ?= -Wall -Werror
+CFLAGS += $(OPTIMIZATION_LEVEL) -fPIC --std=c99 -pthread -I..
 
 ifeq ($(OS),Windows_NT)
 else

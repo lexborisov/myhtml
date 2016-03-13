@@ -5,13 +5,17 @@ CC ?= gcc
 LIBS := ../lib/static_libmyhtml.a
 LDLIBS := $(LIBS)
 
+OPTIMIZATION_LEVEL ?= -O2
+
+CFLAGS ?= -Wall -Werror
+CFLAGS += $(OPTIMIZATION_LEVEL) -fPIC --std=c99 -pthread -I../include
+
 ifeq ($(OS),Windows_NT)
 else
 	UNAM := $(shell uname -s)
 	ifeq ($(UNAM),Darwin)
-		CFLAGS := -Wall -Werror -O2 --std=c99 -I../include
 	else
-		CFLAGS := -Wall -Werror -O2 --std=c99 -pthread -D_POSIX_C_SOURCE=199309L -I../include
+		CFLAGS += -D_POSIX_C_SOURCE=199309L
 	endif
 endif
 

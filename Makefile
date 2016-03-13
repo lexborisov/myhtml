@@ -2,13 +2,11 @@ TARGET := source/myhtml
 SRCDIR := source/myhtml
 
 CC ?= gcc
-CFLAGS ?= -Wall -std=c99 -I.. -pthread
 
 SRCS := $(wildcard $(SRCDIR)/*.c)
 HDRS := $(wildcard $(SRCDIR)/*.h)
 OBJS := $(patsubst %.c,%.o,$(SRCS))
 
-CFLAGS  += -pthread
 SUBDIRS := examples
 LIBNAME := myhtml
 
