@@ -1,5 +1,5 @@
 /*
- Copyright 2015 Alexander Borisov
+ Copyright 2015-2016 Alexander Borisov
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ myhtml_tag_t * myhtml_tag_create(void)
 
 myhtml_status_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags)
 {
-    tags->context_size = 1024;
+    tags->context_size = MyHTML_TAG_LAST_ENTRY + 128;
     tags->context = (myhtml_tag_context_t*)mymalloc(sizeof(myhtml_tag_context_t) * tags->context_size);
     
     if(tags->context == NULL)
@@ -115,23 +115,32 @@ myhtml_tag_index_t * myhtml_tag_index_destroy(myhtml_tag_t* tags, myhtml_tag_ind
     return NULL;
 }
 
-void myhtml_tag_index_check_size(myhtml_tag_t* tags, myhtml_tag_index_t* index_tags)
+void myhtml_tag_index_check_size(myhtml_tag_t* tags, myhtml_tag_index_t* index_tags, myhtml_tag_id_t tag_id)
 {
-    if(index_tags->tags_size < tags->context_size) {
-        index_tags->tags = (myhtml_tag_index_entry_t*)myrealloc(index_tags->tags,
-                                                          sizeof(myhtml_tag_index_entry_t) *
-                                                          tags->context_size);
+    if(tag_id >= index_tags->tags_size) {
+        size_t new_size = tags->context_size + MyHTML_TAG_LAST_ENTRY;
         
-        memset(&index_tags->tags[index_tags->tags_size], 0, sizeof(myhtml_tag_index_entry_t)
-               * (tags->context_size - index_tags->tags_size));
+        myhtml_tag_index_entry_t *index_entries = (myhtml_tag_index_entry_t*)myrealloc(index_tags->tags,
+                                                                             sizeof(myhtml_tag_index_entry_t) *
+                                                                             new_size);
         
-        index_tags->tags_size = tags->context_size;
+        if(index_entries) {
+            index_tags->tags = index_entries;
+            
+            memset(&index_tags->tags[index_tags->tags_size], 0, sizeof(myhtml_tag_index_entry_t)
+                   * (new_size - index_tags->tags_size));
+            
+            index_tags->tags_size = new_size;
+        }
+        else {
+            // TODO: error
+        }
     }
 }
 
 myhtml_status_t myhtml_tag_index_add(myhtml_tag_t* tags, myhtml_tag_index_t* idx_tags, myhtml_tree_node_t* node)
 {
-    myhtml_tag_index_check_size(tags, idx_tags);
+    myhtml_tag_index_check_size(tags, idx_tags, node->tag_idx);
     
     myhtml_tag_index_entry_t* tag = &idx_tags->tags[node->tag_idx];
     
