@@ -80,6 +80,9 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     
     tree->mchar_node_id = mchar_async_node_add(tree->mchar);
     
+    // TODO: this code need send to some func
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+    
     tree->async_args = (myhtml_async_args_t*)calloc(myhtml->thread->pth_list_length, sizeof(myhtml_async_args_t));
     
     if(tree->async_args == NULL)
@@ -93,6 +96,17 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
         tree->async_args[(myhtml->thread->batch_first_id + i)].mchar_node_id = mchar_async_node_add(tree->mchar);
     }
     
+#else /* MyHTML_BUILD_WITHOUT_THREADS */
+    
+    tree->async_args = (myhtml_async_args_t*)calloc(1, sizeof(myhtml_async_args_t));
+    
+    if(tree->async_args == NULL)
+        return MyHTML_STATUS_TREE_ERROR_MEMORY_ALLOCATION;
+    
+    tree->async_args->mchar_node_id = tree->mchar_node_id;
+    
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+    
     tree->sync = mcsync_create();
     mcsync_init(tree->sync);
     
@@ -105,9 +119,11 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
 {
     myhtml_t* myhtml = tree->myhtml;
     
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
     for(size_t i = 0; i < myhtml->thread->batch_count; i++) {
         mchar_async_node_clean(tree->mchar, tree->async_args[(myhtml->thread->batch_first_id + i)].mchar_node_id);
     }
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
     
     mcobject_async_node_clean(tree->tree_obj, tree->mcasync_tree_id);
     mcobject_async_node_clean(tree->token->nodes_obj, tree->mcasync_token_id);
@@ -2627,8 +2643,12 @@ myhtml_status_t myhtml_tree_temp_tag_name_append(myhtml_tree_temp_tag_name_t* te
 
 void myhtml_tree_wait_for_last_done_token(myhtml_tree_t* tree, myhtml_token_node_t* token_for_wait)
 {
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+    
     const struct timespec tomeout = {0, 1000};
     while(tree->token_last_done != token_for_wait) {myhtml_thread_nanosleep(&tomeout);}
+    
+#endif
 }
 
 /* special tonek list */

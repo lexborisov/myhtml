@@ -260,8 +260,10 @@ myhtml_status_t myhtml_hperf_print(const char *name, uint64_t x, uint64_t y, FIL
     
     unsigned long long freq = myhtml_hperf_res(&status);
     
-    _MyHTML_CHECK_STATUS_AND_PRINT_ERROR {
-        fprintf(fh, "%s: %0.5f\n", name, (((float)(y - x) / (float)freq)));
+    if(freq) {
+        _MyHTML_CHECK_STATUS_AND_PRINT_ERROR {
+            fprintf(fh, "%s: %0.5f\n", name, (((float)(y - x) / (float)freq)));
+        }
     }
     
     return status;
@@ -272,8 +274,10 @@ myhtml_status_t myhtml_hperf_print_by_val(const char *name, uint64_t x, FILE *fh
     
     unsigned long long freq = myhtml_hperf_res(&status);
     
-    _MyHTML_CHECK_STATUS_AND_PRINT_ERROR {
-        fprintf(fh, "%s: %0.5f\n", name, ((float)x / (float)freq));
+    if(freq) {
+        _MyHTML_CHECK_STATUS_AND_PRINT_ERROR {
+            fprintf(fh, "%s: %0.5f\n", name, ((float)x / (float)freq));
+        }
     }
     
     return status;

@@ -7,7 +7,7 @@ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library wit
 ## Now
 
 ```text
-The current version is 0.5.1 - this is a beta version
+The current version is 0.5.2 - this is a beta version
 Release will have major version number 1
 ```
 
@@ -21,6 +21,7 @@ Release will have major version number 1
 - Support 34 character encoding by specification [encoding.spec.whatwg.org]
 - Support detecting character encodings
 - Support Single Mode parsing
+- Support Build without POSIX Threads
 - Support for fragment parsing
 - Support for [parsing by chunks]
 - No outside dependencies
@@ -60,6 +61,16 @@ make
 
 If successful copy lib/* and include/* at the right place for you
 
+Flags that can be passed to make:
+- `MyHTML_OPTIMIZATION_LEVEL=-O2` set compiler optimization level. Default: -O2
+- `MyHTML_BUILD_WITHOUT_THREADS=YES` build without POSIX Threads. Default: NO
+
+*for example*
+```bash
+make MyHTML_BUILD_WITHOUT_THREADS=NO
+```
+
+
 ```bash
 cp lib/* /usr/local/lib
 cp -r include/* /usr/local/include
@@ -81,6 +92,7 @@ Flags that can be passed to CMake:
 - `MyHTML_BUILD_SHARED=ON` build shared library. Default: ON
 - `MyHTML_BUILD_STATIC=ON` build static library. Default: ON
 - `MyHTML_INSTALL_HEADER=OFF` install header files. Default OFF
+- `MyHTML_BUILD_WITHOUT_THREADS=YES` build without POSIX Threads. Default: NO
 
 *for example*
 ```bash

@@ -7,10 +7,19 @@ LIBPOSTFIX := .so
 LIBNAME    := myhtml
 LIBSTATIC_PREFIX  := static_
 
-OPTIMIZATION_LEVEL ?= -O2
+MyHTML_OPTIMIZATION_LEVEL ?= -O2
 
 CFLAGS ?= -Wall -Werror
-CFLAGS += $(OPTIMIZATION_LEVEL) -fPIC --std=c99 -pthread -I..
+CFLAGS += $(MyHTML_OPTIMIZATION_LEVEL) -fPIC --std=c99 -I..
+
+MyHTML_BUILD_WITHOUT_THREADS ?= NO
+ifeq ($(MyHTML_BUILD_WITHOUT_THREADS),YES)
+    $(info Build without POSIX Threads)
+	CFLAGS += -DMyHTML_BUILD_WITHOUT_THREADS
+else
+    $(info Build with POSIX Threads)
+	CFLAGS += -pthread
+endif
 
 ifeq ($(OS),Windows_NT)
 else

@@ -18,6 +18,8 @@
 
 #include "myhtml/thread.h"
 
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+
 #if defined(IS_OS_WINDOWS)
 /***********************************************************************************
  *
@@ -234,7 +236,7 @@ void myhtml_thread_nanosleep(const struct timespec *tomeout)
 }
 
 #endif /* !defined(IS_OS_WINDOWS) */
-
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
 
 /*
  *
@@ -246,6 +248,21 @@ mythread_t * mythread_create(void)
 {
     return calloc(1, sizeof(mythread_t));
 }
+
+#ifdef MyHTML_BUILD_WITHOUT_THREADS
+
+myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size_t thread_count, size_t queue_size)
+{
+    myhtml_status_t status;
+    mythread->queue = mythread_queue_create(4096, &status);
+    
+    if(mythread->queue == NULL)
+        return status;
+    
+    return MyHTML_STATUS_OK;
+}
+
+#else /* MyHTML_BUILD_WITHOUT_THREADS */
 
 myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size_t thread_count, size_t queue_size)
 {
@@ -303,12 +320,16 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
     return MyHTML_STATUS_OK;
 }
 
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+
 void mythread_clean(mythread_t *mythread)
 {
     mythread->sys_last_error = 0;
     
     if(mythread->queue)
         mythread_queue_clean(mythread->queue);
+    
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
     
     size_t idx;
     for (idx = mythread->pth_list_root; idx < mythread->pth_list_length; idx++) {
@@ -318,12 +339,16 @@ void mythread_clean(mythread_t *mythread)
     for (idx = 0; idx < mythread->batch_count; idx++) {
         mythread->pth_list[( mythread->batch_first_id + idx )].data.use = idx;
     }
+    
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
 }
 
 mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
 {
     if(mythread == NULL)
         return NULL;
+    
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
     
     myhtml_thread_attr_destroy(mythread);
     
@@ -353,6 +378,8 @@ mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
         mythread->sem_prefix_length = 0;
     }
     
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+    
     if(mythread->queue)
         mythread_queue_destroy(mythread->queue);
     
@@ -363,6 +390,8 @@ mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
     
     return mythread;
 }
+
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
 
 mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_f func, void *work_func, myhtml_status_t *status, size_t total_count)
 {
@@ -467,6 +496,8 @@ mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml
     
     return mythread->batch_first_id;
 }
+
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
 
 // mythread queue functions
 mythread_queue_t * mythread_queue_create(size_t size, myhtml_status_t *status)
@@ -625,6 +656,19 @@ mythread_queue_node_t * mythread_queue_node_malloc(mythread_queue_t* queue, cons
     return qnode;
 }
 
+#ifdef MyHTML_BUILD_WITHOUT_THREADS
+
+void mythread_stream_quit_all(mythread_t *mythread) {}
+void mythread_batch_quit_all(mythread_t *mythread) {}
+void mythread_stream_pause_all(mythread_t *mythread) {}
+void mythread_batch_pause_all(mythread_t *mythread) {}
+void mythread_resume_all(mythread_t *mythread) {}
+void mythread_wait_all(mythread_t *mythread) {}
+void mythread_function_batch(void *arg) {}
+void mythread_function_stream(void *arg) {}
+
+#else /* MyHTML_BUILD_WITHOUT_THREADS */
+
 // mythread functions
 void mythread_stream_quit_all(mythread_t *mythread)
 {
@@ -756,5 +800,7 @@ void mythread_function_stream(void *arg)
     }
     while (1);
 }
+
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
 
 

@@ -200,7 +200,7 @@ size_t myhtml_parser_add_text_with_charef(myhtml_tree_t *tree, myhtml_string_t* 
 {
     myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
     
-    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, {}, is_attibutes, tree->encoding};
+    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, {0}, is_attibutes, tree->encoding};
     myhtml_encoding_result_clean(&str_chunk.res);
     
     size_t current_buf_offset = begin - inc_buf->offset;

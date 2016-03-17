@@ -78,6 +78,14 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
     myhtml->opt = opt;
     myhtml->thread = mythread_create();
     
+#ifdef MyHTML_BUILD_WITHOUT_THREADS
+    
+    status = mythread_init(myhtml->thread, NULL, thread_count, queue_size);
+    
+    if(status)
+        return status;
+    
+#else /* MyHTML_BUILD_WITHOUT_THREADS */
     switch (opt) {
         case MyHTML_OPTIONS_PARSE_MODE_SINGLE:
             status = mythread_init(myhtml->thread, "lastmac", 0, queue_size);
@@ -139,6 +147,8 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
             break;
     }
     
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+    
     myhtml_clean(myhtml);
     
     return status;
@@ -146,8 +156,8 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
 
 void myhtml_clean(myhtml_t* myhtml)
 {
-    mythread_queue_clean(myhtml->thread->queue);
     mythread_clean(myhtml->thread);
+    
     mcobject_async_node_all_clean(myhtml->async_incoming_buf);
 }
 
@@ -578,7 +588,7 @@ myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_t
             node->token->my_str_tm.length = 0;
     }
     
-    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, {}, 0, encoding};
+    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, {0}, 0, encoding};
     myhtml_encoding_result_clean(&str_chunk.res);
     
     myhtml_string_append_charef(&str_chunk, &node->token->my_str_tm, text, length);

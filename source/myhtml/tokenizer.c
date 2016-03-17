@@ -77,6 +77,8 @@ void myhtml_tokenizer_chunk_process(myhtml_tree_t* tree, const char* html, size_
     // add for a chunk
     myhtml_incomming_buf_add(myhtml, tree, tree->incoming_buf, html, html_length);
     
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+    
     if(myhtml->opt & MyHTML_OPTIONS_PARSE_MODE_SINGLE)
         tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
     
@@ -94,6 +96,13 @@ void myhtml_tokenizer_chunk_process(myhtml_tree_t* tree, const char* html, size_
         tree->queue = myhtml->thread->queue;
         myhtml_tokenizer_post(tree);
     }
+    
+#else
+    
+    tree->queue = myhtml->thread->queue;
+    tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
+    
+#endif
     
     if(tree->current_qnode == NULL) {
         myhtml_tokenizer_set_first_settings(tree, html, html_length);
@@ -167,12 +176,16 @@ void myhtml_tokenizer_end(myhtml_tree_t* tree)
     tree->current_qnode->token->tag_ctx_idx = MyHTML_TAG__END_OF_FILE;
     mh_queue_add(tree, NULL, 0, NULL);
     
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+    
     if((tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0 &&
        (tree->myhtml->opt & MyHTML_OPTIONS_PARSE_MODE_SINGLE) == 0)
     {
         myhtml_tokenizer_wait(tree);
         myhtml_tokenizer_pause(tree);
     }
+    
+#endif
     
     tree->flags |= MyHTML_TREE_FLAGS_PARSE_END;
     

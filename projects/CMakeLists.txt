@@ -11,7 +11,7 @@ set(MyHTML_PROJECT_SOURCE "${MyHTML_PROJECT_DIR_ROOT}/source")
 
 set(MyHTML_VERSION_MAJOR 0)
 set(MyHTML_VERSION_MINOR 5)
-set(MyHTML_VERSION_PATCH 1)
+set(MyHTML_VERSION_PATCH 2)
 set(MyHTML_VERSION_STRING "${MyHTML_VERSION_MAJOR}.${MyHTML_VERSION_MINOR}.${MyHTML_VERSION_PATCH}")
 
 project(${MyHTML_PROJECT_NAME})
@@ -32,6 +32,10 @@ endif()
 
 if(NOT DEFINED MyHTML_OPTIMIZATION_LEVEL)
   set(MyHTML_OPTIMIZATION_LEVEL "-O2")
+endif()
+
+if(NOT DEFINED MyHTML_BUILD_WITHOUT_THREADS)
+    set(MyHTML_BUILD_WITHOUT_THREADS "NO")
 endif()
 
 set(INSTALL_DLL_EXE_DIR "bin")
@@ -59,7 +63,18 @@ if(${CMAKE_C_COMPILER_ID} STREQUAL MSVC)
   
   message(STATUS "Windows set definitions")
 else()
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99 -fPIC -pthread")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99 -fPIC")
+  
+  if(MyHTML_BUILD_WITHOUT_THREADS STREQUAL "NO")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+  endif()
+endif()
+
+if(MyHTML_BUILD_WITHOUT_THREADS STREQUAL "YES")
+  message(STATUS "Build without POSIX Threads")
+  add_definitions(-DMyHTML_BUILD_WITHOUT_THREADS)
+else()
+  message(STATUS "Build with POSIX Threads")
 endif()
 
 ################

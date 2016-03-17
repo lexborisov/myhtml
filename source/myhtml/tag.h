@@ -26,10 +26,11 @@ extern "C" {
 
 #include "myhtml/myosi.h"
 
-#include "myhtml/utils/mctree.h"
 #include "myhtml/tag_const.h"
 #include "myhtml/tokenizer.h"
 #include "myhtml/tree.h"
+#include "myhtml/utils/mctree.h"
+#include "myhtml/utils/mchar_async.h"
 #include "myhtml/utils/mcobject_async.h"
 
 #define myhtml_tag_get(__tags__, __idx__, __attr__) __tags__->context[__idx__].__attr__
