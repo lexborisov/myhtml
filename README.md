@@ -50,6 +50,12 @@ Now it UTF-8, UTF-16LE, UTF16BE and russian windows-1251,  koi8-r, iso-8859-5, x
 
 [The Story of Creation]
 
+## Benchmark
+
+- [Article with charts]
+- [Benchmark code]
+- [Images and CSV]
+
 
 ## Build and Installation
 
@@ -198,3 +204,6 @@ See the License for the specific language governing permissions and limitations 
 [html5lib-tests]: https://github.com/html5lib/html5lib-tests
 [Perl 5]: https://metacpan.org/release/HTML-MyHTML
 [The Story of Creation]: http://lexborisov.github.io/myhtml/
+[Article with charts]: http://lexborisov.github.io/benchmark-html-persers/
+[Benchmark code]: https://github.com/lexborisov/benchmark-html-persers/tree/master
+[Images and CSV]: https://github.com/lexborisov/benchmark-html-persers/tree/master/Results
