@@ -878,7 +878,9 @@ size_t myhtml_tokenizer_state_markup_declaration_open(myhtml_tree_t* tree, mythr
     {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_COMMENT_START;
         
-        qnode->begin  = (html_offset + tree->global_offset) + 2;
+        html_offset += 2;
+        
+        qnode->begin  = html_offset + tree->global_offset;
         qnode->length = 0;
         
         return html_offset;
@@ -1307,8 +1309,14 @@ size_t myhtml_tokenizer_state_comment_start(myhtml_tree_t* tree, mythread_queue_
     }
     else if(html[html_offset] == '>')
     {
-        qnode->token->tag_ctx_idx = MyHTML_TAG__TEXT;
+        html_offset++;
+        
+        qnode->length = 0;
+        mh_queue_add(tree, html, html_offset, qnode);
+        
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
+        
+        return html_offset;
     }
     else {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_COMMENT;
@@ -1329,8 +1337,14 @@ size_t myhtml_tokenizer_state_comment_start_dash(myhtml_tree_t* tree, mythread_q
     }
     else if(html[html_offset] == '>')
     {
-        qnode->token->tag_ctx_idx = MyHTML_TAG__TEXT;
+        html_offset++;
+        
+        qnode->length = 0;
+        mh_queue_add(tree, html, html_offset, qnode);
+        
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
+        
+        return html_offset;
     }
     else {
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_COMMENT;
