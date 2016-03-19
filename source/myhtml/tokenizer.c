@@ -1416,6 +1416,11 @@ size_t myhtml_tokenizer_state_comment_end_bang(myhtml_tree_t* tree, mythread_que
             html_offset++;
             mh_queue_add(tree, html, html_offset, qnode);
         }
+        else {
+            html_offset++;
+            qnode->length = 0;
+            mh_queue_add(tree, html, html_offset, qnode);
+        }
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
     }
