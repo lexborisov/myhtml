@@ -876,7 +876,7 @@ size_t myhtml_tokenizer_state_markup_declaration_open(myhtml_tree_t* tree, mythr
     // for a comment
     if(tagname[0] == '-' && tagname[1] == '-')
     {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_COMMENT;
+        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_COMMENT_START;
         
         qnode->begin  = (html_offset + tree->global_offset) + 2;
         qnode->length = 0;
@@ -1325,7 +1325,7 @@ size_t myhtml_tokenizer_state_comment_start_dash(myhtml_tree_t* tree, mythread_q
     
     if(html[html_offset] == '-')
     {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_COMMENT_END_DASH;
+        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_COMMENT_END;
     }
     else if(html[html_offset] == '>')
     {
@@ -1410,10 +1410,12 @@ size_t myhtml_tokenizer_state_comment_end_bang(myhtml_tree_t* tree, mythread_que
 {
     if(html[html_offset] == '>')
     {
-        qnode->length = ((tree->global_offset + html_offset) - qnode->begin) - 3;
-        
-        html_offset++;
-        mh_queue_add(tree, html, html_offset, qnode);
+        if(((tree->global_offset + html_offset) - 3) >= qnode->begin) {
+            qnode->length = ((tree->global_offset + html_offset) - qnode->begin) - 3;
+            
+            html_offset++;
+            mh_queue_add(tree, html, html_offset, qnode);
+        }
         
         mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
     }
@@ -1481,6 +1483,9 @@ myhtml_status_t myhtml_tokenizer_state_init(myhtml_t* myhtml)
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_ATTRIBUTE_VALUE_UNQUOTED]      = myhtml_tokenizer_state_attribute_value_unquoted;
     
     // comments
+    myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT_START]                 = myhtml_tokenizer_state_comment_start;
+    myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT_START_DASH]            = myhtml_tokenizer_state_comment_start_dash;
+    myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT]                       = myhtml_tokenizer_state_comment;
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT]                       = myhtml_tokenizer_state_comment;
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT_END]                   = myhtml_tokenizer_state_comment_end;
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT_END_DASH]              = myhtml_tokenizer_state_comment_end_dash;
@@ -1571,6 +1576,10 @@ myhtml_status_t myhtml_tokenizer_state_init(myhtml_t* myhtml)
                               + MyHTML_TOKENIZER_STATE_ATTRIBUTE_VALUE_UNQUOTED)]      = myhtml_tokenizer_end_state_attribute_value_unquoted;
     
     // for ends comments
+    myhtml->parse_state_func[(MyHTML_TOKENIZER_STATE_LAST_ENTRY
+                              + MyHTML_TOKENIZER_STATE_COMMENT_START)]                 = myhtml_tokenizer_end_state_comment_start;
+    myhtml->parse_state_func[(MyHTML_TOKENIZER_STATE_LAST_ENTRY
+                              + MyHTML_TOKENIZER_STATE_COMMENT_START_DASH)]            = myhtml_tokenizer_end_state_comment_start_dash;
     myhtml->parse_state_func[(MyHTML_TOKENIZER_STATE_LAST_ENTRY
                               + MyHTML_TOKENIZER_STATE_COMMENT)]                       = myhtml_tokenizer_end_state_comment;
     myhtml->parse_state_func[(MyHTML_TOKENIZER_STATE_LAST_ENTRY

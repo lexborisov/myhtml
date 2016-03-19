@@ -160,6 +160,22 @@ size_t myhtml_tokenizer_end_state_attribute_value_unquoted(myhtml_tree_t* tree, 
     return html_offset;
 }
 
+size_t myhtml_tokenizer_end_state_comment_start(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+{
+    qnode->length = ((html_offset + tree->global_offset) - qnode->begin);
+    mh_queue_add(tree, html, html_offset, qnode);
+    
+    return html_offset;
+}
+
+size_t myhtml_tokenizer_end_state_comment_start_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
+{
+    qnode->length = ((html_offset + tree->global_offset) - qnode->begin);
+    mh_queue_add(tree, html, html_offset, qnode);
+    
+    return html_offset;
+}
+
 size_t myhtml_tokenizer_end_state_comment(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     qnode->length = ((html_offset + tree->global_offset) - qnode->begin);
