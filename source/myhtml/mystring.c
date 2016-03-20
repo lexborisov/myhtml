@@ -360,7 +360,7 @@ size_t _myhtml_string_append_char_references_state_4(myhtml_string_char_ref_chun
             return offset;
         }
         
-        if((offset - tmp_offset) < 7) {
+        if(chunk->l_data <= 0x10FFFF) {
             chunk->l_data = myhtml_string_chars_num_map[ buff[offset] ] + chunk->l_data * 10;
         }
         
@@ -375,7 +375,7 @@ size_t _myhtml_string_append_char_references_state_4(myhtml_string_char_ref_chun
 size_t _myhtml_string_append_char_references_state_5(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t offset, size_t size)
 {
     unsigned const char *u_buff = (unsigned const char*)buff;
-    size_t start_pos = chunk->begin + 3;
+    size_t current_len = (str->length - (chunk->begin + 3));
     
     size_t tmp_offset = offset, tmp_set_to = offset;
     
@@ -383,6 +383,10 @@ size_t _myhtml_string_append_char_references_state_5(myhtml_string_char_ref_chun
     {
         if(myhtml_string_chars_hex_map[ u_buff[offset] ] == 0xff)
         {
+            if(((offset - tmp_offset) + current_len) > 6) {
+                chunk->l_data = 0xFFFFFF;
+            }
+            
             chunk->state = 0;
             myhtml_string_append_with_preprocessing(str, &buff[tmp_offset], (tmp_set_to - tmp_offset));
             
@@ -397,7 +401,7 @@ size_t _myhtml_string_append_char_references_state_5(myhtml_string_char_ref_chun
             return offset;
         }
         
-        if((str->length - start_pos) < 6) {
+        if(((offset - tmp_offset) + current_len) < 7) {
             chunk->l_data <<= 4;
             chunk->l_data |= myhtml_string_chars_hex_map[ u_buff[offset] ];
             
@@ -405,6 +409,10 @@ size_t _myhtml_string_append_char_references_state_5(myhtml_string_char_ref_chun
         }
         
         offset++;
+    }
+    
+    if(((offset - tmp_offset) + current_len) > 6) {
+        chunk->l_data = 0xFFFFFF;
     }
     
     myhtml_string_append_with_preprocessing(str, &buff[tmp_offset], (offset - tmp_offset));
