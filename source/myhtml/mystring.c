@@ -360,7 +360,10 @@ size_t _myhtml_string_append_char_references_state_4(myhtml_string_char_ref_chun
             return offset;
         }
         
-        chunk->l_data = myhtml_string_chars_num_map[ buff[offset] ] + chunk->l_data * 10;
+        if((offset - tmp_offset) < 7) {
+            chunk->l_data = myhtml_string_chars_num_map[ buff[offset] ] + chunk->l_data * 10;
+        }
+        
         offset++;
     }
     
