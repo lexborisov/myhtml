@@ -140,6 +140,7 @@ None
 ## In other languages, external bindings
 
 - [Perl 5] module
+- [Crystal] binding
 
 
 ## Examples
@@ -203,6 +204,7 @@ See the License for the specific language governing permissions and limitations 
 [encoding.spec.whatwg.org]: https://encoding.spec.whatwg.org/
 [html5lib-tests]: https://github.com/html5lib/html5lib-tests
 [Perl 5]: https://metacpan.org/release/HTML-MyHTML
+[Crystal]: https://github.com/kostya/myhtml
 [The Story of Creation]: http://lexborisov.github.io/myhtml/
 [Article with charts]: http://lexborisov.github.io/benchmark-html-persers/
 [Benchmark code]: https://github.com/lexborisov/benchmark-html-persers/tree/master
