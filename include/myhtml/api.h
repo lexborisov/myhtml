@@ -1343,7 +1343,7 @@ myhtml_attribute_free(myhtml_tree_t *tree, myhtml_tree_attr_t *attr);
  * @return myhtml_tag_index_t* if successful, otherwise a NULL value
  */
 myhtml_tag_index_t*
-myhtml_tag_index_create(myhtml_tag_t* tag);
+myhtml_tag_index_create(void);
 
 /**
  * Allocating and Initialization resources for a tag index structure
