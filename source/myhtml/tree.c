@@ -373,6 +373,11 @@ myhtml_tree_node_t * myhtml_tree_get_node_body(myhtml_tree_t* tree)
     return tree->node_body;
 }
 
+myhtml_tree_node_t * myhtml_tree_get_node_head(myhtml_tree_t* tree)
+{
+    return tree->node_head;
+}
+
 mchar_async_t * myhtml_tree_get_mchar(myhtml_tree_t* tree)
 {
     return tree->mchar;

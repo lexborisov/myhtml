@@ -34,7 +34,7 @@
 
 #define MyHTML_VERSION_MAJOR 0
 #define MyHTML_VERSION_MINOR 5
-#define MyHTML_VERSION_PATCH 2
+#define MyHTML_VERSION_PATCH 3
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -804,6 +804,16 @@ myhtml_tree_node_t*
 myhtml_tree_get_node_html(myhtml_tree_t* tree);
 
 /**
+ * Get node HEAD (Document -> HTML -> HEAD)
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t*
+myhtml_tree_get_node_head(myhtml_tree_t* tree);
+
+/**
  * Get node BODY (Document -> HTML -> BODY)
  *
  * @param[in] myhtml_tree_t*
@@ -1337,8 +1347,6 @@ myhtml_attribute_free(myhtml_tree_t *tree, myhtml_tree_attr_t *attr);
 
 /**
  * Create tag index structure
- *
- * @param[in] myhtml_tag_t*
  *
  * @return myhtml_tag_index_t* if successful, otherwise a NULL value
  */
