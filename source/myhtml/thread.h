@@ -51,7 +51,6 @@ extern "C" {
 #ifdef MyHTML_BUILD_WITHOUT_THREADS
 
 struct mythread {
-    mythread_queue_t *queue;
     int sys_last_error;
 };
 
@@ -76,8 +75,6 @@ struct mythread_context {
     
     mythread_f func;
     
-    volatile size_t use;
-    volatile mythread_queue_node_t *qnode;
     volatile size_t t_count;
     volatile mythread_thread_opt_t opt;
     
@@ -104,7 +101,7 @@ struct mythread {
     size_t pth_list_size;
     size_t pth_list_root;
     
-    mythread_queue_t *queue;
+    mythread_queue_list_t *queue_list;
     
     char  *sem_prefix;
     size_t sem_prefix_length;
@@ -134,14 +131,16 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
 void mythread_clean(mythread_t *mythread);
 mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy);
 
-void mythread_stream_pause_all(mythread_t *mythread);
-void mythread_batch_pause_all(mythread_t *mythread);
-
-void mythread_wait_all(mythread_t *mythread);
-void mythread_resume_all(mythread_t *mythread);
-
 void mythread_stream_quit_all(mythread_t *mythread);
 void mythread_batch_quit_all(mythread_t *mythread);
+
+void mythread_stream_stop_all(mythread_t *mythread);
+void mythread_batch_stop_all(mythread_t *mythread);
+
+void mythread_stop_all(mythread_t *mythread);
+void mythread_wait_all_for_done(mythread_t *mythread);
+void mythread_resume_all(mythread_t *mythread);
+void mythread_suspend_all(mythread_t *mythread);
 
 // queue
 struct mythread_queue_node {
@@ -155,9 +154,22 @@ struct mythread_queue_node {
     const char* text;
 };
 
-struct mythread_queue_list {
-    mythread_queue_list_t *next;
+struct mythread_queue_thread_param {
+    volatile size_t use;
+};
+
+struct mythread_queue_list_entry {
+    mythread_queue_list_entry_t *next;
+    mythread_queue_list_entry_t *prev;
     mythread_queue_t *queue;
+    mythread_queue_thread_param_t *thread_param;
+};
+
+struct mythread_queue_list {
+    mythread_queue_list_entry_t *first;
+    mythread_queue_list_entry_t *last;
+    
+    volatile size_t count;
 };
 
 struct mythread_queue {
@@ -182,7 +194,15 @@ size_t mythread_queue_count_used_node(mythread_queue_t* queue);
 mythread_queue_node_t * mythread_queue_get_first_node(mythread_queue_t* queue);
 mythread_queue_node_t * mythread_queue_get_prev_node(mythread_queue_t* queue);
 mythread_queue_node_t * mythread_queue_get_current_node(mythread_queue_t* queue);
-mythread_queue_node_t * mythread_queue_node_malloc(mythread_queue_t* queue, const char* text, size_t begin, myhtml_status_t *status);
+mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythread_queue_t* queue, const char* text, size_t begin, myhtml_status_t *status);
+
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+mythread_queue_list_t * mythread_queue_list_create(mythread_t *mythread, size_t size, myhtml_status_t *status);
+mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t *mythread, mythread_queue_t *queue, myhtml_status_t *status);
+mythread_queue_list_entry_t * mythread_queue_list_entry_delete(mythread_t *mythread, mythread_queue_list_entry_t *entry, bool destroy_queue);
+void mythread_queue_list_entry_clean(mythread_t *mythread, mythread_queue_list_entry_t *entry);
+void mythread_queue_list_entry_wait_for_done(mythread_t *mythread, mythread_queue_list_entry_t *entry);
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -33,6 +33,12 @@ mctree_t * mctree_create(size_t start_size)
     return mctree;
 }
 
+void mctree_clean(mctree_t* mctree)
+{
+    mctree->nodes_length = mctree->start_size + 1;
+    memset(mctree->nodes, 0, sizeof(mctree_node_t) * mctree->nodes_size);
+}
+
 mctree_t * mctree_destroy(mctree_t* mctree)
 {
     if(mctree == NULL)

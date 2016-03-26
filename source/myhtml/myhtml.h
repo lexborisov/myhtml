@@ -67,7 +67,7 @@ extern "C" {
         myhtml_parser_worker(0, __tree__->current_qnode); \
         while(myhtml_rules_tree_dispatcher(__tree__, __tree__->current_qnode->token)){}; \
     } \
-    __tree__->current_qnode = mythread_queue_node_malloc(__tree__->queue, __html__, (__tree__->global_offset + __begin__), NULL); \
+    __tree__->current_qnode = mythread_queue_node_malloc(__tree__->myhtml->thread, __tree__->queue, __html__, (__tree__->global_offset + __begin__), NULL); \
     __tree__->current_qnode->tree = __tree__; \
     __tree__->current_qnode->prev = __current__; \
     if(__current__) \

@@ -847,10 +847,19 @@ myhtml_token_node_t * myhtml_token_merged_two_token_string(myhtml_tree_t* tree, 
     return token_to;
 }
 
-void myhtml_token_set_replacement_character_for_null_token(myhtml_token_node_t* node)
+void myhtml_token_set_replacement_character_for_null_token(myhtml_tree_t* tree, myhtml_token_node_t* node)
 {
-    node->my_str_tm.length = myhtml_string_raw_set_replacement_character(&node->my_str_tm, 0);
-    node->length = node->my_str_tm.length;
+    myhtml_token_node_wait_for_done(node);
+    
+    myhtml_string_t new_str;
+    myhtml_string_init(tree->mchar, tree->mchar_node_id, &new_str, (node->my_str_tm.length + 32));
+    
+    myhtml_string_append_with_replacement_null_characters_only(&new_str, node->my_str_tm.data, node->my_str_tm.length);
+    
+    node->length = new_str.length;
+    
+    // TODO: send to cache prev str
+    node->my_str_tm = new_str;
 }
 
 void myhtml_token_set_done(myhtml_token_node_t* node)

@@ -81,6 +81,7 @@ typedef void (*mctree_before_insert_f)(const char* key, size_t key_size, void **
 
 
 mctree_t * mctree_create(size_t start_size);
+void mctree_clean(mctree_t* mctree);
 mctree_t * mctree_destroy(mctree_t* mctree);
 
 mctree_index_t mctree_insert(mctree_t* mctree, const char* key, size_t key_size, void* value, mctree_before_insert_f b_insert);

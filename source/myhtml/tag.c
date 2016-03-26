@@ -26,17 +26,20 @@ myhtml_tag_t * myhtml_tag_create(void)
 
 myhtml_status_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags)
 {
-    tags->context_size = MyHTML_TAG_LAST_ENTRY + 128;
-    tags->context = (myhtml_tag_context_t*)mymalloc(sizeof(myhtml_tag_context_t) * tags->context_size);
+    tags->mcsimple_context = mcsimple_create();
     
-    if(tags->context == NULL)
+    if(tags->mcsimple_context == NULL)
         return MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION;
+    
+    mcsimple_init(tags->mcsimple_context, 128, 1024, sizeof(myhtml_tag_context_t));
     
     tags->mchar_node = mchar_async_node_add(tree->myhtml->mchar);
     tags->tree       = mctree_create(32);
     
     tags->mchar      = tree->myhtml->mchar;
     tags->tag_index  = tree->myhtml->tag_index;
+    
+    tags->tags_count = MyHTML_TAG_LAST_ENTRY;
     
     myhtml_tag_clean(tags);
     
@@ -45,11 +48,11 @@ myhtml_status_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags)
 
 void myhtml_tag_clean(myhtml_tag_t* tags)
 {
-    tags->context_length = 0;
-    myhtml_tag_context_clean(tags, tags->context_length);
-    myhtml_tag_context_add(tags);
+    tags->tags_count = MyHTML_TAG_LAST_ENTRY;
     
+    mcsimple_clean(tags->mcsimple_context);
     mchar_async_node_clean(tags->mchar, tags->mchar_node);
+    mctree_clean(tags->tree);
 }
 
 myhtml_tag_t * myhtml_tag_destroy(myhtml_tag_t* tags)
@@ -57,10 +60,8 @@ myhtml_tag_t * myhtml_tag_destroy(myhtml_tag_t* tags)
     if(tags == NULL)
         return NULL;
     
-    if(tags->context)
-        free(tags->context);
-    
     tags->tree = mctree_destroy(tags->tree);
+    tags->mcsimple_context = mcsimple_destroy(tags->mcsimple_context, true);
     
     mchar_async_node_delete(tags->mchar, tags->mchar_node);
     
@@ -82,7 +83,7 @@ myhtml_status_t myhtml_tag_index_init(myhtml_tag_t* tags, myhtml_tag_index_t* id
     if(mcstatus != MCOBJECT_ASYNC_STATUS_OK)
         return MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE;
     
-    idx_tags->tags_size = tags->context_size;
+    idx_tags->tags_size = tags->tags_count + 128;
     idx_tags->tags_length = 0;
     idx_tags->tags = (myhtml_tag_index_entry_t*)calloc(idx_tags->tags_size, sizeof(myhtml_tag_index_entry_t));
     
@@ -95,7 +96,7 @@ myhtml_status_t myhtml_tag_index_init(myhtml_tag_t* tags, myhtml_tag_index_t* id
 void myhtml_tag_index_clean(myhtml_tag_t* tags, myhtml_tag_index_t* index_tags)
 {
     mcobject_async_node_clean(tags->tag_index, tags->mcobject_node);
-    memset(index_tags->tags, 0, sizeof(myhtml_tag_index_entry_t) * tags->context_length);
+    memset(index_tags->tags, 0, sizeof(myhtml_tag_index_entry_t) * index_tags->tags_size);
 }
 
 myhtml_tag_index_t * myhtml_tag_index_destroy(myhtml_tag_t* tags, myhtml_tag_index_t* index_tags)
@@ -118,7 +119,7 @@ myhtml_tag_index_t * myhtml_tag_index_destroy(myhtml_tag_t* tags, myhtml_tag_ind
 void myhtml_tag_index_check_size(myhtml_tag_t* tags, myhtml_tag_index_t* index_tags, myhtml_tag_id_t tag_id)
 {
     if(tag_id >= index_tags->tags_size) {
-        size_t new_size = tags->context_size + MyHTML_TAG_LAST_ENTRY;
+        size_t new_size = tag_id + 128;
         
         myhtml_tag_index_entry_t *index_entries = (myhtml_tag_index_entry_t*)myrealloc(index_tags->tags,
                                                                              sizeof(myhtml_tag_index_entry_t) *
@@ -246,35 +247,37 @@ myhtml_tag_id_t myhtml_tag_add(myhtml_tag_t* tags, const char* key, size_t key_s
     }
     
     // add tags
-    myhtml_tag_id_t new_ctx_id = myhtml_tag_context_get_free_id(tags);
     
-    mctree_insert(tags->tree, cache, key_size, (void *)new_ctx_id, NULL);
+    myhtml_tag_context_t *tag_ctx = mcsimple_malloc(tags->mcsimple_context);
     
-    tags->context[new_ctx_id].id          = new_ctx_id + MyHTML_TAG_LAST_ENTRY;
-    tags->context[new_ctx_id].name        = cache;
-    tags->context[new_ctx_id].name_length = key_size;
-    tags->context[new_ctx_id].data_parser = data_parser;
+    mctree_insert(tags->tree, cache, key_size, (void *)tag_ctx, NULL);
     
-    memset(tags->context[new_ctx_id].cats, 0,
-           sizeof(enum myhtml_tag_categories) *
-           MyHTML_NAMESPACE_LAST_ENTRY);
+    tag_ctx->id          = tags->tags_count;
+    tag_ctx->name        = cache;
+    tag_ctx->name_length = key_size;
+    tag_ctx->data_parser = data_parser;
     
-    myhtml_tag_context_add(tags);
+    tags->tags_count++;
     
-    return tags->context[new_ctx_id].id;
+    memset(tag_ctx->cats, 0, sizeof(enum myhtml_tag_categories) * MyHTML_NAMESPACE_LAST_ENTRY);
+    
+    return tag_ctx->id;
 }
 
 void myhtml_tag_set_category(myhtml_tag_t* tags, myhtml_tag_id_t tag_idx,
                                        enum myhtml_namespace my_namespace, enum myhtml_tag_categories cats)
 {
-    tags->context[(tag_idx - MyHTML_TAG_LAST_ENTRY)].cats[my_namespace] = cats;
+    if(tag_idx < MyHTML_TAG_LAST_ENTRY)
+        return;
+    
+    myhtml_tag_context_t *tag_ctx = mcsimple_get_by_absolute_position(tags->mcsimple_context, (tag_idx - MyHTML_TAG_LAST_ENTRY));
+    tag_ctx->cats[my_namespace] = cats;
 }
 
 const myhtml_tag_context_t * myhtml_tag_get_by_id(myhtml_tag_t* tags, myhtml_tag_id_t tag_id)
 {
-    if(tag_id > MyHTML_TAG_LAST_ENTRY) {
-        tag_id -= MyHTML_TAG_LAST_ENTRY;
-        return &tags->context[tag_id];
+    if(tag_id >= MyHTML_TAG_LAST_ENTRY) {
+        return mcsimple_get_by_absolute_position(tags->mcsimple_context, (tag_id - MyHTML_TAG_LAST_ENTRY));
     }
     
     return myhtml_tag_static_get_by_id(tag_id);
@@ -288,12 +291,8 @@ const myhtml_tag_context_t * myhtml_tag_get_by_name(myhtml_tag_t* tags, const ch
         return ctx;
     
     mctree_index_t idx = mctree_search_lowercase(tags->tree, name, length);
-    size_t ctx_idx = (size_t)tags->tree->nodes[idx].value;
     
-    if(ctx_idx && ctx_idx < tags->context_length)
-        return &tags->context[ctx_idx];
-    
-    return NULL;
+    return (myhtml_tag_context_t*)tags->tree->nodes[idx].value;
 }
 
 void myhtml_tag_print(myhtml_tag_t* tags, FILE* fh)
@@ -306,7 +305,7 @@ void myhtml_tag_print(myhtml_tag_t* tags, FILE* fh)
         fprintf(fh, "<%s id=\"%zu\">\n", ctx->name, i);
     }
     
-    for(i = (MyHTML_TAG_LAST_ENTRY + 1); i < tags->context_length; i++)
+    for(i = (MyHTML_TAG_LAST_ENTRY + 1); i < tags->tags_count; i++)
     {
         const myhtml_tag_context_t *ctx = myhtml_tag_get_by_id(tags, i);
         

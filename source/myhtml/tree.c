@@ -30,9 +30,11 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     tree->myhtml             = myhtml;
     tree->token              = myhtml_token_create(tree, 4096);
     tree->temp_tag_name.data = NULL;
-    tree->queue              = myhtml->thread->queue;
-    tree->single_queue       = NULL;
     tree->temp_stream        = NULL;
+    tree->queue              = mythread_queue_create(4096, &status);
+    
+    if(status)
+        return status;
     
     tree->tree_obj = mcobject_async_create();
     if(tree->tree_obj == NULL)
@@ -130,6 +132,10 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     mcobject_async_node_clean(tree->token->attr_obj, tree->mcasync_attr_id);
     mchar_async_node_clean(tree->mchar, tree->mchar_node_id);
     
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+    mythread_queue_list_entry_clean(tree->myhtml->thread, tree->queue_entry);
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+    
     myhtml_token_clean(tree->token);
     
     // null root
@@ -166,9 +172,6 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->encoding            = MyHTML_ENCODING_UTF_8;
     tree->encoding_usereq     = MyHTML_ENCODING_DEFAULT;
     
-    if(tree->single_queue)
-        mythread_queue_clean(tree->single_queue);
-    
     myhtml_tree_temp_stream_clean(tree);
     
     myhtml_tree_active_formatting_clean(tree);
@@ -179,6 +182,7 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     myhtml_tree_index_clean(tree, tree->tags);
     mcobject_async_node_clean(myhtml->async_incoming_buf, tree->mcasync_incoming_buf_id);
     myhtml_tag_clean(tree->tags);
+    mythread_queue_clean(tree->queue);
     
     myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->mcasync_attr_id);
 }
@@ -223,9 +227,6 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->encoding            = MyHTML_ENCODING_UTF_8;
     tree->encoding_usereq     = MyHTML_ENCODING_DEFAULT;
     
-    if(tree->single_queue)
-        mythread_queue_clean(tree->single_queue);
-    
     myhtml_tree_temp_stream_clean(tree);
     
     myhtml_tree_active_formatting_clean(tree);
@@ -236,6 +237,10 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     myhtml_tree_index_clean(tree, tree->tags);
     mcobject_async_node_clean(tree->myhtml->async_incoming_buf, tree->mcasync_incoming_buf_id);
     myhtml_tag_clean(tree->tags);
+    
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+    mythread_queue_list_entry_clean(tree->myhtml->thread, tree->queue_entry);
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
     
     myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->mcasync_attr_id);
 }
@@ -257,10 +262,7 @@ myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree)
     tree->mchar              = mchar_async_destroy(tree->mchar, 1);
     tree->temp_stream        = myhtml_tree_temp_stream_free(tree);
     tree->tags               = myhtml_tag_destroy(tree->tags);
-    
-    if(tree->single_queue) {
-        tree->single_queue = mythread_queue_destroy(tree->single_queue);
-    }
+    tree->queue              = mythread_queue_destroy(tree->queue);
     
     mcobject_async_node_delete(tree->myhtml->async_incoming_buf, tree->mcasync_incoming_buf_id);
     myhtml_tree_temp_tag_name_destroy(&tree->temp_tag_name, false);

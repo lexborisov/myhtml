@@ -159,14 +159,14 @@ struct myhtml_tree_temp_stream {
 
 struct myhtml_tree {
     // ref
-    myhtml_t*             myhtml;
-    mchar_async_t*        mchar;
-    myhtml_token_t*       token;
-    mcobject_async_t*     tree_obj;
-    mcsync_t*             sync;
-    mythread_queue_t*     queue;
-    mythread_queue_t*     single_queue;
-    myhtml_tag_t*         tags;
+    myhtml_t*                    myhtml;
+    mchar_async_t*               mchar;
+    myhtml_token_t*              token;
+    mcobject_async_t*            tree_obj;
+    mcsync_t*                    sync;
+    mythread_queue_list_entry_t* queue_entry;
+    mythread_queue_t*            queue;
+    myhtml_tag_t*                tags;
     
     // init id's
     size_t                  mcasync_token_id;

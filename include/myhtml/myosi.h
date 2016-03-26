@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+
 #if defined(_WIN32) || defined(_WIN64)
 #define IS_OS_WINDOWS
 #include <windows.h>
@@ -128,12 +129,15 @@ typedef struct myhtml_string myhtml_string_t;
 
 // thread
 enum mythread_thread_opt {
-    MyTHREAD_OPT_UNDEF = 0,
-    MyTHREAD_OPT_WAIT  = 1,
-    MyTHREAD_OPT_QUIT  = 2
+    MyTHREAD_OPT_UNDEF = 0x00,
+    MyTHREAD_OPT_WAIT  = 0x01,
+    MyTHREAD_OPT_QUIT  = 0x02,
+    MyTHREAD_OPT_STOP  = 0x04
 }
 typedef mythread_thread_opt_t;
 
+typedef struct mythread_queue_list_entry mythread_queue_list_entry_t;
+typedef struct mythread_queue_thread_param mythread_queue_thread_param_t;
 typedef struct mythread_queue_list mythread_queue_list_t;
 typedef struct mythread_queue_node mythread_queue_node_t;
 typedef struct mythread_queue mythread_queue_t;

@@ -96,8 +96,9 @@ void mcobject_async_clean(mcobject_async_t *mcobj_async)
         mcobject_async_node_t *node = &mcobj_async->nodes[node_idx];
         node->cache_length = 0;
         
-        node->chunk = mcobject_async_chunk_malloc(mcobj_async, mcobj_async->origin_size, NULL);
-        node->chunk->prev = NULL;
+        if(node->chunk) {
+            node->chunk = mcobject_async_chunk_malloc(mcobj_async, mcobj_async->origin_size, NULL);
+        }
     }
 }
 
@@ -184,6 +185,20 @@ mcobject_async_status_t mcobject_async_mem_malloc(mcobject_async_t *mcobj_async,
 
 mcobject_async_chunk_t * mcobject_async_chunk_malloc_without_lock(mcobject_async_t *mcobj_async, size_t length, mcobject_async_status_t *status)
 {
+    if(status)
+        *status = MCOBJECT_ASYNC_STATUS_OK;
+    
+    if(mcobj_async->chunk_cache_length)
+    {
+        mcobj_async->chunk_cache_length--;
+        
+        mcobj_async->chunk_cache[ mcobj_async->chunk_cache_length ]->length = 0;
+        mcobj_async->chunk_cache[ mcobj_async->chunk_cache_length ]->next   = NULL;
+        mcobj_async->chunk_cache[ mcobj_async->chunk_cache_length ]->prev   = NULL;
+        
+        return mcobj_async->chunk_cache[ mcobj_async->chunk_cache_length ];
+    }
+    
     if(mcobj_async->chunks_length >= mcobj_async->chunks_size)
     {
         if(mcobj_async->chunks_pos_length >= mcobj_async->chunks_pos_size)
@@ -220,6 +235,9 @@ mcobject_async_chunk_t * mcobject_async_chunk_malloc_without_lock(mcobject_async
     
     mcobject_async_chunk_t* chunk = &mcobj_async->chunks[mcobj_async->chunks_pos_length - 1][mcobj_async->chunks_length];
     mcobj_async->chunks_length++;
+    
+    chunk->next = NULL;
+    chunk->prev = NULL;
     
     if(status)
         *status = mcobject_async_mem_malloc(mcobj_async, chunk, length);
@@ -261,22 +279,11 @@ size_t mcobject_async_node_add(mcobject_async_t *mcobj_async, mcobject_async_sta
     
     mcobject_async_node_t *node = &mcobj_async->nodes[node_idx];
     
-    if(status) {
-        node->chunk = mcobject_async_chunk_malloc_without_lock(mcobj_async, mcobj_async->origin_size, status);
-        
-        if(*status) {
-            mcsync_unlock(mcobj_async->mcsync);
-            return 0;
-        }
-    }
-    else {
-        mcobject_async_status_t mystatus;
-        node->chunk = mcobject_async_chunk_malloc_without_lock(mcobj_async, mcobj_async->origin_size, &mystatus);
-        
-        if(mystatus) {
-            mcsync_unlock(mcobj_async->mcsync);
-            return 0;
-        }
+    node->chunk = mcobject_async_chunk_malloc_without_lock(mcobj_async, mcobj_async->origin_size, status);
+    
+    if(status && *status) {
+        mcsync_unlock(mcobj_async->mcsync);
+        return 0;
     }
     
     node->chunk->next = NULL;

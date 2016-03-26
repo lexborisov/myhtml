@@ -32,10 +32,9 @@ extern "C" {
 #include "myhtml/utils/mctree.h"
 #include "myhtml/utils/mchar_async.h"
 #include "myhtml/utils/mcobject_async.h"
+#include "myhtml/utils/mcsimple.h"
 
 #define myhtml_tag_get(__tags__, __idx__, __attr__) __tags__->context[__idx__].__attr__
-
-#define myhtml_tag_context_get_free_id(__tags__) __tags__->context_length
 
 #define myhtml_tag_context_clean(__tags__, __idx__)                       \
     __tags__->context[__idx__].id          = 0;                           \
@@ -96,10 +95,9 @@ typedef myhtml_tag_static_list_t;
 
 struct myhtml_tag {
     mctree_t* tree;
+    mcsimple_t* mcsimple_context;
     
-    myhtml_tag_context_t* context;
-    size_t context_length;
-    size_t context_size;
+    size_t tags_count;
     
     size_t mcobject_node;
     size_t mchar_node;

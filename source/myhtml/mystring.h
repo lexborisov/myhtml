@@ -77,7 +77,9 @@ struct myhtml_string_char_ref_chunk {
     long l_data;
     
     charef_entry_result_t charef_res;
+    
     bool is_attributes;
+    bool emit_null_char;
     
     myhtml_encoding_t encoding;
     myhtml_encoding_result_t res;
@@ -129,8 +131,9 @@ void myhtml_string_append_with_convert_encoding_with_preprocessing(myhtml_string
 void myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(myhtml_string_t* str, myhtml_encoding_result_t* res,
                                                                          const char* buff, size_t length,
                                                                          myhtml_encoding_t encoding);
-    
-void myhtml_string_append_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length);
+void myhtml_string_append_with_replacement_null_characters_only(myhtml_string_t* str, const char* buff, size_t length);
+
+void myhtml_string_append_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length, bool emit_null_chars);
 void myhtml_string_append_lowercase_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length);
 size_t myhtml_string_raw_set_replacement_character(myhtml_string_t* target, size_t position);
 

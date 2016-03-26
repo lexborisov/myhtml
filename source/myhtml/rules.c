@@ -57,6 +57,38 @@ myhtml_token_node_t * myhtml_insertion_fix_split_for_text_begin_ws(myhtml_tree_t
     return new_token;
 }
 
+//
+void myhtml_insertion_fix_for_null_char_drop_all(myhtml_tree_t* tree, myhtml_token_node_t* token)
+{
+    myhtml_token_node_wait_for_done(token);
+    
+    myhtml_string_t *str = &token->my_str_tm;
+    size_t len = str->length;
+    size_t offset = 0;
+    
+    for (size_t i = 0; i < len; ++i)
+    {
+        if (str->data[i] == '\0')
+        {
+            size_t next_non_null = i;
+            while ((next_non_null < len) && str->data[next_non_null] == '\0') {++next_non_null;}
+            
+            str->length = str->length - (next_non_null - i);
+            
+            size_t next_null = next_non_null;
+            while ((next_null < len) && str->data[next_null] != '\0') {++next_null;}
+            
+            memmove(&str->data[(i - offset)], &str->data[next_non_null], (next_null - next_non_null));
+            
+            i = next_null - 1;
+            
+            offset++;
+        }
+    }
+    
+    token->length = str->length;
+}
+
 bool myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     switch (token->tag_ctx_idx)
@@ -619,7 +651,7 @@ bool myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_tok
         }
         
         const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, node->tag_idx);
-        if(tag_ctx->cats[node->my_namespace] & MyHTML_TAG_CATEGORIES_SPECIAL) {
+        if(tag_ctx->cats[ node->my_namespace ] & MyHTML_TAG_CATEGORIES_SPECIAL) {
             break;
         }
     }
@@ -1007,14 +1039,24 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
         {
             case MyHTML_TAG__TEXT:
             {
-                if(token->type & MyHTML_TOKEN_TYPE_NULL)
-                    break;
-                
-                myhtml_tree_active_formatting_reconstruction(tree);
-                myhtml_tree_node_insert_text(tree, token);
-                
-                if((token->type & MyHTML_TOKEN_TYPE_WHITESPACE) == 0)
-                    tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
+                if(token->type & MyHTML_TOKEN_TYPE_NULL) {
+                    myhtml_insertion_fix_for_null_char_drop_all(tree, token);
+                    
+                    if(token->my_str_tm.length) {
+                        myhtml_tree_active_formatting_reconstruction(tree);
+                        myhtml_tree_node_insert_text(tree, token);
+                        
+                        if((token->type & MyHTML_TOKEN_TYPE_WHITESPACE) == 0)
+                            tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
+                    }
+                }
+                else {
+                    myhtml_tree_active_formatting_reconstruction(tree);
+                    myhtml_tree_node_insert_text(tree, token);
+                    
+                    if((token->type & MyHTML_TOKEN_TYPE_WHITESPACE) == 0)
+                        tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
+                }
                 
                 break;
             }
@@ -2052,10 +2094,14 @@ bool myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_node_
     // skip NULL, we replaced earlier
     if(token->tag_ctx_idx == MyHTML_TAG__TEXT)
     {
-        if(token->type & MyHTML_TOKEN_TYPE_NULL)
-            return false;
-        
-        myhtml_tree_token_list_append(tree->token_list, token);
+        if(token->type & MyHTML_TOKEN_TYPE_NULL) {
+            myhtml_insertion_fix_for_null_char_drop_all(tree, token);
+            
+            if(token->my_str_tm.length)
+                myhtml_tree_token_list_append(tree->token_list, token);
+        }
+        else
+            myhtml_tree_token_list_append(tree->token_list, token);
     }
     else {
         myhtml_tree_token_list_t* token_list = tree->token_list;
@@ -2714,10 +2760,15 @@ bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* t
         switch (token->tag_ctx_idx)
         {
             case MyHTML_TAG__TEXT: {
-                if(token->type & MyHTML_TOKEN_TYPE_NULL)
-                    break;
+                if(token->type & MyHTML_TOKEN_TYPE_NULL) {
+                    myhtml_insertion_fix_for_null_char_drop_all(tree, token);
+                    
+                    if(token->my_str_tm.length)
+                        myhtml_tree_node_insert_text(tree, token);
+                }
+                else
+                    myhtml_tree_node_insert_text(tree, token);
                 
-                myhtml_tree_node_insert_text(tree, token);
                 break;
             }
                 
@@ -3384,7 +3435,7 @@ bool myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_
             {
                 if(token->type & MyHTML_TOKEN_TYPE_NULL) {
                     myhtml_token_node_wait_for_done(token);
-                    myhtml_token_set_replacement_character_for_null_token(token);
+                    myhtml_token_set_replacement_character_for_null_token(tree, token);
                 }
                 
                 myhtml_tree_node_insert_text(tree, token);
