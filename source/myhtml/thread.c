@@ -698,17 +698,9 @@ void mythread_queue_node_clean(mythread_queue_node_t* qnode)
     memset(qnode, 0, sizeof(mythread_queue_node_t));
 }
 
-mythread_queue_node_t * mythread_queue_get_prev_node(mythread_queue_t* queue)
+mythread_queue_node_t * mythread_queue_get_prev_node(mythread_queue_node_t* qnode)
 {
-    if(queue->nodes_length == 0)
-    {
-        if(queue->nodes_pos == 0)
-            return NULL;
-        
-        return &queue->nodes[(queue->nodes_pos - 1)][(queue->nodes_size - 1)];
-    }
-    
-    return &queue->nodes[queue->nodes_pos][(queue->nodes_length - 1)];
+    return qnode->prev;
 }
 
 mythread_queue_node_t * mythread_queue_get_current_node(mythread_queue_t* queue)
@@ -777,6 +769,94 @@ mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythrea
     
     return qnode;
 }
+
+mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, mythread_queue_t* queue, const char* text, size_t begin, size_t limit, myhtml_status_t *status)
+{
+    queue->nodes_length++;
+    
+    if(queue->nodes_uses >= limit) {
+        mythread_wait_all_for_done(mythread);
+        
+        queue->nodes_length = 0;
+        queue->nodes_pos    = 0;
+        queue->nodes_root   = 0;
+        queue->nodes_uses   = 0;
+    }
+    else if(queue->nodes_length >= queue->nodes_size)
+    {
+        queue->nodes_pos++;
+        
+        if(queue->nodes_pos >= queue->nodes_pos_size)
+        {
+            mythread_wait_all_for_done(mythread);
+            
+            queue->nodes_pos_size <<= 1;
+            mythread_queue_node_t** tmp = realloc(queue->nodes, sizeof(mythread_queue_node_t*) * queue->nodes_pos_size);
+            
+            if(tmp) {
+                memset(&tmp[queue->nodes_pos], 0, sizeof(mythread_queue_node_t*) * (queue->nodes_pos_size - queue->nodes_pos));
+                
+                queue->nodes = tmp;
+            }
+            else {
+                if(status)
+                    *status = MyHTML_STATUS_THREAD_ERROR_QUEUE_NODES_MALLOC;
+                
+                return NULL;
+            }
+        }
+        
+        if(queue->nodes[queue->nodes_pos] == NULL) {
+            queue->nodes[queue->nodes_pos] = (mythread_queue_node_t*)malloc(sizeof(mythread_queue_node_t) * queue->nodes_size);
+            
+            if(queue->nodes[queue->nodes_pos] == NULL) {
+                if(status)
+                    *status = MyHTML_STATUS_THREAD_ERROR_QUEUE_NODE_MALLOC;
+                
+                return NULL;
+            }
+        }
+        
+        queue->nodes_length = 0;
+    }
+    
+    queue->nodes_uses++;
+    
+    mythread_queue_node_t *qnode = &queue->nodes[queue->nodes_pos][queue->nodes_length];
+    
+    qnode->text  = text;
+    qnode->begin = begin;
+    
+    return qnode;
+}
+
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+
+mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, mythread_queue_list_entry_t *entry,
+                                                              const char* text, size_t begin, myhtml_status_t *status)
+{
+    mythread_queue_t* queue = entry->queue;
+    
+    queue->nodes_length++;
+    
+    if(queue->nodes_length >= queue->nodes_size) {
+        queue->nodes_uses++;
+        
+        mythread_queue_list_entry_wait_for_done(mythread, entry);
+        mythread_queue_list_entry_clean(mythread, entry);
+    }
+    else
+        queue->nodes_uses++;
+    
+    mythread_queue_node_t *qnode = &queue->nodes[queue->nodes_pos][queue->nodes_length];
+    
+    qnode->text  = text;
+    qnode->begin = begin;
+    
+    return qnode;
+}
+
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
 
 #ifdef MyHTML_BUILD_WITHOUT_THREADS
 

@@ -975,6 +975,39 @@ const char * myhtml_tree_incomming_buf_make_data(myhtml_tree_t *tree, mythread_q
     return tree->temp_tag_name.data;
 }
 
+/* queue */
+void myhtml_queue_add(myhtml_tree_t *tree, const char *html, size_t begin, mythread_queue_node_t *qnode)
+{
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+    
+    if(tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) {
+        myhtml_parser_worker(0, tree->current_qnode);
+        while(myhtml_rules_tree_dispatcher(tree, tree->current_qnode->token)){};
+        
+        tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, html, (tree->global_offset + begin), 4, NULL);
+    }
+    else {
+        tree->current_qnode = mythread_queue_node_malloc_round(tree->myhtml->thread, tree->queue_entry, html, (tree->global_offset + begin), NULL);
+    }
+
+#else
+    
+    myhtml_parser_worker(0, tree->current_qnode);
+    while(myhtml_rules_tree_dispatcher(tree, tree->current_qnode->token)){};
+    
+    tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, html, (tree->global_offset + begin), 4, NULL);
+    
+#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+    
+    tree->current_qnode->tree = tree;
+    tree->current_qnode->prev = qnode;
+    
+    if(qnode)
+        myhtml_tokenizer_calc_current_namespace(tree, qnode);
+    
+    myhtml_token_node_malloc(tree->token, tree->current_qnode->token, tree->token->mcasync_token_id);
+}
+
 bool myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size)
 {
     size_t i = 0;

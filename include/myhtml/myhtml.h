@@ -62,18 +62,6 @@ extern "C" {
 #define mh_queue_current_get(__attr__) mh_queue_get(mh_queue_current(), __attr__)
 #define mh_queue_current_set(__attr__) mh_queue_current_get(__attr__)
 
-#define mh_queue_add(__tree__, __html__, __begin__, __current__)       \
-    if(__tree__->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) { \
-        myhtml_parser_worker(0, __tree__->current_qnode); \
-        while(myhtml_rules_tree_dispatcher(__tree__, __tree__->current_qnode->token)){}; \
-    } \
-    __tree__->current_qnode = mythread_queue_node_malloc(__tree__->myhtml->thread, __tree__->queue, __html__, (__tree__->global_offset + __begin__), NULL); \
-    __tree__->current_qnode->tree = __tree__; \
-    __tree__->current_qnode->prev = __current__; \
-    if(__current__) \
-        myhtml_tokenizer_calc_current_namespace(__tree__, __current__); \
-    myhtml_token_node_malloc(__tree__->token, __tree__->current_qnode->token, __tree__->token->mcasync_token_id)
-
 #define mh_token_get(__idx__, __attr__) tree->token->nodes[__idx__].__attr__
 #define mh_token_set(__idx__, __attr__) mh_token_get(__idx__, __attr__)
 
@@ -213,6 +201,9 @@ const char * myhtml_tree_incomming_buf_make_data(myhtml_tree_t *tree, mythread_q
 
 bool myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id);
+
+// queue
+void myhtml_queue_add(myhtml_tree_t *tree, const char *html, size_t begin, mythread_queue_node_t *qnode);
 
 /** 
  * Platform-specific hdef performance clock queries.

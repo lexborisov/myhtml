@@ -31,7 +31,7 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     tree->token              = myhtml_token_create(tree, 4096);
     tree->temp_tag_name.data = NULL;
     tree->temp_stream        = NULL;
-    tree->queue              = mythread_queue_create(4096, &status);
+    tree->queue              = mythread_queue_create(9182, &status);
     
     if(status)
         return status;

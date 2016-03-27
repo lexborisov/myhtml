@@ -188,7 +188,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 html_offset++;
-                mh_queue_add(tree, html, html_offset, qnode);
+                myhtml_queue_add(tree, html, html_offset, qnode);
                 
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             }
@@ -360,7 +360,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
                 
                 html_offset++;
-                mh_queue_add(tree, html, html_offset, qnode);
+                myhtml_queue_add(tree, html, html_offset, qnode);
             }
             else {
                 mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
