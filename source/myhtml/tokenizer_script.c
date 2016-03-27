@@ -25,7 +25,7 @@ size_t myhtml_tokenizer_state_script_data(myhtml_tree_t* tree, mythread_queue_no
     {
         if(html[html_offset] == '<') {
             html_offset++;
-            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_LESS_THAN_SIGN;
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_LESS_THAN_SIGN;
             
             break;
         }
@@ -41,15 +41,15 @@ size_t myhtml_tokenizer_state_script_data_less_than_sign(myhtml_tree_t* tree, my
     if(html[html_offset] == '/')
     {
         html_offset++;
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_END_TAG_OPEN;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_END_TAG_OPEN;
     }
     else if(html[html_offset] == '!')
     {
         html_offset++;
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPE_START;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPE_START;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
     }
     
     return html_offset;
@@ -59,10 +59,10 @@ size_t myhtml_tokenizer_state_script_data_escape_start(myhtml_tree_t* tree, myth
 {
     if(html[html_offset] == '-') {
         html_offset++;
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPE_START_DASH;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPE_START_DASH;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
     }
     
     return html_offset;
@@ -72,10 +72,10 @@ size_t myhtml_tokenizer_state_script_data_escape_start_dash(myhtml_tree_t* tree,
 {
     if(html[html_offset] == '-') {
         html_offset++;
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_DASH_DASH;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_DASH_DASH;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
     }
     
     return html_offset;
@@ -85,10 +85,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_open(myhtml_tree_t* tree, myth
 {
     if(myhtml_ascii_char_cmp(html[html_offset])) {
         qnode->token->begin = (html_offset + tree->global_offset);
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_END_TAG_NAME;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_END_TAG_NAME;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
     }
     
     return html_offset;
@@ -101,7 +101,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         if(myhtml_whithspace(html[html_offset], ==, ||))
         {
             if((html_offset - qnode->token->begin) != 6) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
                 html_offset++;
                 break;
             }
@@ -122,10 +122,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
             else {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
             }
             
             html_offset++;
@@ -134,7 +134,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         else if(html[html_offset] == '/')
         {
             if((html_offset - qnode->token->begin) != 6) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
                 html_offset++;
                 break;
             }
@@ -155,10 +155,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
                 
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
             else {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
             }
             
             html_offset++;
@@ -167,7 +167,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         else if(html[html_offset] == '>')
         {
             if((html_offset - qnode->token->begin) != 6) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
                 html_offset++;
                 break;
             }
@@ -190,10 +190,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
                 html_offset++;
                 myhtml_queue_add(tree, html, html_offset, qnode);
                 
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             }
             else {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
                 html_offset++;
             }
             
@@ -201,7 +201,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
         }
         else if(myhtml_ascii_char_unless_cmp(html[html_offset]))
         {
-            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
             break;
         }
         
@@ -219,13 +219,13 @@ size_t myhtml_tokenizer_state_script_data_escaped_dash_dash(myhtml_tree_t* tree,
     }
     
     if(html[html_offset] == '<') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
     }
     else if(html[html_offset] == '>') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
     }
     
     html_offset++;
@@ -236,15 +236,15 @@ size_t myhtml_tokenizer_state_script_data_escaped_dash_dash(myhtml_tree_t* tree,
 size_t myhtml_tokenizer_state_script_data_escaped_less_than_sign(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     if(html[html_offset] == '/') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_END_TAG_OPEN;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_END_TAG_OPEN;
         html_offset++;
     }
     else if(myhtml_ascii_char_cmp(html[html_offset])) {
         qnode->token->begin = (html_offset + tree->global_offset);
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPE_START;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPE_START;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
     }
     
     return html_offset;
@@ -254,10 +254,10 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_open(myhtml_tree_t* tr
 {
     if(myhtml_ascii_char_cmp(html[html_offset])) {
         qnode->token->begin = (html_offset + tree->global_offset);
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_END_TAG_NAME;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_END_TAG_NAME;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
     }
     
     return html_offset;
@@ -270,7 +270,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         if(myhtml_whithspace(html[html_offset], ==, ||))
         {
             if((html_offset - qnode->token->begin) != 6) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
                 break;
             }
@@ -291,10 +291,10 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
             else {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
             }
             
             html_offset++;
@@ -303,7 +303,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         else if(html[html_offset] == '/')
         {
             if((html_offset - qnode->token->begin) != 6) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
                 break;
             }
@@ -324,10 +324,10 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
                 
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
             else {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
             }
             
             html_offset++;
@@ -336,7 +336,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         else if(html[html_offset] == '>')
         {
             if((html_offset - qnode->token->begin) != 6) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
                 break;
             }
@@ -357,20 +357,20 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 qnode->token->tag_ctx_idx = MyHTML_TAG_SCRIPT;
                 qnode->token->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
                 
                 html_offset++;
                 myhtml_queue_add(tree, html, html_offset, qnode);
             }
             else {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
             }
             break;
         }
         else if(myhtml_ascii_char_unless_cmp(html[html_offset]))
         {
-            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
             break;
         }
         
@@ -386,13 +386,13 @@ size_t myhtml_tokenizer_state_script_data_escaped(myhtml_tree_t* tree, mythread_
     {
         if(html[html_offset] == '-')
         {
-            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_DASH;
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_DASH;
             html_offset++;
             break;
         }
         else if(html[html_offset] == '<')
         {
-            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
             html_offset++;
             break;
         }
@@ -406,17 +406,17 @@ size_t myhtml_tokenizer_state_script_data_escaped(myhtml_tree_t* tree, mythread_
 size_t myhtml_tokenizer_state_script_data_escaped_dash(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     if(html[html_offset] == '-') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_DASH_DASH;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_DASH_DASH;
         html_offset++;
     }
     else if(html[html_offset] == '<') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN;
     }
     else if(html[html_offset] == '\0') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
         html_offset++;
     }
     
@@ -430,7 +430,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tre
         if(myhtml_whithspace(html[html_offset], ==, ||) || html[html_offset] == '/' || html[html_offset] == '>')
         {
             if((html_offset - qnode->token->begin) != 6) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
                 break;
             }
@@ -443,10 +443,10 @@ size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tre
             qnode->begin = tmp_size;
             
             if(myhtml_strncasecmp(tem_name, "script", 6) == 0) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
             }
             else {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
             }
             
             html_offset++;
@@ -454,7 +454,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tre
         }
         else if(myhtml_ascii_char_unless_cmp(html[html_offset]))
         {
-            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
             break;
         }
         
@@ -470,13 +470,13 @@ size_t myhtml_tokenizer_state_script_data_double_escaped(myhtml_tree_t* tree, my
     {
         if(html[html_offset] == '-')
         {
-            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_DASH;
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_DASH;
             html_offset++;
             break;
         }
         else if(html[html_offset] == '<')
         {
-            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
             html_offset++;
             break;
         }
@@ -491,14 +491,14 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_dash(myhtml_tree_t* tre
 {
     if(html[html_offset] == '-')
     {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH;
     }
     else if(html[html_offset] == '<')
     {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
     }
     
     html_offset++;
@@ -515,14 +515,14 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_dash_dash(myhtml_tree_t
     
     if(html[html_offset] == '<')
     {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN;
     }
     else if(html[html_offset] == '>')
     {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
     }
     
     html_offset++;
@@ -533,13 +533,13 @@ size_t myhtml_tokenizer_state_script_data_double_escaped_dash_dash(myhtml_tree_t
 size_t myhtml_tokenizer_state_script_data_double_escaped_less_than_sign(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size)
 {
     if(html[html_offset] == '/') {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPE_END;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPE_END;
         html_offset++;
         
         qnode->token->begin = (html_offset + tree->global_offset);
     }
     else {
-        mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
     }
     
     return html_offset;
@@ -552,7 +552,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree,
         if(myhtml_whithspace(html[html_offset], ==, ||) || html[html_offset] == '/' || html[html_offset] == '>')
         {
             if((html_offset - qnode->token->begin) != 6) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
                 html_offset++;
                 break;
             }
@@ -565,10 +565,10 @@ size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree,
             qnode->begin = tmp_size;
             
             if(myhtml_strncasecmp(tem_name, "script", 6) == 0) {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
             }
             else {
-                mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
             }
             
             html_offset++;
@@ -576,7 +576,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree,
         }
         else if(myhtml_ascii_char_unless_cmp(html[html_offset]))
         {
-            mh_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
             break;
         }
         

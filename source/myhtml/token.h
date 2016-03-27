@@ -35,16 +35,9 @@ extern "C" {
 #include "myhtml/utils/mchar_async.h"
 #include "myhtml/utils/mcsync.h"
 
-// attr
-#define myhtml_token_attr(__token__, __idx__) __token__->attr[__idx__]
-#define myhtml_token_attr_get(__token__, __idx__, __patam__) myhtml_token_attr(__token__, __idx__).__patam__
-
-#define myhtml_token_attr_malloc(__token__, __attr_idx__, __thread_idx__)                  \
-    __attr_idx__ = mcobject_async_malloc(__token__->attr_obj, __thread_idx__, NULL);       \
-    myhtml_token_attr_clean(__attr_idx__)
-
-// nodes
-#define myhtml_token_node_get(__token__, __idx__, __patam__) __token__->nodes[__idx__].__patam__
+#define myhtml_token_attr_malloc(__token__, __attr_node__, __thread_idx__)                  \
+    __attr_node__ = mcobject_async_malloc(__token__->attr_obj, __thread_idx__, NULL);       \
+    myhtml_token_attr_clean(__attr_node__)
 
 #define myhtml_token_node_set_done(__token_node__) __token_node__->type |= MyHTML_TOKEN_TYPE_DONE
 

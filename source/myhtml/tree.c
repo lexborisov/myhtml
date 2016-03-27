@@ -2258,9 +2258,6 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
     
     const myhtml_tag_context_t *ctx = myhtml_tag_get_by_id(tree->tags, node->tag_idx);
     
-//    size_t mctree_id = mh_tags_get(node->tag_idx, mctree_id);
-//    size_t tag_name_size = mctree_nodes[mctree_id].str_size;
-    
     if(node->tag_idx == MyHTML_TAG__TEXT ||
        node->tag_idx == MyHTML_TAG__COMMENT)
     {
@@ -2290,10 +2287,6 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
     }
     else
     {
-#ifdef DEBUG_MODE
-        fprintf(out, "<%.*s tagid=\"%zu\" mem=\"%zx\"", (int)tag_name_size, mctree_nodes[mctree_id].str,
-                mh_tags_get(node->tag_idx, id), (size_t)node);
-#else
         fprintf(out, "<%.*s", (int)ctx->name_length, ctx->name);
         
         if(node->my_namespace != MyHTML_NAMESPACE_HTML) {
@@ -2317,7 +2310,6 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
                     break;
             }
         }
-#endif
         
         if(node->token)
             myhtml_token_print_attr(tree, node->token, out);
