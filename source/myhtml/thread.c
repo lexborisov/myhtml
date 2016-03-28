@@ -72,13 +72,13 @@ myhtml_status_t myhtml_hread_sem_create(mythread_t *mythread, mythread_context_t
 {
     ctx->sem_name = calloc(1024, sizeof(wchar_t));
     
-    sprintf(ctx->sem_name, "Global/%s%zus%zup%zu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
+    sprintf(ctx->sem_name, "Global/%s%lus%lup%lu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
     
     ctx->sem_name_size = strlen(ctx->sem_name);
     
     ctx->sem = CreateSemaphore(NULL,           // default security attributes
                                0,              // initial count
-                               1,              // maximum count
+                               100,            // maximum count
                                ctx->sem_name); // named semaphore
     
     if (ctx->sem == NULL) {
@@ -94,9 +94,7 @@ myhtml_status_t myhtml_hread_sem_create(mythread_t *mythread, mythread_context_t
 
 myhtml_status_t myhtml_hread_sem_post(mythread_t *mythread, mythread_context_t *ctx)
 {
-    if(!ReleaseSemaphore(ctx->sem, 1, NULL)) {
-        return MyHTML_STATUS_OK;
-    }
+    while(!ReleaseSemaphore(ctx->sem, 1, NULL)) {}
     
     return MyHTML_STATUS_OK;
 }
@@ -118,6 +116,7 @@ myhtml_status_t myhtml_hread_sem_close(mythread_t *mythread, mythread_context_t 
 
 void myhtml_thread_nanosleep(const struct timespec *tomeout)
 {
+    Sleep(0);
 }
 
 #else /* defined(IS_OS_WINDOWS) */

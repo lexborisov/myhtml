@@ -199,7 +199,7 @@ struct myhtml_tree {
     myhtml_tree_insertion_list_t* template_insertion;
     myhtml_async_args_t*          async_args;
     myhtml_tree_temp_stream_t*    temp_stream;
-    volatile myhtml_token_node_t* token_last_done;
+    myhtml_token_node_t* volatile token_last_done;
     
     // for detect namespace out of tree builder
     myhtml_token_node_t*          token_namespace;
