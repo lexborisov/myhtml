@@ -65,7 +65,7 @@ struct mythread_context {
     
 #if defined(IS_OS_WINDOWS)
     HANDLE sem;
-    wchar_t *sem_name;
+    char *sem_name;
 #else
     char *sem_name;
     sem_t *sem;

@@ -72,21 +72,18 @@ myhtml_status_t myhtml_hread_sem_create(mythread_t *mythread, mythread_context_t
 {
     ctx->sem_name = calloc(1024, sizeof(wchar_t));
     
-    char tmp[1024] = {0};
-    sprintf_s(tmp, 1024, "Global/%s%zus%zup%zu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
+    sprintf(ctx->sem_name, "Global/%s%zus%zup%zu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
     
-    size_t retval = 0;
-    mbstowcs_s(&retval, ctx->sem_name, 1024, tmp, strlen(tmp) + 1);
-    
-    ctx->sem_name_size = wcslen(ctx->sem_name);
+    ctx->sem_name_size = strlen(ctx->sem_name);
     
     ctx->sem = CreateSemaphore(NULL,           // default security attributes
                                0,              // initial count
-                               0,              // maximum count
-                               ctx->sem_name); // unnamed semaphore
+                               1,              // maximum count
+                               ctx->sem_name); // named semaphore
     
     if (ctx->sem == NULL) {
         free(ctx->sem_name);
+        ctx->sem_name = NULL;
         
         mythread->sys_last_error = GetLastError();
         return MyHTML_STATUS_THREAD_ERROR_SEM_CREATE;

@@ -29,6 +29,7 @@ extern "C" {
 #include "myhtml/tag_const.h"
 #include "myhtml/tokenizer.h"
 #include "myhtml/tree.h"
+#include "myhtml/utils.h"
 #include "myhtml/utils/mctree.h"
 #include "myhtml/utils/mchar_async.h"
 #include "myhtml/utils/mcobject_async.h"

@@ -39,41 +39,11 @@ extern "C" {
 #include "myhtml/charef.h"
 #include "myhtml/encoding.h"
 
-#define mh_thread_get(__idx__, __attr__) myhtml_thread_get(myhtml->thread, __idx__, __attr__)
-#define mh_thread_set(__idx__, __attr__) myhtml_thread_set(myhtml->thread, __idx__, __attr__)
+    
+#define mh_queue_current() tree->queue
+#define myhtml_tokenizer_state_set(__tree__) myhtml_tree_set(__tree__, state)
 
-#define mh_thread_post(__idx__) sem_post(myhtml_thread_get(myhtml->thread, __idx__, sem))
-#define mh_thread_wait(__idx__) sem_wait(myhtml_thread_get(myhtml->thread, __idx__, sem))
-#define mh_thread_done(__idx__, __param__) myhtml_thread_set(myhtml->thread, __idx__, opt) = __param__;
-
-#define mh_tree_get(__attr__) myhtml_tree_get(tree, __attr__)
-#define mh_tree_set(__attr__) myhtml_tree_set(tree, __attr__)
-
-#define mh_queue_current() mh_tree_get(queue)
-
-#define mh_state_get(__tree__) myhtml_tree_get(__tree__, state)
-#define mh_state_set(__tree__) myhtml_tree_set(__tree__, state)
-
-#define mh_tags_get(__idx__, __attr__) myhtml_tag_get(tree->myhtml->tags, __idx__, __attr__)
-
-#define mh_queue_last(__attr__) myhtml->queue->nodes[myhtml_queue_node_current(myhtml->queue)].__attr__
 #define mh_queue_get(__idx__, __attr__) myhtml->queue->nodes[__idx__].__attr__
-#define mh_queue_set(__idx__, __attr__) mh_queue_get(__idx__, __attr__)
-#define mh_queue_current_get(__attr__) mh_queue_get(mh_queue_current(), __attr__)
-#define mh_queue_current_set(__attr__) mh_queue_current_get(__attr__)
-
-#define mh_token_get(__idx__, __attr__) tree->token->nodes[__idx__].__attr__
-#define mh_token_set(__idx__, __attr__) mh_token_get(__idx__, __attr__)
-
-#define mh_tree_token_current(__attr__) mh_token_get(myhtml_tree_token_current(tree), __attr__)
-#define mh_tree_token_attr_current(__attr__) mh_token_get(myhtml_tree_token_attr_current(tree), __attr__)
-
-#define mh_token_attr_get(__idx__, __attr__) tree->token->attr[__idx__].__attr__
-#define mh_token_attr_set(__idx__, __attr__) mh_token_attr_get(__idx__, __attr__)
-#define mh_token_attr_current(__idx__) mh_token_get(__idx__, attr_last)
-
-#define mh_queue_token_get(__idx__, __attr__) mh_token_get(mh_queue_get(__idx__, token), __attr__)
-#define mh_queue_token_set(__idx__, __attr__) mh_queue_token_get(__idx__, __attr__)
 
 // space, tab, LF, FF, CR
 #define myhtml_whithspace(__char__, __action__, __logic__)    \
