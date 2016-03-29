@@ -63,15 +63,10 @@ extern "C" {
     __myhtml__->__lenn__++;                                                                 \
     if(__myhtml__->__lenn__ == __myhtml__->__sizen__) {                                     \
         __myhtml__->__sizen__ += __size__;                                                  \
-        __myhtml__->__point__ = (__strcn__*)myrealloc(__myhtml__->__point__,                  \
+        __myhtml__->__point__ = (__strcn__*)myrealloc(__myhtml__->__point__,                \
             sizeof(__strcn__) * __myhtml__->__sizen__);                                     \
     }
 
-
-typedef enum {
-    myfalse = 0,
-    mytrue  = 1
-} MyHTML_DEPRECATED(mybool_t, "use bool");
 
 // encoding
 // https://encoding.spec.whatwg.org/#the-encoding

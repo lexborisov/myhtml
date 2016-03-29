@@ -52,12 +52,6 @@
 extern "C" {
 #endif
 
-
-typedef enum {
-    myfalse = 0,
-    mytrue  = 1
-} MyHTML_DEPRECATED(mybool_t, "use bool");
-
 /**
  * encodings type
  */
