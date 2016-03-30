@@ -5253,6 +5253,25 @@ bool myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding
     return false;
 }
 
+bool myhtml_encoding_detect_and_cut_bom(const char *text, size_t length, myhtml_encoding_t *encoding, const char **new_text, size_t *new_size)
+{
+    if(myhtml_encoding_detect_bom(text, length, encoding))
+    {
+        if(*encoding == MyHTML_ENCODING_UTF_8) {
+            *new_text = &text[3];
+            *new_size = length - 3;
+        }
+        else {
+            *new_text = &text[2];
+            *new_size = length - 2;
+        }
+        
+        return true;
+    }
+    
+    return false;
+}
+
 bool myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding)
 {
     unsigned const char *u_text = (unsigned const char*)text;

@@ -117,7 +117,8 @@ bool myhtml_encoding_detect(const char *text, size_t length, myhtml_encoding_t *
 bool myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_encoding_t *encoding);
 bool myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding);
 bool myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding);
-    
+bool myhtml_encoding_detect_and_cut_bom(const char *text, size_t length, myhtml_encoding_t *encoding, const char **new_text, size_t *new_size);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

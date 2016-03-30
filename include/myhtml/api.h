@@ -1622,6 +1622,23 @@ myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_
 bool
 myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding);
 
+/**
+ * Detect Unicode character encoding by BOM. Cut BOM if will be found
+ *
+ * Now available for detect UTF-8, UTF-16LE, UTF-16BE
+ *
+ * @param[in]  text
+ * @param[in]  text length
+ * @param[out] detected encoding
+ * @param[out] new text position
+ * @param[out] new size position
+ *
+ * @return true if encoding found, otherwise false
+ */
+bool
+myhtml_encoding_detect_and_cut_bom(const char *text, size_t length, myhtml_encoding_t *encoding,
+                                   const char **new_text, size_t *new_size);
+
 /***********************************************************************************
  *
  * MyHTML_STRING
