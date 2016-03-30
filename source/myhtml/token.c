@@ -171,8 +171,12 @@ void myhtml_token_attr_clean(myhtml_token_attr_t* attr)
 
 void myhtml_token_node_wait_for_done(myhtml_token_node_t* node)
 {
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
+    
     const struct timespec timeout = {0, 10000};
     while((node->type & MyHTML_TOKEN_TYPE_DONE) == 0) {myhtml_thread_nanosleep(&timeout);}
+    
+#endif
 }
 
 myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_token_node_t* node, size_t token_thread_idx, size_t attr_thread_idx)
