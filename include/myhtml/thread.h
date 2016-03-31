@@ -64,11 +64,9 @@ struct mythread_context {
     mythread_id_t id;
     
 #if defined(IS_OS_WINDOWS)
-    HANDLE sem;
-    char *sem_name;
+    HANDLE mutex;
 #else
-    char *sem_name;
-    sem_t *sem;
+    pthread_mutex_t *mutex;
 #endif
     
     size_t sem_name_size;

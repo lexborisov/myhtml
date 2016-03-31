@@ -2644,8 +2644,8 @@ void myhtml_tree_wait_for_last_done_token(myhtml_tree_t* tree, myhtml_token_node
 {
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
     
-    myhtml_token_node_t* volatile token_last_done = tree->token_last_done;
-    while(token_last_done != token_for_wait) {token_last_done = tree->token_last_done;}
+    const struct timespec timeout = {0, 0};
+    while(tree->token_last_done != token_for_wait) {myhtml_thread_nanosleep(&timeout);}
     
 #endif
 }

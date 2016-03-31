@@ -173,7 +173,7 @@ void myhtml_token_node_wait_for_done(myhtml_token_node_t* node)
 {
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
     
-    const struct timespec timeout = {0, 10000};
+    const struct timespec timeout = {0, 0};
     while((node->type & MyHTML_TOKEN_TYPE_DONE) == 0) {myhtml_thread_nanosleep(&timeout);}
     
 #endif

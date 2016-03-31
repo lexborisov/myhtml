@@ -68,48 +68,35 @@ myhtml_status_t myhtml_thread_attr_destroy(mythread_t *mythread)
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_hread_sem_create(mythread_t *mythread, mythread_context_t *ctx, size_t prefix_id)
+myhtml_status_t myhtml_hread_mutex_create(mythread_t *mythread, mythread_context_t *ctx, size_t prefix_id)
 {
-    ctx->sem_name = calloc(1024, sizeof(wchar_t));
-    
-    sprintf(ctx->sem_name, "Global/%s%lus%lup%lu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
-    
-    ctx->sem_name_size = strlen(ctx->sem_name);
-    
-    ctx->sem = CreateSemaphore(NULL,           // default security attributes
-                               0,              // initial count
-                               100,            // maximum count
-                               ctx->sem_name); // named semaphore
-    
-    if (ctx->sem == NULL) {
-        free(ctx->sem_name);
-        ctx->sem_name = NULL;
-        
-        mythread->sys_last_error = GetLastError();
-        return MyHTML_STATUS_THREAD_ERROR_SEM_CREATE;
-    }
+    ctx->mutex = CreateSemaphore(NULL, 0, 1, NULL);
     
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_hread_sem_post(mythread_t *mythread, mythread_context_t *ctx)
+myhtml_status_t myhtml_hread_mutex_post(mythread_t *mythread, mythread_context_t *ctx)
 {
-    while(!ReleaseSemaphore(ctx->sem, 1, NULL)) {}
+    ReleaseSemaphore(ctx->mutex, 1, NULL);
     
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_hread_sem_wait(mythread_t *mythread, mythread_context_t *ctx)
+myhtml_status_t myhtml_hread_mutex_wait(mythread_t *mythread, mythread_context_t *ctx)
 {
-    //DWORD dwWaitResult =
-    WaitForSingleObject(ctx->sem, INFINITE);
+    WaitForSingleObject(ctx->mutex, INFINITE);
     
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_hread_sem_close(mythread_t *mythread, mythread_context_t *ctx)
+myhtml_status_t myhtml_hread_mutex_try_wait(mythread_t *mythread, mythread_context_t *ctx)
 {
-    CloseHandle(ctx->sem);
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_mutex_close(mythread_t *mythread, mythread_context_t *ctx)
+{
+    CloseHandle(ctx->mutex);
     
     return MyHTML_STATUS_OK;
 }
@@ -186,43 +173,65 @@ myhtml_status_t myhtml_thread_attr_destroy(mythread_t *mythread)
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_hread_sem_create(mythread_t *mythread, mythread_context_t *ctx, size_t prefix_id)
+myhtml_status_t myhtml_hread_mutex_create(mythread_t *mythread, mythread_context_t *ctx, size_t prefix_id)
 {
-    ctx->sem_name = calloc(1024, sizeof(char));
+    ctx->mutex = (pthread_mutex_t*)calloc(1, sizeof(pthread_mutex_t));
     
-    sprintf(ctx->sem_name, "/%s%zus%zup%zu", MyTHREAD_SEM_NAME, prefix_id, ctx->id, (size_t)mythread);
+    if(ctx->mutex == NULL)
+        return MyHTML_STATUS_THREAD_ERROR_MUTEX_MALLOC;
     
-    ctx->sem_name_size = strlen(ctx->sem_name);
-    
-    ctx->sem = sem_open(ctx->sem_name, O_CREAT, S_IRWXU|S_IRWXG, 0);
-    
-    if(ctx->sem == SEM_FAILED) {
-        free(ctx->sem_name);
-        
+    if(pthread_mutex_init(ctx->mutex, NULL)) {
         mythread->sys_last_error = errno;
-        return MyHTML_STATUS_THREAD_ERROR_SEM_CREATE;
+        return MyHTML_STATUS_THREAD_ERROR_MUTEX_INIT;
+    }
+    
+    if(pthread_mutex_lock(ctx->mutex)) {
+        mythread->sys_last_error = errno;
+        return MyHTML_STATUS_THREAD_ERROR_MUTEX_LOCK;
     }
     
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_hread_sem_post(mythread_t *mythread, mythread_context_t *ctx)
+myhtml_status_t myhtml_hread_mutex_post(mythread_t *mythread, mythread_context_t *ctx)
 {
-    sem_post(ctx->sem);
+    if(pthread_mutex_unlock(ctx->mutex)) {
+        mythread->sys_last_error = errno;
+        return MyHTML_STATUS_THREAD_ERROR_MUTEX_UNLOCK;
+    }
+    
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_hread_sem_wait(mythread_t *mythread, mythread_context_t *ctx)
+myhtml_status_t myhtml_hread_mutex_wait(mythread_t *mythread, mythread_context_t *ctx)
 {
-    sem_wait(ctx->sem);
+    if(pthread_mutex_lock(ctx->mutex)) {
+        mythread->sys_last_error = errno;
+        return MyHTML_STATUS_THREAD_ERROR_MUTEX_LOCK;
+    }
+    
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_hread_sem_close(mythread_t *mythread, mythread_context_t *ctx)
+myhtml_status_t myhtml_hread_mutex_try_wait(mythread_t *mythread, mythread_context_t *ctx)
 {
-    sem_close(ctx->sem);
-    sem_unlink(ctx->sem_name);
-    //sem_close(ctx->sem);
+    if(pthread_mutex_trylock(ctx->mutex)) {
+        mythread->sys_last_error = errno;
+        return MyHTML_STATUS_THREAD_ERROR_MUTEX_LOCK;
+    }
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_hread_mutex_close(mythread_t *mythread, mythread_context_t *ctx)
+{
+    if(ctx->mutex) {
+        pthread_mutex_destroy(ctx->mutex);
+        free(ctx->mutex);
+        
+        ctx->mutex = NULL;
+    }
+    
     return MyHTML_STATUS_OK;
 }
 
@@ -335,10 +344,6 @@ mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
         for (size_t i = mythread->pth_list_root; i < mythread->pth_list_length; i++)
         {
             myhtml_thread_join(mythread, &mythread->pth_list[i]);
-            
-            if(mythread->pth_list[i].data.sem_name) {
-                free(mythread->pth_list[i].data.sem_name);
-            }
         }
         
         free(mythread->pth_list);
@@ -390,7 +395,7 @@ mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_f func, 
     thr->data.t_count  = total_count;
     thr->data.opt      = MyTHREAD_OPT_STOP;
     
-    myhtml_status_t m_status = myhtml_hread_sem_create(mythread, &thr->data, 0);
+    myhtml_status_t m_status = myhtml_hread_mutex_create(mythread, &thr->data, 0);
     
     if(m_status != MyHTML_STATUS_OK && status) {
         *status = m_status;
@@ -451,11 +456,8 @@ mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml
                 
                 myhtml_thread_cancel(mythread, thr);
                 
-                myhtml_hread_sem_post(mythread, &thr->data);
-                myhtml_hread_sem_close(mythread, &thr->data);
-                
-                if(thr->data.sem_name)
-                    free(thr->data.sem_name);
+                myhtml_hread_mutex_post(mythread, &thr->data);
+                myhtml_hread_mutex_close(mythread, &thr->data);
             }
             
             mythread->batch_first_id = 0;
@@ -605,7 +607,7 @@ void mythread_queue_list_entry_wait_for_done(mythread_t *mythread, mythread_queu
         return;
     
     size_t idx;
-    const struct timespec tomeout = {0, 10000};
+    const struct timespec tomeout = {0, 0};
     
     for (idx = mythread->pth_list_root; idx < mythread->pth_list_size; idx++) {
         while(entry->thread_param[idx].use < entry->queue->nodes_uses) {
@@ -771,6 +773,7 @@ mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, m
     queue->nodes_length++;
     
     if(queue->nodes_uses >= limit) {
+        queue->nodes_uses++;
         mythread_wait_all_for_done(mythread);
         
         queue->nodes_length = 0;
@@ -884,7 +887,7 @@ void mythread_stream_stop_all(mythread_t *mythread)
         mythread->stream_opt = MyTHREAD_OPT_STOP;
     
     size_t idx;
-    const struct timespec tomeout = {0, 10000};
+    const struct timespec tomeout = {0, 0};
     
     for (idx = mythread->pth_list_root; idx < mythread->batch_first_id; idx++) {
         while(mythread->pth_list[idx].data.opt != MyTHREAD_OPT_STOP) {
@@ -899,7 +902,7 @@ void mythread_batch_stop_all(mythread_t *mythread)
         mythread->batch_opt = MyTHREAD_OPT_STOP;
     
     size_t idx;
-    const struct timespec tomeout = {0, 10000};
+    const struct timespec tomeout = {0, 0};
     
     for (idx = mythread->batch_first_id; idx < (mythread->batch_first_id + mythread->batch_count); idx++) {
         while(mythread->pth_list[idx].data.opt != MyTHREAD_OPT_STOP) {
@@ -931,14 +934,14 @@ void mythread_resume_all(mythread_t *mythread)
         mythread->batch_opt  = MyTHREAD_OPT_UNDEF;
         
         for (size_t idx = mythread->pth_list_root; idx < mythread->pth_list_size; idx++) {
-            myhtml_hread_sem_post(mythread, &mythread->pth_list[idx].data);
+            myhtml_hread_mutex_post(mythread, &mythread->pth_list[idx].data);
         }
     }
 }
 
 void mythread_wait_all_for_done(mythread_t *mythread)
 {
-    const struct timespec tomeout = {0, 10000};
+    const struct timespec tomeout = {0, 0};
     
     mythread_queue_list_t *queue_list = mythread->queue_list;
     mythread_queue_list_entry_t *entry = queue_list->first;
@@ -963,9 +966,11 @@ void mythread_suspend_all(mythread_t *mythread)
     if(mythread->batch_opt != MyTHREAD_OPT_WAIT)
         mythread->batch_opt  = MyTHREAD_OPT_WAIT;
     
-    const struct timespec tomeout = {0, 10000};
+    const struct timespec tomeout = {0, 0};
     
     for (size_t idx = mythread->pth_list_root; idx < mythread->pth_list_size; idx++) {
+        myhtml_hread_mutex_try_wait(mythread, &mythread->pth_list[idx].data);
+        
         while(mythread->pth_list[idx].data.opt != MyTHREAD_OPT_WAIT) {
             myhtml_thread_nanosleep(&tomeout);
         }
@@ -1003,7 +1008,7 @@ bool mythread_function_see_opt(mythread_context_t *ctx, volatile mythread_thread
         if(mythread_function_see_for_all_done(queue_list, ctx->id))
         {
             ctx->opt = MyTHREAD_OPT_STOP;
-            myhtml_hread_sem_wait(mythread, ctx);
+            myhtml_hread_mutex_wait(mythread, ctx);
             ctx->opt = MyTHREAD_OPT_UNDEF;
             
             return false;
@@ -1013,7 +1018,7 @@ bool mythread_function_see_opt(mythread_context_t *ctx, volatile mythread_thread
     {
         if(mythread_function_see_for_all_done(queue_list, ctx->id))
         {
-            myhtml_hread_sem_close(mythread, ctx);
+            myhtml_hread_mutex_close(mythread, ctx);
             ctx->opt = MyTHREAD_OPT_QUIT;
             return true;
         }
@@ -1030,9 +1035,8 @@ void mythread_function_batch(void *arg)
     mythread_t * mythread = ctx->mythread;
     mythread_queue_list_t *queue_list = mythread->queue_list;
     
-    const struct timespec timeout = {0, 10000};
-    
-    myhtml_hread_sem_wait(mythread, ctx);
+    const struct timespec timeout = {0, 0};
+    myhtml_hread_mutex_wait(mythread, ctx);
     
     do {
         if(mythread->batch_opt & MyTHREAD_OPT_WAIT) {
@@ -1083,8 +1087,8 @@ void mythread_function_stream(void *arg)
     mythread_t * mythread = ctx->mythread;
     mythread_queue_list_t *queue_list = mythread->queue_list;
     
-    const struct timespec timeout = {0, 10000};
-    myhtml_hread_sem_wait(mythread, ctx);
+    const struct timespec timeout = {0, 0};
+    myhtml_hread_mutex_wait(mythread, ctx);
     
     do {
         if(mythread->stream_opt & MyTHREAD_OPT_WAIT) {
