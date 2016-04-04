@@ -441,7 +441,7 @@ mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml
     
     for (size_t i = 0; i < count; i++)
     {
-        mythread_id_t curr_id = _myhread_create_stream_raw(mythread, func, mythread_function_batch, status, count);
+        mythread_id_t curr_id = _myhread_create_stream_raw(mythread, func, mythread_function_batch, status, i);
         
         if(init_first == false) {
             mythread->batch_first_id = curr_id;
@@ -516,6 +516,11 @@ mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t *mythrea
         if(status)
             *status = MyHTML_STATUS_THREAD_ERROR_QUEUE_MALLOC;
         return NULL;
+    }
+    
+    size_t idx;
+    for (idx = mythread->batch_first_id; idx < (mythread->batch_first_id + mythread->batch_count); idx++) {
+        entry->thread_param[idx].use = mythread->pth_list[idx].data.t_count;
     }
     
     entry->queue = queue;
@@ -596,8 +601,12 @@ void mythread_queue_list_entry_clean(mythread_t *mythread, mythread_queue_list_e
     mythread_queue_clean(entry->queue);
     
     size_t idx;
-    for (idx = mythread->pth_list_root; idx < mythread->pth_list_size; idx++) {
+    for (idx = mythread->pth_list_root; idx < mythread->batch_first_id; idx++) {
         entry->thread_param[idx].use = 0;
+    }
+    
+    for (idx = mythread->batch_first_id; idx < (mythread->batch_first_id + mythread->batch_count); idx++) {
+        entry->thread_param[idx].use = mythread->pth_list[idx].data.t_count;
     }
 }
 
@@ -610,7 +619,8 @@ void mythread_queue_list_entry_wait_for_done(mythread_t *mythread, mythread_queu
     const struct timespec tomeout = {0, 0};
     
     for (idx = mythread->pth_list_root; idx < mythread->pth_list_size; idx++) {
-        while(entry->thread_param[idx].use < entry->queue->nodes_uses) {
+        mythread_queue_thread_param_t *thread_param = &entry->thread_param[ idx ];
+        while(thread_param->use < entry->queue->nodes_uses) {
             myhtml_thread_nanosleep(&tomeout);
         }
     }
@@ -1066,7 +1076,7 @@ void mythread_function_batch(void *arg)
                 if((qnode->tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
                     ctx->func(ctx->id, qnode);
                 
-                thread_param->use += ctx->t_count;
+                thread_param->use += mythread->batch_count;
             }
             else
                 done_count++;
