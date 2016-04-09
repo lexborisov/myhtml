@@ -510,7 +510,7 @@ mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t *mythrea
     
     entry->thread_param = (mythread_queue_thread_param_t*)mycalloc(mythread->pth_list_size, sizeof(mythread_queue_thread_param_t));
     
-    if(entry == NULL) {
+    if(entry->thread_param == NULL) {
         free(entry);
         
         if(status)
