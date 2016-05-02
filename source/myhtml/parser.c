@@ -28,9 +28,9 @@ void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
     while(myhtml_rules_tree_dispatcher(qnode->tree, qnode->token)){}
 }
 
-myhtml_incoming_buf_t * myhtml_parser_find_first_buf(myhtml_tree_t *tree, size_t begin)
+myhtml_incoming_buffer_t * myhtml_parser_find_first_buf(myhtml_tree_t *tree, size_t begin)
 {
-    myhtml_incoming_buf_t *inc_buf = tree->incoming_buf_first;
+    myhtml_incoming_buffer_t *inc_buf = tree->incoming_buf_first;
     while (inc_buf && inc_buf->next && inc_buf->next->offset < begin) {
         inc_buf = inc_buf->next;
     }
@@ -43,7 +43,7 @@ void myhtml_parser_drop_first_newline(myhtml_tree_t *tree, size_t *begin, size_t
     if(*length == 0)
         return;
     
-    myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, *begin);
+    myhtml_incoming_buffer_t *inc_buf = myhtml_parser_find_first_buf(tree, *begin);
     
     size_t current_buf_offset = *begin - inc_buf->offset;
     
@@ -65,7 +65,7 @@ void myhtml_parser_drop_first_newline(myhtml_tree_t *tree, size_t *begin, size_t
 
 size_t myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length, myhtml_string_char_ref_chunk_t *str_chunk)
 {
-    myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
+    myhtml_incoming_buffer_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
     
     size_t current_buf_offset = begin - inc_buf->offset;
     size_t save_str_len = string->length;
@@ -134,7 +134,7 @@ size_t myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, cons
 
 size_t myhtml_parser_add_text_lowercase(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length, myhtml_string_char_ref_chunk_t *str_chunk)
 {
-    myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
+    myhtml_incoming_buffer_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
     myhtml_encoding_result_clean(&str_chunk->res);
     
     size_t current_buf_offset = begin - inc_buf->offset;
@@ -196,7 +196,7 @@ size_t myhtml_parser_add_text_lowercase(myhtml_tree_t *tree, myhtml_string_t* st
 
 size_t myhtml_parser_add_text_with_charef(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length, myhtml_string_char_ref_chunk_t *str_chunk)
 {
-    myhtml_incoming_buf_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
+    myhtml_incoming_buffer_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
     myhtml_encoding_result_clean(&str_chunk->res);
     
     size_t current_buf_offset = begin - inc_buf->offset;

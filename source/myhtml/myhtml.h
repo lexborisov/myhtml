@@ -38,7 +38,7 @@ extern "C" {
 #include "myhtml/token.h"
 #include "myhtml/charef.h"
 #include "myhtml/encoding.h"
-
+#include "myhtml/incoming.h"
     
 #define mh_queue_current() tree->queue
 #define myhtml_tokenizer_state_set(__tree__) myhtml_tree_set(__tree__, state)
@@ -78,16 +78,6 @@ struct myhtml_collection {
     myhtml_tree_node_t **list;
     size_t size;
     size_t length;
-};
-
-struct myhtml_incoming_buf {
-    const char* data;
-    size_t length;
-    size_t size;
-    size_t offset;
-    
-    struct myhtml_incoming_buf* prev;
-    struct myhtml_incoming_buf* next;
 };
 
 myhtml_t * myhtml_create(void);
@@ -162,12 +152,6 @@ myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, si
 // strings
 myhtml_string_t * myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
 myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
-
-// incoming buffer
-void myhtml_incomming_buf_add(myhtml_t* myhtml, myhtml_tree_t* tree, myhtml_incoming_buf_t *current, const char *html, size_t html_size);
-void myhtml_incomming_buf_clean(myhtml_tree_t* tree, myhtml_incoming_buf_t *current);
-const char * myhtml_tree_incomming_buf_get_last(myhtml_tree_t *tree, myhtml_incoming_buf_t *inc_buf, size_t current_offset, size_t len);
-const char * myhtml_tree_incomming_buf_make_data(myhtml_tree_t *tree, mythread_queue_node_t *qnode, size_t len);
 
 bool myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id);

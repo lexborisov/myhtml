@@ -2729,4 +2729,103 @@ myhtml_tree_special_token_t * myhtml_tree_special_list_get_last(myhtml_tree_spec
     return &special->list[special->length];
 }
 
+/* incoming buffer */
+const char * myhtml_tree_incomming_buffer_get_last(myhtml_tree_t *tree, myhtml_incoming_buffer_t *inc_buf, size_t current_offset, size_t len)
+{
+    if(current_offset >= len) {
+        return &tree->incoming_buf->data[ (current_offset - len) ];
+    }
+    
+    if(tree->temp_tag_name.data == NULL)
+        myhtml_tree_temp_tag_name_init(&tree->temp_tag_name);
+    else
+        myhtml_tree_temp_tag_name_clean(&tree->temp_tag_name);
+    
+    inc_buf = inc_buf->prev;
+    
+    size_t tmp_len = len - current_offset;
+    while (tmp_len)
+    {
+        if(inc_buf->size >= tmp_len)
+            break;
+        
+        tmp_len -= inc_buf->size;
+        inc_buf = inc_buf->prev;
+    }
+    
+    myhtml_tree_temp_tag_name_append(&tree->temp_tag_name, &inc_buf->data[ (inc_buf->size - tmp_len) ], tmp_len);
+    tmp_len = len - tmp_len;
+    inc_buf = inc_buf->next;
+    
+    while (inc_buf && tmp_len)
+    {
+        if(tmp_len > inc_buf->size) {
+            myhtml_tree_temp_tag_name_append(&tree->temp_tag_name, inc_buf->data, inc_buf->size);
+            tmp_len -= inc_buf->size;
+        }
+        else {
+            myhtml_tree_temp_tag_name_append(&tree->temp_tag_name, inc_buf->data, tmp_len);
+            break;
+        }
+        
+        inc_buf = inc_buf->next;
+    }
+    
+    return tree->temp_tag_name.data;
+}
+
+const char * myhtml_tree_incomming_buffer_make_data(myhtml_tree_t *tree, mythread_queue_node_t *qnode, size_t len)
+{
+    if(tree->incoming_buf->offset <= qnode->begin &&
+       (len + qnode->begin) <= (tree->global_offset + tree->incoming_buf->size))
+    {
+        return &tree->incoming_buf->data[ (qnode->begin - tree->incoming_buf->offset) ];
+    }
+    
+    if(tree->temp_tag_name.data == NULL)
+        myhtml_tree_temp_tag_name_init(&tree->temp_tag_name);
+    else
+        myhtml_tree_temp_tag_name_clean(&tree->temp_tag_name);
+    
+    myhtml_incoming_buffer_t *inc_buf = tree->incoming_buf;
+    
+    if(inc_buf == NULL)
+        return NULL;
+    
+    // find original chunk
+    while (inc_buf->offset > qnode->begin) {
+        if(inc_buf->prev)
+            inc_buf = inc_buf->prev;
+        else
+            break;
+    }
+    
+    size_t relative_current_buf_offset = qnode->begin - inc_buf->offset;
+    
+    if((relative_current_buf_offset + len) <= inc_buf->size) {
+        return &inc_buf->data[relative_current_buf_offset];
+    }
+    
+    size_t relative_how_buf_left = inc_buf->size - relative_current_buf_offset;
+    myhtml_tree_temp_tag_name_append(&tree->temp_tag_name, &inc_buf->data[relative_current_buf_offset], relative_how_buf_left);
+    
+    inc_buf = inc_buf->next;
+    
+    while (inc_buf)
+    {
+        if((len - relative_how_buf_left) <= inc_buf->size) {
+            myhtml_tree_temp_tag_name_append(&tree->temp_tag_name, inc_buf->data, (len - relative_how_buf_left));
+            break;
+        }
+        else {
+            relative_how_buf_left += inc_buf->size;
+            myhtml_tree_temp_tag_name_append(&tree->temp_tag_name, inc_buf->data, inc_buf->size);
+        }
+        
+        inc_buf = inc_buf->next;
+    }
+    
+    return tree->temp_tag_name.data;
+}
+
 

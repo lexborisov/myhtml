@@ -75,7 +75,8 @@ void myhtml_tokenizer_chunk_process(myhtml_tree_t* tree, const char* html, size_
     myhtml_tokenizer_state_f* state_f = myhtml->parse_state_func;
     
     // add for a chunk
-    myhtml_incomming_buf_add(myhtml, tree, tree->incoming_buf, html, html_length);
+    tree->incoming_buf = myhtml_incomming_buffer_add(tree->incoming_buf, tree->myhtml->async_incoming_buf,
+                                                     tree->mcasync_incoming_buf_id, html, html_length);
     
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
     
@@ -316,7 +317,7 @@ void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, 
     const myhtml_tag_context_t *tag_ctx = NULL;
     
     if(html_offset < qnode->length) {
-        const char *tagname = myhtml_tree_incomming_buf_make_data(tree, qnode, qnode->length);
+        const char *tagname = myhtml_tree_incomming_buffer_make_data(tree, qnode, qnode->length);
         tag_ctx = myhtml_tag_get_by_name(tags, tagname, qnode->length);
     }
     else {
@@ -328,7 +329,7 @@ void myhtml_check_tag_parser(myhtml_tree_t* tree, mythread_queue_node_t* qnode, 
     }
     else {
         if(html_offset < qnode->length) {
-            const char *tagname = myhtml_tree_incomming_buf_make_data(tree, qnode, qnode->length);
+            const char *tagname = myhtml_tree_incomming_buffer_make_data(tree, qnode, qnode->length);
             qnode->token->tag_ctx_idx = myhtml_tag_add(tags, tagname, qnode->length, MyHTML_TOKENIZER_STATE_DATA, true);
         }
         else {
@@ -686,7 +687,7 @@ size_t myhtml_tokenizer_state_cdata_section(myhtml_tree_t* tree, mythread_queue_
         {
             const char *tagname;
             if(html_offset < 2)
-                tagname = myhtml_tree_incomming_buf_get_last(tree, tree->incoming_buf, html_offset, 2);
+                tagname = myhtml_tree_incomming_buffer_get_last(tree, tree->incoming_buf, html_offset, 2);
             else
                 tagname = &html[html_offset - 2];
             
@@ -829,7 +830,7 @@ size_t myhtml_tokenizer_state_markup_declaration_open(myhtml_tree_t* tree, mythr
         return html_size;
     }
     
-    const char *tagname = myhtml_tree_incomming_buf_make_data(tree, qnode, 2);
+    const char *tagname = myhtml_tree_incomming_buffer_make_data(tree, qnode, 2);
     
     // for a comment
     if(tagname[0] == '-' && tagname[1] == '-')
@@ -849,7 +850,7 @@ size_t myhtml_tokenizer_state_markup_declaration_open(myhtml_tree_t* tree, mythr
         return html_size;
     }
     
-    tagname = myhtml_tree_incomming_buf_make_data(tree, qnode, 7);
+    tagname = myhtml_tree_incomming_buffer_make_data(tree, qnode, 7);
     
     if(myhtml_strncasecmp(tagname, "DOCTYPE", 7) == 0)
     {

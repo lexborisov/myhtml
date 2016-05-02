@@ -134,7 +134,7 @@ size_t myhtml_tokenizer_state_custom_after_doctype_name_a_z(myhtml_tree_t* tree,
         return html_size;
     }
     
-    const char* param = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+    const char* param = myhtml_tree_incomming_buffer_make_data(tree, qnode, 6);
     
     if(myhtml_strncasecmp(param, "PUBLIC", 6) == 0) {
         myhtml_parser_queue_set_attr(tree, qnode);

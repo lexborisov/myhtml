@@ -260,6 +260,9 @@ size_t mcobject_async_node_add(mcobject_async_t *mcobj_async, mcobject_async_sta
 {
     mcsync_lock(mcobj_async->mcsync);
     
+    if(status)
+        *status = MCOBJECT_ASYNC_STATUS_OK;
+    
     size_t node_idx;
     
     if(mcobj_async->nodes_cache_length) {

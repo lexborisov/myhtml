@@ -109,7 +109,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
             size_t tmp_size = qnode->begin;
             qnode->begin = qnode->token->begin;
             
-            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, qnode, 6);
             
             qnode->begin = tmp_size;
             
@@ -142,7 +142,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
             size_t tmp_size = qnode->begin;
             qnode->begin = qnode->token->begin;
             
-            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, qnode, 6);
             
             qnode->begin = tmp_size;
             
@@ -175,7 +175,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myth
             size_t tmp_size = qnode->begin;
             qnode->begin = qnode->token->begin;
             
-            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, qnode, 6);
             qnode->begin = tmp_size;
             
             if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
@@ -278,7 +278,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
             size_t tmp_size = qnode->begin;
             qnode->begin = qnode->token->begin;
             
-            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, qnode, 6);
             
             qnode->begin = tmp_size;
             
@@ -311,7 +311,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
             size_t tmp_size = qnode->begin;
             qnode->begin = qnode->token->begin;
             
-            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, qnode, 6);
             
             qnode->begin = tmp_size;
             
@@ -344,7 +344,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
             size_t tmp_size = qnode->begin;
             qnode->begin = qnode->token->begin;
             
-            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, qnode, 6);
             
             qnode->begin = tmp_size;
             
@@ -438,7 +438,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tre
             size_t tmp_size = qnode->begin;
             qnode->begin = qnode->token->begin;
             
-            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, qnode, 6);
             
             qnode->begin = tmp_size;
             
@@ -560,7 +560,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree,
             size_t tmp_size = qnode->begin;
             qnode->begin = qnode->token->begin;
             
-            const char *tem_name = myhtml_tree_incomming_buf_make_data(tree, qnode, 6);
+            const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, qnode, 6);
             
             qnode->begin = tmp_size;
             

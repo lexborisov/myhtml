@@ -177,8 +177,8 @@ struct myhtml_tree {
     myhtml_token_attr_t*    attr_current;
     myhtml_tag_id_t         tmp_tag_id;
     mythread_queue_node_t*  current_qnode;
-    myhtml_incoming_buf_t*  incoming_buf;
-    myhtml_incoming_buf_t*  incoming_buf_first;
+    myhtml_incoming_buffer_t*  incoming_buf;
+    myhtml_incoming_buffer_t*  incoming_buf_first;
     
     myhtml_tree_indexes_t* indexes;
     
@@ -384,6 +384,10 @@ myhtml_status_t myhtml_tree_special_list_append(myhtml_tree_special_token_list_t
 size_t myhtml_tree_special_list_length(myhtml_tree_special_token_list_t* special);
 myhtml_tree_special_token_t * myhtml_tree_special_list_get_last(myhtml_tree_special_token_list_t* special);
 size_t myhtml_tree_special_list_pop(myhtml_tree_special_token_list_t* special);
+
+/* incoming buffer */ 
+const char * myhtml_tree_incomming_buffer_get_last(myhtml_tree_t *tree, myhtml_incoming_buffer_t *inc_buf, size_t current_offset, size_t len);
+const char * myhtml_tree_incomming_buffer_make_data(myhtml_tree_t *tree, mythread_queue_node_t *qnode, size_t len);
 
 #ifdef __cplusplus
 } /* extern "C" */
