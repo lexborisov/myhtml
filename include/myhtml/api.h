@@ -34,7 +34,7 @@
 
 #define MyHTML_VERSION_MAJOR 0
 #define MyHTML_VERSION_MINOR 6
-#define MyHTML_VERSION_PATCH 1
+#define MyHTML_VERSION_PATCH 3
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -49,7 +49,7 @@
 #endif
 
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 /**
