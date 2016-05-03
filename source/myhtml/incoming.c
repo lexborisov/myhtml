@@ -133,7 +133,7 @@ size_t myhtml_incoming_buffer_escaped_case_cmp(myhtml_incoming_buffer_t **inc_bu
             
             size_t code_point = myhtml_incoming_buffer_convert_one_escaped_to_code_point(&current, relative_pos);
             
-            if(code_point > 255 && myhtml_string_chars_num_map[code_point] != myhtml_string_chars_num_map[ u_to[i] ]) {
+            if(code_point > 255 || myhtml_string_chars_num_map[code_point] != myhtml_string_chars_num_map[ u_to[i] ]) {
                 break;
             }
             
