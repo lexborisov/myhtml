@@ -115,7 +115,12 @@ enum myhtml_encoding_list {
     MyHTML_ENCODING_WINDOWS_1258     = 0x22,
     MyHTML_ENCODING_WINDOWS_874      = 0x23,
     MyHTML_ENCODING_X_MAC_CYRILLIC   = 0x24,
-    MyHTML_ENCODING_LAST_ENTRY       = 0x25
+    MyHTML_ENCODING_ISO_2022_JP      = 0x25,
+    MyHTML_ENCODING_GBK              = 0x26,
+    MyHTML_ENCODING_SHIFT_JIS        = 0x27,
+    MyHTML_ENCODING_EUC_JP           = 0x28,
+    MyHTML_ENCODING_ISO_8859_8_I     = 0x29,
+    MyHTML_ENCODING_LAST_ENTRY       = 0x2a
 }
 typedef myhtml_encoding_t;
 

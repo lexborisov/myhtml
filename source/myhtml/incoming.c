@@ -47,18 +47,48 @@ void myhtml_incomming_buffer_clean(myhtml_incoming_buffer_t *current)
     memset(current, 0, sizeof(myhtml_incoming_buffer_t));
 }
 
-myhtml_incoming_buffer_t * myhtml_incoming_buffer_find_by_position(myhtml_incoming_buffer_t *inc_buf, size_t position)
+myhtml_incoming_buffer_t * myhtml_incoming_buffer_find_by_position(myhtml_incoming_buffer_t *inc_buf, size_t begin)
 {
-    if(inc_buf->offset < position) {
-        while(inc_buf && (inc_buf->offset + inc_buf->size) < position)
+    if(inc_buf->offset < begin) {
+        while(inc_buf && (inc_buf->offset + inc_buf->size) < begin)
             inc_buf = inc_buf->next;
     }
     else {
-        while(inc_buf && inc_buf->offset > position)
+        while(inc_buf && inc_buf->offset > begin)
             inc_buf = inc_buf->prev;
     }
     
     return inc_buf;
+}
+
+const char * myhtml_incoming_buffer_data(myhtml_incoming_buffer_t *inc_buf)
+{
+    return inc_buf->data;
+}
+
+size_t myhtml_incoming_buffer_length(myhtml_incoming_buffer_t *inc_buf)
+{
+    return inc_buf->length;
+}
+
+size_t myhtml_incoming_buffer_size(myhtml_incoming_buffer_t *inc_buf)
+{
+    return inc_buf->size;
+}
+
+size_t myhtml_incoming_buffer_offset(myhtml_incoming_buffer_t *inc_buf)
+{
+    return inc_buf->offset;
+}
+
+myhtml_incoming_buffer_t * myhtml_incoming_buffer_next(myhtml_incoming_buffer_t *inc_buf)
+{
+    return inc_buf->next;
+}
+
+myhtml_incoming_buffer_t * myhtml_incoming_buffer_prev(myhtml_incoming_buffer_t *inc_buf)
+{
+    return inc_buf->prev;
 }
 
 // // //

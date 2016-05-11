@@ -60,6 +60,25 @@ sub read_tmpl {
         \@data;
 }
 
+sub read_tmpl_raw {
+        my ($self, $filename) = @_;
+        
+        $filename = $self->{dirs}->{template}."/$filename";
+        
+        open my $fh, "<",  $filename or die "Can't open $filename: $!";
+        binmode $fh, ":utf8";
+
+        my @data;
+
+        while (my $line = <$fh>) {
+                push @data, $line;
+        }
+
+        close $fh;
+
+        \@data;
+}
+
 sub format_list_text {
         my ($self, $list, $join_val) = @_;
         

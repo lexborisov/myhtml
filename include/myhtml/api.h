@@ -93,7 +93,12 @@ enum myhtml_encoding_list {
     MyHTML_ENCODING_WINDOWS_1258     = 0x22,
     MyHTML_ENCODING_WINDOWS_874      = 0x23,
     MyHTML_ENCODING_X_MAC_CYRILLIC   = 0x24,
-    MyHTML_ENCODING_LAST_ENTRY       = 0x25
+    MyHTML_ENCODING_ISO_2022_JP      = 0x25,
+    MyHTML_ENCODING_GBK              = 0x26,
+    MyHTML_ENCODING_SHIFT_JIS        = 0x27,
+    MyHTML_ENCODING_EUC_JP           = 0x28,
+    MyHTML_ENCODING_ISO_8859_8_I     = 0x29,
+    MyHTML_ENCODING_LAST_ENTRY       = 0x2a
 }
 typedef myhtml_encoding_t;
 
@@ -477,6 +482,12 @@ typedef struct myhtml_tag myhtml_tag_t;
  *
  */
 typedef struct mchar_async mchar_async_t;
+
+/**
+ * MyHTML_INCOMING structures
+ *
+ */
+typedef struct myhtml_incoming_buffer myhtml_incoming_buffer_t;
 
 /**
  * MyHTML_STRING structures
@@ -1538,7 +1549,6 @@ myhtml_collection_check_size(myhtml_collection_t *collection, size_t up_to_lengt
  * @param[in] myhtml_tree_t*
  * @param[in] Input character encoding
  *
- * @return NULL if successful, otherwise an myhtml_collection_t* structure
  */
 void
 myhtml_encoding_set(myhtml_tree_t* tree, myhtml_encoding_t encoding);
@@ -1653,6 +1663,22 @@ myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *e
 bool
 myhtml_encoding_detect_and_cut_bom(const char *text, size_t length, myhtml_encoding_t *encoding,
                                    const char **new_text, size_t *new_size);
+
+/**
+ * Detect encoding by name
+ * Names like: windows-1258 return MyHTML_ENCODING_WINDOWS_1258
+ *             cp1251 or windows-1251 return MyHTML_ENCODING_WINDOWS_1251
+ *
+ * See https://encoding.spec.whatwg.org/#names-and-labels
+ *
+ * @param[in]  name
+ * @param[in]  name length
+ * @param[out] detected encoding
+ *
+ * @return true if encoding found, otherwise false
+ */
+bool
+myhtml_encoding_by_name(const char *name, size_t length, myhtml_encoding_t *encoding);
 
 /***********************************************************************************
  *
@@ -1834,6 +1860,90 @@ myhtml_string_data_realloc(mchar_async_t *mchar, size_t node_id,
  */
 void
 myhtml_string_data_free(mchar_async_t *mchar, size_t node_id, char *data);
+
+/***********************************************************************************
+ *
+ * MyHTML_INCOMING
+ *
+ * @description
+ * For example, three buffer:
+ *   1) Data: "bebebe";        Prev: 0; Next: 2; Size: 6;  Length: 6;  Offset: 0
+ *   2) Data: "lalala-lululu"; Prev: 1; Next: 3; Size: 13; Length: 13; Offset: 6
+ *   3) Data: "huy";           Prev: 2; Next: 0; Size: 3;  Length: 1;  Offset: 19
+ *
+ ***********************************************************************************/
+
+/**
+ * Get Incoming Buffer by position
+ *
+ * @param[in] current myhtml_incoming_buffer_t*
+ * @param[in] begin position
+ *
+ * @return myhtml_incoming_buffer_t if successful, otherwise a NULL value
+ */
+myhtml_incoming_buffer_t*
+myhtml_incoming_buffer_find_by_position(myhtml_incoming_buffer_t *inc_buf, size_t begin);
+
+/**
+ * Get data of Incoming Buffer
+ *
+ * @param[in] myhtml_incoming_buffer_t*
+ *
+ * @return const char* if successful, otherwise a NULL value
+ */
+const char*
+myhtml_incoming_buffer_data(myhtml_incoming_buffer_t *inc_buf);
+
+/**
+ * Get data length of Incoming Buffer
+ *
+ * @param[in] myhtml_incoming_buffer_t*
+ *
+ * @return size_t
+ */
+size_t
+myhtml_incoming_buffer_length(myhtml_incoming_buffer_t *inc_buf);
+
+/**
+ * Get data size of Incoming Buffer
+ *
+ * @param[in] myhtml_incoming_buffer_t*
+ *
+ * @return size_t
+ */
+size_t
+myhtml_incoming_buffer_size(myhtml_incoming_buffer_t *inc_buf);
+
+/**
+ * Get data offset of Incoming Buffer. Global position of begin Incoming Buffer.
+ * See description for MyHTML_INCOMING title
+ *
+ * @param[in] myhtml_incoming_buffer_t*
+ *
+ * @return size_t
+ */
+size_t
+myhtml_incoming_buffer_offset(myhtml_incoming_buffer_t *inc_buf);
+
+/**
+ * Get next buffer
+ *
+ * @param[in] myhtml_incoming_buffer_t*
+ *
+ * @return myhtml_incoming_buffer_t*
+ */
+myhtml_incoming_buffer_t*
+myhtml_incoming_buffer_next(myhtml_incoming_buffer_t *inc_buf);
+
+/**
+ * Get prev buffer
+ *
+ * @param[in] myhtml_incoming_buffer_t*
+ *
+ * @return myhtml_incoming_buffer_t*
+ */
+myhtml_incoming_buffer_t*
+myhtml_incoming_buffer_prev(myhtml_incoming_buffer_t *inc_buf);
 
 /***********************************************************************************
  *

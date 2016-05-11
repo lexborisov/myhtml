@@ -25,6 +25,7 @@ extern "C" {
 #endif
 
 #include "myhtml/myosi.h"
+#include "myhtml/utils.h"
 
 enum myhtml_encoding_status {
     MyHTML_ENCODING_STATUS_OK       = 0x00,
@@ -62,6 +63,19 @@ struct myhtml_encoding_unicode_result {
     size_t count_bad;
 }
 typedef myhtml_encoding_unicode_result_t;
+
+struct myhtml_encoding_detect_name_entry {
+    const char* name;
+    size_t name_length;
+    const char* label;
+    size_t label_length;
+    
+    myhtml_encoding_t encoding;
+    
+    size_t next;
+    size_t curr;
+}
+typedef myhtml_encoding_detect_name_entry_t;
 
 typedef myhtml_encoding_status_t (*myhtml_encoding_custom_f)(unsigned const char data, myhtml_encoding_result_t *res);
 
@@ -118,6 +132,9 @@ bool myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_enco
 bool myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding);
 bool myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding);
 bool myhtml_encoding_detect_and_cut_bom(const char *text, size_t length, myhtml_encoding_t *encoding, const char **new_text, size_t *new_size);
+
+const myhtml_encoding_detect_name_entry_t * myhtml_encoding_name_entry_by_name(const char* name, size_t length);
+bool myhtml_encoding_by_name(const char *name, size_t length, myhtml_encoding_t *encoding);
 
 #ifdef __cplusplus
 } /* extern "C" */
