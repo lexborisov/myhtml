@@ -2,7 +2,7 @@ TARGET := examples
 SRCDIR := examples
 
 CC ?= gcc
-LIBS := ../lib/static_libmyhtml.a
+LIBS := ../lib/libmyhtml_static.a
 LDLIBS := $(LIBS)
 
 MyHTML_OPTIMIZATION_LEVEL ?= -O2

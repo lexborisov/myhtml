@@ -5,7 +5,7 @@ CC ?= gcc
 
 LIBPOSTFIX := .so
 LIBNAME    := myhtml
-LIBSTATIC_PREFIX  := static_
+LIBSTATIC_POSTFIX  := _static
 
 MyHTML_OPTIMIZATION_LEVEL ?= -O2
 
@@ -43,7 +43,7 @@ shared: $(OBJS) $(HDRS)
 	$(CC) -shared $(LDFLAGS) $(OBJS) -o lib$(LIBNAME)$(LIBPOSTFIX)
 
 static: shared
-	$(AR) crus $(LIBSTATIC_PREFIX)lib$(LIBNAME).a $(OBJS)
+	$(AR) crus lib$(LIBNAME)$(LIBSTATIC_POSTFIX).a $(OBJS)
 
 clean:
 	rm -rf *.o
