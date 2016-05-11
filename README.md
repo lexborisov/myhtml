@@ -28,6 +28,10 @@ Release will have major version number 1
 - C99 support
 - Passes all tree construction tests from [html5lib-tests]
 
+## Further developments
+
+- [MyCSS] — Fast C/C++ CSS Parser (Cascading Style Sheets Parser) 
+
 ## Support encodings for InputStream
 
 ```text
@@ -204,6 +208,7 @@ See the [LICENSE] file.
 [parsing by chunks]: https://github.com/lexborisov/myhtml/blob/master/examples/chunks_high_level.c
 [encoding.spec.whatwg.org]: https://encoding.spec.whatwg.org/
 [html5lib-tests]: https://github.com/html5lib/html5lib-tests
+[MyCSS]: https://github.com/lexborisov/mycss
 [Perl 5]: https://metacpan.org/release/HTML-MyHTML
 [Perl 6]: https://github.com/MadcapJake/p6-MyHTML
 [Crystal]: https://github.com/kostya/myhtml
