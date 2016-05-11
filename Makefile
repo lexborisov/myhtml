@@ -12,7 +12,7 @@ LIBNAME := myhtml
 
 all: create
 	$(MAKE) -C $(SRCDIR) $@
-	cp $(SRCDIR)/*lib$(LIBNAME).* lib/
+	cp $(SRCDIR)/*lib$(LIBNAME)*.* lib/
 	for f in $(SUBDIRS); do $(MAKE) -C $$f all; done
 
 clean:
