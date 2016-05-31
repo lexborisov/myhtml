@@ -48,25 +48,25 @@ extern "C" {
 #endif
 
 #ifdef DEBUG_MODE
-    #define MyHTML_DEBUG(__format__, ...)      \
-        myhtml_print(stderr, "DEBUG: "__format__"\n", ##__VA_ARGS__)
+    #define MyHTML_DEBUG(format, ...)      \
+        myhtml_print(stderr, "DEBUG: "format"\n", ##__VA_ARGS__)
 #else
-    #define MyHTML_DEBUG(__format__, ...)
+    #define MyHTML_DEBUG(format, ...)
 #endif
 
 #ifdef DEBUG_MODE
-    #define MyHTML_DEBUG_ERROR(__format__, ...)      \
-        myhtml_print(stderr, "DEBUG ERROR: "__format__"\n", ##__VA_ARGS__)
+    #define MyHTML_DEBUG_ERROR(format, ...)      \
+        myhtml_print(stderr, "DEBUG ERROR: "format"\n", ##__VA_ARGS__)
 #else
-    #define MyHTML_DEBUG_ERROR(__format__, ...)
+    #define MyHTML_DEBUG_ERROR(format, ...)
 #endif
 
-#define myhtml_base_add(__myhtml__, __point__, __lenn__, __sizen__, __strcn__, __size__)    \
-    __myhtml__->__lenn__++;                                                                 \
-    if(__myhtml__->__lenn__ == __myhtml__->__sizen__) {                                     \
-        __myhtml__->__sizen__ += __size__;                                                  \
-        __myhtml__->__point__ = (__strcn__*)myrealloc(__myhtml__->__point__,                \
-            sizeof(__strcn__) * __myhtml__->__sizen__);                                     \
+#define myhtml_base_add(myhtml, point, lenn, sizen, strcn, size)    \
+    myhtml->Lenn++;                                                 \
+    if(myhtml->lenn == myhtml->sizen) {                             \
+        myhtml->sizen += size;                                      \
+        myhtml->point = (strcn*)myrealloc(myhtml->point,            \
+            sizeof(strcn) * myhtml->sizen);                         \
     }
 
 

@@ -37,15 +37,15 @@ extern "C" {
 #include "myhtml/utils/mchar_async.h"
 #include "myhtml/utils/mcsync.h"
 
-#define myhtml_token_attr_malloc(__token__, __attr_node__, __thread_idx__)                  \
-    __attr_node__ = mcobject_async_malloc(__token__->attr_obj, __thread_idx__, NULL);       \
-    myhtml_token_attr_clean(__attr_node__)
+#define myhtml_token_attr_malloc(token, attr_node, thread_idx)                  \
+    attr_node = mcobject_async_malloc(token->attr_obj, thread_idx, NULL);       \
+    myhtml_token_attr_clean(attr_node)
 
-#define myhtml_token_node_set_done(__token_node__) __token_node__->type |= MyHTML_TOKEN_TYPE_DONE
+#define myhtml_token_node_set_done(token_node) token_node->type |= MyHTML_TOKEN_TYPE_DONE
 
-#define myhtml_token_node_malloc(__token__, __token_node__, __thread_id__)                                    \
-    __token_node__ = (myhtml_token_node_t*)mcobject_async_malloc(__token__->nodes_obj, __thread_id__, NULL);  \
-    myhtml_token_node_clean(__token_node__)
+#define myhtml_token_node_malloc(token, token_node, thread_idx)                                    \
+    token_node = (myhtml_token_node_t*)mcobject_async_malloc(token->nodes_obj, thread_idx, NULL);  \
+    myhtml_token_node_clean(token_node)
 
 struct myhtml_token_replacement_entry {
     char* from;

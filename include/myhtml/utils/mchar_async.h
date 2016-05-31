@@ -29,7 +29,7 @@ extern "C" {
 #include "myhtml/myosi.h"
 #include "myhtml/utils/mcsync.h"
 
-#define mchar_async_cache_has_nodes(__cache__) __cache__.count
+#define mchar_async_cache_has_nodes(cache) cache.count
 
 typedef struct mchar_async_node mchar_async_node_t;
 

@@ -43,25 +43,25 @@ extern "C" {
 #include "myhtml/incoming.h"
     
 #define mh_queue_current() tree->queue
-#define myhtml_tokenizer_state_set(__tree__) myhtml_tree_set(__tree__, state)
+#define myhtml_tokenizer_state_set(tree) myhtml_tree_set(tree, state)
 
-#define mh_queue_get(__idx__, __attr__) myhtml->queue->nodes[__idx__].__attr__
+#define mh_queue_get(idx, attr) myhtml->queue->nodes[idx].attr
 
 // space, tab, LF, FF, CR
-#define myhtml_whithspace(__char__, __action__, __logic__)    \
-    __char__ __action__ ' ' __logic__                    \
-    __char__ __action__ '\t' __logic__                    \
-    __char__ __action__ '\n' __logic__                    \
-    __char__ __action__ '\f' __logic__                    \
-    __char__ __action__ '\r'
+#define myhtml_whithspace(onechar, action, logic)    \
+    onechar action ' '  logic                        \
+    onechar action '\t' logic                        \
+    onechar action '\n' logic                        \
+    onechar action '\f' logic                        \
+    onechar action '\r'
 
-#define myhtml_ascii_char_cmp(__char__)     \
-    ((__char__ >= 'a' && __char__ <= 'z') || \
-    (__char__ >= 'A' && __char__ <= 'Z'))
+#define myhtml_ascii_char_cmp(onechar)      \
+    ((onechar >= 'a' && onechar <= 'z') ||  \
+    (onechar >= 'A' && onechar <= 'Z'))
 
-#define myhtml_ascii_char_unless_cmp(__char__) \
-    ((__char__ < 'a' || __char__ > 'z') &&      \
-    (__char__ < 'A' || __char__ > 'Z'))
+#define myhtml_ascii_char_unless_cmp(onechar)         \
+    ((onechar < 'a' || onechar > 'z') &&              \
+    (onechar < 'A' || onechar > 'Z'))
 
 struct myhtml {
     mythread_t          *thread;

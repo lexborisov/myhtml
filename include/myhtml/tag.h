@@ -37,27 +37,27 @@ extern "C" {
 #include "myhtml/utils/mcobject_async.h"
 #include "myhtml/utils/mcsimple.h"
 
-#define myhtml_tag_get(__tags__, __idx__, __attr__) __tags__->context[__idx__].__attr__
+#define myhtml_tag_get(tags, idx, attr) tags->context[idx].attr
 
-#define myhtml_tag_context_clean(__tags__, __idx__)                       \
-    __tags__->context[__idx__].id          = 0;                           \
-    __tags__->context[__idx__].name        = NULL;                        \
-    __tags__->context[__idx__].name_length = 0;                           \
-    __tags__->context[__idx__].data_parser = MyHTML_TOKENIZER_STATE_DATA; \
-    memset(__tags__->context[__idx__].cats, MyHTML_TAG_CATEGORIES_UNDEF, sizeof(__tags__->context[__idx__].cats));
+#define myhtml_tag_context_clean(tags, idx)                       \
+    tags->context[idx].id          = 0;                           \
+    tags->context[idx].name        = NULL;                        \
+    tags->context[idx].name_length = 0;                           \
+    tags->context[idx].data_parser = MyHTML_TOKENIZER_STATE_DATA; \
+    memset(tags->context[idx].cats, MyHTML_TAG_CATEGORIES_UNDEF, sizeof(tags->context[idx].cats));
 
 
-#define myhtml_tag_context_add(__tags__)                                         \
-    __tags__->context_length++;                                                  \
-    if(__tags__->context_length == __tags__->context_size) {                     \
-        __tags__->context_size += 4096;                                          \
-        __tags__->context = (myhtml_tag_context_t*)myrealloc(__tags__->context,  \
-            sizeof(myhtml_tag_context_t) * __tags__->context_size);              \
-    }                                                                            \
-    myhtml_tag_context_clean(__tags__, __tags__->context_length)
+#define myhtml_tag_context_add(tags)                                         \
+    tags->context_length++;                                                  \
+    if(tags->context_length == tags->context_size) {                         \
+        tags->context_size += 4096;                                          \
+        tags->context = (myhtml_tag_context_t*)myrealloc(tags->context,      \
+            sizeof(myhtml_tag_context_t) * tags->context_size);              \
+    }                                                                        \
+    myhtml_tag_context_clean(tags, tags->context_length)
 
-#define myhtml_tag_index_clean_node(__index_node__) \
-    memset(__index_node__, 0, sizeof(myhtml_tag_index_node_t));
+#define myhtml_tag_index_clean_node(index_node)             \
+    memset(index_node, 0, sizeof(myhtml_tag_index_node_t));
 
 struct myhtml_tag_index_entry {
     myhtml_tag_index_node_t *first;

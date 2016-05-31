@@ -39,10 +39,10 @@ extern "C" {
 #define MyHTML_TOKENIZER_CHAR_A_Z_a_z      '\001'
 #define MyHTML_TOKENIZER_CHAR_WHITESPACE   '\002'
     
-#define myhtml_tokenizer_inc_html_offset(__offset__, __size__)   \
-    __offset__++;                                            \
-    if(__offset__ >= __size__)                               \
-        return __offset__
+#define myhtml_tokenizer_inc_html_offset(offset, size)   \
+    offset++;                                            \
+    if(offset >= size)                                   \
+        return offset
 
 void myhtml_tokenizer_begin(myhtml_tree_t* tree, const char* html, size_t html_length);
 void myhtml_tokenizer_chunk(myhtml_tree_t* tree, const char* html, size_t html_length);

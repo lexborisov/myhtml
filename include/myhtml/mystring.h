@@ -31,38 +31,38 @@ extern "C" {
 #include "myhtml/encoding.h"
 #include "myhtml/utils/mchar_async.h"
 
-#define myhtml_string_get(__str__, __attr__) __str__->__attr__
-#define myhtml_string_set(__str__, __attr__) myhtml_string_get(__str__, __attr__)
-#define myhtml_string_len(__str__) myhtml_string_get(__str__, length)
+#define myhtml_string_get(str, attr) str->attr
+#define myhtml_string_set(str, attr) myhtml_string_get(str, attr)
+#define myhtml_string_len(str) myhtml_string_get(str, length)
 
-#define MyHTML_STRING_REALLOC_IF_NEED(__str__, __count__, __upto__)         \
-    if((__str__->length + __count__) >= __str__->size) {                    \
-        myhtml_string_release(__str__, (__str__->length + __count__ + __upto__)); \
-    }                                                                       \
+#define MyHTML_STRING_REALLOC_IF_NEED(str, count, upto)           \
+    if((str->length + count) >= str->size) {                      \
+        myhtml_string_release(str, (str->length + count + upto)); \
+    }                                                             \
 
-#define MyHTML_STRING_APPEND_BYTE_WITHOUT_REALLOC(__byte__, __str__)   \
-    __str__->data[__str__->length] = __byte__;                         \
-    __str__->length++
+#define MyHTML_STRING_APPEND_BYTE_WITHOUT_REALLOC(onechar, str)   \
+    str->data[str->length] = onechar;                             \
+    str->length++
 
-#define MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT(__byte__, __str__, __upto__)   \
-    if(__str__->length >= __str__->size) {                                         \
-        myhtml_string_release(__str__, (str->size + __upto__));                    \
-    }                                                                              \
-    __str__->data[__str__->length] = __byte__
+#define MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT(onechar, str, upto)   \
+    if(str->length >= str->size) {                                        \
+        myhtml_string_release(str, (str->size + upto));                   \
+    }                                                                     \
+    str->data[str->length] = onechar
 
-#define MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT_REALLOC(__byte__, __str__) \
-    __str__->data[__str__->length] = __byte__
+#define MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT_REALLOC(onechar, str) \
+    str->data[str->length] = onechar
 
-#define MyHTML_STRING_APPEND_BYTE(__byte__, __str__, __upto__)                \
-    MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT(__byte__, __str__, __upto__); \
-    __str__->length++
+#define MyHTML_STRING_APPEND_BYTE(onechar, str, upto)                \
+    MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT(onechar, str, upto); \
+    str->length++
 
-#define myhtml_mystring_whitespace(__char__, __action__, __logic__)    \
-    (__char__ __action__ ' ' __logic__                     \
-    __char__ __action__ '\t' __logic__                     \
-    __char__ __action__ '\n' __logic__                     \
-    __char__ __action__ '\f' __logic__                     \
-    __char__ __action__ '\r')
+#define myhtml_mystring_whitespace(onechar, action, logic)    \
+    (onechar action ' '  logic                                \
+     onechar action '\t' logic                                \
+     onechar action '\n' logic                                \
+     onechar action '\f' logic                                \
+     onechar action '\r')
 
 struct myhtml_string {
     char*  data;

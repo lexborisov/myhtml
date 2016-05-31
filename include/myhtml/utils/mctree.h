@@ -33,27 +33,27 @@ extern "C" {
 #include <stdlib.h>
 #include <memory.h>
 
-#define mctree_node_get_free_id(__mctree__) __mctree__->nodes_length
+#define mctree_node_get_free_id(mctree) mctree->nodes_length
 
-#define mctree_node_clean(__mctree__, __idx__) \
-    __mctree__->nodes[__idx__].str          = NULL; \
-    __mctree__->nodes[__idx__].value        = NULL; \
-    __mctree__->nodes[__idx__].child_count  = 0;    \
-    __mctree__->nodes[__idx__].prev         = 0;    \
-    __mctree__->nodes[__idx__].next         = 0;    \
-    __mctree__->nodes[__idx__].child        = 0
+#define mctree_node_clean(mctree, idx)      \
+    mctree->nodes[idx].str          = NULL; \
+    mctree->nodes[idx].value        = NULL; \
+    mctree->nodes[idx].child_count  = 0;    \
+    mctree->nodes[idx].prev         = 0;    \
+    mctree->nodes[idx].next         = 0;    \
+    mctree->nodes[idx].child        = 0
 
-#define mctree_node_add(__mctree__)                                     \
-    __mctree__->nodes_length++;                                         \
-    if(__mctree__->nodes_length == __mctree__->nodes_size) {            \
-        __mctree__->nodes_size += 4096;                                 \
-        __mctree__->nodes = (mctree_node_t*)myrealloc(__mctree__->nodes,  \
-            sizeof(mctree_node_t) * __mctree__->nodes_size);            \
-    }                                                                   \
-    mctree_node_clean(__mctree__, __mctree__->nodes_length)
+#define mctree_node_add(mctree)                                     \
+    mctree->nodes_length++;                                         \
+    if(mctree->nodes_length == mctree->nodes_size) {                \
+        mctree->nodes_size += 4096;                                 \
+        mctree->nodes = (mctree_node_t*)myrealloc(mctree->nodes,    \
+            sizeof(mctree_node_t) * mctree->nodes_size);            \
+    }                                                               \
+    mctree_node_clean(mctree, mctree->nodes_length)
 
-#define mctree_make_first_idx(__mctree__, __key__, __size__) \
-    ((myhtml_string_chars_lowercase_map[ (const unsigned char)(__key__[0]) ] + myhtml_string_chars_lowercase_map[ (const unsigned char)(__key__[__size__ - 1]) ]) % __mctree__->start_size) + 1
+#define mctree_make_first_idx(mctree, key, size) \
+    ((myhtml_string_chars_lowercase_map[ (const unsigned char)(key[0]) ] + myhtml_string_chars_lowercase_map[ (const unsigned char)(key[size - 1]) ]) % mctree->start_size) + 1
 
 
 typedef size_t mctree_index_t;

@@ -34,13 +34,13 @@ extern "C" {
 #include "myhtml/utils/mchar_async.h"
 #include "myhtml/utils/mcobject_async.h"
 
-#define myhtml_tree_get(__tree__, __attr__) __tree__->__attr__
-#define myhtml_tree_set(__tree__, __attr__) __tree__->__attr__
+#define myhtml_tree_get(tree, attr) tree->attr
+#define myhtml_tree_set(tree, attr) tree->attr
 
-#define myhtml_tree_token_current(__tree__) myhtml_tree_get(__tree__, token_current)
-#define myhtml_tree_token_attr_current(__tree__) myhtml_tree_get(__tree__, attr_current)
+#define myhtml_tree_token_current(tree) myhtml_tree_get(tree, token_current)
+#define myhtml_tree_token_attr_current(tree) myhtml_tree_get(tree, attr_current)
 
-#define myhtml_tree_node_get(__tree__, __node_id__, __attr__) __tree__->nodes[__node_id__].__attr__
+#define myhtml_tree_node_get(tree, node_id, attr) tree->nodes[node_id].attr
 
 enum myhtml_tree_node_type {
     MyHTML_TYPE_NONE    = 0,
