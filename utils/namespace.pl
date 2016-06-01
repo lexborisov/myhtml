@@ -5,33 +5,23 @@ use strict;
 use MyHTML::Base;
 use JSON::XS;
 
-my $static_list_index_length = 419;
+my $static_list_index_length = 19;
 
 my $utils = MyHTML::Base->new(dirs => {source => "../source/myhtml", template => "tmpl"});
-my $raw_data = $utils->read_tmpl_raw("encoding/encodings.json");
-my $encodings = decode_json(join("", @$raw_data));
 
-#test_result();
-
-my $result = create_result($encodings, $static_list_index_length);
+my $result = create_result($static_list_index_length);
 my $static_list = create_static_list_index($result);
 
 print $static_list, "\n";
 
 sub create_result {
-        my ($encodings, $static_list_index_length) = @_;
+        my ($static_list_index_length) = @_;
         my $result = {};
         
-        foreach my $entry (@$encodings) {
-                foreach my $encoding (@{$entry->{encodings}}) {
-                        next if $encoding->{name} =~ /replacement/i;
-                        
-                        foreach my $label (sort {$a cmp $b} @{$encoding->{labels}}) {
-                                my $id = get_index_id($label, $static_list_index_length);
-                                
-                                push @{$result->{$id}}, [$encoding->{name}, $label, length($label), length($encoding->{name})];
-                        }
-                }
+        foreach my $ns (qw( HTML MATHML SVG XLINK XML XMLNS )) {
+                my $id = get_index_id($ns, $static_list_index_length);
+                
+                push @{$result->{$id}}, [$ns, length($ns)];
         }
         
         $result;
@@ -41,7 +31,7 @@ sub test_result {
         my $op = [0, undef];
         
         foreach my $idx (1..1024) {
-                my $result = create_result($encodings, $idx);
+                my $result = create_result($idx);
                 my $res_max = test_result_max_value($result, 0);
                 
                 if(!defined($op->[1]) || $op->[1] > $res_max) {
@@ -80,15 +70,14 @@ sub get_index_id {
 sub create_sub_static_list_index {
         my ($result, $struct, $offset) = @_;
         
-        my @list_sorted = sort {$a->[2] <=> $b->[2]} @$result[0..$#$result];
+        my @list_sorted = sort {$a->[1] <=> $b->[1]} @$result[0..$#$result];
         
         foreach my $i (1..$#list_sorted) {
                 my $cur = $offset;
                 $offset++;
                 push @$struct, "\t{".
-                '"'. $list_sorted[$i]->[0] .'", '. $list_sorted[$i]->[3] .', '.
-                '"'. $list_sorted[$i]->[1] .'", '. $list_sorted[$i]->[2] .', '.
-                name_to_myhtml_encoding($list_sorted[$i]->[0]), ', '.
+                '"'. $list_sorted[$i]->[0] .'", '. $list_sorted[$i]->[1] .', '.
+                "MyHTML_NAMESPACE_". uc($list_sorted[$i]->[0]), ', '.
                 ($i < $#list_sorted ? $offset : 0) .", $cur},\n";
         }
         
@@ -113,20 +102,19 @@ sub create_static_list_index {
                                 $id = $offset - (@{$result->{$i}} - 1);
                         }
                         
-                        my @list_sorted = sort {$a->[2] <=> $b->[2]} @{$result->{$i}}[0..$#{$result->{$i}}];
+                        my @list_sorted = sort {$a->[1] <=> $b->[1]} @{$result->{$i}}[0..$#{$result->{$i}}];
                         
                         push @res, "\t{".
-                        '"'. $list_sorted[0]->[0] .'", '. $list_sorted[0]->[3] .', '.
-                        '"'. $list_sorted[0]->[1] .'", '. $list_sorted[0]->[2] .', '.
-                        name_to_myhtml_encoding($result->{$i}->[0]->[0]), ', '.
+                        '"'. $list_sorted[0]->[0] .'", '. $list_sorted[0]->[1] .', '.
+                        "MyHTML_NAMESPACE_". uc($list_sorted[0]->[0]), ', '.
                         "$id, $i},\n";
 				}
 				else {
-                        push @res, "\t{NULL, 0, NULL, 0, 0, 0, 0},\n";
+                        push @res, "\t{NULL, 0, MyHTML_NAMESPACE_UNDEF, 0, 0},\n";
                 }
         }
         
-        "static const myhtml_encoding_detect_name_entry_t myhtml_encoding_detect_name_entry_static_list_index[] = \n{\n". join("", @res, @$struct) ."};\n"
+        "static const myhtml_namespace_detect_name_entry_t myhtml_namespace_detect_name_entry_static_list_index[] = \n{\n". join("", @res, @$struct) ."};\n"
 }
 
 sub name_to_myhtml_encoding {
@@ -137,8 +125,4 @@ sub name_to_myhtml_encoding {
         
         $name;
 }
-
-
-
-
 
