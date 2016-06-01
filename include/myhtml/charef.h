@@ -26,7 +26,7 @@
 extern "C" {
 #endif
     
-#include "myhtml/myosi.h"
+#include <myhtml/myosi.h>
 
 struct charef_entry {
     unsigned char ch;

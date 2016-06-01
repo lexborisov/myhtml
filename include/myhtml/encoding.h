@@ -26,8 +26,8 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
-#include "myhtml/utils.h"
+#include <myhtml/myosi.h>
+#include <myhtml/utils.h>
 
 enum myhtml_encoding_status {
     MyHTML_ENCODING_STATUS_OK       = 0x00,

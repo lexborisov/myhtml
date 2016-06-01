@@ -22,7 +22,7 @@
 #define MyHTML_API_ENCODING_H
 #pragma once
 
-#include "myhtml/api.h"
+#include <myhtml/api.h>
 
 #ifdef __cplusplus
 extern "C" {

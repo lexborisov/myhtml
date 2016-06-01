@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
-#include "myhtml/charef.h"
-#include "myhtml/encoding.h"
-#include "myhtml/utils/mchar_async.h"
+#include <myhtml/myosi.h>
+#include <myhtml/charef.h>
+#include <myhtml/encoding.h>
+#include <myhtml/utils/mchar_async.h>
 
 #define myhtml_string_get(str, attr) str->attr
 #define myhtml_string_set(str, attr) myhtml_string_get(str, attr)

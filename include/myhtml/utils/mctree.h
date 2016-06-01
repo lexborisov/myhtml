@@ -26,8 +26,8 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
-#include "myhtml/utils.h"
+#include <myhtml/myosi.h>
+#include <myhtml/utils.h>
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -26,9 +26,9 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
-#include "myhtml/utils.h"
-#include "myhtml/myhtml.h"
+#include <myhtml/myosi.h>
+#include <myhtml/utils.h>
+#include <myhtml/myhtml.h>
 
 size_t myhtml_tokenizer_state_doctype(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);
 size_t myhtml_tokenizer_state_before_doctype_name(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);

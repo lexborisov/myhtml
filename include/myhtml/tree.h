@@ -26,13 +26,13 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
-#include "myhtml/myhtml.h"
-#include "myhtml/mystring.h"
-#include "myhtml/token.h"
-#include "myhtml/utils/mcsync.h"
-#include "myhtml/utils/mchar_async.h"
-#include "myhtml/utils/mcobject_async.h"
+#include <myhtml/myosi.h>
+#include <myhtml/myhtml.h>
+#include <myhtml/mystring.h>
+#include <myhtml/token.h>
+#include <myhtml/utils/mcsync.h>
+#include <myhtml/utils/mchar_async.h>
+#include <myhtml/utils/mcobject_async.h>
 
 #define myhtml_tree_get(tree, attr) tree->attr
 #define myhtml_tree_set(tree, attr) tree->attr

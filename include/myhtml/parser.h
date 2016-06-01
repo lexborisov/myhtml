@@ -26,11 +26,11 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
-#include "myhtml/myhtml.h"
-#include "myhtml/mystring.h"
-#include "myhtml/tree.h"
-#include "myhtml/token.h"
+#include <myhtml/myosi.h>
+#include <myhtml/myhtml.h>
+#include <myhtml/mystring.h>
+#include <myhtml/tree.h>
+#include <myhtml/token.h>
 
 void myhtml_parser_index(mythread_id_t thread_id, mythread_queue_node_t *qnode);
 void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode);

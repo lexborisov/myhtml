@@ -30,7 +30,7 @@ extern "C" {
 #include <stdlib.h>
 #include <memory.h>
     
-#include "myhtml/myosi.h"
+#include <myhtml/myosi.h>
     
 #if !defined(MyHTML_WITHOUT_THREADS)
 #if defined(IS_OS_WINDOWS)

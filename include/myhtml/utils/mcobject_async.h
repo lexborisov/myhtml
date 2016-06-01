@@ -26,8 +26,8 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
-#include "myhtml/utils/mcsync.h"
+#include <myhtml/myosi.h>
+#include <myhtml/utils/mcsync.h>
 
 enum mcobject_async_status {
     MCOBJECT_ASYNC_STATUS_OK                                  = 0,

@@ -26,14 +26,14 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
-#include "myhtml/utils.h"
-#include "myhtml/myhtml.h"
-#include "myhtml/tag.h"
-#include "myhtml/thread.h"
-#include "myhtml/tokenizer_doctype.h"
-#include "myhtml/tokenizer_script.h"
-#include "myhtml/tokenizer_end.h"
+#include <myhtml/myosi.h>
+#include <myhtml/utils.h>
+#include <myhtml/myhtml.h>
+#include <myhtml/tag.h>
+#include <myhtml/thread.h>
+#include <myhtml/tokenizer_doctype.h>
+#include <myhtml/tokenizer_script.h>
+#include <myhtml/tokenizer_end.h>
 
 #define MyHTML_TOKENIZER_CHAR_OTHER        '\000'
 #define MyHTML_TOKENIZER_CHAR_A_Z_a_z      '\001'

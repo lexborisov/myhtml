@@ -28,7 +28,7 @@ extern "C" {
 
 #define MyHTML_ENCODING_DETECT_NAME_STATIC_SIZE 419
 
-#include "myhtml/encoding.h"
+#include <myhtml/encoding.h>
 
 static const myhtml_encoding_detect_name_entry_t myhtml_encoding_detect_name_entry_static_list_index[] =
 {

@@ -21,8 +21,11 @@ clean:
 	rm -rf lib/*
 
 clone: create
+	find include -name "*.h" -exec rm -f {} \;
 	cp $(SRCDIR)/*.h include/myhtml
 	cp $(SRCDIR)/utils/*.h include/myhtml/utils
+	find include -name "*.h" -exec sed -i '.bak' -E 's/^[ \t]*#[ \t]*include[ \t]*"([^"]+)"/#include <\1>/g' {} \;
+	find include -name "*.h.bak" -exec rm -f {} \;
 
 create:
 	mkdir -p bin lib include/myhtml/utils

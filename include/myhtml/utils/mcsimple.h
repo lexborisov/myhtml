@@ -22,7 +22,7 @@
 #define MyHTML_UTILS_MCSIMPLE_H
 #pragma once
 
-#include "myhtml/myosi.h"
+#include <myhtml/myosi.h>
 
 struct mcsimple {
     size_t  struct_size;

@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
+#include <myhtml/myosi.h>
 
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
 
@@ -41,9 +41,9 @@ extern "C" {
 #include <fcntl.h>
 #include <errno.h>
 
-#include "myhtml/myhtml.h"
-#include "myhtml/tree.h"
-#include "myhtml/mystring.h"
+#include <myhtml/myhtml.h>
+#include <myhtml/tree.h>
+#include <myhtml/mystring.h>
 
 #endif /* MyHTML_BUILD_WITHOUT_THREADS */
 

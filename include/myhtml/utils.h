@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
+#include <myhtml/myosi.h>
 
 size_t myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
 size_t myhtml_strcasecmp(const char* str1, const char* str2);

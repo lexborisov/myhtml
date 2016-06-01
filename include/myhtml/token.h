@@ -28,14 +28,14 @@ extern "C" {
 
 #include <string.h>
 
-#include "myhtml/myosi.h"
-#include "myhtml/utils.h"
-#include "myhtml/tag.h"
-#include "myhtml/myhtml.h"
-#include "myhtml/mystring.h"
-#include "myhtml/utils/mcobject_async.h"
-#include "myhtml/utils/mchar_async.h"
-#include "myhtml/utils/mcsync.h"
+#include <myhtml/myosi.h>
+#include <myhtml/utils.h>
+#include <myhtml/tag.h>
+#include <myhtml/myhtml.h>
+#include <myhtml/mystring.h>
+#include <myhtml/utils/mcobject_async.h>
+#include <myhtml/utils/mchar_async.h>
+#include <myhtml/utils/mcsync.h>
 
 #define myhtml_token_attr_malloc(token, attr_node, thread_idx)                  \
     attr_node = mcobject_async_malloc(token->attr_obj, thread_idx, NULL);       \

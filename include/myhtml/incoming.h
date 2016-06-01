@@ -26,9 +26,9 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
-#include "myhtml/tree.h"
-#include "myhtml/utils/mcobject_async.h"
+#include <myhtml/myosi.h>
+#include <myhtml/tree.h>
+#include <myhtml/utils/mcobject_async.h>
 
 struct myhtml_incoming_buffer {
     const char* data;

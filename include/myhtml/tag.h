@@ -26,16 +26,16 @@
 extern "C" {
 #endif
 
-#include "myhtml/myosi.h"
+#include <myhtml/myosi.h>
 
-#include "myhtml/tag_const.h"
-#include "myhtml/tokenizer.h"
-#include "myhtml/tree.h"
-#include "myhtml/utils.h"
-#include "myhtml/utils/mctree.h"
-#include "myhtml/utils/mchar_async.h"
-#include "myhtml/utils/mcobject_async.h"
-#include "myhtml/utils/mcsimple.h"
+#include <myhtml/tag_const.h>
+#include <myhtml/tokenizer.h>
+#include <myhtml/tree.h>
+#include <myhtml/utils.h>
+#include <myhtml/utils/mctree.h>
+#include <myhtml/utils/mchar_async.h>
+#include <myhtml/utils/mcobject_async.h>
+#include <myhtml/utils/mcsimple.h>
 
 #define myhtml_tag_get(tags, idx, attr) tags->context[idx].attr
 
