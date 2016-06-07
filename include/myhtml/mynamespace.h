@@ -28,6 +28,8 @@
 extern "C" {
 #endif
 
+#include <string.h>
+
 #include <myhtml/myosi.h>
 #include <myhtml/utils.h>
 
@@ -42,7 +44,8 @@ struct myhtml_namespace_detect_name_entry {
 }
 typedef myhtml_namespace_detect_name_entry_t;
 
-bool myhtml_namespace_by_name(const char *name, size_t length, myhtml_namespace_t *ns);
+const char * myhtml_namespace_name_by_id(myhtml_namespace_t ns, size_t *length);
+bool myhtml_namespace_id_by_name(const char *name, size_t length, myhtml_namespace_t *ns);
 const myhtml_namespace_detect_name_entry_t * myhtml_namespace_name_entry_by_name(const char* name, size_t length);
 
 #ifdef __cplusplus

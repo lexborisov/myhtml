@@ -435,7 +435,8 @@ enum myhtml_namespace {
     MyHTML_NAMESPACE_XML        = 0x05,
     MyHTML_NAMESPACE_XMLNS      = 0x06,
     MyHTML_NAMESPACE_LAST_ENTRY = 0x07
-};
+}
+typedef myhtml_namespace_t;
 
 /**
  * @struct myhtml options
@@ -1946,6 +1947,35 @@ myhtml_incoming_buffer_next(myhtml_incoming_buffer_t *inc_buf);
  */
 myhtml_incoming_buffer_t*
 myhtml_incoming_buffer_prev(myhtml_incoming_buffer_t *inc_buf);
+
+/***********************************************************************************
+ *
+ * MyHTML_NAMESPACE
+ *
+ ***********************************************************************************/
+
+/**
+ * Get namespace text by namespace type (id)
+ *
+ * @param[in] myhtml_namespace_t
+ * @param[out] optional, length of returned text
+ *
+ * @return text if successful, otherwise a NULL value
+ */
+const char*
+myhtml_namespace_name_by_id(myhtml_namespace_t ns, size_t *length);
+
+/**
+ * Get namespace type (id) by namespace text
+ *
+ * @param[in] const char*, namespace text
+ * @param[in] size of namespace text
+ * @param[out] detected namespace type (id)
+ *
+ * @return true if detect, otherwise false
+ */
+bool
+myhtml_namespace_id_by_name(const char *name, size_t length, myhtml_namespace_t *ns);
 
 /***********************************************************************************
  *

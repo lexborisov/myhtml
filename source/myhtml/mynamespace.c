@@ -51,7 +51,7 @@ const myhtml_namespace_detect_name_entry_t * myhtml_namespace_name_entry_by_name
     return NULL;
 }
 
-bool myhtml_namespace_by_name(const char *name, size_t length, myhtml_namespace_t *ns)
+bool myhtml_namespace_id_by_name(const char *name, size_t length, myhtml_namespace_t *ns)
 {
     const myhtml_namespace_detect_name_entry_t *entry = myhtml_namespace_name_entry_by_name(name, length);
     
@@ -65,5 +65,21 @@ bool myhtml_namespace_by_name(const char *name, size_t length, myhtml_namespace_
     return false;
 }
 
+const char * myhtml_namespace_name_by_id(myhtml_namespace_t ns, size_t *length)
+{
+    if(ns >= MyHTML_NAMESPACE_LAST_ENTRY) {
+        if(length)
+            *length = 0;
+        
+        return NULL;
+    }
+    
+    const char *name_ns = myhtml_namespace_resource_names_map[ns];
+    
+    if(length)
+        *length = strlen(name_ns);
+    
+    return name_ns;
+}
 
 

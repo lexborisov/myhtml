@@ -46,5 +46,8 @@ static const myhtml_namespace_detect_name_entry_t myhtml_namespace_detect_name_e
     {"XLINK", 5, MyHTML_NAMESPACE_XLINK, 0, 19},
 };
 
+static const char myhtml_namespace_resource_names_map[][7] = {
+    "", "HTML", "MathML", "SVG", "XLink", "XML", "XMLNS"
+};
 
 #endif /* MyHTML_MYNAMESPACE_RESOURCE_H */
