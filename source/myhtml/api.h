@@ -946,6 +946,39 @@ myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection,
                          const char* name, size_t length, myhtml_status_t *status);
 
 /**
+ * Get nodes by tag id in node scope
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_collection_t*, creates new collection if NULL
+ * @param[in] node for search tag_id in children nodes
+ * @param[in] tag_id for search
+ * @param[out] status of this operation
+ *
+ * @return myhtml_collection_t* if successful, otherwise an NULL value
+ */
+myhtml_collection_t*
+myhtml_get_nodes_by_tag_id_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection,
+                                    myhtml_tree_node_t *node, myhtml_tag_id_t tag_id,
+                                    myhtml_status_t *status);
+
+/**
+ * Get nodes by tag name in node scope
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_collection_t*, creates new collection if NULL
+ * @param[in] node for search tag_id in children nodes
+ * @param[in] tag name
+ * @param[in] tag name length
+ * @param[out] status of this operation
+ *
+ * @return myhtml_collection_t* if successful, otherwise an NULL value
+ */
+myhtml_collection_t*
+myhtml_get_nodes_by_name_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection,
+                                  myhtml_tree_node_t *node, const char* html, size_t length,
+                                  myhtml_status_t *status);
+
+/**
  * Get next sibling node
  *
  * @param[in] myhtml_tree_node_t*

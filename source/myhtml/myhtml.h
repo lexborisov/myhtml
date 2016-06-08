@@ -105,6 +105,8 @@ myhtml_encoding_t myhtml_encoding_get(myhtml_tree_t* tree);
 
 myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status);
 myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection, const char* html, size_t length, myhtml_status_t *status);
+myhtml_collection_t * myhtml_get_nodes_by_tag_id_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tree_node_t *node, myhtml_tag_id_t tag_id, myhtml_status_t *status);
+myhtml_collection_t * myhtml_get_nodes_by_name_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tree_node_t *node, const char* html, size_t length, myhtml_status_t *status);
 
 myhtml_tree_node_t * myhtml_node_first(myhtml_tree_t* tree);
 myhtml_tree_node_t * myhtml_node_next(myhtml_tree_node_t *node);

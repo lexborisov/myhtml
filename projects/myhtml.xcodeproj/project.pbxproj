@@ -61,6 +61,9 @@
 		0EBD22D71CE3D65300F1CA9C /* mctree.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EBD22A11CE3D65300F1CA9C /* mctree.c */; };
 		0EBD22D81CE3D65300F1CA9C /* mctree.h in Headers */ = {isa = PBXBuildFile; fileRef = 0EBD22A21CE3D65300F1CA9C /* mctree.h */; };
 		0EBD22D91CE3D65300F1CA9C /* resources.h in Headers */ = {isa = PBXBuildFile; fileRef = 0EBD22A31CE3D65300F1CA9C /* resources.h */; };
+		0EEA5B1F1D07A649009E28A6 /* mynamespace.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEA5B1C1D07A649009E28A6 /* mynamespace.c */; };
+		0EEA5B201D07A649009E28A6 /* mynamespace.h in Headers */ = {isa = PBXBuildFile; fileRef = 0EEA5B1D1D07A649009E28A6 /* mynamespace.h */; };
+		0EEA5B211D07A649009E28A6 /* mynamespace_resource.h in Headers */ = {isa = PBXBuildFile; fileRef = 0EEA5B1E1D07A649009E28A6 /* mynamespace_resource.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -119,6 +122,9 @@
 		0EBD22A11CE3D65300F1CA9C /* mctree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mctree.c; sourceTree = "<group>"; };
 		0EBD22A21CE3D65300F1CA9C /* mctree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mctree.h; sourceTree = "<group>"; };
 		0EBD22A31CE3D65300F1CA9C /* resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = resources.h; sourceTree = "<group>"; };
+		0EEA5B1C1D07A649009E28A6 /* mynamespace.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mynamespace.c; path = ../source/myhtml/mynamespace.c; sourceTree = "<group>"; };
+		0EEA5B1D1D07A649009E28A6 /* mynamespace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mynamespace.h; path = ../source/myhtml/mynamespace.h; sourceTree = "<group>"; };
+		0EEA5B1E1D07A649009E28A6 /* mynamespace_resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mynamespace_resource.h; path = ../source/myhtml/mynamespace_resource.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -182,6 +188,9 @@
 				0EBD22891CE3D65300F1CA9C /* thread.h */,
 				0EBD228A1CE3D65300F1CA9C /* token.c */,
 				0EBD228B1CE3D65300F1CA9C /* token.h */,
+				0EEA5B1E1D07A649009E28A6 /* mynamespace_resource.h */,
+				0EEA5B1D1D07A649009E28A6 /* mynamespace.h */,
+				0EEA5B1C1D07A649009E28A6 /* mynamespace.c */,
 				0EBD228C1CE3D65300F1CA9C /* tokenizer_doctype.c */,
 				0EBD228D1CE3D65300F1CA9C /* tokenizer_doctype.h */,
 				0EBD228E1CE3D65300F1CA9C /* tokenizer_end.c */,
@@ -236,6 +245,7 @@
 				0EBD22A91CE3D65300F1CA9C /* encoding_detect_resource.h in Headers */,
 				0EBD22A41CE3D65300F1CA9C /* api_encoding.h in Headers */,
 				0EBD22A51CE3D65300F1CA9C /* api.h in Headers */,
+				0EEA5B211D07A649009E28A6 /* mynamespace_resource.h in Headers */,
 				0EBD22AD1CE3D65300F1CA9C /* encoding.h in Headers */,
 				0EBD22D01CE3D65300F1CA9C /* mchar_async.h in Headers */,
 				0EBD22C01CE3D65300F1CA9C /* thread.h in Headers */,
@@ -253,6 +263,7 @@
 				0EBD22B71CE3D65300F1CA9C /* parser.h in Headers */,
 				0EBD22BB1CE3D65300F1CA9C /* tag_const.h in Headers */,
 				0EBD22D21CE3D65300F1CA9C /* mcobject_async.h in Headers */,
+				0EEA5B201D07A649009E28A6 /* mynamespace.h in Headers */,
 				0EBD22D61CE3D65300F1CA9C /* mcsync.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -320,6 +331,7 @@
 				0EBD22D31CE3D65300F1CA9C /* mcsimple.c in Sources */,
 				0EBD22AC1CE3D65300F1CA9C /* encoding.c in Sources */,
 				0EBD22CF1CE3D65300F1CA9C /* mchar_async.c in Sources */,
+				0EEA5B1F1D07A649009E28A6 /* mynamespace.c in Sources */,
 				0EBD22CD1CE3D65300F1CA9C /* utils.c in Sources */,
 				0EBD22C11CE3D65300F1CA9C /* token.c in Sources */,
 				0EBD22A61CE3D65300F1CA9C /* charef.c in Sources */,

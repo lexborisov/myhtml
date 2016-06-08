@@ -328,6 +328,67 @@ myhtml_encoding_t myhtml_encoding_get(myhtml_tree_t* tree)
 /*
  * Nodes
  */
+
+myhtml_status_t myhtml_get_nodes_by_tag_id_in_scope_find_recursion(myhtml_tree_node_t *node, myhtml_collection_t *collection, myhtml_tag_id_t tag_id)
+{
+    while(node) {
+        if(node->tag_idx == tag_id) {
+            collection->list[ collection->length ] = node;
+            collection->length++;
+            
+            if(collection->length >= collection->size)
+            {
+                myhtml_status_t mystatus = myhtml_collection_check_size(collection, 1024);
+                
+                if(mystatus != MyHTML_STATUS_OK)
+                    return mystatus;
+            }
+        }
+        
+        if(node->child)
+            myhtml_get_nodes_by_tag_id_in_scope_find_recursion(node->child, collection, tag_id);
+        
+        node = node->next;
+    }
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_collection_t * myhtml_get_nodes_by_tag_id_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tree_node_t *node, myhtml_tag_id_t tag_id, myhtml_status_t *status)
+{
+    if(node == NULL)
+        return NULL;
+    
+    myhtml_status_t mystatus = MyHTML_STATUS_OK;
+    
+    if(collection == NULL) {
+        collection = myhtml_collection_create(1024, &mystatus);
+    }
+    
+    if(mystatus) {
+        if(status)
+            *status = mystatus;
+        
+        return collection;
+    }
+    
+    if(node->child)
+        mystatus = myhtml_get_nodes_by_tag_id_in_scope_find_recursion(node->child, collection, tag_id);
+    
+    collection->list[collection->length] = NULL;
+    
+    if(status)
+        *status = mystatus;
+    
+    return collection;
+}
+
+myhtml_collection_t * myhtml_get_nodes_by_name_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tree_node_t *node, const char* html, size_t length, myhtml_status_t *status)
+{
+    const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_name(tree->tags, html, length);
+    return myhtml_get_nodes_by_tag_id_in_scope(tree, collection, node, tag_ctx->id, status);
+}
+
 myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status)
 {
     myhtml_tag_index_entry_t *index_tag = myhtml_tag_index_entry(tree->indexes->tags, tag_id);
@@ -823,7 +884,7 @@ myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, si
     
     if(upto_length > collection->size)
     {
-        size_t tmp_size = collection->length + 1024;
+        size_t tmp_size = collection->size + upto_length;
         myhtml_tree_node_t **tmp = (myhtml_tree_node_t **)myrealloc(collection->list, sizeof(myhtml_tree_node_t*) * tmp_size);
         
         if(tmp) {
