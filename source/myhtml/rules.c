@@ -683,6 +683,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                         case MyHTML_TAG_DD:
                         case MyHTML_TAG_DT:
                         case MyHTML_TAG_LI:
+                        case MyHTML_TAG_MENUITEM:
                         case MyHTML_TAG_OPTGROUP:
                         case MyHTML_TAG_OPTION:
                         case MyHTML_TAG_P:
@@ -722,6 +723,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                         case MyHTML_TAG_DD:
                         case MyHTML_TAG_DT:
                         case MyHTML_TAG_LI:
+                        case MyHTML_TAG_MENUITEM:
                         case MyHTML_TAG_OPTGROUP:
                         case MyHTML_TAG_OPTION:
                         case MyHTML_TAG_P:
@@ -1167,16 +1169,16 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 
                 myhtml_tree_node_t** list = tree->open_elements->list;
                 for(size_t i = 0; i < tree->open_elements->length; i++) {
-                    if(list[i]->tag_idx != MyHTML_TAG_DD     && list[i]->tag_idx != MyHTML_TAG_DT       &&
-                       list[i]->tag_idx != MyHTML_TAG_LI     && list[i]->tag_idx != MyHTML_TAG_OPTGROUP &&
-                       list[i]->tag_idx != MyHTML_TAG_OPTION && list[i]->tag_idx != MyHTML_TAG_P        &&
-                       list[i]->tag_idx != MyHTML_TAG_RB     && list[i]->tag_idx != MyHTML_TAG_RP       &&
-                       list[i]->tag_idx != MyHTML_TAG_RT     && list[i]->tag_idx != MyHTML_TAG_RTC      &&
-                       list[i]->tag_idx != MyHTML_TAG_TBODY  && list[i]->tag_idx != MyHTML_TAG_TD       &&
-                       list[i]->tag_idx != MyHTML_TAG_TFOOT  && list[i]->tag_idx != MyHTML_TAG_TH       &&
-                       list[i]->tag_idx != MyHTML_TAG_THEAD  && list[i]->tag_idx != MyHTML_TAG_TR       &&
-                       list[i]->tag_idx != MyHTML_TAG_BODY   && list[i]->tag_idx != MyHTML_TAG_HTML     &&
-                       list[i]->my_namespace != MyHTML_NAMESPACE_HTML)
+                    if(list[i]->tag_idx != MyHTML_TAG_DD       && list[i]->tag_idx != MyHTML_TAG_DT       &&
+                       list[i]->tag_idx != MyHTML_TAG_LI       && list[i]->tag_idx != MyHTML_TAG_MENUITEM &&
+                       list[i]->tag_idx != MyHTML_TAG_OPTGROUP && list[i]->tag_idx != MyHTML_TAG_OPTION   &&
+                       list[i]->tag_idx != MyHTML_TAG_P        && list[i]->tag_idx != MyHTML_TAG_RB       &&
+                       list[i]->tag_idx != MyHTML_TAG_RP       && list[i]->tag_idx != MyHTML_TAG_RT       &&
+                       list[i]->tag_idx != MyHTML_TAG_RTC      && list[i]->tag_idx != MyHTML_TAG_TBODY    &&
+                       list[i]->tag_idx != MyHTML_TAG_TD       && list[i]->tag_idx != MyHTML_TAG_TFOOT    &&
+                       list[i]->tag_idx != MyHTML_TAG_TH       && list[i]->tag_idx != MyHTML_TAG_THEAD    &&
+                       list[i]->tag_idx != MyHTML_TAG_TR       && list[i]->tag_idx != MyHTML_TAG_BODY     &&
+                       list[i]->tag_idx != MyHTML_TAG_HTML     && list[i]->my_namespace != MyHTML_NAMESPACE_HTML)
                     {
                         // parse error
                     }
@@ -1203,7 +1205,6 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_HEADER:
             case MyHTML_TAG_HGROUP:
             case MyHTML_TAG_MAIN:
-            case MyHTML_TAG_MENU:
             case MyHTML_TAG_NAV:
             case MyHTML_TAG_OL:
             case MyHTML_TAG_P:
@@ -1214,6 +1215,21 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
                     myhtml_tree_tags_close_p(tree);
                 }
+                
+                myhtml_tree_node_insert_html_element(tree, token);
+                break;
+            }
+                
+            case MyHTML_TAG_MENU:
+            {
+                if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
+                    myhtml_tree_tags_close_p(tree);
+                }
+                
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_MENUITEM))
+                    myhtml_tree_open_elements_pop(tree);
                 
                 myhtml_tree_node_insert_html_element(tree, token);
                 break;
@@ -1502,7 +1518,6 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 break;
             }
                 
-            case MyHTML_TAG_MENUITEM:
             case MyHTML_TAG_PARAM:
             case MyHTML_TAG_SOURCE:
             case MyHTML_TAG_TRACK:
@@ -1518,6 +1533,11 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     myhtml_tree_tags_close_p(tree);
                 }
                 
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_MENUITEM))
+                    myhtml_tree_open_elements_pop(tree);
+                
                 myhtml_tree_node_insert_html_element(tree, token);
                 myhtml_tree_open_elements_pop(tree);
                 
@@ -1529,117 +1549,6 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 token->tag_ctx_idx = MyHTML_TAG_IMG;
                 return true;
-            }
-                
-            case MyHTML_TAG_ISINDEX:
-            {
-                myhtml_tree_node_t* is_in_node = myhtml_tree_open_elements_find_by_tag_idx(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, NULL);
-                if(tree->node_form && is_in_node == NULL)
-                    break;
-                
-                tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
-                
-                if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
-                }
-                
-                myhtml_tree_node_t* form = myhtml_tree_node_insert(tree, MyHTML_TAG_FORM, MyHTML_NAMESPACE_HTML);
-                myhtml_tree_node_t* template = myhtml_tree_open_elements_find_by_tag_idx(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, NULL);
-                
-                if(template == NULL)
-                    tree->node_form = form;
-                
-                myhtml_token_node_wait_for_done(token);
-                myhtml_token_attr_t *attr_action = myhtml_token_attr_remove_by_name(token, "action", 6);
-                
-                if(attr_action) {
-                    myhtml_token_node_malloc(tree->token, form->token, tree->mcasync_token_id);
-                    myhtml_token_node_set_done(form->token);
-                    
-                    myhtml_token_attr_copy(tree->token, attr_action, form->token, tree->mcasync_attr_id);
-                }
-                
-                myhtml_tree_node_insert(tree, MyHTML_TAG_HR, MyHTML_NAMESPACE_HTML);
-                myhtml_tree_open_elements_pop(tree);
-                
-                myhtml_tree_active_formatting_reconstruction(tree);
-                
-                myhtml_tree_node_insert(tree, MyHTML_TAG_LABEL, MyHTML_NAMESPACE_HTML);
-                
-                // Insert characters (see below for what they should say).
-                // Prompt: If the token has an attribute with the name "prompt",
-                // then the first stream of characters must be the same string as given in that attribute,
-                // and the second stream of characters must be empty. Otherwise,
-                // the two streams of character tokens together should, together with the input element,
-                // express the equivalent of "This is a searchable index. Enter search keywords: (input field)" in the user's preferred language.
-                
-                myhtml_token_attr_t *attr_prompt = myhtml_token_attr_remove_by_name(token, "prompt", 6);
-                //myhtml_token_attr_t *attr_name   =
-                myhtml_token_attr_remove_by_name(token, "name", 4);
-                
-                myhtml_tree_node_t* text_node = myhtml_tree_node_insert(tree, MyHTML_TAG__TEXT, MyHTML_NAMESPACE_HTML);
-                myhtml_tree_open_elements_pop(tree);
-                
-                myhtml_token_node_malloc(tree->token, text_node->token, tree->mcasync_token_id);
-                myhtml_token_node_set_done(text_node->token);
-                
-                const char message[] = "This is a searchable index. Enter search keywords: ";
-                
-                if(attr_prompt && attr_prompt->value_length) {
-                    myhtml_token_node_text_append(tree->token, text_node->token, &attr_prompt->entry.data[ attr_prompt->value_begin ], attr_prompt->value_length);
-                }
-                else {
-                    myhtml_token_node_text_append(tree->token, text_node->token, message, strlen(message));
-                }
-                
-                // Insert an HTML element for an "input" start tag token
-                // with all the attributes from the "isindex" token except "name", "action", and "prompt",
-                // and with an attribute named "name" with the value "isindex".
-                // (This creates an input element with the name attribute set to the magic value "isindex".)
-                // Immediately pop the current node off the stack of open elements.
-                myhtml_tree_node_t* input_node = myhtml_tree_node_insert(tree, MyHTML_TAG_INPUT, MyHTML_NAMESPACE_HTML);
-                
-                myhtml_token_node_malloc(tree->token, input_node->token, tree->mcasync_token_id);
-                myhtml_token_node_set_done(input_node->token);
-                
-                if(token->attr_first) {
-                    myhtml_token_attr_t* attr_isindex = token->attr_first;
-                    
-                    while (attr_isindex)
-                    {
-                        myhtml_token_attr_copy(tree->token, attr_isindex, input_node->token, tree->mcasync_attr_id);
-                        attr_isindex = attr_isindex->next;
-                    }
-                }
-                myhtml_token_node_attr_append(tree->token, input_node->token, "name", 4, "isindex", 7, tree->mcasync_attr_id);
-                myhtml_tree_open_elements_pop(tree);
-                
-                // Insert more characters (see below for what they should say).
-//                text_node = myhtml_tree_node_insert(tree, MyHTML_TAG__TEXT, MyHTML_NAMESPACE_HTML);
-//                myhtml_tree_open_elements_pop(tree);
-//                
-//                myhtml_token_node_malloc(tree->token, text_node->token, tree->mcasync_token_id);
-//                myhtml_token_node_set_done(text_node->token);
-//                
-//                if(attr_prompt && attr_prompt->value_length) {
-//                    myhtml_token_node_text_append(tree->token, text_node->token, &attr_prompt->entry.data[ attr_prompt->value_begin ], attr_prompt->value_length);
-//                }
-//                else {
-//                    myhtml_token_node_text_append(tree->token, text_node->token, message, strlen(message));
-//                }
-                
-                // and the end
-                myhtml_tree_open_elements_pop(tree);
-                
-                myhtml_tree_node_insert(tree, MyHTML_TAG_HR, MyHTML_NAMESPACE_HTML);
-                myhtml_tree_open_elements_pop(tree);
-                
-                myhtml_tree_open_elements_pop(tree);
-                
-                if(template == NULL)
-                    tree->node_form = NULL;
-                
-                break;
             }
                 
             case MyHTML_TAG_TEXTAREA:
@@ -1740,6 +1649,17 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     myhtml_tree_open_elements_pop(tree);
                 
                 myhtml_tree_active_formatting_reconstruction(tree);
+                
+                myhtml_tree_node_insert_html_element(tree, token);
+                break;
+            }
+                
+            case MyHTML_TAG_MENUITEM:
+            {
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_MENUITEM))
+                    myhtml_tree_open_elements_pop(tree);
                 
                 myhtml_tree_node_insert_html_element(tree, token);
                 break;

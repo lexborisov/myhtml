@@ -1201,6 +1201,7 @@ void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t 
             case MyHTML_TAG_DD:
             case MyHTML_TAG_DT:
             case MyHTML_TAG_LI:
+            case MyHTML_TAG_MENUITEM:
             case MyHTML_TAG_OPTGROUP:
             case MyHTML_TAG_OPTION:
             case MyHTML_TAG_P:
