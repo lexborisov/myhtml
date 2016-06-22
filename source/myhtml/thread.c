@@ -138,7 +138,7 @@ myhtml_status_t myhtml_thread_cancel(mythread_t *mythread, mythread_list_t *thr)
 
 myhtml_status_t myhtml_thread_attr_init(mythread_t *mythread)
 {
-    mythread->attr = (pthread_attr_t*)calloc(1, sizeof(pthread_attr_t));
+    mythread->attr = (pthread_attr_t*)myhtml_calloc(1, sizeof(pthread_attr_t));
     
     if(mythread->attr == NULL)
         return MyHTML_STATUS_THREAD_ERROR_ATTR_MALLOC;
@@ -165,7 +165,7 @@ myhtml_status_t myhtml_thread_attr_destroy(mythread_t *mythread)
     if(mythread->attr) {
         mythread->sys_last_error = pthread_attr_destroy(mythread->attr);
         
-        free(mythread->attr);
+        myhtml_free(mythread->attr);
         mythread->attr = NULL;
         
         if(mythread->sys_last_error)
@@ -177,7 +177,7 @@ myhtml_status_t myhtml_thread_attr_destroy(mythread_t *mythread)
 
 myhtml_status_t myhtml_hread_mutex_create(mythread_t *mythread, mythread_context_t *ctx, size_t prefix_id)
 {
-    ctx->mutex = (pthread_mutex_t*)calloc(1, sizeof(pthread_mutex_t));
+    ctx->mutex = (pthread_mutex_t*)myhtml_calloc(1, sizeof(pthread_mutex_t));
     
     if(ctx->mutex == NULL)
         return MyHTML_STATUS_THREAD_ERROR_MUTEX_MALLOC;
@@ -229,7 +229,7 @@ myhtml_status_t myhtml_hread_mutex_close(mythread_t *mythread, mythread_context_
 {
     if(ctx->mutex) {
         pthread_mutex_destroy(ctx->mutex);
-        free(ctx->mutex);
+        myhtml_free(ctx->mutex);
         
         ctx->mutex = NULL;
     }
@@ -253,7 +253,7 @@ void myhtml_thread_nanosleep(const struct timespec *tomeout)
 
 mythread_t * mythread_create(void)
 {
-    return calloc(1, sizeof(mythread_t));
+    return myhtml_calloc(1, sizeof(mythread_t));
 }
 
 #ifdef MyHTML_BUILD_WITHOUT_THREADS
@@ -281,7 +281,7 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
         mythread->pth_list_root   = 1;
         mythread->pth_list_length = 1;
         mythread->pth_list_size   = thread_count + 1;
-        mythread->pth_list        = (mythread_list_t*)calloc(mythread->pth_list_size, sizeof(mythread_list_t));
+        mythread->pth_list        = (mythread_list_t*)myhtml_calloc(mythread->pth_list_size, sizeof(mythread_list_t));
         
         if(mythread->pth_list == NULL)
             return MyHTML_STATUS_THREAD_ERROR_LIST_INIT;
@@ -297,7 +297,7 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
     }
     
     myhtml_status_t status;
-    mythread->queue_list = mythread_queue_list_create(mythread, 1024, &status);
+    mythread->queue_list = mythread_queue_list_create(mythread, &status);
     
     if(mythread->queue_list == NULL)
         return status;
@@ -307,7 +307,7 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
         mythread->sem_prefix_length = strlen(sem_prefix);
         
         if(mythread->sem_prefix_length) {
-            mythread->sem_prefix = calloc((mythread->sem_prefix_length + 1), sizeof(char));
+            mythread->sem_prefix = myhtml_calloc((mythread->sem_prefix_length + 1), sizeof(char));
             
             if(mythread->sem_prefix == NULL) {
                 mythread->sem_prefix_length = 0;
@@ -348,16 +348,16 @@ mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
             myhtml_thread_join(mythread, &mythread->pth_list[i]);
         }
         
-        free(mythread->pth_list);
+        myhtml_free(mythread->pth_list);
         mythread->pth_list = NULL;
     }
     
     if(mythread->queue_list) {
-        free(mythread->queue_list);
+        myhtml_free(mythread->queue_list);
     }
     
     if(mythread->sem_prefix) {
-        free(mythread->sem_prefix);
+        myhtml_free(mythread->sem_prefix);
         
         mythread->sem_prefix = NULL;
         mythread->sem_prefix_length = 0;
@@ -366,7 +366,7 @@ mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
 #endif /* MyHTML_BUILD_WITHOUT_THREADS */
     
     if(self_destroy) {
-        free(mythread);
+        myhtml_free(mythread);
         return NULL;
     }
     
@@ -475,16 +475,14 @@ mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml
 #endif /* MyHTML_BUILD_WITHOUT_THREADS */
 
 // mythread queue functions
+// TODO: size = 1024; -- never use
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
-mythread_queue_list_t * mythread_queue_list_create(mythread_t *mythread, size_t size, myhtml_status_t *status)
+mythread_queue_list_t * mythread_queue_list_create(mythread_t *mythread, myhtml_status_t *status)
 {
     if(status)
         *status = MyHTML_STATUS_OK;
     
-    if(size < 1024)
-        size = 1024;
-    
-    mythread_queue_list_t* queue_list = (mythread_queue_list_t*)mycalloc(1, sizeof(mythread_queue_list_t));
+    mythread_queue_list_t* queue_list = (mythread_queue_list_t*)myhtml_calloc(1, sizeof(mythread_queue_list_t));
     
     if(queue_list == NULL) {
         if(status)
@@ -502,7 +500,7 @@ mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t *mythrea
     if(status)
         *status = MyHTML_STATUS_OK;
     
-    mythread_queue_list_entry_t* entry = (mythread_queue_list_entry_t*)mycalloc(1, sizeof(mythread_queue_list_entry_t));
+    mythread_queue_list_entry_t* entry = (mythread_queue_list_entry_t*)myhtml_calloc(1, sizeof(mythread_queue_list_entry_t));
     
     if(entry == NULL) {
         if(status)
@@ -510,10 +508,10 @@ mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t *mythrea
         return NULL;
     }
     
-    entry->thread_param = (mythread_queue_thread_param_t*)mycalloc(mythread->pth_list_size, sizeof(mythread_queue_thread_param_t));
+    entry->thread_param = (mythread_queue_thread_param_t*)myhtml_calloc(mythread->pth_list_size, sizeof(mythread_queue_thread_param_t));
     
     if(entry->thread_param == NULL) {
-        free(entry);
+        myhtml_free(entry);
         
         if(status)
             *status = MyHTML_STATUS_THREAD_ERROR_QUEUE_MALLOC;
@@ -586,9 +584,9 @@ mythread_queue_list_entry_t * mythread_queue_list_entry_delete(mythread_t *mythr
         mythread_queue_destroy(entry->queue);
     
     if(entry->thread_param)
-        free(entry->thread_param);
+        myhtml_free(entry->thread_param);
     
-    free(entry);
+    myhtml_free(entry);
     
     queue_list->count--;
     
@@ -638,7 +636,7 @@ mythread_queue_t * mythread_queue_create(size_t size, myhtml_status_t *status)
     if(size < 4096)
         size = 4096;
     
-    mythread_queue_t* queue = (mythread_queue_t*)mymalloc(sizeof(mythread_queue_t));
+    mythread_queue_t* queue = (mythread_queue_t*)myhtml_malloc(sizeof(mythread_queue_t));
     
     if(queue == NULL) {
         if(status)
@@ -648,10 +646,10 @@ mythread_queue_t * mythread_queue_create(size_t size, myhtml_status_t *status)
     
     queue->nodes_pos_size = 512;
     queue->nodes_size     = size;
-    queue->nodes          = (mythread_queue_node_t**)mycalloc(queue->nodes_pos_size, sizeof(mythread_queue_node_t*));
+    queue->nodes          = (mythread_queue_node_t**)myhtml_calloc(queue->nodes_pos_size, sizeof(mythread_queue_node_t*));
     
     if(queue->nodes == NULL) {
-        free(queue);
+        myhtml_free(queue);
         
         if(status)
             *status = MyHTML_STATUS_THREAD_ERROR_QUEUE_NODES_MALLOC;
@@ -660,11 +658,11 @@ mythread_queue_t * mythread_queue_create(size_t size, myhtml_status_t *status)
     
     mythread_queue_clean(queue);
     
-    queue->nodes[queue->nodes_pos] = (mythread_queue_node_t*)mymalloc(sizeof(mythread_queue_node_t) * queue->nodes_size);
+    queue->nodes[queue->nodes_pos] = (mythread_queue_node_t*)myhtml_malloc(sizeof(mythread_queue_node_t) * queue->nodes_size);
     
     if(queue->nodes[queue->nodes_pos] == NULL) {
-        free(queue->nodes);
-        free(queue);
+        myhtml_free(queue->nodes);
+        myhtml_free(queue);
         
         if(status)
             *status = MyHTML_STATUS_THREAD_ERROR_QUEUE_NODE_MALLOC;
@@ -692,13 +690,13 @@ mythread_queue_t * mythread_queue_destroy(mythread_queue_t* queue)
     
     if(queue->nodes) {
         for (size_t i = 0; i <= queue->nodes_pos; i++) {
-            free(queue->nodes[i]);
+            myhtml_free(queue->nodes[i]);
         }
         
-        free(queue->nodes);
+        myhtml_free(queue->nodes);
     }
     
-    free(queue);
+    myhtml_free(queue);
     
     return NULL;
 }
@@ -728,7 +726,7 @@ size_t mythread_queue_count_used_node(mythread_queue_t* queue)
     return queue->nodes_uses;
 }
 
-mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythread_queue_t* queue, const char* text, size_t begin, myhtml_status_t *status)
+mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythread_queue_t* queue, myhtml_status_t *status)
 {
     queue->nodes_length++;
     
@@ -741,7 +739,7 @@ mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythrea
             mythread_wait_all_for_done(mythread);
             
             queue->nodes_pos_size <<= 1;
-            mythread_queue_node_t** tmp = realloc(queue->nodes, sizeof(mythread_queue_node_t*) * queue->nodes_pos_size);
+            mythread_queue_node_t** tmp = myhtml_realloc(queue->nodes, sizeof(mythread_queue_node_t*) * queue->nodes_pos_size);
             
             if(tmp) {
                 memset(&tmp[queue->nodes_pos], 0, sizeof(mythread_queue_node_t*) * (queue->nodes_pos_size - queue->nodes_pos));
@@ -757,7 +755,7 @@ mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythrea
         }
         
         if(queue->nodes[queue->nodes_pos] == NULL) {
-            queue->nodes[queue->nodes_pos] = (mythread_queue_node_t*)malloc(sizeof(mythread_queue_node_t) * queue->nodes_size);
+            queue->nodes[queue->nodes_pos] = (mythread_queue_node_t*)myhtml_malloc(sizeof(mythread_queue_node_t) * queue->nodes_size);
             
             if(queue->nodes[queue->nodes_pos] == NULL) {
                 if(status)
@@ -772,15 +770,10 @@ mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythrea
     
     queue->nodes_uses++;
     
-    mythread_queue_node_t *qnode = &queue->nodes[queue->nodes_pos][queue->nodes_length];
-    
-    qnode->text  = text;
-    qnode->begin = begin;
-    
-    return qnode;
+    return &queue->nodes[queue->nodes_pos][queue->nodes_length];
 }
 
-mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, mythread_queue_t* queue, const char* text, size_t begin, size_t limit, myhtml_status_t *status)
+mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, mythread_queue_t* queue, size_t limit, myhtml_status_t *status)
 {
     queue->nodes_length++;
     
@@ -802,7 +795,7 @@ mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, m
             mythread_wait_all_for_done(mythread);
             
             queue->nodes_pos_size <<= 1;
-            mythread_queue_node_t** tmp = realloc(queue->nodes, sizeof(mythread_queue_node_t*) * queue->nodes_pos_size);
+            mythread_queue_node_t** tmp = myhtml_realloc(queue->nodes, sizeof(mythread_queue_node_t*) * queue->nodes_pos_size);
             
             if(tmp) {
                 memset(&tmp[queue->nodes_pos], 0, sizeof(mythread_queue_node_t*) * (queue->nodes_pos_size - queue->nodes_pos));
@@ -818,7 +811,7 @@ mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, m
         }
         
         if(queue->nodes[queue->nodes_pos] == NULL) {
-            queue->nodes[queue->nodes_pos] = (mythread_queue_node_t*)malloc(sizeof(mythread_queue_node_t) * queue->nodes_size);
+            queue->nodes[queue->nodes_pos] = (mythread_queue_node_t*)myhtml_malloc(sizeof(mythread_queue_node_t) * queue->nodes_size);
             
             if(queue->nodes[queue->nodes_pos] == NULL) {
                 if(status)
@@ -833,18 +826,12 @@ mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, m
     
     queue->nodes_uses++;
     
-    mythread_queue_node_t *qnode = &queue->nodes[queue->nodes_pos][queue->nodes_length];
-    
-    qnode->text  = text;
-    qnode->begin = begin;
-    
-    return qnode;
+    return &queue->nodes[queue->nodes_pos][queue->nodes_length];
 }
 
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
 
-mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, mythread_queue_list_entry_t *entry,
-                                                              const char* text, size_t begin, myhtml_status_t *status)
+mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, mythread_queue_list_entry_t *entry, myhtml_status_t *status)
 {
     mythread_queue_t* queue = entry->queue;
     
@@ -859,12 +846,7 @@ mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, m
     else
         queue->nodes_uses++;
     
-    mythread_queue_node_t *qnode = &queue->nodes[queue->nodes_pos][queue->nodes_length];
-    
-    qnode->text  = text;
-    qnode->begin = begin;
-    
-    return qnode;
+    return &queue->nodes[queue->nodes_pos][queue->nodes_length];
 }
 
 #endif /* MyHTML_BUILD_WITHOUT_THREADS */

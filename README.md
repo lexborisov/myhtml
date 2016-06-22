@@ -7,9 +7,11 @@ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library wit
 ## Now
 
 ```text
-The current version is 0.7.0 - this is a beta version
-Release will have major version number 1
+The current version is 1.0.0 - Release Candidate (rc)
 ```
+
+## Changes
+Please, see [CHANGELOG.md] file
 
 ## Features
 
@@ -103,6 +105,10 @@ Flags that can be passed to CMake:
 - `MyHTML_BUILD_STATIC=ON` build static library. Default: ON
 - `MyHTML_INSTALL_HEADER=OFF` install header files. Default OFF
 - `MyHTML_BUILD_WITHOUT_THREADS=YES` build without POSIX Threads. Default: NO
+- `MyHTML_EXTERN_MALLOC=my_malloc_func` set extern malloc function. Default: UNDEFINED
+- `MyHTML_EXTERN_REALLOC=my_realloc_func` set extern realloc function. Default: UNDEFINED
+- `MyHTML_EXTERN_CALLOC=my_calloc_func` set extern calloc function. Default: UNDEFINED
+- `MyHTML_EXTERN_FREE=my_free_func` set extern free function. Default: UNDEFINED
 
 *for example*
 ```bash
@@ -131,11 +137,10 @@ gcc -Wall -Werror -O2 your_program.c /path/to/libmyhtml_static.a -o your_program
 Works are in full swing
 
 - make test && make install
-- Build in Windows OS
-- external bindings (Perl, PHP, Python, Erlang, Node.js, C#, R, Ruby, Rust and other)
+- css ([MyCSS])
+- html render
+- js
 - ...
-- css parsing && selectors (is ready, but I do not like it and will remodel)
-- html render without js (in fact, he is ready, we do refactoring before publication, see previous)
 
 ## Dependencies
 
@@ -209,6 +214,7 @@ See the [LICENSE] file.
 [encoding.spec.whatwg.org]: https://encoding.spec.whatwg.org/
 [html5lib-tests]: https://github.com/html5lib/html5lib-tests
 [MyCSS]: https://github.com/lexborisov/mycss
+[CHANGELOG.md]: https://github.com/lexborisov/myhtml/blob/master/CHANGELOG.md
 [Perl 5]: https://metacpan.org/release/HTML-MyHTML
 [Perl 6]: https://github.com/MadcapJake/p6-MyHTML
 [Crystal]: https://github.com/kostya/myhtml

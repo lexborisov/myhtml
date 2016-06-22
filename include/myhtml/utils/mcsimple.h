@@ -22,6 +22,10 @@
 #define MyHTML_UTILS_MCSIMPLE_H
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <myhtml/myosi.h>
 
 struct mcsimple {
@@ -47,5 +51,10 @@ uint8_t * mcsimple_init_list_entries(mcsimple_t *mcsimple, size_t pos);
 
 void * mcsimple_malloc(mcsimple_t *mcsimple);
 void * mcsimple_get_by_absolute_position(mcsimple_t *mcsimple, size_t pos);
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* MyHTML_UTILS_MCSIMPLE_H */

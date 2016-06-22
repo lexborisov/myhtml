@@ -33,22 +33,22 @@ if(myhtml_whithspace(html[html_offset], ==, ||)) {                              
     }                                                                                        \
 }
 
-#define myhtml_parser_queue_set_attr(tree, qnode)                                       \
-    if(qnode->token->attr_first == NULL) {                                              \
-        qnode->token->attr_first = myhtml_tree_token_attr_current(tree);                \
-        qnode->token->attr_last  = qnode->token->attr_first;                            \
-                                                                                        \
-        tree->attr_current = qnode->token->attr_last;                                   \
-        tree->attr_current->next = NULL;                                                \
-        tree->attr_current->prev = NULL;                                                \
-    }                                                                                   \
-    else {                                                                              \
-        qnode->token->attr_last->next = myhtml_tree_token_attr_current(tree);            \
-        qnode->token->attr_last->next->prev = qnode->token->attr_last;                   \
-        qnode->token->attr_last = qnode->token->attr_last->next;                         \
-                                                                                        \
-        qnode->token->attr_last->next = NULL;                                           \
-        tree->attr_current = qnode->token->attr_last;                                   \
+#define myhtml_parser_queue_set_attr(tree, token_node)                              \
+    if(token_node->attr_first == NULL) {                                            \
+        token_node->attr_first = myhtml_tree_token_attr_current(tree);              \
+        token_node->attr_last  = token_node->attr_first;                            \
+                                                                                    \
+        tree->attr_current = token_node->attr_last;                                 \
+        tree->attr_current->next = NULL;                                            \
+        tree->attr_current->prev = NULL;                                            \
+    }                                                                               \
+    else {                                                                          \
+        token_node->attr_last->next = myhtml_tree_token_attr_current(tree);         \
+        token_node->attr_last->next->prev = token_node->attr_last;                  \
+        token_node->attr_last = token_node->attr_last->next;                        \
+                                                                                    \
+        token_node->attr_last->next = NULL;                                         \
+        tree->attr_current = token_node->attr_last;                                 \
     }
 
 #ifdef __cplusplus

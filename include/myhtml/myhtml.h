@@ -41,7 +41,8 @@ extern "C" {
 #include <myhtml/charef.h>
 #include <myhtml/encoding.h>
 #include <myhtml/incoming.h>
-    
+#include <myhtml/callback.h>
+
 #define mh_queue_current() tree->queue
 #define myhtml_tokenizer_state_set(tree) myhtml_tree_set(tree, state)
 
@@ -65,9 +66,7 @@ extern "C" {
 
 struct myhtml {
     mythread_t          *thread;
-    mcobject_async_t    *async_incoming_buf;
-    mchar_async_t       *mchar; // for all
-    mcobject_async_t    *tag_index;
+    //mchar_async_t       *mchar; // for all
     
     myhtml_tokenizer_state_f* parse_state_func;
     myhtml_insertion_f* insertion_func;
@@ -82,21 +81,22 @@ struct myhtml_collection {
     size_t length;
 };
 
+
 myhtml_t * myhtml_create(void);
 myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t thread_count, size_t queue_size);
 void myhtml_clean(myhtml_t* myhtml);
 myhtml_t* myhtml_destroy(myhtml_t* myhtml);
 
 myhtml_status_t myhtml_parse(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size);
-myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
 myhtml_status_t myhtml_parse_single(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size);
-myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
 myhtml_status_t myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t html_size);
-myhtml_status_t myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+myhtml_status_t myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 myhtml_status_t myhtml_parse_chunk_single(myhtml_tree_t* tree, const char* html, size_t html_size);
-myhtml_status_t myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+myhtml_status_t myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 myhtml_status_t myhtml_parse_chunk_end(myhtml_tree_t* tree);
 
 // encoding
@@ -105,6 +105,44 @@ myhtml_encoding_t myhtml_encoding_get(myhtml_tree_t* tree);
 
 myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status);
 myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection, const char* html, size_t length, myhtml_status_t *status);
+myhtml_collection_t * myhtml_get_nodes_by_attribute_key(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* scope_node, const char* key, size_t key_len, myhtml_status_t* status);
+/* like a [some=value] or #id */
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                          bool case_insensitive,
+                                                          const char* key, size_t key_len,
+                                                          const char* value, size_t value_len,
+                                                          myhtml_status_t* status);
+/* like a [some~=value] or .class */
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_whitespace_separated(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                                               bool case_insensitive,
+                                                                               const char* key, size_t key_len,
+                                                                               const char* value, size_t value_len,
+                                                                               myhtml_status_t* status);
+/* like a [some^=value] */
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_begin(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                                bool case_insensitive,
+                                                                const char* key, size_t key_len,
+                                                                const char* value, size_t value_len,
+                                                                myhtml_status_t* status);
+/* like a [some$=value] */
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_end(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                              bool case_insensitive,
+                                                              const char* key, size_t key_len,
+                                                              const char* value, size_t value_len,
+                                                              myhtml_status_t* status);
+/* like a [some*=value] */
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_contain(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                                  bool case_insensitive,
+                                                                  const char* key, size_t key_len,
+                                                                  const char* value, size_t value_len,
+                                                                  myhtml_status_t* status);
+/* like a [some|=value] */
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_hyphen_separated(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                                           bool case_insensitive,
+                                                                           const char* key, size_t key_len,
+                                                                           const char* value, size_t value_len,
+                                                                           myhtml_status_t* status);
+
 myhtml_collection_t * myhtml_get_nodes_by_tag_id_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tree_node_t *node, myhtml_tag_id_t tag_id, myhtml_status_t *status);
 myhtml_collection_t * myhtml_get_nodes_by_name_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tree_node_t *node, const char* html, size_t length, myhtml_status_t *status);
 
@@ -116,11 +154,11 @@ myhtml_tree_node_t * myhtml_node_child(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_last_child(myhtml_tree_node_t *node);
 
 myhtml_tree_node_t * myhtml_node_insert_to_appropriate_place(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
-myhtml_tree_node_t * myhtml_node_insert_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
 
-myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_node_t *node);
 void myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node);
 void myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node);
@@ -135,23 +173,36 @@ myhtml_tree_attr_t * myhtml_node_attribute_first(myhtml_tree_node_t *node);
 myhtml_tree_attr_t * myhtml_node_attribute_last(myhtml_tree_node_t *node);
 const char * myhtml_node_text(myhtml_tree_node_t *node, size_t *length);
 myhtml_string_t * myhtml_node_string(myhtml_tree_node_t *node);
+myhtml_position_t myhtml_node_raw_pasition(myhtml_tree_node_t *node);
+myhtml_position_t myhtml_node_element_pasition(myhtml_tree_node_t *node);
 
+/* attributes */
 myhtml_tree_attr_t * myhtml_attribute_next(myhtml_tree_attr_t *attr);
 myhtml_tree_attr_t * myhtml_attribute_prev(myhtml_tree_attr_t *attr);
 enum myhtml_namespace myhtml_attribute_namespace(myhtml_tree_attr_t *attr);
-const char * myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length);
+void myhtml_attribute_namespace_set(myhtml_tree_attr_t *attr, myhtml_namespace_t ns);
+
+/* use myhtml_attribute_key */
+MyHTML_DEPRECATED(const char * myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length), "use myhtml_attribute_key");
+
+const char * myhtml_attribute_key(myhtml_tree_attr_t *attr, size_t *length);
 const char * myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length);
+myhtml_string_t * myhtml_attribute_key_string(myhtml_tree_attr_t* attr);
+myhtml_string_t * myhtml_attribute_value_string(myhtml_tree_attr_t* attr);
 myhtml_tree_attr_t * myhtml_attribute_by_key(myhtml_tree_node_t *node, const char *key, size_t key_len);
 myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node, const char *key, size_t key_len, const char *value, size_t value_len, myhtml_encoding_t encoding);
 myhtml_tree_attr_t * myhtml_attribute_remove(myhtml_tree_node_t *node, myhtml_tree_attr_t *attr);
 myhtml_tree_attr_t * myhtml_attribute_remove_by_key(myhtml_tree_node_t *node, const char *key, size_t key_len);
 void myhtml_attribute_delete(myhtml_tree_t *tree, myhtml_tree_node_t *node, myhtml_tree_attr_t *attr);
 void myhtml_attribute_free(myhtml_tree_t *tree, myhtml_tree_attr_t *attr);
+myhtml_position_t myhtml_attribute_key_raw_position(myhtml_tree_attr_t *attr);
+myhtml_position_t myhtml_attribute_value_raw_position(myhtml_tree_attr_t *attr);
 
+/* collection */
 myhtml_collection_t * myhtml_collection_create(size_t size, myhtml_status_t *status);
 void myhtml_collection_clean(myhtml_collection_t *collection);
 myhtml_collection_t * myhtml_collection_destroy(myhtml_collection_t *collection);
-myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, size_t up_to_length);
+myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, size_t need, size_t upto_length);
 
 // strings
 myhtml_string_t * myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
@@ -161,7 +212,7 @@ bool myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id);
 
 // queue
-void myhtml_queue_add(myhtml_tree_t *tree, const char *html, size_t begin, mythread_queue_node_t *qnode);
+void myhtml_queue_add(myhtml_tree_t *tree, const char *html, size_t begin, myhtml_token_node_t* token);
 
 /** 
  * Platform-specific hdef performance clock queries.

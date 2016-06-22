@@ -83,12 +83,12 @@ mcsync_t * mcsync_destroy(mcsync_t* mcsync, int destroy_self)
 #if !defined(MyHTML_FORCE_SPINLOCK)
     if(mcsync->mutex) {
         pthread_mutex_destroy(mcsync->mutex);
-        free(mcsync->mutex);
+        myhtml_free(mcsync->mutex);
     }
 #endif
     
     if(destroy_self)
-        free(mcsync);
+        myhtml_free(mcsync);
     
     return NULL;
 }
@@ -124,7 +124,7 @@ mcsync_status_t mcsync_mutex_lock(mcsync_t* mcsync)
 {
 #if !defined(MyHTML_FORCE_SPINLOCK)
     if(mcsync->mutex == NULL) {
-        mcsync->mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+        mcsync->mutex = (pthread_mutex_t*)myhtml_malloc(sizeof(pthread_mutex_t));
         
         if(mcsync->mutex == NULL)
             return MCSYNC_STATUS_ERROR_MEM_ALLOCATE;

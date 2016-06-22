@@ -34,12 +34,14 @@ enum mcobject_async_status {
     MCOBJECT_ASYNC_STATUS_ERROR_MEMORY_ALLOCATION             = 1,
     MCOBJECT_ASYNC_STATUS_CHUNK_ERROR_MEMORY_ALLOCATION       = 2,
     MCOBJECT_ASYNC_STATUS_CHUNK_CACHE_ERROR_MEMORY_ALLOCATION = 3,
-    MCOBJECT_ASYNC_STATUS_NODES_ERROR_MEMORY_ALLOCATION       = 4
+    MCOBJECT_ASYNC_STATUS_NODES_ERROR_MEMORY_ALLOCATION       = 4,
+    MCOBJECT_ASYNC_STATUS_NODES_ERROR_BAD_NODE_ID             = 5,
+    MCOBJECT_ASYNC_STATUS_CACHE_ERROR_MEMORY_REALLOC          = 6
 }
 typedef mcobject_async_status_t;
 
 struct mcobject_async_chunk {
-    char  *begin;
+    unsigned char *begin;
     size_t length;
     size_t size;
     
@@ -51,7 +53,7 @@ typedef mcobject_async_chunk_t;
 struct mcobject_async_node {
     mcobject_async_chunk_t *chunk;
     
-    char  **cache;
+    void  **cache;
     size_t  cache_size;
     size_t  cache_length;
 }
@@ -96,7 +98,7 @@ void mcobject_async_node_all_clean(mcobject_async_t *mcobj_async);
 void mcobject_async_node_delete(mcobject_async_t *mcobj_async, size_t node_idx);
 
 void * mcobject_async_malloc(mcobject_async_t *mcobj_async, size_t node_idx, mcobject_async_status_t *status);
-void mcobject_async_free(mcobject_async_t *mcobj_async, void *entry);
+mcobject_async_status_t mcobject_async_free(mcobject_async_t *mcobj_async, void *entry);
 
 mcobject_async_chunk_t * mcobject_async_chunk_malloc(mcobject_async_t *mcobj_async, size_t length, mcobject_async_status_t *status);
 mcobject_async_chunk_t * mcobject_async_chunk_malloc_without_lock(mcobject_async_t *mcobj_async, size_t length, mcobject_async_status_t *status);

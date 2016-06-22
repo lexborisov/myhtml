@@ -21,10 +21,10 @@
 #include "myhtml/incoming.h"
 #include "myhtml/utils/resources.h"
 
-myhtml_incoming_buffer_t * myhtml_incomming_buffer_add(myhtml_incoming_buffer_t *current, mcobject_async_t *mcobject, size_t mcnode_id,
+myhtml_incoming_buffer_t * myhtml_incomming_buffer_add(myhtml_incoming_buffer_t *current, mcobject_t *mcobject,
                                                        const char *html, size_t html_size)
 {
-    myhtml_incoming_buffer_t *inc_buf = mcobject_async_malloc(mcobject, mcnode_id, NULL);
+    myhtml_incoming_buffer_t *inc_buf = mcobject_malloc(mcobject, NULL);
     
     inc_buf->size   = html_size;
     inc_buf->length = 0;
@@ -81,6 +81,19 @@ size_t myhtml_incoming_buffer_size(myhtml_incoming_buffer_t *inc_buf)
 size_t myhtml_incoming_buffer_offset(myhtml_incoming_buffer_t *inc_buf)
 {
     return inc_buf->offset;
+}
+
+size_t myhtml_incoming_buffer_relative_begin(myhtml_incoming_buffer_t *inc_buf, size_t begin)
+{
+    return (begin - inc_buf->offset);
+}
+
+size_t myhtml_incoming_buffer_available_length(myhtml_incoming_buffer_t *inc_buf, size_t relative_begin, size_t length)
+{
+    if((relative_begin + length) > inc_buf->size)
+        return (inc_buf->size - relative_begin);
+    
+    return length;
 }
 
 myhtml_incoming_buffer_t * myhtml_incoming_buffer_next(myhtml_incoming_buffer_t *inc_buf)

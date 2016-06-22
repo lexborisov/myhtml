@@ -30,7 +30,7 @@
 #include <stdarg.h>
 
 
-#if defined(_WIN32) || defined(_WIN64)
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(__WINPTHREADS_VERSION)
 #define IS_OS_WINDOWS
 #include <windows.h>
 #endif
@@ -47,6 +47,36 @@
 extern "C" {
 #endif
 
+/* Mem */
+#ifdef MyHTML_EXTERN_MALLOC
+    extern void * MyHTML_EXTERN_MALLOC(size_t size);
+    #define myhtml_malloc MyHTML_EXTERN_MALLOC
+#else
+    #define myhtml_malloc myhtml_mem_malloc
+#endif
+
+#ifdef MyHTML_EXTERN_REALLOC
+    extern void * MyHTML_EXTERN_REALLOC(void* dst, size_t size);
+    #define myhtml_realloc MyHTML_EXTERN_REALLOC
+#else
+    #define myhtml_realloc myhtml_mem_realloc
+#endif
+
+#ifdef MyHTML_EXTERN_CALLOC
+    extern void * MyHTML_EXTERN_CALLOC(size_t num, size_t size);
+    #define myhtml_calloc MyHTML_EXTERN_CALLOC
+#else
+    #define myhtml_calloc myhtml_mem_calloc
+#endif
+
+#ifdef MyHTML_EXTERN_FREE
+    extern void MyHTML_EXTERN_FREE(void* dst);
+    #define myhtml_free MyHTML_EXTERN_FREE
+#else
+    #define myhtml_free myhtml_mem_free
+#endif
+
+/* Debug */
 #ifdef DEBUG_MODE
     #define MyHTML_DEBUG(format, ...)      \
         myhtml_print(stderr, "DEBUG: "format"\n", ##__VA_ARGS__)
@@ -65,7 +95,7 @@ extern "C" {
     myhtml->Lenn++;                                                 \
     if(myhtml->lenn == myhtml->sizen) {                             \
         myhtml->sizen += size;                                      \
-        myhtml->point = (strcn*)myrealloc(myhtml->point,            \
+        myhtml->point = (strcn*)myhtml_realloc(myhtml->point,            \
             sizeof(strcn) * myhtml->sizen);                         \
     }
 
@@ -126,6 +156,9 @@ enum myhtml_encoding_list {
 }
 typedef myhtml_encoding_t;
 
+// char references
+typedef struct myhtml_data_process_entry myhtml_data_process_entry_t;
+
 // strings
 typedef struct myhtml_string myhtml_string_t;
 
@@ -163,7 +196,15 @@ enum myhtml_tree_flags {
     MyHTML_TREE_FLAGS_PARSE_FLAG_EMIT_NEWLINE = 0x080
 };
 
-typedef struct myhtml_tree_temp_stream myhtml_tree_temp_stream_t;
+enum myhtml_tree_parse_flags {
+    MyHTML_TREE_PARSE_FLAGS_CLEAN                   = 0x000,
+    MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE      = 0x001,
+    MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN   = 0x003,
+    MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004,
+    MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE = 0x008,
+}
+typedef myhtml_tree_parse_flags_t;
+
 typedef struct myhtml_tree_temp_tag_name myhtml_tree_temp_tag_name_t;
 typedef struct myhtml_tree_insertion_list myhtml_tree_insertion_list_t;
 typedef struct myhtml_tree_token_list myhtml_tree_token_list_t;
@@ -221,6 +262,10 @@ typedef struct myhtml_tag_index myhtml_tag_index_t;
 typedef size_t myhtml_tag_id_t;
 
 typedef struct myhtml_tag myhtml_tag_t;
+
+// stream
+typedef struct myhtml_stream_buffer_entry myhtml_stream_buffer_entry_t;
+typedef struct myhtml_stream_buffer myhtml_stream_buffer_t;
 
 // parse
 enum myhtml_tokenizer_state {
@@ -363,6 +408,7 @@ enum myhtml_status {
     MyHTML_STATUS_PERF_ERROR_COMPILED_WITHOUT_PERF     = 0x00c8,
     MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK            = 0x00c9,
     MyHTML_STATUS_TOKENIZER_ERROR_MEMORY_ALLOCATION    = 0x012c,
+    MyHTML_STATUS_TOKENIZER_ERROR_FRAGMENT_INIT        = 0x012d,
     MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION         = 0x0190,
     MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE           = 0x0191,
     MyHTML_STATUS_TAGS_ERROR_MCOBJECT_MALLOC           = 0x0192,
@@ -373,8 +419,18 @@ enum myhtml_status {
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE           = 0x01f5,
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT             = 0x01f6,
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE      = 0x01f7,
+    MyHTML_STATUS_TREE_ERROR_INCOMING_BUFFER_CREATE    = 0x01f8,
     MyHTML_STATUS_ATTR_ERROR_ALLOCATION                = 0x0258,
-    MyHTML_STATUS_ATTR_ERROR_CREATE                    = 0x0259
+    MyHTML_STATUS_ATTR_ERROR_CREATE                    = 0x0259,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_CREATE           = 0x0300,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_INIT             = 0x0301,
+    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_CREATE     = 0x0302,
+    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_INIT       = 0x0303,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_ADD_ENTRY        = 0x0304,
+    MyHTML_STATUS_MCOBJECT_ERROR_CACHE_CREATE          = 0x0340,
+    MyHTML_STATUS_MCOBJECT_ERROR_CHUNK_CREATE          = 0x0341,
+    MyHTML_STATUS_MCOBJECT_ERROR_CHUNK_INIT            = 0x0342,
+    MyHTML_STATUS_MCOBJECT_ERROR_CACHE_REALLOC         = 0x0343
 }
 typedef myhtml_status_t;
 
@@ -400,13 +456,19 @@ enum myhtml_options {
     MyHTML_OPTIONS_PARSE_MODE_TREE_INDEX   = 0x20
 };
 
+struct myhtml_position {
+    size_t begin;
+    size_t length;
+}
+typedef myhtml_position_t;
+
 typedef struct myhtml_incoming_buffer myhtml_incoming_buffer_t;
 typedef myhtml_token_attr_t myhtml_tree_attr_t;
 typedef struct myhtml_collection myhtml_collection_t;
 typedef struct myhtml myhtml_t;
 
 // parser state function
-typedef size_t (*myhtml_tokenizer_state_f)(myhtml_tree_t* tree, mythread_queue_node_t* qnode, const char* html, size_t html_offset, size_t html_size);
+typedef size_t (*myhtml_tokenizer_state_f)(myhtml_tree_t* tree, myhtml_token_node_t* token_node, const char* html, size_t html_offset, size_t html_size);
 
 // parser stream function
 typedef void (*mythread_f)(mythread_id_t thread_id, mythread_queue_node_t *qnode);
@@ -414,10 +476,19 @@ typedef void (*mythread_f)(mythread_id_t thread_id, mythread_queue_node_t *qnode
 // parser insertion mode function
 typedef bool (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_node_t* token);
 
-void * mymalloc(size_t size);
-void * myrealloc(void* dst, size_t size);
-void * mycalloc(size_t num, size_t size);
-void   myfree(void* dst);
+// char references state
+typedef size_t (*myhtml_data_process_state_f)(myhtml_data_process_entry_t* charef, myhtml_string_t* str, const char* data, size_t offset, size_t size);
+
+// callback functions
+typedef void* (*myhtml_callback_token_f)(myhtml_tree_t* tree, myhtml_token_node_t* token, void* ctx);
+
+// find attribute value functions
+typedef bool (*myhtml_attribute_value_find_f)(myhtml_string_t* str_key, const char* value, size_t value_len);
+
+void * myhtml_mem_malloc(size_t size);
+void * myhtml_mem_realloc(void* dst, size_t size);
+void * myhtml_mem_calloc(size_t num, size_t size);
+void   myhtml_mem_free(void* dst);
 
 void myhtml_print(FILE* out, const char* format, ...);
 

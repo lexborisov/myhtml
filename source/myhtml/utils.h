@@ -28,8 +28,18 @@ extern "C" {
 
 #include "myhtml/myosi.h"
 
+#define myhtml_utils_whithspace(onechar, action, logic)     \
+    (onechar action ' '  logic                              \
+     onechar action '\t' logic                              \
+     onechar action '\n' logic                              \
+     onechar action '\f' logic                              \
+     onechar action '\r')
+
 size_t myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
 size_t myhtml_strcasecmp(const char* str1, const char* str2);
+size_t myhtml_strncmp(const char* str1, const char* str2, size_t size);
+size_t myhtml_strcmp(const char* str1, const char* str2);
+size_t myhtml_strcmp_ws(const char* str1, const char* str2);
 
 #ifdef __cplusplus
 } /* extern "C" */

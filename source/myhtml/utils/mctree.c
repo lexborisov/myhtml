@@ -24,11 +24,11 @@
 
 mctree_t * mctree_create(size_t start_size)
 {
-    mctree_t* mctree = (mctree_t*)mymalloc(sizeof(mctree_t));
+    mctree_t* mctree = (mctree_t*)myhtml_malloc(sizeof(mctree_t));
     
     mctree->nodes_size = start_size + 4096;
     mctree->nodes_length = start_size + 1;
-    mctree->nodes = (mctree_node_t*)mycalloc(mctree->nodes_size, sizeof(mctree_node_t));
+    mctree->nodes = (mctree_node_t*)myhtml_calloc(mctree->nodes_size, sizeof(mctree_node_t));
     
     mctree->start_size = start_size;
     
@@ -47,9 +47,9 @@ mctree_t * mctree_destroy(mctree_t* mctree)
         return NULL;
     
     if(mctree->nodes)
-        free(mctree->nodes);
+        myhtml_free(mctree->nodes);
     
-    free(mctree);
+    myhtml_free(mctree);
     
     return NULL;
 }

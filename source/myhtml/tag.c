@@ -23,7 +23,7 @@
 
 myhtml_tag_t * myhtml_tag_create(void)
 {
-    return (myhtml_tag_t*)mymalloc(sizeof(myhtml_tag_t));
+    return (myhtml_tag_t*)myhtml_malloc(sizeof(myhtml_tag_t));
 }
 
 myhtml_status_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags)
@@ -35,13 +35,11 @@ myhtml_status_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags)
     
     mcsimple_init(tags->mcsimple_context, 128, 1024, sizeof(myhtml_tag_context_t));
     
-    tags->mchar_node = mchar_async_node_add(tree->myhtml->mchar);
-    tags->tree       = mctree_create(32);
-    
-    tags->mchar      = tree->myhtml->mchar;
-    tags->tag_index  = tree->myhtml->tag_index;
-    
-    tags->tags_count = MyHTML_TAG_LAST_ENTRY;
+    tags->mchar_node         = mchar_async_node_add(tree->mchar);
+    tags->tree               = mctree_create(32);
+    tags->mchar              = tree->mchar;
+    tags->tags_count         = MyHTML_TAG_LAST_ENTRY;
+    tags->mcobject_tag_index = NULL;
     
     myhtml_tag_clean(tags);
     
@@ -67,27 +65,30 @@ myhtml_tag_t * myhtml_tag_destroy(myhtml_tag_t* tags)
     
     mchar_async_node_delete(tags->mchar, tags->mchar_node);
     
-    free(tags);
+    myhtml_free(tags);
     
     return NULL;
 }
 
 myhtml_tag_index_t * myhtml_tag_index_create(void)
 {
-    return (myhtml_tag_index_t*)calloc(1, sizeof(myhtml_tag_index_t));
+    return (myhtml_tag_index_t*)myhtml_calloc(1, sizeof(myhtml_tag_index_t));
 }
 
 myhtml_status_t myhtml_tag_index_init(myhtml_tag_t* tags, myhtml_tag_index_t* idx_tags)
 {
-    mcobject_async_status_t mcstatus;
-    tags->mcobject_node = mcobject_async_node_add(tags->tag_index, &mcstatus);
+    /* Tags Index */
+    tags->mcobject_tag_index = mcobject_create();
+    if(tags->mcobject_tag_index == NULL)
+        return MyHTML_STATUS_TAGS_ERROR_INDEX_MEMORY_ALLOCATION;
     
-    if(mcstatus != MCOBJECT_ASYNC_STATUS_OK)
-        return MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE;
+    myhtml_status_t status = mcobject_init(tags->mcobject_tag_index, 4096, sizeof(myhtml_incoming_buffer_t));
+    if(status)
+        return status;
     
     idx_tags->tags_size = tags->tags_count + 128;
     idx_tags->tags_length = 0;
-    idx_tags->tags = (myhtml_tag_index_entry_t*)calloc(idx_tags->tags_size, sizeof(myhtml_tag_index_entry_t));
+    idx_tags->tags = (myhtml_tag_index_entry_t*)myhtml_calloc(idx_tags->tags_size, sizeof(myhtml_tag_index_entry_t));
     
     if(idx_tags->tags == NULL)
         return MyHTML_STATUS_TAGS_ERROR_INDEX_MEMORY_ALLOCATION;
@@ -97,23 +98,23 @@ myhtml_status_t myhtml_tag_index_init(myhtml_tag_t* tags, myhtml_tag_index_t* id
 
 void myhtml_tag_index_clean(myhtml_tag_t* tags, myhtml_tag_index_t* index_tags)
 {
-    mcobject_async_node_clean(tags->tag_index, tags->mcobject_node);
+    mcobject_clean(tags->mcobject_tag_index);
     memset(index_tags->tags, 0, sizeof(myhtml_tag_index_entry_t) * index_tags->tags_size);
 }
 
 myhtml_tag_index_t * myhtml_tag_index_destroy(myhtml_tag_t* tags, myhtml_tag_index_t* index_tags)
 {
-    mcobject_async_node_delete(tags->tag_index, tags->mcobject_node);
+    mcobject_destroy(tags->mcobject_tag_index, true);
     
     if(index_tags == NULL)
         return NULL;
     
     if(index_tags->tags) {
-        free(index_tags->tags);
+        myhtml_free(index_tags->tags);
         index_tags->tags = NULL;
     }
     
-    free(index_tags);
+    myhtml_free(index_tags);
     
     return NULL;
 }
@@ -123,7 +124,7 @@ void myhtml_tag_index_check_size(myhtml_tag_t* tags, myhtml_tag_index_t* index_t
     if(tag_id >= index_tags->tags_size) {
         size_t new_size = tag_id + 128;
         
-        myhtml_tag_index_entry_t *index_entries = (myhtml_tag_index_entry_t*)myrealloc(index_tags->tags,
+        myhtml_tag_index_entry_t *index_entries = (myhtml_tag_index_entry_t*)myhtml_realloc(index_tags->tags,
                                                                              sizeof(myhtml_tag_index_entry_t) *
                                                                              new_size);
         
@@ -143,15 +144,15 @@ void myhtml_tag_index_check_size(myhtml_tag_t* tags, myhtml_tag_index_t* index_t
 
 myhtml_status_t myhtml_tag_index_add(myhtml_tag_t* tags, myhtml_tag_index_t* idx_tags, myhtml_tree_node_t* node)
 {
-    myhtml_tag_index_check_size(tags, idx_tags, node->tag_idx);
+    myhtml_tag_index_check_size(tags, idx_tags, node->tag_id);
     
-    myhtml_tag_index_entry_t* tag = &idx_tags->tags[node->tag_idx];
+    myhtml_tag_index_entry_t* tag = &idx_tags->tags[node->tag_id];
     
-    mcobject_async_status_t mcstatus;
-    myhtml_tag_index_node_t* new_node = mcobject_async_malloc(tags->tag_index, tags->mcobject_node, &mcstatus);
+    myhtml_status_t status;
+    myhtml_tag_index_node_t* new_node = mcobject_malloc(tags->mcobject_tag_index, &status);
     
-    if(mcstatus != MCOBJECT_ASYNC_STATUS_OK)
-        return MyHTML_STATUS_TAGS_ERROR_MCOBJECT_MALLOC;
+    if(status)
+        return status;
     
     myhtml_tag_index_clean_node(new_node);
     
@@ -267,13 +268,13 @@ myhtml_tag_id_t myhtml_tag_add(myhtml_tag_t* tags, const char* key, size_t key_s
 }
 
 void myhtml_tag_set_category(myhtml_tag_t* tags, myhtml_tag_id_t tag_idx,
-                                       enum myhtml_namespace my_namespace, enum myhtml_tag_categories cats)
+                                       enum myhtml_namespace ns, enum myhtml_tag_categories cats)
 {
     if(tag_idx < MyHTML_TAG_LAST_ENTRY)
         return;
     
     myhtml_tag_context_t *tag_ctx = mcsimple_get_by_absolute_position(tags->mcsimple_context, (tag_idx - MyHTML_TAG_LAST_ENTRY));
-    tag_ctx->cats[my_namespace] = cats;
+    tag_ctx->cats[ns] = cats;
 }
 
 const myhtml_tag_context_t * myhtml_tag_get_by_id(myhtml_tag_t* tags, myhtml_tag_id_t tag_id)

@@ -8,9 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		0E1ED9B41C68AE0E001B5FD6 /* encoding_detect.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E1ED9B31C68AE0E001B5FD6 /* encoding_detect.c */; };
+		0E2578981D07ABEE00442BDE /* mynamespace.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E2578951D07ABEE00442BDE /* mynamespace.c */; };
+		0E6CA1BD1D15416400B492C5 /* data_process.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E6CA1BB1D15416400B492C5 /* data_process.c */; };
 		0E7362DC1C568BFE00FF6A0E /* encoding.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E7362DA1C568BFE00FF6A0E /* encoding.c */; };
 		0E770BBD1C3A7FBF00F68C82 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BBC1C3A7FBF00F68C82 /* main.c */; };
-		0E770C001C3E87BA00F68C82 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BDB1C3E87BA00F68C82 /* Makefile */; };
 		0E770C011C3E87BA00F68C82 /* myhtml.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BDC1C3E87BA00F68C82 /* myhtml.c */; };
 		0E770C021C3E87BA00F68C82 /* myosi.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BDE1C3E87BA00F68C82 /* myosi.c */; };
 		0E770C031C3E87BA00F68C82 /* mystring.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BE01C3E87BA00F68C82 /* mystring.c */; };
@@ -30,7 +31,12 @@
 		0E770C111C3E87BA00F68C82 /* mcsync.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BFC1C3E87BA00F68C82 /* mcsync.c */; };
 		0E770C121C3E87BA00F68C82 /* mctree.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770BFE1C3E87BA00F68C82 /* mctree.c */; };
 		0E770C151C3FE6A400F68C82 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770C131C3FE6A400F68C82 /* utils.c */; };
+		0E7E16631CA31449006310B5 /* mcsimple.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E7E16611CA31449006310B5 /* mcsimple.c */; };
+		0E8499831D1B0C430027A80B /* mcobject.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E8499821D1B0C430027A80B /* mcobject.c */; };
+		0EBC8AED1D17EEE100592890 /* callback.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EBC8AEB1D17EEE100592890 /* callback.c */; };
+		0EBC8AF01D1855A300592890 /* stream.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EBC8AEE1D1855A300592890 /* stream.c */; };
 		0EEADE9E1C5550690086B3D6 /* charef.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEADE9C1C5550690086B3D6 /* charef.c */; };
+		0EEC1B601CC0E692000D7AD3 /* incoming.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEC1B5E1CC0E691000D7AD3 /* incoming.c */; };
 		0EEF775A1C425D20006DB566 /* tokenizer_end.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEF77581C425D20006DB566 /* tokenizer_end.c */; };
 /* End PBXBuildFile section */
 
@@ -48,7 +54,13 @@
 
 /* Begin PBXFileReference section */
 		0E1ED9B31C68AE0E001B5FD6 /* encoding_detect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = encoding_detect.c; sourceTree = "<group>"; };
+		0E2578951D07ABEE00442BDE /* mynamespace.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mynamespace.c; sourceTree = "<group>"; };
+		0E2578961D07ABEE00442BDE /* mynamespace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mynamespace.h; sourceTree = "<group>"; };
+		0E2578971D07ABEE00442BDE /* mynamespace_resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mynamespace_resource.h; sourceTree = "<group>"; };
 		0E357A9B1C5CDBA8003A6E17 /* api_encoding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = api_encoding.h; sourceTree = "<group>"; };
+		0E5199DC1D15D8490055AE0C /* charef_resource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = charef_resource.h; sourceTree = "<group>"; };
+		0E6CA1BB1D15416400B492C5 /* data_process.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = data_process.c; sourceTree = "<group>"; };
+		0E6CA1BC1D15416400B492C5 /* data_process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = data_process.h; sourceTree = "<group>"; };
 		0E7362DA1C568BFE00FF6A0E /* encoding.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = encoding.c; sourceTree = "<group>"; };
 		0E7362DB1C568BFE00FF6A0E /* encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = encoding.h; sourceTree = "<group>"; };
 		0E770BB91C3A7FBF00F68C82 /* osx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = osx; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,7 +68,6 @@
 		0E770BC31C3A7FE700F68C82 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 		0E770BD91C3E87BA00F68C82 /* api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = api.h; sourceTree = "<group>"; };
 		0E770BDA1C3E87BA00F68C82 /* def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = def.h; sourceTree = "<group>"; };
-		0E770BDB1C3E87BA00F68C82 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		0E770BDC1C3E87BA00F68C82 /* myhtml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = myhtml.c; sourceTree = "<group>"; };
 		0E770BDD1C3E87BA00F68C82 /* myhtml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myhtml.h; sourceTree = "<group>"; };
 		0E770BDE1C3E87BA00F68C82 /* myosi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = myosi.c; sourceTree = "<group>"; };
@@ -94,10 +105,23 @@
 		0E770BFF1C3E87BA00F68C82 /* mctree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mctree.h; sourceTree = "<group>"; };
 		0E770C131C3FE6A400F68C82 /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
 		0E770C141C3FE6A400F68C82 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		0E7E16611CA31449006310B5 /* mcsimple.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mcsimple.c; sourceTree = "<group>"; };
+		0E7E16621CA31449006310B5 /* mcsimple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mcsimple.h; sourceTree = "<group>"; };
+		0E8499811D1B0C3E0027A80B /* mcobject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mcobject.h; sourceTree = "<group>"; };
+		0E8499821D1B0C430027A80B /* mcobject.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mcobject.c; sourceTree = "<group>"; };
+		0EA18AC21C91C0A1008E8DE0 /* resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = resources.h; sourceTree = "<group>"; };
+		0EBC8AEB1D17EEE100592890 /* callback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = callback.c; sourceTree = "<group>"; };
+		0EBC8AEC1D17EEE100592890 /* callback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = callback.h; sourceTree = "<group>"; };
+		0EBC8AEE1D1855A300592890 /* stream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = stream.c; sourceTree = "<group>"; };
+		0EBC8AEF1D1855A300592890 /* stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stream.h; sourceTree = "<group>"; };
 		0EEADE9C1C5550690086B3D6 /* charef.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = charef.c; sourceTree = "<group>"; };
 		0EEADE9D1C5550690086B3D6 /* charef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = charef.h; sourceTree = "<group>"; };
+		0EEC1B5E1CC0E691000D7AD3 /* incoming.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = incoming.c; sourceTree = "<group>"; };
+		0EEC1B5F1CC0E692000D7AD3 /* incoming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = incoming.h; sourceTree = "<group>"; };
 		0EEF77581C425D20006DB566 /* tokenizer_end.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tokenizer_end.c; sourceTree = "<group>"; };
 		0EEF77591C425D20006DB566 /* tokenizer_end.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tokenizer_end.h; sourceTree = "<group>"; };
+		0EFCE0AB1CE3B36500712734 /* encoding_detect_resource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = encoding_detect_resource.h; sourceTree = "<group>"; };
+		0EFCE0AC1CE3B43F00712734 /* encoding_resource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = encoding_resource.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,7 +139,7 @@
 			isa = PBXGroup;
 			children = (
 				0E770BBB1C3A7FBF00F68C82 /* osx */,
-				0E770BD81C3E87BA00F68C82 /* source */,
+				0E770BD81C3E87BA00F68C82 /* myhtml */,
 				0E770BBA1C3A7FBF00F68C82 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -137,13 +161,12 @@
 			path = osx;
 			sourceTree = "<group>";
 		};
-		0E770BD81C3E87BA00F68C82 /* source */ = {
+		0E770BD81C3E87BA00F68C82 /* myhtml */ = {
 			isa = PBXGroup;
 			children = (
 				0E770BD91C3E87BA00F68C82 /* api.h */,
 				0E357A9B1C5CDBA8003A6E17 /* api_encoding.h */,
 				0E770BDA1C3E87BA00F68C82 /* def.h */,
-				0E770BDB1C3E87BA00F68C82 /* Makefile */,
 				0E770BDD1C3E87BA00F68C82 /* myhtml.h */,
 				0E770BDC1C3E87BA00F68C82 /* myhtml.c */,
 				0E770BDF1C3E87BA00F68C82 /* myosi.h */,
@@ -152,11 +175,18 @@
 				0E770BE01C3E87BA00F68C82 /* mystring.c */,
 				0EEADE9D1C5550690086B3D6 /* charef.h */,
 				0EEADE9C1C5550690086B3D6 /* charef.c */,
+				0E5199DC1D15D8490055AE0C /* charef_resource.h */,
+				0E6CA1BC1D15416400B492C5 /* data_process.h */,
+				0E6CA1BB1D15416400B492C5 /* data_process.c */,
 				0E770BE31C3E87BA00F68C82 /* parser.h */,
 				0E770BE21C3E87BA00F68C82 /* parser.c */,
+				0EBC8AEF1D1855A300592890 /* stream.h */,
+				0EBC8AEE1D1855A300592890 /* stream.c */,
 				0E770BE41C3E87BA00F68C82 /* perf.c */,
 				0E770BE61C3E87BA00F68C82 /* rules.h */,
 				0E770BE51C3E87BA00F68C82 /* rules.c */,
+				0EBC8AEC1D17EEE100592890 /* callback.h */,
+				0EBC8AEB1D17EEE100592890 /* callback.c */,
 				0E770BE81C3E87BA00F68C82 /* tag.h */,
 				0E770BE71C3E87BA00F68C82 /* tag.c */,
 				0E770BE91C3E87BA00F68C82 /* tag_const.h */,
@@ -165,6 +195,9 @@
 				0E770BEB1C3E87BA00F68C82 /* thread.c */,
 				0E770BEE1C3E87BA00F68C82 /* token.h */,
 				0E770BED1C3E87BA00F68C82 /* token.c */,
+				0E2578961D07ABEE00442BDE /* mynamespace.h */,
+				0E2578951D07ABEE00442BDE /* mynamespace.c */,
+				0E2578971D07ABEE00442BDE /* mynamespace_resource.h */,
 				0E770BF01C3E87BA00F68C82 /* tokenizer.h */,
 				0E770BEF1C3E87BA00F68C82 /* tokenizer.c */,
 				0E770BF21C3E87BA00F68C82 /* tokenizer_doctype.h */,
@@ -179,16 +212,24 @@
 				0E770C131C3FE6A400F68C82 /* utils.c */,
 				0E7362DB1C568BFE00FF6A0E /* encoding.h */,
 				0E7362DA1C568BFE00FF6A0E /* encoding.c */,
+				0EFCE0AC1CE3B43F00712734 /* encoding_resource.h */,
+				0EFCE0AB1CE3B36500712734 /* encoding_detect_resource.h */,
 				0E1ED9B31C68AE0E001B5FD6 /* encoding_detect.c */,
+				0EEC1B5F1CC0E692000D7AD3 /* incoming.h */,
+				0EEC1B5E1CC0E691000D7AD3 /* incoming.c */,
 				0E770BF71C3E87BA00F68C82 /* utils */,
 			);
-			name = source;
+			name = myhtml;
 			path = ../../source/myhtml;
 			sourceTree = "<group>";
 		};
 		0E770BF71C3E87BA00F68C82 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				0E8499811D1B0C3E0027A80B /* mcobject.h */,
+				0E8499821D1B0C430027A80B /* mcobject.c */,
+				0E7E16621CA31449006310B5 /* mcsimple.h */,
+				0E7E16611CA31449006310B5 /* mcsimple.c */,
 				0E770BF91C3E87BA00F68C82 /* mchar_async.h */,
 				0E770BF81C3E87BA00F68C82 /* mchar_async.c */,
 				0E770BFB1C3E87BA00F68C82 /* mcobject_async.h */,
@@ -197,6 +238,7 @@
 				0E770BFC1C3E87BA00F68C82 /* mcsync.c */,
 				0E770BFF1C3E87BA00F68C82 /* mctree.h */,
 				0E770BFE1C3E87BA00F68C82 /* mctree.c */,
+				0EA18AC21C91C0A1008E8DE0 /* resources.h */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -264,24 +306,30 @@
 				0E770C021C3E87BA00F68C82 /* myosi.c in Sources */,
 				0E770C061C3E87BA00F68C82 /* rules.c in Sources */,
 				0E770C081C3E87BA00F68C82 /* tag_init.c in Sources */,
-				0E770C001C3E87BA00F68C82 /* Makefile in Sources */,
 				0E770C0E1C3E87BA00F68C82 /* tree.c in Sources */,
 				0E770C031C3E87BA00F68C82 /* mystring.c in Sources */,
 				0E770C121C3E87BA00F68C82 /* mctree.c in Sources */,
+				0E8499831D1B0C430027A80B /* mcobject.c in Sources */,
 				0E770C071C3E87BA00F68C82 /* tag.c in Sources */,
 				0E770C041C3E87BA00F68C82 /* parser.c in Sources */,
 				0E770C0B1C3E87BA00F68C82 /* tokenizer.c in Sources */,
+				0EEC1B601CC0E692000D7AD3 /* incoming.c in Sources */,
 				0E770C0A1C3E87BA00F68C82 /* token.c in Sources */,
 				0E770C111C3E87BA00F68C82 /* mcsync.c in Sources */,
+				0EBC8AED1D17EEE100592890 /* callback.c in Sources */,
+				0E6CA1BD1D15416400B492C5 /* data_process.c in Sources */,
 				0E770C151C3FE6A400F68C82 /* utils.c in Sources */,
 				0E770BBD1C3A7FBF00F68C82 /* main.c in Sources */,
 				0E770C0D1C3E87BA00F68C82 /* tokenizer_script.c in Sources */,
 				0E7362DC1C568BFE00FF6A0E /* encoding.c in Sources */,
+				0E7E16631CA31449006310B5 /* mcsimple.c in Sources */,
 				0E770C0F1C3E87BA00F68C82 /* mchar_async.c in Sources */,
 				0E770C091C3E87BA00F68C82 /* thread.c in Sources */,
 				0E770C101C3E87BA00F68C82 /* mcobject_async.c in Sources */,
 				0EEADE9E1C5550690086B3D6 /* charef.c in Sources */,
+				0E2578981D07ABEE00442BDE /* mynamespace.c in Sources */,
 				0EEF775A1C425D20006DB566 /* tokenizer_end.c in Sources */,
+				0EBC8AF01D1855A300592890 /* stream.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -377,7 +425,10 @@
 					MyHTML_FORCE_RDTSC,
 					"$(inherited)",
 				);
-				HEADER_SEARCH_PATHS = ../../source;
+				HEADER_SEARCH_PATHS = (
+					../../source,
+					/usr/local/include,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -385,7 +436,10 @@
 		0E770BC21C3A7FBF00F68C82 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = ../../source;
+				HEADER_SEARCH_PATHS = (
+					../../source,
+					/usr/local/include,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

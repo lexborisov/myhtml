@@ -18,10 +18,13 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "myhtml/utils/resources.h"
 #include "myhtml/mystring.h"
+#include "myhtml/utils/resources.h"
 
-
+/////////////////////////////////////////////////////////
+//// Init, Clean, Destroy
+////
+/////////////////////////////////////////////////////////
 char * myhtml_string_init(mchar_async_t *mchar, size_t node_idx, myhtml_string_t* str, size_t size)
 {
     str->data     = mchar_async_malloc(mchar, node_idx, size);
@@ -53,11 +56,32 @@ myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, bool destroy_obj)
         mchar_async_free(str->mchar, str->node_idx, str->data);
     
     if(destroy_obj && str)
-        free(str);
+        myhtml_free(str);
     
     return NULL;
 }
 
+char * myhtml_string_realloc(myhtml_string_t *str, size_t new_size)
+{
+    if(str == NULL)
+        return NULL;
+    
+    char *tmp = mchar_async_realloc(str->mchar, str->node_idx, str->data, str->length, new_size);
+    
+    if(tmp) {
+        str->size = new_size;
+        str->data = tmp;
+    }
+    else
+        return NULL;
+    
+    return tmp;
+}
+
+/////////////////////////////////////////////////////////
+//// Basic API
+////
+/////////////////////////////////////////////////////////
 char * myhtml_string_data_alloc(mchar_async_t *mchar, size_t node_id, size_t size)
 {
     return mchar_async_malloc(mchar, node_id, size);
@@ -124,366 +148,13 @@ size_t myhtml_string_length_set(myhtml_string_t *str, size_t length)
     return str->length;
 }
 
-char * myhtml_string_realloc(mchar_async_t *mchar, size_t node_id, myhtml_string_t *str, size_t new_size)
-{
-    if(str == NULL)
-        return 0;
-    
-    char *tmp;
-    
-    if(str->data) {
-        tmp = mchar_async_realloc(str->mchar, str->node_idx, str->data, str->length, new_size);
-    }
-    else {
-        tmp = mchar_async_malloc(mchar, node_id, new_size);
-        
-        str->mchar    = mchar;
-        str->node_idx = node_id;
-    }
-    
-    if(tmp) {
-        str->size = new_size;
-        str->data = tmp;
-    }
-    else
-        return NULL;
-    
-    return str->data;
-}
-
-bool myhtml_string_release(myhtml_string_t* str, size_t size)
-{
-    char* tmp = mchar_async_realloc(str->mchar, str->node_idx, str->data, str->length, size);
-    
-    if(tmp) {
-        str->size = size;
-        str->data = tmp;
-    }
-    else
-        return false;
-    
-    return true;
-}
-
-void _myhtml_string_charef_append(myhtml_string_t* str, const char sm)
-{
-    MyHTML_STRING_REALLOC_IF_NEED(str, 2, 32);
-    
-    str->data[str->length] = sm;
-    str->length++;
-    
-    str->data[str->length] = '\0';
-}
-
-size_t _myhtml_string_append_char_references_state_0(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t offset, size_t size)
-{
-    size_t tmp_offset = offset;
-    
-    while(offset < size)
-    {
-        if(buff[offset] == '&')
-        {
-            if(chunk->encoding == MyHTML_ENCODING_UTF_8) {
-                myhtml_string_append_with_preprocessing(str, &buff[tmp_offset], (offset - tmp_offset), chunk->emit_null_char);
-            }
-            else {
-                myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &chunk->res, &buff[tmp_offset], (offset - tmp_offset), chunk->encoding);
-                myhtml_encoding_result_clean(&chunk->res);
-            }
-            
-            chunk->begin = str->length;
-            chunk->state = 1;
-            
-            _myhtml_string_charef_append(str, buff[offset]);
-            
-            offset++;
-            return offset;
-        }
-        
-        offset++;
-    }
-    
-    if(chunk->encoding == MyHTML_ENCODING_UTF_8)
-        myhtml_string_append_with_preprocessing(str, &buff[tmp_offset], (offset - tmp_offset), chunk->emit_null_char);
-    else
-        myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &chunk->res, &buff[tmp_offset], (offset - tmp_offset), chunk->encoding);
-    
-    return offset;
-}
-
-size_t _myhtml_string_append_char_references_state_1(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t offset, size_t size)
-{
-    if(buff[offset] == '#')
-    {
-        _myhtml_string_charef_append(str, buff[offset]);
-        offset++;
-        
-        chunk->l_data = 0;
-        
-        if(offset >= size) {
-            chunk->state = 3;
-            return offset;
-        }
-        
-        if(buff[offset] == 'x' || buff[offset] == 'X') {
-            _myhtml_string_charef_append(str, buff[offset]);
-            offset++;
-            
-            chunk->state = 5;
-        }
-        else
-            chunk->state = 4;
-    }
-    else {
-        chunk->charef_res.last_entry = NULL;
-        chunk->charef_res.curr_entry = myhtml_charef_get_first_position(buff[offset]);
-        
-        if(chunk->charef_res.curr_entry->ch == '\0')
-            chunk->state = 0;
-        else {
-            chunk->state = 2;
-            
-            _myhtml_string_charef_append(str, buff[offset]);
-            offset++;
-        }
-    }
-    
-    return offset;
-}
-
-size_t _myhtml_string_append_char_references_state_2(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t offset, size_t size)
-{
-    size_t tmp_offset = offset;
-    
-    const charef_entry_t *current_entry = myhtml_charef_find_by_pos(chunk->charef_res.curr_entry->next, buff, &offset, size, &chunk->charef_res);
-    
-    if(chunk->charef_res.is_done) {
-        chunk->state = 0;
-        
-        if(buff[offset] == ';')
-            offset++;
-        else {
-            if(chunk->is_attributes &&
-               (buff[offset] == '=' || myhtml_string_alphanumeric_character[ (unsigned char)buff[offset] ] != 0xff))
-            {
-                if(chunk->encoding == MyHTML_ENCODING_UTF_8)
-                    myhtml_string_append_with_preprocessing(str, &buff[tmp_offset], (offset - tmp_offset), chunk->emit_null_char);
-                else
-                    myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &chunk->res, &buff[tmp_offset], (offset - tmp_offset), chunk->encoding);
-                
-                return offset;
-            }
-        }
-        
-        if(current_entry->codepoints_len)
-        {
-            for (size_t i = 0; i < current_entry->codepoints_len; i++) {
-                MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
-                
-                chunk->begin += myhtml_encoding_codepoint_to_ascii_utf_8(current_entry->codepoints[i], &str->data[chunk->begin]);
-            }
-            
-            str->length = chunk->begin;
-        }
-        else {
-            if(chunk->encoding == MyHTML_ENCODING_UTF_8)
-                myhtml_string_append_with_preprocessing(str, &buff[tmp_offset], (offset - tmp_offset), chunk->emit_null_char);
-            else
-                myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &chunk->res, &buff[tmp_offset], (offset - tmp_offset), chunk->encoding);
-        }
-        
-        chunk->charef_res.last_entry = NULL;
-    }
-    else {
-        if(chunk->encoding == MyHTML_ENCODING_UTF_8)
-            myhtml_string_append_with_preprocessing(str, &buff[tmp_offset], (offset - tmp_offset), chunk->emit_null_char);
-        else
-            myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &chunk->res, &buff[tmp_offset], (offset - tmp_offset), chunk->encoding);
-    }
-    
-    return offset;
-}
-
-size_t _myhtml_string_append_char_references_state_3(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t offset, size_t size)
-{
-    if(buff[offset] == 'x' || buff[offset] == 'X') {
-        _myhtml_string_charef_append(str, buff[offset]);
-        offset++;
-        
-        chunk->state = 5;
-    }
-    else
-        chunk->state = 4;
-    
-    return offset;
-}
-
-void _myhtml_string_append_char_references_state_end(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str)
-{
-    str->length = chunk->begin;
-    
-    /* 4 is max utf8 byte + \0 */
-    MyHTML_STRING_REALLOC_IF_NEED(str, 5, 12);
-    
-    if(chunk->l_data <= 0x9F)
-        chunk->l_data = replacement_character[chunk->l_data];
-    else if(chunk->l_data >= 0xD800 && chunk->l_data <= 0xDFFF)
-        chunk->l_data = replacement_character[0];
-    else if(chunk->l_data > 0x10FFFF)
-        chunk->l_data = replacement_character[0];
-    
-//    if(chunk->l_data == 0x10FFFE)
-//        chunk->l_data = replacement_character[0];
-    
-    str->length += myhtml_encoding_codepoint_to_ascii_utf_8(chunk->l_data, &str->data[chunk->begin]);
-    str->data[str->length] = '\0';
-}
-
-size_t _myhtml_string_append_char_references_state_4(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const unsigned char *buff, size_t offset, size_t size)
-{
-    size_t tmp_offset = offset;
-    
-    while(offset < size)
-    {
-        if(myhtml_string_chars_num_map[ buff[offset] ] == 0xff)
-        {
-            chunk->state = 0;
-            
-            myhtml_string_append_with_preprocessing(str, (const char*)&buff[tmp_offset], (offset - tmp_offset), chunk->emit_null_char);
-            
-            if((str->length - (chunk->begin + 2)) == 0) {
-                return offset;
-            }
-            
-            if(buff[offset] == ';')
-                offset++;
-            
-            _myhtml_string_append_char_references_state_end(chunk, str);
-            return offset;
-        }
-        
-        if(chunk->l_data <= 0x10FFFF) {
-            chunk->l_data = myhtml_string_chars_num_map[ buff[offset] ] + chunk->l_data * 10;
-        }
-        
-        offset++;
-    }
-    
-    myhtml_string_append_with_preprocessing(str, (const char*)&buff[tmp_offset], (offset - tmp_offset), chunk->emit_null_char);
-    
-    return offset;
-}
-
-size_t _myhtml_string_append_char_references_state_5(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t offset, size_t size)
-{
-    unsigned const char *u_buff = (unsigned const char*)buff;
-    size_t current_len = (str->length - (chunk->begin + 3));
-    
-    size_t tmp_offset = offset, tmp_set_to = offset;
-    
-    while(offset < size)
-    {
-        if(myhtml_string_chars_hex_map[ u_buff[offset] ] == 0xff)
-        {
-            if(((offset - tmp_offset) + current_len) > 6) {
-                chunk->l_data = 0xFFFFFF;
-            }
-            
-            chunk->state = 0;
-            myhtml_string_append_with_preprocessing(str, &buff[tmp_offset], (tmp_set_to - tmp_offset), chunk->emit_null_char);
-            
-            if((str->length - (chunk->begin + 3)) == 0) {
-                return offset;
-            }
-            
-            if(buff[offset] == ';')
-                offset++;
-            
-            _myhtml_string_append_char_references_state_end(chunk, str);
-            return offset;
-        }
-        
-        if(((offset - tmp_offset) + current_len) < 7) {
-            chunk->l_data <<= 4;
-            chunk->l_data |= myhtml_string_chars_hex_map[ u_buff[offset] ];
-            
-            tmp_set_to++;
-        }
-        
-        offset++;
-    }
-    
-    if(((offset - tmp_offset) + current_len) > 6) {
-        chunk->l_data = 0xFFFFFF;
-    }
-    
-    myhtml_string_append_with_preprocessing(str, &buff[tmp_offset], (offset - tmp_offset), chunk->emit_null_char);
-    
-    return offset;
-}
-
-void myhtml_string_append_charef(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str, const char* buff, size_t size)
-{
-    size_t offset = 0;
-    
-    while (offset < size)
-    {
-        switch (chunk->state) {
-            case 1:
-                offset = _myhtml_string_append_char_references_state_1(chunk, str, buff, offset, size);
-                break;
-            case 2:
-                offset = _myhtml_string_append_char_references_state_2(chunk, str, buff, offset, size);
-                break;
-            case 3:
-                offset = _myhtml_string_append_char_references_state_3(chunk, str, buff, offset, size);
-                break;
-            case 4:
-                offset = _myhtml_string_append_char_references_state_4(chunk, str, (const unsigned char*)buff, offset, size);
-                break;
-            case 5:
-                offset = _myhtml_string_append_char_references_state_5(chunk, str, buff, offset, size);
-                break;
-            default:
-                offset = _myhtml_string_append_char_references_state_0(chunk, str, buff, offset, size);
-                break;
-        }
-    }
-}
-
-void myhtml_string_append_charef_end(myhtml_string_char_ref_chunk_t *chunk, myhtml_string_t* str)
-{
-    if(chunk->state == 2 && chunk->charef_res.last_entry)
-    {
-        const charef_entry_t *entry = chunk->charef_res.last_entry;
-        
-        for (size_t i = 0; i < entry->codepoints_len; i++) {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
-            
-            chunk->begin += myhtml_encoding_codepoint_to_ascii_utf_8(entry->codepoints[i], &str->data[chunk->begin]);
-        }
-        
-        str->length = chunk->begin;
-    }
-    else if(chunk->state == 4) {
-        if((str->length - (chunk->begin + 2)))
-            _myhtml_string_append_char_references_state_end(chunk, str);
-    }
-    else if(chunk->state == 5) {
-        if((str->length - (chunk->begin + 3)))
-            _myhtml_string_append_char_references_state_end(chunk, str);
-    }
-    
-    if(str->length) {
-        if(str->data[ (str->length - 1) ] == '\r') {
-            str->data[ (str->length - 1) ] = '\n';
-        }
-    }
-}
-
+/////////////////////////////////////////////////////////
+//// Append API
+////
+/////////////////////////////////////////////////////////
 void myhtml_string_append(myhtml_string_t* str, const char* buff, size_t length)
 {
-    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), (length + 32));
+    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
     
     memcpy(&str->data[str->length], buff, (sizeof(char) * length));
     
@@ -491,75 +162,99 @@ void myhtml_string_append(myhtml_string_t* str, const char* buff, size_t length)
     str->data[str->length] = '\0';
 }
 
-void myhtml_string_append_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length, bool emit_null_chars)
+void myhtml_string_append_one(myhtml_string_t* str, const char data)
 {
-    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 32);
+    MyHTML_STRING_REALLOC_IF_NEED(str, 2, 1);
+    MyHTML_STRING_APPEND_BYTE_WITHOUT_REALLOC(data, str);
+    MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT_REALLOC('\0', str);
+}
+
+void myhtml_string_append_lowercase(myhtml_string_t* str, const char* data, size_t length)
+{
+    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
+    
+    unsigned char *ref = (unsigned char*)&str->data[str->length];
+    unsigned char *buf = (unsigned char*)data;
+    
+    size_t i;
+    for(i = 0; i < length; i++) {
+        ref[i] = myhtml_string_chars_lowercase_map[ buf[i] ];
+    }
+    
+    ref[i] = '\0';
+    str->length += length;
+}
+
+size_t myhtml_string_append_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length, bool emit_null_chars)
+{
+    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
     
     unsigned char *data = (unsigned char*)str->data;
     const unsigned char *u_buff = (unsigned char*)buff;
     
+    /* 0x0D == \r */
+    /* 0x0A == \n */
+    
     for (size_t i = 0; i < length; i++)
     {
-        if(u_buff[i] == 0x0D)
-        {
+        if(u_buff[i] == 0x0D) {
             data[str->length] = 0x0A;
             
-            if((i+1) < length && u_buff[(i + 1)] == 0x0A) {
-                i++;
+            if((i + 1) < length) {
+                if(u_buff[(i + 1)] == 0x0A)
+                    i++;
+            }
+            else {
+                str->length++;
+                return str->length;
             }
         }
         else if(u_buff[i] == 0x00 && emit_null_chars == false)
         {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
-            
-            if((unsigned char *)str->data != data)
-                data = (unsigned char*)str->data;
+            myhtml_string_realloc(str, (str->size + 5));
+            data = (unsigned char*)str->data;
             
             // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
             data[str->length] = 0xEF; str->length++;
             data[str->length] = 0xBF; str->length++;
             data[str->length] = 0xBD;
         }
-        else {
+        else
             data[str->length] = u_buff[i];
-        }
         
         str->length++;
-        
-        if(str->length >= str->size) {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
-            
-            if((unsigned char *)str->data != data)
-                data = (unsigned char*)str->data;
-        }
     }
     
     str->data[str->length] = '\0';
+    
+    return 0;
 }
 
-void myhtml_string_append_lowercase_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length)
+size_t myhtml_string_append_lowercase_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length, bool emit_null_chars)
 {
-    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 32);
+    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
     
     unsigned char *data = (unsigned char*)str->data;
     const unsigned char *u_buff = (unsigned char*)buff;
     
     for (size_t i = 0; i < length; i++)
     {
-        if(u_buff[i] == 0x0D)
-        {
+        if(u_buff[i] == 0x0D) {
             data[str->length] = 0x0A;
             
-            if((i+1) < length && u_buff[(i + 1)] == 0x0A) {
-                i++;
+            if((i + 1) < length) {
+                if(u_buff[(i + 1)] == 0x0A)
+                    i++;
+            }
+            else {
+                str->length++;
+                return str->length;
             }
         }
-        else if(u_buff[i] == 0x00)
+        else if(u_buff[i] == 0x00 && emit_null_chars == false)
         {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
-            
-            if((unsigned char *)str->data != data)
-                data = (unsigned char*)str->data;
+            myhtml_string_realloc(str, (str->size + 5));
+            data = (unsigned char*)str->data;
             
             // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
             data[str->length] = 0xEF; str->length++;
@@ -571,55 +266,66 @@ void myhtml_string_append_lowercase_with_preprocessing(myhtml_string_t* str, con
         }
         
         str->length++;
-        
-        if(str->length >= str->size) {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
-            
-            if((unsigned char *)str->data != data)
-                data = (unsigned char*)str->data;
-        }
     }
     
     str->data[str->length] = '\0';
+    
+    return 0;
 }
 
-void myhtml_string_append_with_convert_encoding_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding)
+size_t myhtml_string_before_append_any_preprocessing(myhtml_string_t* str, const char* buff, size_t length, size_t last_position)
+{
+    if(last_position == 0 || length == 0)
+        return 0;
+    
+    if(*buff == '\n')
+        return 1;
+    
+    return 0;
+}
+
+/////////////////////////////////////////////////////////
+//// Append With Convert Encoding and Preprocessing API
+////
+/////////////////////////////////////////////////////////
+size_t myhtml_string_append_with_convert_encoding_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding, bool emit_null_chars)
 {
     myhtml_encoding_result_t res;
     myhtml_encoding_result_clean(&res);
     
-    myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &res, buff, length, encoding);
+    return myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &res, buff, length, encoding, emit_null_chars);
 }
 
-void myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding)
+size_t myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding, bool emit_null_chars)
 {
+    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
+    
     unsigned const char* u_buff = (unsigned const char*)buff;
     myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
     
     for (size_t i = 0; i < length; i++)
     {
         if(func(u_buff[i], res) == MyHTML_ENCODING_STATUS_OK) {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
+            MyHTML_STRING_REALLOC_IF_NEED(str, 5, 1);
             
             size_t len = myhtml_encoding_codepoint_to_ascii_utf_8(res->result, &str->data[str->length]);
             
             if(len == 1) {
-                // change \r\n to \n
-                if(str->length > 0) {
-                    if(str->data[(str->length - 1)] == '\r') {
-                        str->data[(str->length - 1)] = '\n';
-                        
-                        if(str->data[str->length] == '\n')
-                            str->length--;
-                        
-                        str->length += len;
-                        continue;
+                if(str->data[str->length] == '\r') {
+                    str->data[str->length] = '\n';
+                    
+                    if((i + 1) < length) {
+                        if(buff[(i + 1)] == '\n')
+                            i++;
+                    }
+                    else {
+                        str->length++;
+                        return str->length;
                     }
                 }
-                
-                if(str->data[str->length] == 0x00)
+                else if(str->data[str->length] == 0x00 && emit_null_chars == false)
                 {
-                    MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
+                    myhtml_string_realloc(str, (str->size + 5));
                     
                     // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
                     str->data[str->length] = 0xEF; str->length++;
@@ -629,16 +335,73 @@ void myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(myhtml_
             }
             
             str->length += len;
-            
-            if(str->length >= str->size) {
-                MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
-            }
         }
     }
     
     MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT('\0', str, 1);
+    
+    return 0;
 }
 
+size_t myhtml_string_append_lowercase_with_convert_encoding_with_preprocessing(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding, bool emit_null_chars)
+{
+    myhtml_encoding_result_t res;
+    myhtml_encoding_result_clean(&res);
+    
+    return myhtml_string_append_lowercase_chunk_with_convert_encoding_with_preprocessing(str, &res, buff, length, encoding, emit_null_chars);
+}
+
+size_t myhtml_string_append_lowercase_chunk_with_convert_encoding_with_preprocessing(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding, bool emit_null_chars)
+{
+    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
+    
+    unsigned const char* u_buff = (unsigned const char*)buff;
+    myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
+    
+    for (size_t i = 0; i < length; i++)
+    {
+        if(func(u_buff[i], res) == MyHTML_ENCODING_STATUS_OK) {
+            MyHTML_STRING_REALLOC_IF_NEED(str, 5, 1);
+            
+            size_t len = myhtml_encoding_codepoint_to_lowercase_ascii_utf_8(res->result, &str->data[str->length]);
+            
+            if(len == 1) {
+                if(str->data[str->length] == '\r') {
+                    str->data[str->length] = '\n';
+                    
+                    if((i + 1) < length) {
+                        if(buff[(i + 1)] == '\n')
+                            i++;
+                    }
+                    else {
+                        str->length++;
+                        return str->length;
+                    }
+                }
+                else if(str->data[str->length] == 0x00 && emit_null_chars == false)
+                {
+                    myhtml_string_realloc(str, (str->size + 5));
+                    
+                    // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
+                    str->data[str->length] = 0xEF; str->length++;
+                    str->data[str->length] = 0xBF; str->length++;
+                    str->data[str->length] = 0xBD;
+                }
+            }
+            
+            str->length += len;
+        }
+    }
+    
+    MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT('\0', str, 1);
+    
+    return 0;
+}
+
+/////////////////////////////////////////////////////////
+//// Append With Convert Encoding without Preprocessing API
+////
+/////////////////////////////////////////////////////////
 void myhtml_string_append_with_convert_encoding(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding)
 {
     myhtml_encoding_result_t res;
@@ -655,7 +418,7 @@ void myhtml_string_append_chunk_with_convert_encoding(myhtml_string_t* str, myht
     for (size_t i = 0; i < length; i++)
     {
         if(func(u_buff[i], res) == MyHTML_ENCODING_STATUS_OK) {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 5, 32);
+            MyHTML_STRING_REALLOC_IF_NEED(str, 5, 0);
             str->length += myhtml_encoding_codepoint_to_ascii_utf_8(res->result, &str->data[str->length]);
         }
     }
@@ -663,40 +426,18 @@ void myhtml_string_append_chunk_with_convert_encoding(myhtml_string_t* str, myht
     MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT('\0', str, 1);
 }
 
-void myhtml_string_append_one(myhtml_string_t* str, const char data)
-{
-    MyHTML_STRING_REALLOC_IF_NEED(str, 2, 32);
-    MyHTML_STRING_APPEND_BYTE_WITHOUT_REALLOC(data, str);
-    MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT_REALLOC('\0', str);
-}
-
 void myhtml_string_append_one_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char data, myhtml_encoding_t encoding)
 {
     myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
     
     if(func((unsigned const char)data, res) == MyHTML_ENCODING_STATUS_OK) {
-        MyHTML_STRING_REALLOC_IF_NEED(str, 5, 32);
+        MyHTML_STRING_REALLOC_IF_NEED(str, 5, 0);
         str->length += myhtml_encoding_codepoint_to_ascii_utf_8(res->result, &str->data[str->length]);
         
         MyHTML_STRING_APPEND_BYTE_WITHOUT_INCREMENT_REALLOC('\0', str);
     }
 }
 
-void myhtml_string_append_lowercase(myhtml_string_t* str, const char* data, size_t length)
-{
-    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 32);
-    
-    unsigned char *ref = (unsigned char*)&str->data[str->length];
-    unsigned char *buf = (unsigned char*)data;
-    
-    size_t i;
-    for(i = 0; i < length; i++) {
-        ref[i] = myhtml_string_chars_lowercase_map[ buf[i] ];
-    }
-    
-    ref[i] = '\0';
-    str->length += length;
-}
 
 void myhtml_string_append_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, const char* buff, size_t length, myhtml_encoding_t encoding)
 {
@@ -714,7 +455,7 @@ void myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(myhtml_str
     for (size_t i = 0; i < length; i++)
     {
         if(func(u_buff[i], res) == MyHTML_ENCODING_STATUS_OK) {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
+            MyHTML_STRING_REALLOC_IF_NEED(str, 5, 1);
             
             size_t insert_len = myhtml_encoding_codepoint_to_ascii_utf_8(res->result, &str->data[str->length]);
             
@@ -758,33 +499,24 @@ size_t myhtml_string_raw_set_replacement_character(myhtml_string_t* target, size
 
 void myhtml_string_append_with_replacement_null_characters_only(myhtml_string_t* str, const char* buff, size_t length)
 {
+    MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
+    
     unsigned char *data = (unsigned char*)str->data;
     const unsigned char *u_buff = (unsigned char*)buff;
     
     for (size_t i = 0; i < length; i++)
     {
-        if(u_buff[i] == 0x00)
-        {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
-            
-            if((unsigned char *)str->data != data)
-                data = (unsigned char*)str->data;
+        if(u_buff[i] == 0x00) {
+            myhtml_string_realloc(str, (str->size + 5));
+            data = (unsigned char*)str->data;
             
             // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
             data[str->length] = 0xEF; str->length++;
             data[str->length] = 0xBF; str->length++;
             data[str->length] = 0xBD;
         }
-        else {
+        else
             data[str->length] = u_buff[i];
-        }
-        
-        if(str->length >= str->size) {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 4, 32);
-            
-            if((unsigned char *)str->data != data)
-                data = (unsigned char*)str->data;
-        }
         
         str->length++;
     }

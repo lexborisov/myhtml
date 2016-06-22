@@ -47,7 +47,7 @@ int main(int argc, const char * argv[])
     
     // print original tree
     printf("Original tree:\n");
-    myhtml_tree_print_node_childs(tree, myhtml_tree_get_document(tree), stdout, 0);
+    myhtml_tree_print_node_children(tree, myhtml_tree_get_document(tree), stdout, 0);
     
     printf("For a test; Create and delete 100000 attrs...\n");
     for(size_t j = 0; j < 100000; j++) {
@@ -59,7 +59,7 @@ int main(int argc, const char * argv[])
     myhtml_attribute_add(tree, node, "key", 3, "value", 5, MyHTML_ENCODING_UTF_8);
     
     printf("Modified tree:\n");
-    myhtml_tree_print_node_childs(tree, myhtml_tree_get_document(tree), stdout, 0);
+    myhtml_tree_print_node_children(tree, myhtml_tree_get_document(tree), stdout, 0);
     
     // get attr by key name
     myhtml_tree_attr_t *gets_attr = myhtml_attribute_by_key(node, "key", 3);

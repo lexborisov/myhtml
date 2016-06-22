@@ -27,305 +27,253 @@ void myhtml_parser_index(mythread_id_t thread_id, mythread_queue_node_t *qnode)
 
 void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
 {
-    while(myhtml_rules_tree_dispatcher(qnode->tree, qnode->token)){}
-}
-
-myhtml_incoming_buffer_t * myhtml_parser_find_first_buf(myhtml_tree_t *tree, size_t begin)
-{
-    myhtml_incoming_buffer_t *inc_buf = tree->incoming_buf_first;
-    while (inc_buf && inc_buf->next && inc_buf->next->offset < begin) {
-        inc_buf = inc_buf->next;
-    }
-    
-    return inc_buf;
-}
-
-void myhtml_parser_drop_first_newline(myhtml_tree_t *tree, size_t *begin, size_t *length)
-{
-    if(*length == 0)
-        return;
-    
-    myhtml_incoming_buffer_t *inc_buf = myhtml_parser_find_first_buf(tree, *begin);
-    
-    size_t current_buf_offset = *begin - inc_buf->offset;
-    
-    if(inc_buf->data[current_buf_offset] == '\n') {
-        (*begin)++;
-        (*length)--;
-    }
-    else if(inc_buf->data[current_buf_offset] == '\r') {
-        current_buf_offset++;
-        (*begin)++;
-        (*length)--;
-        
-        if(*length > 1 && inc_buf->data[current_buf_offset] == '\n') {
-            (*begin)++;
-            (*length)--;
-        }
+    if((qnode->tree->parse_flags & MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE) == 0) {
+        while(myhtml_rules_tree_dispatcher(qnode->tree, qnode->token)){}
     }
 }
 
-size_t myhtml_parser_add_text(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length, myhtml_string_char_ref_chunk_t *str_chunk)
+size_t myhtml_parser_token_data_to_string_lowercase(myhtml_tree_t *tree, myhtml_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length)
 {
-    myhtml_incoming_buffer_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
+    myhtml_incoming_buffer_t *buffer = myhtml_incoming_buffer_find_by_position(tree->incoming_buf_first, begin);
+    size_t relative_begin = begin - buffer->offset;
     
-    size_t current_buf_offset = begin - inc_buf->offset;
-    size_t save_str_len = string->length;
-    
-    if((current_buf_offset + length) <= inc_buf->size)
-    {
+    // if token data length in one buffer then print them all at once
+    if((relative_begin + length) <= buffer->size) {
         if(tree->encoding == MyHTML_ENCODING_UTF_8)
-            myhtml_string_append_with_preprocessing(string, &inc_buf->data[current_buf_offset], length, str_chunk->emit_null_char);
+            myhtml_string_append_lowercase_with_preprocessing(str, &buffer->data[relative_begin], length, proc_entry->emit_null_char);
         else
-            myhtml_string_append_with_convert_encoding(string,
-                                                       &inc_buf->data[current_buf_offset],
-                                                       length, tree->encoding);
+            myhtml_string_append_lowercase_chunk_with_convert_encoding_with_preprocessing(str, &proc_entry->res,
+                                                                                          &buffer->data[relative_begin], length,
+                                                                                          proc_entry->encoding, proc_entry->emit_null_char);
         
-        return (string->length - save_str_len);
+        return str->length;
     }
     
-    size_t buf_next_offset = inc_buf->size - current_buf_offset;
-    
-    myhtml_encoding_result_t res;
-    myhtml_encoding_result_clean(&res);
-    
-    if(tree->encoding == MyHTML_ENCODING_UTF_8)
-        myhtml_string_append_with_preprocessing(string, &inc_buf->data[current_buf_offset], buf_next_offset, str_chunk->emit_null_char);
-    else
-        myhtml_string_append_chunk_with_convert_encoding(string, &res, &inc_buf->data[current_buf_offset],
-                                                         buf_next_offset, tree->encoding);
-    
-    length = length - buf_next_offset;
-    inc_buf = inc_buf->next;
-    
-    if(tree->encoding == MyHTML_ENCODING_UTF_8) {
-        while (inc_buf && length)
+    size_t save_position = 0;
+    // if the data are spread across multiple buffers that join them
+    while(buffer) {
+        if((relative_begin + length) > buffer->size)
         {
-            if(length > inc_buf->size) {
-                myhtml_string_append_with_preprocessing(string, inc_buf->data, inc_buf->size, str_chunk->emit_null_char);
-                length -= inc_buf->size;
-            }
-            else {
-                myhtml_string_append_with_preprocessing(string, inc_buf->data, length, str_chunk->emit_null_char);
-                break;
+            size_t relative_end = (buffer->size - relative_begin);
+            length -= relative_end;
+            
+            size_t tmp_offset = myhtml_string_before_append_any_preprocessing(str, &buffer->data[relative_begin], relative_end, save_position);
+            
+            if(relative_end > 0) {
+                if(tree->encoding == MyHTML_ENCODING_UTF_8)
+                    save_position = myhtml_string_append_lowercase_with_preprocessing(str, &buffer->data[(relative_begin + tmp_offset)], (relative_end - tmp_offset), proc_entry->emit_null_char);
+                else
+                    save_position = myhtml_string_append_lowercase_chunk_with_convert_encoding_with_preprocessing(str, &proc_entry->res,
+                                                                                                                  &buffer->data[(relative_begin + tmp_offset)], (relative_end - tmp_offset),
+                                                                                                                  proc_entry->encoding, proc_entry->emit_null_char);
             }
             
-            inc_buf = inc_buf->next;
-        }
-    }
-    else {
-        while (inc_buf && length)
-        {
-            if(length > inc_buf->size) {
-                myhtml_string_append_chunk_with_convert_encoding(string, &res, inc_buf->data,
-                                                                 inc_buf->size, tree->encoding);
-                length -= inc_buf->size;
-            }
-            else {
-                myhtml_string_append_chunk_with_convert_encoding(string, &res, inc_buf->data,
-                                                                 length, tree->encoding);
-                break;
-            }
-            
-            inc_buf = inc_buf->next;
-        }
-    }
-    
-    return (string->length - save_str_len);
-}
-
-size_t myhtml_parser_add_text_lowercase(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length, myhtml_string_char_ref_chunk_t *str_chunk)
-{
-    myhtml_incoming_buffer_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
-    myhtml_encoding_result_clean(&str_chunk->res);
-    
-    size_t current_buf_offset = begin - inc_buf->offset;
-    size_t save_str_len = string->length;
-    
-    if((current_buf_offset + length) <= inc_buf->size)
-    {
-        if(tree->encoding == MyHTML_ENCODING_UTF_8)
-            myhtml_string_append_lowercase_with_preprocessing(string, &inc_buf->data[current_buf_offset], length);
-        else
-            myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_chunk->res, &inc_buf->data[current_buf_offset], length, tree->encoding);
-        
-        return (string->length - save_str_len);
-    }
-    
-    size_t buf_next_offset = inc_buf->size - current_buf_offset;
-    
-    if(tree->encoding == MyHTML_ENCODING_UTF_8)
-        myhtml_string_append_lowercase_with_preprocessing(string, &inc_buf->data[current_buf_offset], buf_next_offset);
-    else
-        myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_chunk->res, &inc_buf->data[current_buf_offset], buf_next_offset, tree->encoding);
-    
-    length = length - buf_next_offset;
-    inc_buf = inc_buf->next;
-    
-    if(tree->encoding == MyHTML_ENCODING_UTF_8) {
-        while (inc_buf && length)
-        {
-            if(length > inc_buf->size) {
-                myhtml_string_append_lowercase_with_preprocessing(string, inc_buf->data, inc_buf->size);
-                length -= inc_buf->size;
-            }
-            else {
-                myhtml_string_append_lowercase_with_preprocessing(string, inc_buf->data, length);
-                break;
-            }
-            
-            inc_buf = inc_buf->next;
-        }
-    }
-    else {
-        while (inc_buf && length)
-        {
-            if(length > inc_buf->size) {
-                myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_chunk->res, inc_buf->data, inc_buf->size, tree->encoding);
-                length -= inc_buf->size;
-            }
-            else {
-                myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(string, &str_chunk->res, inc_buf->data, length, tree->encoding);
-                break;
-            }
-            
-            inc_buf = inc_buf->next;
-        }
-    }
-    
-    return (string->length - save_str_len);
-}
-
-size_t myhtml_parser_add_text_with_charef(myhtml_tree_t *tree, myhtml_string_t* string, const char *text, size_t begin, size_t length, myhtml_string_char_ref_chunk_t *str_chunk)
-{
-    myhtml_incoming_buffer_t *inc_buf = myhtml_parser_find_first_buf(tree, begin);
-    myhtml_encoding_result_clean(&str_chunk->res);
-    
-    size_t current_buf_offset = begin - inc_buf->offset;
-    size_t save_str_len = string->length;
-    
-    if((current_buf_offset + length) <= inc_buf->size)
-    {
-        myhtml_string_append_charef(str_chunk, string, &inc_buf->data[current_buf_offset], length);
-        myhtml_string_append_charef_end(str_chunk, string);
-        return (string->length - save_str_len);
-    }
-    
-    size_t buf_next_offset = inc_buf->size - current_buf_offset;
-    
-    myhtml_string_append_charef(str_chunk, string, &inc_buf->data[current_buf_offset], buf_next_offset);
-    
-    length = length - buf_next_offset;
-    inc_buf = inc_buf->next;
-    
-    while (inc_buf && length)
-    {
-        if(length > inc_buf->size) {
-            myhtml_string_append_charef(str_chunk, string, inc_buf->data, inc_buf->size);
-            length -= inc_buf->size;
+            relative_begin = 0;
+            buffer         = buffer->next;
         }
         else {
-            myhtml_string_append_charef(str_chunk, string, inc_buf->data, length);
+            size_t tmp_offset = myhtml_string_before_append_any_preprocessing(str, &buffer->data[relative_begin], length, save_position);
+            
+            if(length > 0) {
+                if(tree->encoding == MyHTML_ENCODING_UTF_8)
+                    myhtml_string_append_lowercase_with_preprocessing(str, &buffer->data[(relative_begin + tmp_offset)], (length - tmp_offset), proc_entry->emit_null_char);
+                else
+                    myhtml_string_append_lowercase_chunk_with_convert_encoding_with_preprocessing(str, &proc_entry->res,
+                                                                                                                  &buffer->data[(relative_begin + tmp_offset)], (length - tmp_offset),
+                                                                                                                  proc_entry->encoding, proc_entry->emit_null_char);
+            }
+            
             break;
         }
-        
-        inc_buf = inc_buf->next;
     }
     
-    myhtml_string_append_charef_end(str_chunk, string);
-    return (string->length - save_str_len);
+    return str->length;
+}
+
+size_t myhtml_parser_token_data_to_string(myhtml_tree_t *tree, myhtml_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length)
+{
+    myhtml_incoming_buffer_t *buffer = myhtml_incoming_buffer_find_by_position(tree->incoming_buf_first, begin);
+    size_t relative_begin = begin - buffer->offset;
+    
+    // if token data length in one buffer then print them all at once
+    if((relative_begin + length) <= buffer->size) {
+        if(tree->encoding == MyHTML_ENCODING_UTF_8)
+            myhtml_string_append_with_preprocessing(str, &buffer->data[relative_begin], length, proc_entry->emit_null_char);
+        else
+            myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &proc_entry->res,
+                                                                                &buffer->data[relative_begin], length,
+                                                                                proc_entry->encoding, proc_entry->emit_null_char);
+        
+        return str->length;
+    }
+    
+    size_t save_position = 0;
+    // if the data are spread across multiple buffers that join them
+    while(buffer) {
+        if((relative_begin + length) > buffer->size)
+        {
+            size_t relative_end = (buffer->size - relative_begin);
+            length -= relative_end;
+            
+            size_t tmp_offset = myhtml_string_before_append_any_preprocessing(str, &buffer->data[relative_begin], relative_end, save_position);
+            
+            if(relative_end > 0) {
+                if(tree->encoding == MyHTML_ENCODING_UTF_8)
+                    save_position = myhtml_string_append_with_preprocessing(str, &buffer->data[(relative_begin + tmp_offset)], (relative_end - tmp_offset), proc_entry->emit_null_char);
+                else
+                    save_position = myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &proc_entry->res,
+                                                                                                        &buffer->data[(relative_begin + tmp_offset)],
+                                                                                                        (relative_end - tmp_offset),
+                                                                                                        proc_entry->encoding, proc_entry->emit_null_char);
+            }
+            
+            relative_begin = 0;
+            buffer         = buffer->next;
+        }
+        else {
+            size_t tmp_offset = myhtml_string_before_append_any_preprocessing(str, &buffer->data[relative_begin], length, save_position);
+            
+            if(length > 0) {
+                if(tree->encoding == MyHTML_ENCODING_UTF_8)
+                    myhtml_string_append_with_preprocessing(str, &buffer->data[(relative_begin + tmp_offset)], (length - tmp_offset), proc_entry->emit_null_char);
+                else
+                    myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &proc_entry->res,
+                                                                                                        &buffer->data[(relative_begin + tmp_offset)], (length - tmp_offset),
+                                                                                                        proc_entry->encoding, proc_entry->emit_null_char);
+            }
+            
+            break;
+        }
+    }
+    
+    return str->length;
+}
+
+size_t myhtml_parser_token_data_to_string_charef(myhtml_tree_t *tree, myhtml_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length)
+{
+    myhtml_incoming_buffer_t *buffer = myhtml_incoming_buffer_find_by_position(tree->incoming_buf_first, begin);
+    size_t relative_begin = begin - buffer->offset;
+    
+    // if token data length in one buffer then print them all at once
+    if((relative_begin + length) <= buffer->size) {
+        myhtml_data_process(proc_entry, str, &buffer->data[relative_begin], length);
+        myhtml_data_process_end(proc_entry, str);
+        
+        return str->length;
+    }
+    
+    // if the data are spread across multiple buffers that join them
+    while(buffer) {
+        if((relative_begin + length) > buffer->size)
+        {
+            size_t relative_end = (buffer->size - relative_begin);
+            length -= relative_end;
+            
+            myhtml_data_process(proc_entry, str, &buffer->data[relative_begin], relative_end);
+            
+            relative_begin = 0;
+            buffer         = buffer->next;
+        }
+        else {
+            myhtml_data_process(proc_entry, str, &buffer->data[relative_begin], length);
+            break;
+        }
+    }
+    
+    myhtml_data_process_end(proc_entry, str);
+    
+    return str->length;
 }
 
 void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
 {
+    myhtml_tree_t* tree = qnode->tree;
     myhtml_token_node_t* token = qnode->token;
+    
+    if(qnode->tree->parse_flags & MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN) {
+        if(tree->callback_before_token)
+            tree->callback_before_token_ctx = tree->callback_before_token(tree, token, tree->callback_before_token_ctx);
+        
+        token->type |= MyHTML_TOKEN_TYPE_DONE;
+        
+        if(tree->callback_after_token)
+            tree->callback_after_token_ctx = tree->callback_after_token(tree, token, tree->callback_after_token_ctx);
+        
+        return;
+    }
+    
+    if(tree->callback_before_token)
+        tree->callback_before_token_ctx = tree->callback_before_token(tree, token, tree->callback_before_token_ctx);
     
     size_t mchar_node_id = qnode->tree->async_args[thread_id].mchar_node_id;
     
-    if(token->tag_ctx_idx == MyHTML_TAG__TEXT ||
-       token->tag_ctx_idx == MyHTML_TAG__COMMENT)
+    if(token->tag_id == MyHTML_TAG__TEXT ||
+       token->tag_id == MyHTML_TAG__COMMENT)
     {
-        myhtml_string_init(qnode->tree->mchar, mchar_node_id, &token->my_str_tm, (qnode->length + 4));
+        myhtml_string_init(tree->mchar, mchar_node_id, &token->str, (token->raw_length + 1));
         
-        token->begin      = token->my_str_tm.length;
-        token->length     = qnode->length;
         token->attr_first = NULL;
         token->attr_last  = NULL;
         
-        myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, {0}, false, false, qnode->tree->encoding};
+        myhtml_data_process_entry_t proc_entry;
+        myhtml_data_process_entry_clean(&proc_entry);
+        
+        proc_entry.encoding = tree->encoding;
         
         if(token->type & MyHTML_TOKEN_TYPE_DATA) {
-            str_chunk.emit_null_char = true;
+            proc_entry.emit_null_char = true;
             
-            token->length = myhtml_parser_add_text_with_charef(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length, &str_chunk);
+            myhtml_parser_token_data_to_string_charef(tree, &token->str, &proc_entry, token->raw_begin, token->raw_length);
         }
         else if(token->type & MyHTML_TOKEN_TYPE_RCDATA || token->type & MyHTML_TOKEN_TYPE_CDATA) {
-            token->length = myhtml_parser_add_text_with_charef(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length, &str_chunk);
+            myhtml_parser_token_data_to_string_charef(tree, &token->str, &proc_entry, token->raw_begin, token->raw_length);
         }
         else
-            token->length = myhtml_parser_add_text(qnode->tree, &token->my_str_tm, qnode->text, qnode->begin, qnode->length, &str_chunk);
+            myhtml_parser_token_data_to_string(tree, &token->str, &proc_entry, token->raw_begin, token->raw_length);
     }
     else if(token->attr_first)
     {
-        token->my_str_tm.data     = NULL;
-        token->my_str_tm.mchar    = NULL;
-        token->my_str_tm.node_idx = 0;
-        token->my_str_tm.length   = 0;
-        token->my_str_tm.size     = 0;
-        
-        token->begin  = 0;
-        token->length = 0;
+        myhtml_string_clean_all(&token->str);
         
         myhtml_token_attr_t* attr = token->attr_first;
-        myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, {0}, false, false, qnode->tree->encoding};
+        
+        myhtml_data_process_entry_t proc_entry;
+        myhtml_data_process_entry_clean(&proc_entry);
+        
+        proc_entry.encoding = tree->encoding;
         
         while(attr)
         {
-            myhtml_string_init(qnode->tree->mchar, mchar_node_id, &attr->entry, (attr->name_length + attr->value_length + 8));
+            if(attr->raw_key_length) {
+                myhtml_string_init(tree->mchar, mchar_node_id, &attr->key, (attr->raw_key_length + 1));
+                myhtml_parser_token_data_to_string_lowercase(tree, &attr->key, &proc_entry, attr->raw_key_begin, attr->raw_key_length);
+            }
+            else
+                myhtml_string_clean_all(&attr->key);
             
-            if(attr->name_length)
-            {
-                size_t begin = attr->name_begin;
-                attr->name_begin = attr->entry.length;
+            if(attr->raw_value_length) {
+                myhtml_string_init(tree->mchar, mchar_node_id, &attr->value, (attr->raw_value_length + 1));
+                proc_entry.is_attributes = true;
                 
-                attr->name_length = myhtml_parser_add_text_lowercase(qnode->tree, &attr->entry, qnode->text, begin, attr->name_length, &str_chunk);
+                myhtml_parser_token_data_to_string_charef(tree, &attr->value, &proc_entry, attr->raw_value_begin, attr->raw_value_length);
             }
-            else {
-                attr->name_begin = 0;
-            }
-            
-            if(attr->value_length)
-            {
-                size_t begin = attr->value_begin;
-                attr->value_begin = attr->entry.length;
-                
-                str_chunk.is_attributes = true;
-                
-                attr->value_length = myhtml_parser_add_text_with_charef(qnode->tree, &attr->entry, qnode->text, begin, attr->value_length, &str_chunk);
-            }
-            else {
-                attr->value_begin = 0;
-            }
-            
-            attr->my_namespace = MyHTML_NAMESPACE_HTML;
+            else
+                myhtml_string_clean_all(&attr->value);
             
             attr = attr->next;
         }
     }
     else {
-        token->begin      = 0;
-        token->length     = 0;
         token->attr_first = NULL;
         token->attr_last  = NULL;
         
-        token->my_str_tm.data     = NULL;
-        token->my_str_tm.mchar    = NULL;
-        token->my_str_tm.node_idx = 0;
-        token->my_str_tm.length   = 0;
-        token->my_str_tm.size     = 0;
+        myhtml_string_clean_all(&token->str);
     }
     
     token->type |= MyHTML_TOKEN_TYPE_DONE;
+    
+    if(tree->callback_after_token)
+        tree->callback_after_token_ctx = tree->callback_after_token(tree, token, tree->callback_after_token_ctx);
 }
 
 void myhtml_parser_worker_index_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)

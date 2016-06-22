@@ -47,7 +47,7 @@ extern "C" {
     mctree->nodes_length++;                                         \
     if(mctree->nodes_length == mctree->nodes_size) {                \
         mctree->nodes_size += 4096;                                 \
-        mctree->nodes = (mctree_node_t*)myrealloc(mctree->nodes,    \
+        mctree->nodes = (mctree_node_t*)myhtml_realloc(mctree->nodes,    \
             sizeof(mctree_node_t) * mctree->nodes_size);            \
     }                                                               \
     mctree_node_clean(mctree, mctree->nodes_length)

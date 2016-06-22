@@ -9,8 +9,8 @@ set(MyHTML_PROJECT_DIR_LIB "${MyHTML_PROJECT_DIR_ROOT}/lib")
 set(MyHTML_PROJECT_API_HEADER "${MyHTML_PROJECT_DIR_ROOT}/include/myhtml")
 set(MyHTML_PROJECT_SOURCE "${MyHTML_PROJECT_DIR_ROOT}/source")
 
-set(MyHTML_VERSION_MAJOR 0)
-set(MyHTML_VERSION_MINOR 7)
+set(MyHTML_VERSION_MAJOR 1)
+set(MyHTML_VERSION_MINOR 0)
 set(MyHTML_VERSION_PATCH 0)
 set(MyHTML_VERSION_STRING "${MyHTML_VERSION_MAJOR}.${MyHTML_VERSION_MINOR}.${MyHTML_VERSION_PATCH}")
 
@@ -38,6 +38,28 @@ if(NOT DEFINED MyHTML_BUILD_WITHOUT_THREADS)
     set(MyHTML_BUILD_WITHOUT_THREADS "NO")
 endif()
 
+################
+## extern mem functions
+#########################
+if(DEFINED MyHTML_EXTERN_MALLOC)
+    add_definitions(-DMyHTML_EXTERN_MALLOC=${MyHTML_EXTERN_MALLOC})
+endif()
+
+if(DEFINED MyHTML_EXTERN_REALLOC)
+    add_definitions(-DMyHTML_EXTERN_REALLOC=${MyHTML_EXTERN_REALLOC})
+endif()
+
+if(DEFINED MyHTML_EXTERN_CALLOC)
+    add_definitions(-DMyHTML_EXTERN_CALLOC=${MyHTML_EXTERN_CALLOC})
+endif()
+
+if(DEFINED MyHTML_EXTERN_FREE)
+    add_definitions(-DMyHTML_EXTERN_FREE=${MyHTML_EXTERN_FREE})
+endif()
+
+################
+## ARGS
+#########################
 set(INSTALL_DLL_EXE_DIR "bin")
 
 option(MyHTML_BUILD_SHARED "Build shared library" ON)

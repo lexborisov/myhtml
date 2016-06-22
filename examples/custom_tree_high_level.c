@@ -50,10 +50,10 @@ int main(int argc, const char * argv[])
     
     for (size_t i = 1; i < 100001; i++) {
         myhtml_tree_node_t* new_p_node = myhtml_node_create(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML);
-        myhtml_node_insert_append_child(tree, base_node, new_p_node);
+        myhtml_node_append_child(tree, base_node, new_p_node);
         
         myhtml_tree_node_t* new_text_node = myhtml_node_create(tree, MyHTML_TAG__TEXT, MyHTML_NAMESPACE_HTML);
-        myhtml_node_insert_append_child(tree, new_p_node, new_text_node);
+        myhtml_node_append_child(tree, new_p_node, new_text_node);
         
         sprintf(tmp_buf_key, "best_key_for_%zu", i);
         sprintf(tmp_buf_value, "for best value %zu", i);
@@ -69,7 +69,7 @@ int main(int argc, const char * argv[])
     
     // print
     printf("Print result:\n");
-    myhtml_tree_print_node_childs(tree, myhtml_tree_get_document(tree), stdout, 0);
+    myhtml_tree_print_node_children(tree, myhtml_tree_get_document(tree), stdout, 0);
     
     // release resources
     myhtml_tree_destroy(tree);

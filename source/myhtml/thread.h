@@ -147,11 +147,6 @@ struct mythread_queue_node {
     mythread_queue_node_t *prev;
     myhtml_token_node_t *token;
     myhtml_tree_t *tree;
-    
-    size_t begin;
-    size_t length;
-    
-    const char* text;
 };
 
 struct mythread_queue_thread_param {
@@ -194,18 +189,18 @@ size_t mythread_queue_count_used_node(mythread_queue_t* queue);
 mythread_queue_node_t * mythread_queue_get_first_node(mythread_queue_t* queue);
 mythread_queue_node_t * mythread_queue_get_prev_node(mythread_queue_node_t* qnode);
 mythread_queue_node_t * mythread_queue_get_current_node(mythread_queue_t* queue);
-mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythread_queue_t* queue, const char* text, size_t begin, myhtml_status_t *status);
-mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, mythread_queue_t* queue, const char* text, size_t begin, size_t limit, myhtml_status_t *status);
+mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythread_queue_t* queue, myhtml_status_t *status);
+mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, mythread_queue_t* queue, size_t limit, myhtml_status_t *status);
 
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
 
-mythread_queue_list_t * mythread_queue_list_create(mythread_t *mythread, size_t size, myhtml_status_t *status);
+mythread_queue_list_t * mythread_queue_list_create(mythread_t *mythread, myhtml_status_t *status);
 mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t *mythread, mythread_queue_t *queue, myhtml_status_t *status);
 mythread_queue_list_entry_t * mythread_queue_list_entry_delete(mythread_t *mythread, mythread_queue_list_entry_t *entry, bool destroy_queue);
 void mythread_queue_list_entry_clean(mythread_t *mythread, mythread_queue_list_entry_t *entry);
 void mythread_queue_list_entry_wait_for_done(mythread_t *mythread, mythread_queue_list_entry_t *entry);
     
-mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, mythread_queue_list_entry_t *entry, const char* text, size_t begin, myhtml_status_t *status);
+mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, mythread_queue_list_entry_t *entry, myhtml_status_t *status);
 
 #endif /* MyHTML_BUILD_WITHOUT_THREADS */
 

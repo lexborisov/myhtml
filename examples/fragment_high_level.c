@@ -40,7 +40,7 @@ int main(int argc, const char * argv[])
     myhtml_parse_fragment(tree, MyHTML_ENCODING_UTF_8, html, strlen(html), MyHTML_TAG_DIV, MyHTML_NAMESPACE_HTML);
     
     // print fragment
-    myhtml_tree_print_node_childs(tree, myhtml_tree_get_document(tree), stdout, 0);
+    myhtml_tree_print_node_children(tree, myhtml_tree_get_document(tree), stdout, 0);
     
     // release resources
     myhtml_tree_destroy(tree);

@@ -51,7 +51,7 @@ int main(int argc, const char * argv[])
     }
     
     // print fragment
-    myhtml_tree_print_node_childs(tree, myhtml_tree_get_document(tree), stdout, 0);
+    myhtml_tree_print_node_children(tree, myhtml_tree_get_document(tree), stdout, 0);
     
     // release resources
     myhtml_collection_destroy(collection);

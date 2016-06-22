@@ -54,6 +54,19 @@ static const unsigned char myhtml_utils_chars_map[] = {
 
 size_t myhtml_strncasecmp(const char* str1, const char* str2, size_t size)
 {
+    if(str1 == NULL) {
+        if(str2 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    else if(str2 == NULL) {
+        if(str1 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    
     unsigned char *ustr1 = (unsigned char *)str1;
     unsigned char *ustr2 = (unsigned char *)str2;
     
@@ -73,13 +86,26 @@ size_t myhtml_strncasecmp(const char* str1, const char* str2, size_t size)
 
 size_t myhtml_strcasecmp(const char* str1, const char* str2)
 {
+    if(str1 == NULL) {
+        if(str2 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    else if(str2 == NULL) {
+        if(str1 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    
     unsigned char *ustr1 = (unsigned char *)str1;
     unsigned char *ustr2 = (unsigned char *)str2;
     
     for (size_t i = 0;;)
     {
         if(myhtml_utils_chars_map[*ustr1] != myhtml_utils_chars_map[*ustr2])
-            return i;
+            return (i + 1);
         
         if(*ustr1 == '\0')
             return 0;
@@ -90,4 +116,103 @@ size_t myhtml_strcasecmp(const char* str1, const char* str2)
         i++;
     }
 }
+
+size_t myhtml_strncmp(const char* str1, const char* str2, size_t size)
+{
+    if(str1 == NULL) {
+        if(str2 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    else if(str2 == NULL) {
+        if(str1 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    
+    unsigned char *ustr1 = (unsigned char *)str1;
+    unsigned char *ustr2 = (unsigned char *)str2;
+    
+    size_t i = 0;
+    while (i < size) {
+        if(*ustr1 != *ustr2)
+            return (size - i);
+        
+        ustr1++;
+        ustr2++;
+        
+        i++;
+    }
+    
+    return 0;
+}
+
+size_t myhtml_strcmp(const char* str1, const char* str2)
+{
+    if(str1 == NULL) {
+        if(str2 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    else if(str2 == NULL) {
+        if(str1 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    
+    unsigned char *ustr1 = (unsigned char *)str1;
+    unsigned char *ustr2 = (unsigned char *)str2;
+    
+    for (size_t i = 0;;)
+    {
+        if(*ustr1 != *ustr2)
+            return (i + 1);
+        
+        if(*ustr1 == '\0')
+            return 0;
+        
+        ustr1++;
+        ustr2++;
+        
+        i++;
+    }
+}
+
+size_t myhtml_strcmp_ws(const char* str1, const char* str2)
+{
+    if(str1 == NULL) {
+        if(str2 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    else if(str2 == NULL) {
+        if(str1 == NULL)
+            return 0;
+        
+        return 1;
+    }
+    
+    unsigned char *ustr1 = (unsigned char *)str1;
+    unsigned char *ustr2 = (unsigned char *)str2;
+    
+    for (size_t i = 0;;)
+    {
+        if(*ustr1 != *ustr2)
+            return (i + 1);
+        
+        if(myhtml_utils_whithspace(*ustr1, ==, ||) || *ustr1 == '\0')
+            return 0;
+        
+        ustr1++;
+        ustr2++;
+        
+        i++;
+    }
+}
+
 

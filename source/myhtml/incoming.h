@@ -28,7 +28,7 @@ extern "C" {
 
 #include "myhtml/myosi.h"
 #include "myhtml/tree.h"
-#include "myhtml/utils/mcobject_async.h"
+#include "myhtml/utils/mcobject.h"
 
 struct myhtml_incoming_buffer {
     const char* data;
@@ -42,7 +42,7 @@ struct myhtml_incoming_buffer {
 
 
 // incoming buffer
-myhtml_incoming_buffer_t * myhtml_incomming_buffer_add(myhtml_incoming_buffer_t *current, mcobject_async_t *mcobject, size_t mcnode_id, const char *html, size_t html_size);
+myhtml_incoming_buffer_t * myhtml_incomming_buffer_add(myhtml_incoming_buffer_t *current, mcobject_t *mcobject, const char *html, size_t html_size);
 void myhtml_incomming_buffer_clean(myhtml_incoming_buffer_t *current);
 
 myhtml_incoming_buffer_t * myhtml_incoming_buffer_find_by_position(myhtml_incoming_buffer_t *inc_buf, size_t begin);
@@ -51,6 +51,8 @@ const char * myhtml_incoming_buffer_data(myhtml_incoming_buffer_t *inc_buf);
 size_t myhtml_incoming_buffer_length(myhtml_incoming_buffer_t *inc_buf);
 size_t myhtml_incoming_buffer_size(myhtml_incoming_buffer_t *inc_buf);
 size_t myhtml_incoming_buffer_offset(myhtml_incoming_buffer_t *inc_buf);
+size_t myhtml_incoming_buffer_relative_begin(myhtml_incoming_buffer_t *inc_buf, size_t begin);
+size_t myhtml_incoming_buffer_available_length(myhtml_incoming_buffer_t *inc_buf, size_t relative_begin, size_t length);
 
 myhtml_incoming_buffer_t * myhtml_incoming_buffer_next(myhtml_incoming_buffer_t *inc_buf);
 myhtml_incoming_buffer_t * myhtml_incoming_buffer_prev(myhtml_incoming_buffer_t *inc_buf);

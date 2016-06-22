@@ -34,8 +34,8 @@
  *
  */
 
-#define MyHTML_VERSION_MAJOR 0
-#define MyHTML_VERSION_MINOR 7
+#define MyHTML_VERSION_MAJOR 1
+#define MyHTML_VERSION_MINOR 0
 #define MyHTML_VERSION_PATCH 0
 
 #include <stdbool.h>
@@ -406,6 +406,7 @@ enum myhtml_status {
     MyHTML_STATUS_PERF_ERROR_COMPILED_WITHOUT_PERF     = 0x00c8,
     MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK            = 0x00c9,
     MyHTML_STATUS_TOKENIZER_ERROR_MEMORY_ALLOCATION    = 0x012c,
+    MyHTML_STATUS_TOKENIZER_ERROR_FRAGMENT_INIT        = 0x012d,
     MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION         = 0x0190,
     MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE           = 0x0191,
     MyHTML_STATUS_TAGS_ERROR_MCOBJECT_MALLOC           = 0x0192,
@@ -416,8 +417,18 @@ enum myhtml_status {
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE           = 0x01f5,
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT             = 0x01f6,
     MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE      = 0x01f7,
+    MyHTML_STATUS_TREE_ERROR_INCOMING_BUFFER_CREATE    = 0x01f8,
     MyHTML_STATUS_ATTR_ERROR_ALLOCATION                = 0x0258,
-    MyHTML_STATUS_ATTR_ERROR_CREATE                    = 0x0259
+    MyHTML_STATUS_ATTR_ERROR_CREATE                    = 0x0259,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_CREATE           = 0x0300,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_INIT             = 0x0301,
+    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_CREATE     = 0x0302,
+    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_INIT       = 0x0303,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_ADD_ENTRY        = 0x0304,
+    MyHTML_STATUS_MCOBJECT_ERROR_CACHE_CREATE          = 0x0340,
+    MyHTML_STATUS_MCOBJECT_ERROR_CHUNK_CREATE          = 0x0341,
+    MyHTML_STATUS_MCOBJECT_ERROR_CHUNK_INIT            = 0x0342,
+    MyHTML_STATUS_MCOBJECT_ERROR_CACHE_REALLOC         = 0x0343
 }
 typedef myhtml_status_t;
 
@@ -450,6 +461,18 @@ enum myhtml_options {
     MyHTML_OPTIONS_PARSE_MODE_WORKER_INDEX = 0x10,
     MyHTML_OPTIONS_PARSE_MODE_TREE_INDEX   = 0x20
 };
+
+/**
+ * @struct myhtml_tree parse flags
+ */
+enum myhtml_tree_parse_flags {
+    MyHTML_TREE_PARSE_FLAGS_CLEAN                   = 0x000,
+    MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE      = 0x001,
+    MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN   = 0x003,
+    MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004,
+    MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE = 0x008,
+}
+typedef myhtml_tree_parse_flags_t;
 
 /**
  * @struct myhtml_t MyHTML
@@ -515,6 +538,23 @@ struct myhtml_collection {
     size_t length;
 }
 typedef myhtml_collection_t;
+
+/**
+ * @struct myhtml_position_t
+ */
+struct myhtml_position {
+    size_t begin;
+    size_t length;
+}
+typedef myhtml_position_t;
+
+/**
+ * @struct myhtml_token_node_t
+ */
+typedef struct myhtml_token_node myhtml_token_node_t;
+
+// callback functions
+typedef void* (*myhtml_callback_token_f)(myhtml_tree_t* tree, myhtml_token_node_t* token, void* ctx);
 
 /***********************************************************************************
  *
@@ -598,7 +638,7 @@ myhtml_parse(myhtml_tree_t* tree, myhtml_encoding_t encoding,
 myhtml_status_t
 myhtml_parse_fragment(myhtml_tree_t* tree, myhtml_encoding_t encoding,
                       const char* html, size_t html_size,
-                      myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+                      myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
 /**
  * Parsing HTML in Single Mode. 
@@ -635,7 +675,7 @@ myhtml_parse_single(myhtml_tree_t* tree, myhtml_encoding_t encoding,
 myhtml_status_t
 myhtml_parse_fragment_single(myhtml_tree_t* tree, myhtml_encoding_t encoding,
                              const char* html, size_t html_size,
-                             myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+                             myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
 /**
  * Parsing HTML chunk. For end parsing call myhtml_parse_chunk_end function
@@ -662,7 +702,7 @@ myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t html_size);
  */
 myhtml_status_t
 myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html,size_t html_size,
-                            myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+                            myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
 /**
  * Parsing HTML chunk in Single Mode.
@@ -691,7 +731,7 @@ myhtml_parse_chunk_single(myhtml_tree_t* tree, const char* html, size_t html_siz
  */
 myhtml_status_t
 myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size,
-                                   myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace);
+                                   myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
 /**
  * End of parsing HTML chunks
@@ -727,6 +767,30 @@ myhtml_tree_create(void);
  */
 myhtml_status_t
 myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml);
+
+/**
+ * Get Parse Flags of Tree
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_tree_parse_flags_t
+ */
+myhtml_tree_parse_flags_t
+myhtml_tree_parse_flags(myhtml_tree_t* tree);
+
+/**
+ * Set Parse Flags for Tree
+ * See enum myhtml_tree_parse_flags in this file
+ *
+ * @example myhtml_tree_parse_flags_set(tree, MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE|
+ *                                            MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE|
+ *                                            MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN);
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] parse flags. You can combine their
+ */
+void
+myhtml_tree_parse_flags_set(myhtml_tree_t* tree, myhtml_tree_parse_flags_t parse_flags);
 
 /**
  * Clears resources before new parsing
@@ -887,8 +951,8 @@ myhtml_tree_print_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node,
  * @param[in] tab (\t) increment for pretty print, set 0
  */
 void
-myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node,
-                              FILE* out, size_t inc);
+myhtml_tree_print_node_children(myhtml_tree_t* tree, myhtml_tree_node_t* node,
+                                FILE* out, size_t inc);
 
 /**
  * Print a node
@@ -899,6 +963,16 @@ myhtml_tree_print_node_childs(myhtml_tree_t* tree, myhtml_tree_node_t* node,
  */
 void
 myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out);
+
+/**
+ * Get first Incoming Buffer
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_incoming_buffer_t* if successful, otherwise a NULL value
+ */
+myhtml_incoming_buffer_t*
+myhtml_tree_incoming_buffer_first(myhtml_tree_t *tree);
 
 /***********************************************************************************
  *
@@ -937,13 +1011,184 @@ myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection,
  * @param[in] myhtml_collection_t*, creates new collection if NULL
  * @param[in] tag name
  * @param[in] tag name length
- * @param[out] status of this operation
+ * @param[out] status of this operation, optional
  *
  * @return myhtml_collection_t* if successful, otherwise an NULL value
  */
 myhtml_collection_t*
 myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection,
                          const char* name, size_t length, myhtml_status_t *status);
+
+/**
+ * Get nodes by attribute key
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_collection_t*, optional; creates new collection if NULL
+ * @param[in] myhtml_tree_node_t*, optional; scope node; html if NULL
+ * @param[in] find key
+ * @param[in] find key length
+ * @param[out] status of this operation, optional
+ *
+ * @return myhtml_collection_t* if successful, otherwise an NULL value
+ */
+myhtml_collection_t*
+myhtml_get_nodes_by_attribute_key(myhtml_tree_t *tree, myhtml_collection_t* collection,
+                                  myhtml_tree_node_t* scope_node,
+                                  const char* key, size_t key_len, myhtml_status_t* status);
+
+/**
+ * Get nodes by attribute value; exactly equal; like a [foo="bar"]
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_collection_t*, optional; creates new collection if NULL
+ * @param[in] myhtml_tree_node_t*, optional; scope node; html if NULL
+ * @param[in] case-insensitive if true
+ * @param[in] find in key; if NULL find in all attributes
+ * @param[in] find in key length; if 0 find in all attributes
+ * @param[in] find value
+ * @param[in] find value length
+ * @param[out] status of this operation, optional
+ *
+ * @return myhtml_collection_t* if successful, otherwise an NULL value
+ */
+myhtml_collection_t*
+myhtml_get_nodes_by_attribute_value(myhtml_tree_t *tree,
+                                    myhtml_collection_t* collection,
+                                    myhtml_tree_node_t* node,
+                                    bool case_insensitive,
+                                    const char* key, size_t key_len,
+                                    const char* value, size_t value_len,
+                                    myhtml_status_t* status);
+
+/**
+ * Get nodes by attribute value; whitespace separated; like a [foo~="bar"]
+ *
+ * @example if value="bar" and node attr value="lalala bar bebebe", then this node is found
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_collection_t*, optional; creates new collection if NULL
+ * @param[in] myhtml_tree_node_t*, optional; scope node; html if NULL
+ * @param[in] case-insensitive if true
+ * @param[in] find in key; if NULL find in all attributes
+ * @param[in] find in key length; if 0 find in all attributes
+ * @param[in] find value
+ * @param[in] find value length
+ * @param[out] status of this operation, optional
+ *
+ * @return myhtml_collection_t* if successful, otherwise an NULL value
+ */
+myhtml_collection_t*
+myhtml_get_nodes_by_attribute_value_whitespace_separated(myhtml_tree_t *tree,
+                                                         myhtml_collection_t* collection,
+                                                         myhtml_tree_node_t* node,
+                                                         bool case_insensitive,
+                                                         const char* key, size_t key_len,
+                                                         const char* value, size_t value_len,
+                                                         myhtml_status_t* status);
+
+/**
+ * Get nodes by attribute value; value begins exactly with the string; like a [foo^="bar"]
+ *
+ * @example if value="bar" and node attr value="barmumumu", then this node is found
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_collection_t*, optional; creates new collection if NULL
+ * @param[in] myhtml_tree_node_t*, optional; scope node; html if NULL
+ * @param[in] case-insensitive if true
+ * @param[in] find in key; if NULL find in all attributes
+ * @param[in] find in key length; if 0 find in all attributes
+ * @param[in] find value
+ * @param[in] find value length
+ * @param[out] status of this operation, optional
+ *
+ * @return myhtml_collection_t* if successful, otherwise an NULL value
+ */
+myhtml_collection_t*
+myhtml_get_nodes_by_attribute_value_begin(myhtml_tree_t *tree,
+                                          myhtml_collection_t* collection,
+                                          myhtml_tree_node_t* node,
+                                          bool case_insensitive,
+                                          const char* key, size_t key_len,
+                                          const char* value, size_t value_len,
+                                          myhtml_status_t* status);
+
+
+/**
+ * Get nodes by attribute value; value ends exactly with the string; like a [foo$="bar"]
+ *
+ * @example if value="bar" and node attr value="mumumubar", then this node is found
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_collection_t*, optional; creates new collection if NULL
+ * @param[in] myhtml_tree_node_t*, optional; scope node; html if NULL
+ * @param[in] case-insensitive if true
+ * @param[in] find in key; if NULL find in all attributes
+ * @param[in] find in key length; if 0 find in all attributes
+ * @param[in] find value
+ * @param[in] find value length
+ * @param[out] status of this operation, optional
+ *
+ * @return myhtml_collection_t* if successful, otherwise an NULL value
+ */
+myhtml_collection_t*
+myhtml_get_nodes_by_attribute_value_end(myhtml_tree_t *tree,
+                                        myhtml_collection_t* collection,
+                                        myhtml_tree_node_t* node,
+                                        bool case_insensitive,
+                                        const char* key, size_t key_len,
+                                        const char* value, size_t value_len,
+                                        myhtml_status_t* status);
+
+/**
+ * Get nodes by attribute value; value contains the substring; like a [foo*="bar"]
+ *
+ * @example if value="bar" and node attr value="bububarmumu", then this node is found
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_collection_t*, optional; creates new collection if NULL
+ * @param[in] myhtml_tree_node_t*, optional; scope node; html if NULL
+ * @param[in] case-insensitive if true
+ * @param[in] find in key; if NULL find in all attributes
+ * @param[in] find in key length; if 0 find in all attributes
+ * @param[in] find value
+ * @param[in] find value length
+ * @param[out] status of this operation, optional
+ *
+ * @return myhtml_collection_t* if successful, otherwise an NULL value
+ */
+myhtml_collection_t*
+myhtml_get_nodes_by_attribute_value_contain(myhtml_tree_t *tree,
+                                            myhtml_collection_t* collection,
+                                            myhtml_tree_node_t* node,
+                                            bool case_insensitive,
+                                            const char* key, size_t key_len,
+                                            const char* value, size_t value_len,
+                                            myhtml_status_t* status);
+
+/**
+ * Get nodes by attribute value; attribute value is a hyphen-separated list of values beginning; 
+ * like a [foo|="bar"]
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_collection_t*, optional; creates new collection if NULL
+ * @param[in] myhtml_tree_node_t*, optional; scope node; html if NULL
+ * @param[in] case-insensitive if true
+ * @param[in] find in key; if NULL find in all attributes
+ * @param[in] find in key length; if 0 find in all attributes
+ * @param[in] find value
+ * @param[in] find value length
+ * @param[out] optional; status of this operation
+ *
+ * @return myhtml_collection_t* if successful, otherwise an NULL value
+ */
+myhtml_collection_t*
+myhtml_get_nodes_by_attribute_value_hyphen_separated(myhtml_tree_t *tree,
+                                                     myhtml_collection_t* collection,
+                                                     myhtml_tree_node_t* node,
+                                                     bool case_insensitive,
+                                                     const char* key, size_t key_len,
+                                                     const char* value, size_t value_len,
+                                                     myhtml_status_t* status);
 
 /**
  * Get nodes by tag id in node scope
@@ -1039,7 +1284,7 @@ myhtml_node_last_child(myhtml_tree_node_t *node);
  */
 myhtml_tree_node_t*
 myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id,
-                   enum myhtml_namespace my_namespace);
+                   enum myhtml_namespace ns);
 
 /**
  * Release allocated resources
@@ -1103,8 +1348,8 @@ myhtml_node_insert_to_appropriate_place(myhtml_tree_t* tree, myhtml_tree_node_t 
  * @return insertion node if successful, otherwise a NULL value
  */
 myhtml_tree_node_t*
-myhtml_node_insert_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target,
-                                myhtml_tree_node_t *node);
+myhtml_node_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target,
+                         myhtml_tree_node_t *node);
 
 /**
  * Append sibling node after target node. Insertion without validation.
@@ -1183,32 +1428,6 @@ myhtml_tag_id_t
 myhtml_node_tag_id(myhtml_tree_node_t *node);
 
 /**
- * Get tag name by tag id
- *
- * @param[in] myhtml_tree_t*
- * @param[in] tag id
- * @param[out] optional, name length
- *
- * @return const char* if exists, otherwise a NULL value
- */
-const char*
-myhtml_tag_name_by_id(myhtml_tree_t* tree,
-                      myhtml_tag_id_t tag_id, size_t *length);
-
-/**
- * Get tag id by name
- *
- * @param[in] myhtml_tree_t*
- * @param[in] tag name
- * @param[in] tag name length
- *
- * @return tag id
- */
-myhtml_tag_id_t
-myhtml_tag_id_by_name(myhtml_tree_t* tree,
-                      const char *tag_name, size_t length);
-
-/**
  * Node has self-closing flag?
  *
  * @param[in] myhtml_tree_node_t*
@@ -1259,6 +1478,30 @@ myhtml_node_text(myhtml_tree_node_t *node, size_t *length);
 myhtml_string_t*
 myhtml_node_string(myhtml_tree_node_t *node);
 
+/**
+ * Get raw position for Tree Node in Incoming Buffer
+ *
+ * @example <[BEGIN]div[LENGTH] attr=lalala>
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return myhtml_tree_node_t
+ */
+myhtml_position_t
+myhtml_node_raw_pasition(myhtml_tree_node_t *node);
+
+/**
+ * Get element position for Tree Node in Incoming Buffer
+ *
+ * @example [BEGIN]<div attr=lalala>[LENGTH]
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return myhtml_tree_node_t
+ */
+myhtml_position_t
+myhtml_node_element_pasition(myhtml_tree_node_t *node);
+
 /***********************************************************************************
  *
  * MyHTML_ATTRIBUTE
@@ -1292,8 +1535,17 @@ myhtml_attribute_prev(myhtml_tree_attr_t *attr);
  *
  * @return enum myhtml_namespace
  */
-enum myhtml_namespace
+myhtml_namespace_t
 myhtml_attribute_namespace(myhtml_tree_attr_t *attr);
+
+/**
+ * Set attribute namespace
+ *
+ * @param[in] myhtml_tree_attr_t*
+ * @param[in] myhtml_namespace_t
+ */
+void
+myhtml_attribute_namespace_set(myhtml_tree_attr_t *attr, myhtml_namespace_t ns);
 
 /**
  * Get attribute name (key)
@@ -1303,8 +1555,19 @@ myhtml_attribute_namespace(myhtml_tree_attr_t *attr);
  *
  * @return const char* if exists, otherwise an NULL value
  */
+MyHTML_DEPRECATED(const char*
+myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length), "use myhtml_attribute_key");
+
+/**
+ * Get attribute key
+ *
+ * @param[in] myhtml_tree_attr_t*
+ * @param[out] optional, name length
+ *
+ * @return const char* if exists, otherwise an NULL value
+ */
 const char*
-myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length);
+myhtml_attribute_key(myhtml_tree_attr_t *attr, size_t *length);
 
 /**
  * Get attribute value
@@ -1316,6 +1579,26 @@ myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length);
  */
 const char*
 myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length);
+
+/**
+ * Get attribute key string
+ *
+ * @param[in] myhtml_tree_attr_t*
+ *
+ * @return myhtml_string_t* if exists, otherwise an NULL value
+ */
+myhtml_string_t*
+myhtml_attribute_key_string(myhtml_tree_attr_t* attr);
+
+/**
+ * Get attribute value string
+ *
+ * @param[in] myhtml_tree_attr_t*
+ *
+ * @return myhtml_string_t* if exists, otherwise an NULL value
+ */
+myhtml_string_t*
+myhtml_attribute_value_string(myhtml_tree_attr_t* attr);
 
 /**
  * Get attribute by key
@@ -1350,7 +1633,7 @@ myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node,
                      myhtml_encoding_t encoding);
 
 /**
- * Remove attribute reference. Do not release the resources
+ * Remove attribute reference. Not release the resources
  *
  * @param[in] myhtml_tree_node_t*
  * @param[in] myhtml_tree_attr_t*
@@ -1361,7 +1644,7 @@ myhtml_tree_attr_t*
 myhtml_attribute_remove(myhtml_tree_node_t *node, myhtml_tree_attr_t *attr);
 
 /**
- * Remove attribute by key reference. Do not release the resources
+ * Remove attribute by key reference. Not release the resources
  *
  * @param[in] myhtml_tree_node_t*
  * @param[in] attr key name
@@ -1394,6 +1677,157 @@ myhtml_attribute_delete(myhtml_tree_t *tree, myhtml_tree_node_t *node,
  */
 void
 myhtml_attribute_free(myhtml_tree_t *tree, myhtml_tree_attr_t *attr);
+
+/**
+ * Get raw position for Attribute Key in Incoming Buffer
+ *
+ * @param[in] myhtml_tree_attr_t*
+ *
+ * @return myhtml_position_t
+ */
+myhtml_position_t
+myhtml_attribute_key_raw_position(myhtml_tree_attr_t *attr);
+
+/**
+ * Get raw position for Attribute Value in Incoming Buffer
+ *
+ * @param[in] myhtml_tree_attr_t*
+ *
+ * @return myhtml_position_t
+ */
+myhtml_position_t
+myhtml_attribute_value_raw_position(myhtml_tree_attr_t *attr);
+
+/***********************************************************************************
+ *
+ * MyHTML_TOKEN_NODE
+ *
+ ***********************************************************************************/
+
+/**
+ * Get token node tag id
+ *
+ * @param[in] myhtml_token_node_t*
+ *
+ * @return myhtml_tag_id_t
+ */
+myhtml_tag_id_t
+myhtml_token_node_tag_id(myhtml_token_node_t *token_node);
+
+/**
+ * Get raw position for Token Node in Incoming Buffer
+ *
+ * @example <[BEGIN]div[LENGTH] attr=lalala>
+ *
+ * @param[in] myhtml_token_node_t*
+ *
+ * @return myhtml_position_t
+ */
+myhtml_position_t
+myhtml_token_node_raw_pasition(myhtml_token_node_t *token_node);
+
+/**
+ * Get element position for Token Node in Incoming Buffer
+ *
+ * @example [BEGIN]<div attr=lalala>[LENGTH]
+ *
+ * @param[in] myhtml_token_node_t*
+ *
+ * @return myhtml_position_t
+ */
+myhtml_position_t
+myhtml_token_node_element_pasition(myhtml_token_node_t *token_node);
+
+/**
+ * Get first attribute of a token node
+ *
+ * @param[in] myhtml_token_node_t*
+ *
+ * @return myhtml_tree_attr_t* if exists, otherwise an NULL value
+ */
+myhtml_tree_attr_t*
+myhtml_token_node_attribute_first(myhtml_token_node_t *token_node);
+
+/**
+ * Get last attribute of a token node
+ *
+ * @param[in] myhtml_token_node_t*
+ *
+ * @return myhtml_tree_attr_t* if exists, otherwise an NULL value
+ */
+myhtml_tree_attr_t*
+myhtml_token_node_attribute_last(myhtml_token_node_t *token_node);
+
+/**
+ * Get text of a token node. Only for a MyHTML_TAG__TEXT or MyHTML_TAG__COMMENT tags
+ *
+ * @param[in] myhtml_token_node_t*
+ * @param[out] optional, text length
+ *
+ * @return const char* if exists, otherwise an NULL value
+ */
+const char*
+myhtml_token_node_text(myhtml_token_node_t *token_node, size_t *length);
+
+/**
+ * Get myhtml_string_t object by token node
+ *
+ * @param[in] myhtml_token_node_t*
+ *
+ * @return myhtml_string_t* if exists, otherwise an NULL value
+ */
+myhtml_string_t*
+myhtml_token_node_string(myhtml_token_node_t *token_node);
+
+/**
+ * Token node has self-closing flag?
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return true or false (1 or 0)
+ */
+bool
+myhtml_token_node_is_close_self(myhtml_token_node_t *token_node);
+
+/**
+ * Wait for process token all parsing stage. Need if you use thread mode
+ *
+ * @param[in] myhtml_token_node_t*
+ */
+void
+myhtml_token_node_wait_for_done(myhtml_token_node_t* node);
+
+/***********************************************************************************
+ *
+ * MyHTML_TAG
+ *
+ ***********************************************************************************/
+
+/**
+ * Get tag name by tag id
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] tag id
+ * @param[out] optional, name length
+ *
+ * @return const char* if exists, otherwise a NULL value
+ */
+const char*
+myhtml_tag_name_by_id(myhtml_tree_t* tree,
+                      myhtml_tag_id_t tag_id, size_t *length);
+
+/**
+ * Get tag id by name
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] tag name
+ * @param[in] tag name length
+ *
+ * @return tag id
+ */
+myhtml_tag_id_t
+myhtml_tag_id_by_name(myhtml_tree_t* tree,
+                      const char *tag_name, size_t length);
 
 /***********************************************************************************
  *
@@ -1747,16 +2181,13 @@ myhtml_string_init(mchar_async_t *mchar, size_t node_id,
 /**
  * Increase the current size for myhtml_string_t object
  *
- * @param[in] mchar_async_t*. See description for myhtml_string_init function
- * @param[in] node_id. See description for myhtml_string_init function
  * @param[in] myhtml_string_t*. See description for myhtml_string_init function
  * @param[in] data size. Set the new size you want for myhtml_string_t object
  *
  * @return char* of the size if successful, otherwise a NULL value
  */
 char*
-myhtml_string_realloc(mchar_async_t *mchar, size_t node_id,
-                      myhtml_string_t *str, size_t new_size);
+myhtml_string_realloc(myhtml_string_t *str, size_t new_size);
 
 /**
  * Clean myhtml_string_t object. In reality, data length set to 0
@@ -1962,6 +2393,31 @@ size_t
 myhtml_incoming_buffer_offset(myhtml_incoming_buffer_t *inc_buf);
 
 /**
+ * Get Relative Position for Incoming Buffer.
+ * Incoming Buffer should be prepared by myhtml_incoming_buffer_find_by_position
+ *
+ * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] global begin
+ *
+ * @return size_t
+ */
+size_t
+myhtml_incoming_buffer_relative_begin(myhtml_incoming_buffer_t *inc_buf, size_t begin);
+
+/**
+ * This function returns number of available data by Incoming Buffer
+ * Incoming buffer may be incomplete. See myhtml_incoming_buffer_next
+ *
+ * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] global begin
+ *
+ * @return size_t
+ */
+size_t
+myhtml_incoming_buffer_available_length(myhtml_incoming_buffer_t *inc_buf,
+                                        size_t relative_begin, size_t length);
+
+/**
  * Get next buffer
  *
  * @param[in] myhtml_incoming_buffer_t*
@@ -2009,6 +2465,50 @@ myhtml_namespace_name_by_id(myhtml_namespace_t ns, size_t *length);
  */
 bool
 myhtml_namespace_id_by_name(const char *name, size_t length, myhtml_namespace_t *ns);
+
+/***********************************************************************************
+ *
+ * MyHTML_CALLBACK
+ *
+ ***********************************************************************************/
+
+/**
+ * Get current callback for tokens before processing
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_callback_token_f
+ */
+myhtml_callback_token_f
+myhtml_callback_before_token_done(myhtml_tree_t *tree);
+
+/**
+ * Get current callback for tokens after processing
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_callback_token_f
+ */
+myhtml_callback_token_f
+myhtml_callback_after_token_done(myhtml_tree_t *tree);
+
+/**
+ * Set callback for tokens before processing
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_callback_token_f callback function
+ */
+void
+myhtml_callback_before_token_done_set(myhtml_tree_t *tree, myhtml_callback_token_f func, void* ctx);
+
+/**
+ * Set callback for tokens before processing
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_callback_token_f callback function
+ */
+void
+myhtml_callback_after_token_done_set(myhtml_tree_t *tree, myhtml_callback_token_f func, void* ctx);
 
 /***********************************************************************************
  *

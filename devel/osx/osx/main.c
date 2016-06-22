@@ -49,7 +49,7 @@ struct chunk_res_result {
     bool is_fragment;
     bool enabled_script;
     myhtml_tag_id_t tag_id;
-    enum myhtml_namespace my_namespace;
+    enum myhtml_namespace ns;
 };
 
 typedef void (*chunk_test_f)(struct chunk_res_test *res_test, struct chunk_res_result *result);
@@ -62,7 +62,7 @@ struct res_html load_html(const char* filename)
     long l = ftell(f);
     fseek(f, 0L, SEEK_SET);
     
-    char *html = (char*)mymalloc(l);
+    char *html = (char*)myhtml_malloc(l);
     fread(html, 1, l, f);
     
     fclose(f);
@@ -112,13 +112,12 @@ void chunk_test(void)
     }
     printf("\n");
     
-    myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
+    myhtml_tree_print_node_children(tree, tree->document, stdout, 0);
     
     myhtml_tree_destroy(tree);
     myhtml_destroy(myhtml);
     free(res.html);
 }
-
 
 /* For a test */
 struct res_html load_html_file(const char* filename)
@@ -224,8 +223,8 @@ void append_to_test(struct res_html_test* data, const char *text, size_t len, bo
 
 bool sort_text(myhtml_tree_attr_t *attr1, size_t size, myhtml_tree_attr_t **list, size_t i, size_t *len)
 {
-    unsigned char *fisrt = (unsigned char*)attr1->entry.data;
-    unsigned char *sec = (unsigned char*)list[i]->entry.data;
+    unsigned char *fisrt = (unsigned char*)attr1->key.data;
+    unsigned char *sec = (unsigned char*)list[i]->key.data;
     
     for (size_t j = 0; j < size; j++)
     {
@@ -255,13 +254,13 @@ myhtml_tree_attr_t ** sort_attr(myhtml_tree_node_t *node)
     
     while (attr) {
         for (i = 0; i < len; i++) {
-            if(attr->name_length > list[i]->name_length)
+            if(attr->key.length > list[i]->key.length)
             {
-                if(sort_text(attr, list[i]->name_length, list, i, &len))
+                if(sort_text(attr, list[i]->key.length, list, i, &len))
                     break;
             }
             else {
-                if(sort_text(attr, attr->name_length, list, i, &len))
+                if(sort_text(attr, attr->key.length, list, i, &len))
                     break;
             }
         }
@@ -289,7 +288,7 @@ void print_node_attr(myhtml_tree_node_t *node, struct res_html_test* data, size_
     {
         myhtml_tree_attr_t *attr = *list_attr;
         
-        const char *name = myhtml_attribute_name(attr, &len);
+        const char *name = myhtml_attribute_key(attr, &len);
         
         if(name) {
             append_to_test(data, "\n", 1, false, false);
@@ -297,13 +296,13 @@ void print_node_attr(myhtml_tree_node_t *node, struct res_html_test* data, size_
             for(size_t i = 0; i < inc; i++)
                 append_to_test(data, "  ", 2, false, false);
             
-            if(attr->my_namespace == MyHTML_NAMESPACE_XML) {
+            if(attr->ns == MyHTML_NAMESPACE_XML) {
                 append_to_test(data, "xml ", 4, false, false);
             }
-            else if(attr->my_namespace == MyHTML_NAMESPACE_XMLNS) {
+            else if(attr->ns == MyHTML_NAMESPACE_XMLNS) {
                 append_to_test(data, "xmlns ", 6, false, false);
             }
-            else if(attr->my_namespace == MyHTML_NAMESPACE_XLINK) {
+            else if(attr->ns == MyHTML_NAMESPACE_XLINK) {
                 append_to_test(data, "xlink ", 6, false, false);
             }
             
@@ -442,12 +441,14 @@ void chunk_process(struct chunk_res_test *res_test, struct chunk_res_result *res
     if(result->enabled_script)
         result->tree->flags |= MyHTML_TREE_FLAGS_SCRIPT;
     
+    //printf("%.*s\n", res_test->data.len, res_test->data.html);
+    
     if(result->is_fragment == false) {
         myhtml_parse_single(result->tree, MyHTML_ENCODING_UTF_8, res_test->data.html, res_test->data.len);
         print_tree(result->tree, result->tree->document->child, &data, 0);
     }
     else {
-        myhtml_parse_fragment_single(result->tree, MyHTML_ENCODING_UTF_8, res_test->data.html, res_test->data.len, result->tag_id, result->my_namespace);
+        myhtml_parse_fragment_single(result->tree, MyHTML_ENCODING_UTF_8, res_test->data.html, res_test->data.len, result->tag_id, result->ns);
         print_tree(result->tree, result->tree->document->child->child, &data, 0);
     }
     
@@ -562,19 +563,19 @@ void read_chunk(struct res_html* res, chunk_test_f func, struct chunk_res_result
             
             if(j == line_len) {
                 result->tag_id = myhtml_tag_id_by_name(result->tree, data, line_len);
-                result->my_namespace = MyHTML_NAMESPACE_HTML;
+                result->ns = MyHTML_NAMESPACE_HTML;
             }
             else {
                 result->tag_id = myhtml_tag_id_by_name(result->tree, &data[j], (line_len - j));
                 
                 if(strncasecmp("math", data, 4) == 0) {
-                    result->my_namespace = MyHTML_NAMESPACE_MATHML;
+                    result->ns = MyHTML_NAMESPACE_MATHML;
                 }
                 else if(strncasecmp("svg", data, 3) == 0) {
-                    result->my_namespace = MyHTML_NAMESPACE_SVG;
+                    result->ns = MyHTML_NAMESPACE_SVG;
                 }
                 else {
-                    result->my_namespace = MyHTML_NAMESPACE_HTML;
+                    result->ns = MyHTML_NAMESPACE_HTML;
                 }
             }
             
@@ -764,9 +765,6 @@ void test_all(void)
     
     size_t count = 0;
     
-    myhtml_tree_t* tree = myhtml_tree_create();
-    myhtml_tree_init(tree, myhtml);
-    
     if((dir = opendir(from_dir)) != NULL)
     {
         while((ent = readdir(dir)) != NULL)
@@ -779,10 +777,17 @@ void test_all(void)
             {
                 count++;
                 
-                printf("%zu: %s\n", count, path);
+//                printf("%zu: %s\n", count, path);
                 
                 struct res_html res = load_html(path);
+                
+                myhtml_tree_t* tree = myhtml_tree_create();
+                myhtml_tree_init(tree, myhtml);
+                
                 myhtml_parse(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
+                
+                myhtml_tree_destroy(tree);
+                
                 
                 //                myhtml_tree_node_t **node_list = myhtml_get_elements_by_tag_id(tree, MyHTML_TAG_TITLE, NULL);
                 //
@@ -800,23 +805,18 @@ void test_all(void)
         closedir (dir);
     }
     
-    myhtml_tree_destroy(tree);
+    
     myhtml_destroy(myhtml);
 }
 
 int main(int argc, const char * argv[])
 {
-    myhtml_encoding_t encoding;
-    if(myhtml_encoding_by_name("cp1251", strlen("cp1251"), &encoding)) {
-        printf("");
-    }
-    
-    return 0;
-    
 //    const myhtml_tag_context_t *tag = myhtml_tag_static_search("div", 3);
 //    
 ////    return 0;
 //    read_dir("/new/C-git/html5lib-tests/tree-construction/");
+//    return 0;
+//    read_dir("/new/tree-construction/");
 //    return 0;
 //    read_dir("/new/C-git/html5lib-tests/custom/");
 //    return 0;
@@ -850,22 +850,23 @@ int main(int argc, const char * argv[])
 //    
 //    return 0;
 //
-//    uint64_t all_start1 = myhtml_hperf_clock(NULL);
-//    test_all();
-//    uint64_t all_stop1 = myhtml_hperf_clock(NULL);
-//
-//    myhtml_hperf_print("Parse html", all_start1, all_stop1, stdout);
-//    return 0;
+    uint64_t all_start1 = myhtml_hperf_clock(NULL);
+    test_all();
+    uint64_t all_stop1 = myhtml_hperf_clock(NULL);
+
+    myhtml_hperf_print("Parse html", all_start1, all_stop1, stdout);
+    return 0;
 //
     /* Default path or argument value */
 //    const char* path = "/new/C-git/myhtml/bin/html2sexpr";
 //    const char* path = "/new/Test/html_files/http-www.gameland.ru_magstorage_pg_075_pg_075.pdf.html";
 //    const char* path = "/new/Test/html_files/http-msu.ru_projects_amv_doc_h1_1_1_2.doc.html";
-//    const char* path = "/new/Test/html_files/http-council.gov.ru_media_files_41d459b106b190827ede.doc.html";
+//    const char* path = "/new/Test/html_files/http-5fan.ru_wievjob.php_id=16163.html";
 //    const char* path = "/new/Test/html_files/http-www.unodc.org_documents_scientific_MLD-06-58676_Vol_2_ebook.pdf.html";
-//    const char* path = "/new/C-git/broken.html";
-    const char* path = "/new/C-git/test_full.html";
-//    const char* path = "/new/Test/html_files/http-pornoscanner.com_rss.xml.html";
+    const char* path = "/new/C-git/broken.html";
+//    const char* path = "/new/C-git/test_full.html";
+//    const char* path = "/new/C-git/test_full_utf_16.html";
+//    const char* path = "/new/html_parsers/test_large_4.html";
     
     if (argc == 2) {
         path = argv[1];
@@ -882,7 +883,6 @@ int main(int argc, const char * argv[])
     myhtml_t* myhtml = myhtml_create();
     myhtml_init(myhtml, MyHTML_OPTIONS_DEFAULT, 1, 0);
     
-    
 //    mythread_resume_all(myhtml->thread);
 //    mythread_wait_all(myhtml->thread);
 //    
@@ -897,6 +897,9 @@ int main(int argc, const char * argv[])
     
     myhtml_tree_t* tree = myhtml_tree_create();
     myhtml_tree_init(tree, myhtml);
+    
+//    myhtml_tree_parse_flags_set(tree, MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE| MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN);
+    
 //    
 //    myhtml_encoding_t encoding;
 //    myhtml_encoding_detect(res.html, res.size, &encoding);
@@ -907,15 +910,44 @@ int main(int argc, const char * argv[])
     for(size_t i = 0; i < 1; i++)
     {
         myhtml_parse(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
+        
 //        myhtml_parse_fragment(tree, MyHTML_ENCODING_UTF_8, res.html, res.size, MyHTML_TAG_ANNOTATION_XML, MyHTML_NAMESPACE_MATHML);
         
 //        myhtml_tree_print_node(tree, tree->document->child, stdout);
         
-        //myhtml_tree_print_node_childs(tree, tree->document, stdout, 0);
+//        myhtml_tree_print_node_children(tree, tree->document, stdout, 0);
     }
     
     uint64_t parse_stop = myhtml_hperf_clock(NULL);
     uint64_t all_stop = myhtml_hperf_clock(NULL);
+    
+    myhtml_collection_t* collection = myhtml_get_nodes_by_attribute_value_contain(tree, NULL, NULL, 1,
+                                                                          "class", 5,
+                                                                          "count", 5, NULL);
+    
+    for(size_t i = 0; i < collection->length; i++)
+        myhtml_tree_print_node(tree, collection->list[i], stdout);
+    
+    printf("");
+    
+//    myhtml_tree_node_t *node = myhtml_tree_get_node_body(tree);
+//    
+//    printf("For a test; Create and delete 100000 attrs...\n");
+//    for(size_t j = 0; j < 100000; j++) {
+//        myhtml_tree_attr_t *attr = myhtml_attribute_add(tree, node, "key", 3, "value", 5, MyHTML_ENCODING_UTF_8);
+//        myhtml_attribute_delete(tree, node, attr);
+//    }
+//    
+//
+//    
+//    // add first attr in first div in tree
+//    myhtml_attribute_add(tree, node, "key", 3, "value", 5, MyHTML_ENCODING_UTF_8);
+//    
+//    myhtml_tree_attr_t *gets_attr = myhtml_attribute_by_key(node, "key", 3);
+//    const char *attr_char = myhtml_attribute_value(gets_attr, NULL);
+//    
+//    printf("Get attr by key name \"key\": %s\n", attr_char);
+    
     
     printf("\n\nInformation:\n");
     printf("Timer (%llu ticks/sec):\n", (unsigned long long) myhtml_hperf_res(NULL));
@@ -932,7 +964,5 @@ int main(int argc, const char * argv[])
     
     return 0;
 }
-
-
 
 

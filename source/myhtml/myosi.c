@@ -20,28 +20,24 @@
 
 #include "myhtml/myosi.h"
 
-void * mymalloc(size_t size)
+void * myhtml_mem_malloc(size_t size)
 {
-    //printf("Call malloc\n");
     return malloc(size);
 }
 
 // see who's call realloc
-void * myrealloc(void* dst, size_t size)
+void * myhtml_mem_realloc(void* dst, size_t size)
 {
-    //printf("Call realloc\n");
     return realloc(dst, size);
 }
 
-void * mycalloc(size_t num, size_t size)
+void * myhtml_mem_calloc(size_t num, size_t size)
 {
-    //printf("Call calloc\n");
     return calloc(num, size);
 }
 
-void myfree(void* dst)
+void myhtml_mem_free(void* dst)
 {
-    //printf("Call free\n");
     free(dst);
 }
 

@@ -20,6 +20,9 @@
 
 #include "myhtml/encoding.h"
 #include "myhtml/encoding_resource.h"
+#include "myhtml/utils/resources.h"
+
+
 
 myhtml_encoding_custom_f myhtml_encoding_get_function_by_id(myhtml_encoding_t idx)
 {
@@ -907,8 +910,8 @@ enum myhtml_encoding_status myhtml_encoding_decode_shared_utf_16(unsigned const 
             return MyHTML_ENCODING_STATUS_OK;
         }
         
-        unsigned char byte1 = code_unit >> 8;
-        unsigned char byte2 = code_unit & 0x00FF;
+        unsigned char byte1 = (unsigned char)(code_unit >> 8);
+        unsigned char byte2 = (unsigned char)(code_unit & 0x00FF);
         
         if(res->flag) {
             res->result     = byte1;
@@ -978,30 +981,94 @@ size_t myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data)
     
     if (codepoint <= 0x0000007F) {
         /* 0xxxxxxx */
-        data[0] = codepoint;
+        data[0] = (char)codepoint;
         return 1;
     }
     else if (codepoint <= 0x000007FF) {
         /* 110xxxxx 10xxxxxx */
-        data[0] = 0xC0 | (codepoint >> 6  );
-        data[1] = 0x80 | (codepoint & 0x3F);
+        data[0] = (char)(0xC0 | (codepoint >> 6  ));
+        data[1] = (char)(0x80 | (codepoint & 0x3F));
         
         return 2;
     }
     else if (codepoint <= 0x0000FFFF) {
         /* 1110xxxx 10xxxxxx 10xxxxxx */
-        data[0] = 0xE0 | ((codepoint >> 12));
-        data[1] = 0x80 | ((codepoint >> 6 ) & 0x3F);
-        data[2] = 0x80 | ( codepoint & 0x3F);
+        data[0] = (char)(0xE0 | ((codepoint >> 12)));
+        data[1] = (char)(0x80 | ((codepoint >> 6 ) & 0x3F));
+        data[2] = (char)(0x80 | ( codepoint & 0x3F));
         
         return 3;
     }
     else if (codepoint <= 0x001FFFFF) {
         /* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
-        data[0] = 0xF0 | ( codepoint >> 18);
-        data[1] = 0x80 | ((codepoint >> 12) & 0x3F);
-        data[2] = 0x80 | ((codepoint >> 6 ) & 0x3F);
-        data[3] = 0x80 | ( codepoint & 0x3F);
+        data[0] = (char)(0xF0 | ( codepoint >> 18));
+        data[1] = (char)(0x80 | ((codepoint >> 12) & 0x3F));
+        data[2] = (char)(0x80 | ((codepoint >> 6 ) & 0x3F));
+        data[3] = (char)(0x80 | ( codepoint & 0x3F));
+        
+        return 4;
+    }
+    /* not uses in unicode */
+    //    else if (codepoint <= 0x03FFFFFF) {
+    //        /* 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx */
+    //        data[0] = 0xF8 | ( codepoint >> 24);
+    //        data[1] = 0x80 | ((codepoint >> 18) & 0x3F);
+    //        data[2] = 0x80 | ((codepoint >> 12) & 0x3F);
+    //        data[3] = 0x80 | ((codepoint >> 6 ) & 0x3F);
+    //        data[4] = 0x80 | ( codepoint & 0x3F);
+    //
+    //        return 5;
+    //    }
+    //    else if (codepoint <= 0x7FFFFFFF) {
+    //        /* 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx */
+    //        data[0] = 0xFC | ( codepoint >> 30);
+    //        data[1] = 0x80 | ((codepoint >> 24) & 0x3F);
+    //        data[2] = 0x80 | ((codepoint >> 18) & 0x3F);
+    //        data[3] = 0x80 | ((codepoint >> 12) & 0x3F);
+    //        data[4] = 0x80 | ((codepoint >> 6 ) & 0x3F);
+    //        data[5] = 0x80 | ( codepoint & 0x3F);
+    //
+    //        return 6;
+    //    }
+    
+    return 0;
+}
+
+size_t myhtml_encoding_codepoint_to_lowercase_ascii_utf_8(size_t codepoint, char *data)
+{
+    /* 0x80 -- 10xxxxxx */
+    /* 0xC0 -- 110xxxxx */
+    /* 0xE0 -- 1110xxxx */
+    /* 0xF0 -- 11110xxx */
+    /* 0xF8 -- 111110xx */
+    /* 0xFC -- 1111110x */
+    
+    if (codepoint <= 0x0000007F) {
+        /* 0xxxxxxx */
+        data[0] = myhtml_string_chars_lowercase_map[ codepoint ];
+        return 1;
+    }
+    else if (codepoint <= 0x000007FF) {
+        /* 110xxxxx 10xxxxxx */
+        data[0] = (char)(0xC0 | (codepoint >> 6  ));
+        data[1] = (char)(0x80 | (codepoint & 0x3F));
+        
+        return 2;
+    }
+    else if (codepoint <= 0x0000FFFF) {
+        /* 1110xxxx 10xxxxxx 10xxxxxx */
+        data[0] = (char)(0xE0 | ((codepoint >> 12)));
+        data[1] = (char)(0x80 | ((codepoint >> 6 ) & 0x3F));
+        data[2] = (char)(0x80 | ( codepoint & 0x3F));
+        
+        return 3;
+    }
+    else if (codepoint <= 0x001FFFFF) {
+        /* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
+        data[0] = (char)(0xF0 | ( codepoint >> 18));
+        data[1] = (char)(0x80 | ((codepoint >> 12) & 0x3F));
+        data[2] = (char)(0x80 | ((codepoint >> 6 ) & 0x3F));
+        data[3] = (char)(0x80 | ( codepoint & 0x3F));
         
         return 4;
     }

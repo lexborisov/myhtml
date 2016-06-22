@@ -22,7 +22,7 @@
 
 void myhtml_init_marker(myhtml_t* myhtml)
 {
-    myhtml->marker = (myhtml_tree_node_t*)mymalloc(sizeof(myhtml_tree_node_t));
+    myhtml->marker = (myhtml_tree_node_t*)myhtml_malloc(sizeof(myhtml_tree_node_t));
     
     if(myhtml->marker)
         myhtml_tree_node_clean(myhtml->marker);
@@ -31,12 +31,12 @@ void myhtml_init_marker(myhtml_t* myhtml)
 void myhtml_destroy_marker(myhtml_t* myhtml)
 {
     if(myhtml->marker)
-        free(myhtml->marker);
+        myhtml_free(myhtml->marker);
 }
 
 myhtml_t * myhtml_create(void)
 {
-    return (myhtml_t*)mymalloc(sizeof(myhtml_t));
+    return (myhtml_t*)myhtml_malloc(sizeof(myhtml_t));
 }
 
 myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t thread_count, size_t queue_size)
@@ -44,23 +44,6 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
     myhtml_status_t status;
     
     myhtml_init_marker(myhtml);
-    
-    myhtml->async_incoming_buf = mcobject_async_create();
-    if(myhtml->async_incoming_buf == NULL)
-        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
-    
-    mcobject_async_status_t mcstatus = mcobject_async_init(myhtml->async_incoming_buf, 32, 1024, sizeof(myhtml_incoming_buffer_t));
-    if(mcstatus != MCOBJECT_ASYNC_STATUS_OK)
-        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
-    
-    // for tags node and other
-    myhtml->mchar = mchar_async_create(64, 4096);
-    
-    myhtml->tag_index = mcobject_async_create();
-    mcstatus = mcobject_async_init(myhtml->tag_index, 128, 1024, sizeof(myhtml_tag_index_node_t));
-    
-    if(mcstatus != MCOBJECT_ASYNC_STATUS_OK)
-        return MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE;
     
     status = myhtml_tokenizer_state_init(myhtml);
     if(status) {
@@ -159,8 +142,6 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
 void myhtml_clean(myhtml_t* myhtml)
 {
     mythread_clean(myhtml->thread);
-    
-    mcobject_async_node_all_clean(myhtml->async_incoming_buf);
 }
 
 myhtml_t* myhtml_destroy(myhtml_t* myhtml)
@@ -173,14 +154,10 @@ myhtml_t* myhtml_destroy(myhtml_t* myhtml)
     mythread_destroy(myhtml->thread, true);
     myhtml_tokenizer_state_destroy(myhtml);
     
-    myhtml->async_incoming_buf = mcobject_async_destroy(myhtml->async_incoming_buf, true);
-    myhtml->tag_index = mcobject_async_destroy(myhtml->tag_index, true);
-    myhtml->mchar = mchar_async_destroy(myhtml->mchar, true);
-    
     if(myhtml->insertion_func)
-        free(myhtml->insertion_func);
+        myhtml_free(myhtml->insertion_func);
     
-    free(myhtml);
+    myhtml_free(myhtml);
     
     return NULL;
 }
@@ -192,14 +169,15 @@ myhtml_status_t myhtml_parse(myhtml_tree_t* tree, myhtml_encoding_t encoding, co
     }
     
     myhtml_encoding_set(tree, encoding);
+    myhtml_status_t status = myhtml_tokenizer_begin(tree, html, html_size);
     
-    myhtml_tokenizer_begin(tree, html, html_size);
-    myhtml_tokenizer_end(tree);
+    if(status)
+        return status;
     
-    return MyHTML_STATUS_OK;
+    return myhtml_tokenizer_end(tree);
 }
 
-myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
+myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace ns)
 {
     if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END) {
         myhtml_tree_clean(tree);
@@ -208,16 +186,19 @@ myhtml_status_t myhtml_parse_fragment(myhtml_tree_t* tree, myhtml_encoding_t enc
     if(tag_id == 0)
         tag_id = MyHTML_TAG_DIV;
     
-    if(my_namespace == 0)
-        my_namespace = MyHTML_NAMESPACE_HTML;
+    if(ns == 0)
+        ns = MyHTML_NAMESPACE_HTML;
     
-    myhtml_tokenizer_fragment_init(tree, tag_id, my_namespace);
+    if(myhtml_tokenizer_fragment_init(tree, tag_id, ns) == NULL)
+        return MyHTML_STATUS_TOKENIZER_ERROR_FRAGMENT_INIT;
+    
     myhtml_encoding_set(tree, encoding);
+    myhtml_status_t status = myhtml_tokenizer_begin(tree, html, html_size);
     
-    myhtml_tokenizer_begin(tree, html, html_size);
-    myhtml_tokenizer_end(tree);
+    if(status)
+        return status;
     
-    return MyHTML_STATUS_OK;
+    return myhtml_tokenizer_end(tree);
 }
 
 myhtml_status_t myhtml_parse_single(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size)
@@ -230,13 +211,15 @@ myhtml_status_t myhtml_parse_single(myhtml_tree_t* tree, myhtml_encoding_t encod
     
     myhtml_encoding_set(tree, encoding);
     
-    myhtml_tokenizer_begin(tree, html, html_size);
-    myhtml_tokenizer_end(tree);
+    myhtml_status_t status = myhtml_tokenizer_begin(tree, html, html_size);
     
-    return MyHTML_STATUS_OK;
+    if(status)
+        return status;
+    
+    return myhtml_tokenizer_end(tree);
 }
 
-myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
+myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, myhtml_encoding_t encoding, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace ns)
 {
     if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END) {
         myhtml_tree_clean(tree);
@@ -245,18 +228,22 @@ myhtml_status_t myhtml_parse_fragment_single(myhtml_tree_t* tree, myhtml_encodin
     if(tag_id == 0)
         tag_id = MyHTML_TAG_DIV;
     
-    if(my_namespace == 0)
-        my_namespace = MyHTML_NAMESPACE_HTML;
+    if(ns == 0)
+        ns = MyHTML_NAMESPACE_HTML;
     
     tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
     
-    myhtml_tokenizer_fragment_init(tree, tag_id, my_namespace);
+    if(myhtml_tokenizer_fragment_init(tree, tag_id, ns) == NULL)
+        return MyHTML_STATUS_TOKENIZER_ERROR_FRAGMENT_INIT;
+    
     myhtml_encoding_set(tree, encoding);
     
-    myhtml_tokenizer_begin(tree, html, html_size);
-    myhtml_tokenizer_end(tree);
+    myhtml_status_t status = myhtml_tokenizer_begin(tree, html, html_size);
     
-    return MyHTML_STATUS_OK;
+    if(status)
+        return status;
+    
+    return myhtml_tokenizer_end(tree);
 }
 
 myhtml_status_t myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t html_size)
@@ -265,12 +252,10 @@ myhtml_status_t myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t
         myhtml_tree_clean(tree);
     }
     
-    myhtml_tokenizer_chunk(tree, html, html_size);
-    
-    return MyHTML_STATUS_OK;
+    return  myhtml_tokenizer_chunk(tree, html, html_size);
 }
 
-myhtml_status_t myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
+myhtml_status_t myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace ns)
 {
     if(tree->flags & MyHTML_TREE_FLAGS_PARSE_END) {
         myhtml_tree_clean(tree);
@@ -279,14 +264,13 @@ myhtml_status_t myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* htm
     if(tag_id == 0)
         tag_id = MyHTML_TAG_DIV;
     
-    if(my_namespace == 0)
-        my_namespace = MyHTML_NAMESPACE_HTML;
+    if(ns == 0)
+        ns = MyHTML_NAMESPACE_HTML;
     
-    myhtml_tokenizer_fragment_init(tree, tag_id, my_namespace);
+    if(myhtml_tokenizer_fragment_init(tree, tag_id, ns) == NULL)
+        return MyHTML_STATUS_TOKENIZER_ERROR_FRAGMENT_INIT;
     
-    myhtml_tokenizer_chunk(tree, html, html_size);
-    
-    return MyHTML_STATUS_OK;
+    return myhtml_tokenizer_chunk(tree, html, html_size);
 }
 
 myhtml_status_t myhtml_parse_chunk_single(myhtml_tree_t* tree, const char* html, size_t html_size)
@@ -297,18 +281,17 @@ myhtml_status_t myhtml_parse_chunk_single(myhtml_tree_t* tree, const char* html,
     return myhtml_parse_chunk(tree, html, html_size);
 }
 
-myhtml_status_t myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
+myhtml_status_t myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size, myhtml_tag_id_t tag_id, enum myhtml_namespace ns)
 {
     if((tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
         tree->flags |= MyHTML_TREE_FLAGS_SINGLE_MODE;
     
-    return myhtml_parse_chunk_fragment(tree, html, html_size, tag_id, my_namespace);
+    return myhtml_parse_chunk_fragment(tree, html, html_size, tag_id, ns);
 }
 
 myhtml_status_t myhtml_parse_chunk_end(myhtml_tree_t* tree)
 {
-    myhtml_tokenizer_end(tree);
-    return MyHTML_STATUS_OK;
+    return myhtml_tokenizer_end(tree);
 }
 
 void myhtml_encoding_set(myhtml_tree_t* tree, myhtml_encoding_t encoding)
@@ -332,13 +315,13 @@ myhtml_encoding_t myhtml_encoding_get(myhtml_tree_t* tree)
 myhtml_status_t myhtml_get_nodes_by_tag_id_in_scope_find_recursion(myhtml_tree_node_t *node, myhtml_collection_t *collection, myhtml_tag_id_t tag_id)
 {
     while(node) {
-        if(node->tag_idx == tag_id) {
+        if(node->tag_id == tag_id) {
             collection->list[ collection->length ] = node;
             collection->length++;
             
             if(collection->length >= collection->size)
             {
-                myhtml_status_t mystatus = myhtml_collection_check_size(collection, 1024);
+                myhtml_status_t mystatus = myhtml_collection_check_size(collection, 1024, 0);
                 
                 if(mystatus != MyHTML_STATUS_OK)
                     return mystatus;
@@ -411,7 +394,7 @@ myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_col
     }
     else {
         idx = collection->length;
-        mystatus = myhtml_collection_check_size(collection, index_tag->count);
+        mystatus = myhtml_collection_check_size(collection, index_tag->count, 128);
     }
     
     if(mystatus) {
@@ -486,12 +469,12 @@ myhtml_tree_node_t * myhtml_node_last_child(myhtml_tree_node_t *node)
     return node->last_child;
 }
 
-myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, enum myhtml_namespace my_namespace)
+myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, enum myhtml_namespace ns)
 {
     myhtml_tree_node_t *node = myhtml_tree_node_create(tree);
     
-    node->tag_idx      = tag_id;
-    node->my_namespace = my_namespace;
+    node->tag_id      = tag_id;
+    node->ns = ns;
     
     return node;
 }
@@ -536,7 +519,7 @@ myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_n
     return node;
 }
 
-myhtml_tree_node_t * myhtml_node_insert_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node)
+myhtml_tree_node_t * myhtml_node_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node)
 {
     if(target == NULL || node == NULL)
         return NULL;
@@ -580,29 +563,29 @@ myhtml_string_t * myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *
         myhtml_token_node_clean(node->token);
     }
     
-    if(node->token->my_str_tm.data == NULL) {
-        myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->my_str_tm, (length + 2));
+    if(node->token->str.data == NULL) {
+        myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->str, (length + 2));
     }
     else {
-        if(node->token->my_str_tm.size < length) {
-            mchar_async_free(tree->mchar, node->token->my_str_tm.node_idx, node->token->my_str_tm.data);
-            myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->my_str_tm, length);
+        if(node->token->str.size < length) {
+            mchar_async_free(tree->mchar, node->token->str.node_idx, node->token->str.data);
+            myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->str, length);
         }
         else
-            node->token->my_str_tm.length = 0;
+            node->token->str.length = 0;
     }
     
     if(encoding != MyHTML_ENCODING_UTF_8) {
-        myhtml_string_append_with_convert_encoding(&node->token->my_str_tm, text, length, encoding);
+        myhtml_string_append_with_convert_encoding(&node->token->str, text, length, encoding);
     }
     else {
-        myhtml_string_append(&node->token->my_str_tm, text, length);
+        myhtml_string_append(&node->token->str, text, length);
     }
     
-    node->token->begin  = 0;
-    node->token->length = node->token->my_str_tm.length;
+    node->token->raw_begin  = 0;
+    node->token->raw_length = 0;
     
-    return &node->token->my_str_tm;
+    return &node->token->str;
 }
 
 myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding)
@@ -623,38 +606,41 @@ myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_t
         myhtml_token_node_clean(node->token);
     }
     
-    if(node->token->my_str_tm.data == NULL) {
-        myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->my_str_tm, (length + 2));
+    if(node->token->str.data == NULL) {
+        myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->str, (length + 2));
     }
     else {
-        if(node->token->my_str_tm.size < length) {
-            mchar_async_free(tree->mchar, node->token->my_str_tm.node_idx, node->token->my_str_tm.data);
-            myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->my_str_tm, length);
+        if(node->token->str.size < length) {
+            mchar_async_free(tree->mchar, node->token->str.node_idx, node->token->str.data);
+            myhtml_string_init(tree->mchar, tree->mchar_node_id, &node->token->str, length);
         }
         else
-            node->token->my_str_tm.length = 0;
+            node->token->str.length = 0;
     }
     
-    myhtml_string_char_ref_chunk_t str_chunk = {0, 0, 0, {0}, false, encoding};
-    myhtml_encoding_result_clean(&str_chunk.res);
+    myhtml_data_process_entry_t proc_entry;
+    myhtml_data_process_entry_clean(&proc_entry);
     
-    myhtml_string_append_charef(&str_chunk, &node->token->my_str_tm, text, length);
-    myhtml_string_append_charef_end(&str_chunk, &node->token->my_str_tm);
+    proc_entry.encoding = encoding;
+    myhtml_encoding_result_clean(&proc_entry.res);
     
-    node->token->begin  = 0;
-    node->token->length = node->token->my_str_tm.length;
+    myhtml_data_process(&proc_entry, &node->token->str, text, length);
+    myhtml_data_process_end(&proc_entry, &node->token->str);
     
-    return &node->token->my_str_tm;
+    node->token->raw_begin  = 0;
+    node->token->raw_length = 0;
+    
+    return &node->token->str;
 }
 
 enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node)
 {
-    return node->my_namespace;
+    return node->ns;
 }
 
 myhtml_tag_id_t myhtml_node_tag_id(myhtml_tree_node_t *node)
 {
-    return node->tag_idx;
+    return node->tag_id;
 }
 
 const char * myhtml_tag_name_by_id(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, size_t *length)
@@ -715,12 +701,12 @@ myhtml_tree_attr_t * myhtml_node_attribute_last(myhtml_tree_node_t *node)
 
 const char * myhtml_node_text(myhtml_tree_node_t *node, size_t *length)
 {
-    if(node->token && node->token->length && node->token->my_str_tm.data)
+    if(node->token && node->token->str.length && node->token->str.data)
     {
         if(length)
-            *length = node->token->length;
+            *length = node->token->str.length;
         
-        return &node->token->my_str_tm.data[node->token->begin];
+        return node->token->str.data;
     }
     
     if(length)
@@ -732,9 +718,466 @@ const char * myhtml_node_text(myhtml_tree_node_t *node, size_t *length)
 myhtml_string_t * myhtml_node_string(myhtml_tree_node_t *node)
 {
     if(node && node->token)
-        return &node->token->my_str_tm;
+        return &node->token->str;
     
     return NULL;
+}
+
+myhtml_position_t myhtml_node_raw_pasition(myhtml_tree_node_t *node)
+{
+    if(node && node->token)
+        return (myhtml_position_t){node->token->raw_begin, node->token->raw_length};
+    
+    return (myhtml_position_t){0, 0};
+}
+
+myhtml_position_t myhtml_node_element_pasition(myhtml_tree_node_t *node)
+{
+    if(node && node->token)
+        return (myhtml_position_t){node->token->element_begin, node->token->element_length};
+    
+    return (myhtml_position_t){0, 0};
+}
+
+myhtml_status_t myhtml_get_nodes_by_attribute_key_recursion(myhtml_tree_t *tree, myhtml_tree_node_t* node, myhtml_collection_t* collection, const char* key, size_t key_len)
+{
+    while(node)
+    {
+        if(node->token && node->token->attr_first) {
+            myhtml_tree_attr_t* attr = node->token->attr_first;
+            
+            while(attr) {
+                myhtml_string_t* str_key = &attr->key;
+                
+                if(str_key->length == key_len && myhtml_strncasecmp(str_key->data, key, key_len) == 0) {
+                    collection->list[ collection->length ] = node;
+                    
+                    collection->length++;
+                    if(collection->length >= collection->size) {
+                        myhtml_status_t status = myhtml_collection_check_size(collection, 1024, 0);
+                        
+                        if(status)
+                            return status;
+                    }
+                }
+                
+                attr = attr->next;
+            }
+        }
+        
+        if(node->child) {
+            myhtml_status_t status = myhtml_get_nodes_by_attribute_key_recursion(tree, node->child, collection, key, key_len);
+            
+            if(status)
+                return status;
+        }
+        
+        node = node->next;
+    }
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_collection_t * myhtml_get_nodes_by_attribute_key(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* scope_node, const char* key, size_t key_len, myhtml_status_t* status)
+{
+    if(collection == NULL) {
+        collection = myhtml_collection_create(1024, status);
+        
+        if((status && *status) || collection == NULL)
+            return NULL;
+    }
+    
+    if(scope_node == NULL)
+        scope_node = tree->node_html;
+    
+    myhtml_status_t rec_status = myhtml_get_nodes_by_attribute_key_recursion(tree, scope_node, collection, key, key_len);
+    
+    if(rec_status && status)
+        *status = rec_status;
+    
+    return collection;
+}
+
+/* find by attribute value; case-sensitivity */
+bool myhtml_get_nodes_by_attribute_value_recursion_eq(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    return str->length == value_len && myhtml_strncmp(str->data, value, value_len) == 0;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_whitespace_separated(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    if(str->length < value_len)
+        return false;
+    
+    const char *data = str->data;
+    
+    if(myhtml_strncmp(data, value, value_len) == 0) {
+        if((str->length > value_len && myhtml_utils_whithspace(data[value_len], ==, ||)) || str->length == value_len)
+            return true;
+    }
+    
+    for(size_t i = 1; (str->length - i) >= value_len; i++)
+    {
+        if(myhtml_utils_whithspace(data[(i - 1)], ==, ||)) {
+            if(myhtml_strncmp(&data[i], value, value_len) == 0) {
+                if((i > value_len && myhtml_utils_whithspace(data[(i + value_len)], ==, ||)) || (str->length - i) == value_len)
+                    return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_begin(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    if(str->length < value_len)
+        return false;
+    
+    return myhtml_strncmp(str->data, value, value_len) == 0;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_end(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    if(str->length < value_len)
+        return false;
+    
+    return myhtml_strncmp(&str->data[ (str->length - (str->length - value_len)) ], value, value_len) == 0;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_contain(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    if(str->length < value_len)
+        return false;
+    
+    const char *data = str->data;
+    
+    for(size_t i = 0; (str->length - i) >= value_len; i++)
+    {
+        if(myhtml_strncmp(&data[i], value, value_len) == 0) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_hyphen_separated(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    const char *data = str->data;
+    
+    if(str->length < value_len)
+        return false;
+    else if(str->length == value_len && myhtml_strncmp(data, value, value_len) == 0) {
+        return true;
+    }
+    else if(myhtml_strncmp(data, value, value_len) == 0 && data[value_len] == '-') {
+        return true;
+    }
+    
+    return false;
+}
+
+/* find by attribute value; case-insensitive */
+bool myhtml_get_nodes_by_attribute_value_recursion_eq_i(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    return str->length == value_len && myhtml_strncasecmp(str->data, value, value_len) == 0;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_whitespace_separated_i(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    if(str->length < value_len)
+        return false;
+    
+    const char *data = str->data;
+    
+    if(myhtml_strncasecmp(data, value, value_len) == 0) {
+        if((str->length > value_len && myhtml_utils_whithspace(data[value_len], ==, ||)) || str->length == value_len)
+            return true;
+    }
+    
+    for(size_t i = 1; (str->length - i) >= value_len; i++)
+    {
+        if(myhtml_utils_whithspace(data[(i - 1)], ==, ||)) {
+            if(myhtml_strncasecmp(&data[i], value, value_len) == 0) {
+                if((i > value_len && myhtml_utils_whithspace(data[(i + value_len)], ==, ||)) || (str->length - i) == value_len)
+                    return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_begin_i(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    if(str->length < value_len)
+        return false;
+    
+    return myhtml_strncasecmp(str->data, value, value_len) == 0;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_end_i(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    if(str->length < value_len)
+        return false;
+    
+    return myhtml_strncasecmp(&str->data[ (str->length - (str->length - value_len)) ], value, value_len) == 0;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_contain_i(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    if(str->length < value_len)
+        return false;
+    
+    const char *data = str->data;
+    
+    for(size_t i = 0; (str->length - i) >= value_len; i++)
+    {
+        if(myhtml_strncasecmp(&data[i], value, value_len) == 0) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool myhtml_get_nodes_by_attribute_value_recursion_hyphen_separated_i(myhtml_string_t* str, const char* value, size_t value_len)
+{
+    const char *data = str->data;
+    
+    if(str->length < value_len)
+        return false;
+    else if(str->length == value_len && myhtml_strncasecmp(data, value, value_len) == 0) {
+        return true;
+    }
+    else if(myhtml_strncasecmp(data, value, value_len) == 0 && data[value_len] == '-') {
+        return true;
+    }
+    
+    return false;
+}
+
+/* find by attribute value; basic functions */
+myhtml_status_t myhtml_get_nodes_by_attribute_value_recursion(myhtml_tree_t *tree, myhtml_tree_node_t* node,
+                                                              myhtml_collection_t* collection,
+                                                              myhtml_attribute_value_find_f func_eq,
+                                                              const char* value, size_t value_len)
+{
+    while(node)
+    {
+        if(node->token && node->token->attr_first) {
+            myhtml_tree_attr_t* attr = node->token->attr_first;
+            
+            while(attr) {
+                myhtml_string_t* str = &attr->value;
+                
+                if(func_eq(str, value, value_len)) {
+                    collection->list[ collection->length ] = node;
+                    
+                    collection->length++;
+                    if(collection->length >= collection->size) {
+                        myhtml_status_t status = myhtml_collection_check_size(collection, 1024, 0);
+                        
+                        if(status)
+                            return status;
+                    }
+                }
+                
+                attr = attr->next;
+            }
+        }
+        
+        if(node->child) {
+            myhtml_status_t status = myhtml_get_nodes_by_attribute_value_recursion(tree, node->child, collection, func_eq, value, value_len);
+            
+            if(status)
+                return status;
+        }
+        
+        node = node->next;
+    }
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_status_t myhtml_get_nodes_by_attribute_value_recursion_by_key(myhtml_tree_t *tree, myhtml_tree_node_t* node,
+                                                                     myhtml_collection_t* collection,
+                                                                     myhtml_attribute_value_find_f func_eq,
+                                                                     const char* key, size_t key_len,
+                                                                     const char* value, size_t value_len)
+{
+    while(node)
+    {
+        if(node->token && node->token->attr_first) {
+            myhtml_tree_attr_t* attr = node->token->attr_first;
+            
+            while(attr) {
+                myhtml_string_t* str_key = &attr->key;
+                myhtml_string_t* str = &attr->value;
+                
+                if(str_key->length == key_len && myhtml_strncasecmp(str_key->data, key, key_len) == 0)
+                {
+                    if(func_eq(str, value, value_len)) {
+                        collection->list[ collection->length ] = node;
+                        
+                        collection->length++;
+                        if(collection->length >= collection->size) {
+                            myhtml_status_t status = myhtml_collection_check_size(collection, 1024, 0);
+                            
+                            if(status)
+                                return status;
+                        }
+                    }
+                }
+                
+                attr = attr->next;
+            }
+        }
+        
+        if(node->child) {
+            myhtml_status_t status = myhtml_get_nodes_by_attribute_value_recursion_by_key(tree, node->child, collection, func_eq,
+                                                                                          key, key_len, value, value_len);
+            
+            if(status)
+                return status;
+        }
+        
+        node = node->next;
+    }
+    
+    return MyHTML_STATUS_OK;
+}
+
+myhtml_collection_t * _myhtml_get_nodes_by_attribute_value(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                           myhtml_attribute_value_find_f func_eq,
+                                                           const char* key, size_t key_len,
+                                                           const char* value, size_t value_len,
+                                                           myhtml_status_t* status)
+{
+    if(collection == NULL) {
+        collection = myhtml_collection_create(1024, status);
+        
+        if((status && *status) || collection == NULL)
+            return NULL;
+    }
+    
+    if(node == NULL)
+        node = tree->node_html;
+    
+    myhtml_status_t rec_status;
+    
+    if(key && key_len)
+        rec_status = myhtml_get_nodes_by_attribute_value_recursion_by_key(tree, node, collection, func_eq, key, key_len, value, value_len);
+    else
+        rec_status = myhtml_get_nodes_by_attribute_value_recursion(tree, node, collection, func_eq, value, value_len);
+    
+    if(rec_status && status)
+        *status = rec_status;
+    
+    return collection;
+}
+
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                          bool case_insensitive,
+                                                          const char* key, size_t key_len,
+                                                          const char* value, size_t value_len,
+                                                          myhtml_status_t* status)
+{
+    if(case_insensitive) {
+        return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                    myhtml_get_nodes_by_attribute_value_recursion_eq_i,
+                                                    key, key_len, value, value_len, status);
+    }
+    
+    return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                myhtml_get_nodes_by_attribute_value_recursion_eq,
+                                                key, key_len, value, value_len, status);
+}
+
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_whitespace_separated(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                                               bool case_insensitive,
+                                                                               const char* key, size_t key_len,
+                                                                               const char* value, size_t value_len,
+                                                                               myhtml_status_t* status)
+{
+    if(case_insensitive) {
+        return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                    myhtml_get_nodes_by_attribute_value_recursion_whitespace_separated_i,
+                                                    key, key_len, value, value_len, status);
+    }
+    
+    return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                myhtml_get_nodes_by_attribute_value_recursion_whitespace_separated,
+                                                key, key_len, value, value_len, status);
+}
+
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_begin(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                                bool case_insensitive,
+                                                                const char* key, size_t key_len,
+                                                                const char* value, size_t value_len,
+                                                                myhtml_status_t* status)
+{
+    if(case_insensitive) {
+        return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                    myhtml_get_nodes_by_attribute_value_recursion_begin_i,
+                                                    key, key_len, value, value_len, status);
+    }
+    
+    return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                myhtml_get_nodes_by_attribute_value_recursion_begin,
+                                                key, key_len, value, value_len, status);
+}
+
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_end(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                              bool case_insensitive,
+                                                              const char* key, size_t key_len,
+                                                              const char* value, size_t value_len,
+                                                              myhtml_status_t* status)
+{
+    if(case_insensitive) {
+        return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                    myhtml_get_nodes_by_attribute_value_recursion_end_i,
+                                                    key, key_len, value, value_len, status);
+    }
+    
+    return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                myhtml_get_nodes_by_attribute_value_recursion_end,
+                                                key, key_len, value, value_len, status);
+}
+
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_contain(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                                  bool case_insensitive,
+                                                                  const char* key, size_t key_len,
+                                                                  const char* value, size_t value_len,
+                                                                  myhtml_status_t* status)
+{
+    if(case_insensitive) {
+        return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                    myhtml_get_nodes_by_attribute_value_recursion_contain_i,
+                                                    key, key_len, value, value_len, status);
+    }
+    
+    return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                myhtml_get_nodes_by_attribute_value_recursion_contain,
+                                                key, key_len, value, value_len, status);
+}
+
+myhtml_collection_t * myhtml_get_nodes_by_attribute_value_hyphen_separated(myhtml_tree_t *tree, myhtml_collection_t* collection, myhtml_tree_node_t* node,
+                                                                           bool case_insensitive,
+                                                                           const char* key, size_t key_len,
+                                                                           const char* value, size_t value_len,
+                                                                           myhtml_status_t* status)
+{
+    if(case_insensitive) {
+        return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                    myhtml_get_nodes_by_attribute_value_recursion_hyphen_separated_i,
+                                                    key, key_len, value, value_len, status);
+    }
+    
+    return _myhtml_get_nodes_by_attribute_value(tree, collection, node,
+                                                myhtml_get_nodes_by_attribute_value_recursion_hyphen_separated,
+                                                key, key_len, value, value_len, status);
 }
 
 /*
@@ -752,17 +1195,38 @@ myhtml_tree_attr_t * myhtml_attribute_prev(myhtml_tree_attr_t *attr)
 
 enum myhtml_namespace myhtml_attribute_namespace(myhtml_tree_attr_t *attr)
 {
-    return attr->my_namespace;
+    return attr->ns;
+}
+
+void myhtml_attribute_namespace_set(myhtml_tree_attr_t *attr, myhtml_namespace_t ns)
+{
+    attr->ns = ns;
 }
 
 const char * myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length)
 {
-    if(attr->entry.data && attr->name_length)
+    if(attr->key.data && attr->key.length)
     {
         if(length)
-            *length = attr->name_length;
+            *length = attr->key.length;
         
-        return &attr->entry.data[attr->name_begin];
+        return attr->key.data;
+    }
+    
+    if(length)
+        *length = 0;
+    
+    return NULL;
+}
+
+const char * myhtml_attribute_key(myhtml_tree_attr_t *attr, size_t *length)
+{
+    if(attr->key.data && attr->key.length)
+    {
+        if(length)
+            *length = attr->key.length;
+        
+        return attr->key.data;
     }
     
     if(length)
@@ -773,16 +1237,32 @@ const char * myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length)
 
 const char * myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length)
 {
-    if(attr->entry.data && attr->value_length)
+    if(attr->value.data && attr->value.length)
     {
         if(length)
-            *length = attr->value_length;
+            *length = attr->value.length;
         
-        return &attr->entry.data[attr->value_begin];
+        return attr->value.data;
     }
     
     if(length)
         *length = 0;
+    
+    return NULL;
+}
+
+myhtml_string_t * myhtml_attribute_key_string(myhtml_tree_attr_t* attr)
+{
+    if(attr)
+        return &attr->key;
+    
+    return NULL;
+}
+
+myhtml_string_t * myhtml_attribute_value_string(myhtml_tree_attr_t* attr)
+{
+    if(attr)
+        return &attr->value;
     
     return NULL;
 }
@@ -841,8 +1321,28 @@ void myhtml_attribute_delete(myhtml_tree_t *tree, myhtml_tree_node_t *node, myht
 
 void myhtml_attribute_free(myhtml_tree_t *tree, myhtml_tree_attr_t *attr)
 {
-    mchar_async_free(attr->entry.mchar, attr->entry.node_idx, attr->entry.data);
+    if(attr->key.data)
+        mchar_async_free(attr->key.mchar, attr->key.node_idx, attr->key.data);
+    if(attr->value.data)
+        mchar_async_free(attr->value.mchar, attr->value.node_idx, attr->value.data);
+    
     mcobject_async_free(tree->token->attr_obj, attr);
+}
+
+myhtml_position_t myhtml_attribute_key_raw_position(myhtml_tree_attr_t *attr)
+{
+    if(attr)
+        return (myhtml_position_t){attr->raw_key_begin, attr->raw_key_length};
+    
+    return (myhtml_position_t){0, 0};
+}
+
+myhtml_position_t myhtml_attribute_value_raw_position(myhtml_tree_attr_t *attr)
+{
+    if(attr)
+        return (myhtml_position_t){attr->raw_value_begin, attr->raw_value_length};
+    
+    return (myhtml_position_t){0, 0};
 }
 
 /*
@@ -850,7 +1350,7 @@ void myhtml_attribute_free(myhtml_tree_t *tree, myhtml_tree_attr_t *attr)
  */
 myhtml_collection_t * myhtml_collection_create(size_t size, myhtml_status_t *status)
 {
-    myhtml_collection_t *collection = (myhtml_collection_t*)malloc(sizeof(myhtml_collection_t));
+    myhtml_collection_t *collection = (myhtml_collection_t*)myhtml_malloc(sizeof(myhtml_collection_t));
     
     if(collection == NULL) {
         if(status)
@@ -861,10 +1361,10 @@ myhtml_collection_t * myhtml_collection_create(size_t size, myhtml_status_t *sta
     
     collection->size   = size;
     collection->length = 0;
-    collection->list   = (myhtml_tree_node_t **)mymalloc(sizeof(myhtml_tree_node_t*) * size);
+    collection->list   = (myhtml_tree_node_t **)myhtml_malloc(sizeof(myhtml_tree_node_t*) * size);
     
     if(collection->list == NULL) {
-        free(collection);
+        myhtml_free(collection);
         
         if(status)
             *status = MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
@@ -878,14 +1378,12 @@ myhtml_collection_t * myhtml_collection_create(size_t size, myhtml_status_t *sta
     return collection;
 }
 
-myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, size_t upto_length)
+myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, size_t need, size_t upto_length)
 {
-    upto_length = collection->length + upto_length;
-    
-    if(upto_length > collection->size)
+    if((collection->length + need) >= collection->size)
     {
-        size_t tmp_size = collection->size + upto_length;
-        myhtml_tree_node_t **tmp = (myhtml_tree_node_t **)myrealloc(collection->list, sizeof(myhtml_tree_node_t*) * tmp_size);
+        size_t tmp_size = collection->length + need + upto_length + 1;
+        myhtml_tree_node_t **tmp = (myhtml_tree_node_t **)myhtml_realloc(collection->list, sizeof(myhtml_tree_node_t*) * tmp_size);
         
         if(tmp) {
             collection->length  = upto_length;
@@ -911,34 +1409,48 @@ myhtml_collection_t * myhtml_collection_destroy(myhtml_collection_t *collection)
         return NULL;
     
     if(collection->list)
-        free(collection->list);
+        myhtml_free(collection->list);
     
-    free(collection);
+    myhtml_free(collection);
     
     return NULL;
 }
 
 /* queue */
-void myhtml_queue_add(myhtml_tree_t *tree, const char *html, size_t begin, mythread_queue_node_t *qnode)
+void myhtml_queue_add(myhtml_tree_t *tree, const char *html, size_t begin, myhtml_token_node_t* token)
 {
+    mythread_queue_node_t *qnode = tree->current_qnode;
+    
+    if(tree->parse_flags & MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN) {
+        if(token && token->tag_id == MyHTML_TAG__TEXT && token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
+        {
+            myhtml_token_node_clean(token);
+            token->raw_begin = token->element_begin = (tree->global_offset + begin);
+            
+            return;
+        }
+    }
+    
+    qnode->token = token;
+    
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
     
     if(tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) {
-        myhtml_parser_worker(0, tree->current_qnode);
-        while(myhtml_rules_tree_dispatcher(tree, tree->current_qnode->token)){};
+        myhtml_parser_worker(0, qnode);
+        while(myhtml_rules_tree_dispatcher(tree, token)){};
         
-        tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, html, (tree->global_offset + begin), 4, NULL);
+        tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, 4, NULL);
     }
     else {
-        tree->current_qnode = mythread_queue_node_malloc_round(tree->myhtml->thread, tree->queue_entry, html, (tree->global_offset + begin), NULL);
+        tree->current_qnode = mythread_queue_node_malloc_round(tree->myhtml->thread, tree->queue_entry, NULL);
     }
-
+    
 #else
     
-    myhtml_parser_worker(0, tree->current_qnode);
-    while(myhtml_rules_tree_dispatcher(tree, tree->current_qnode->token)){};
+    myhtml_parser_worker(0, qnode);
+    while(myhtml_rules_tree_dispatcher(tree, token)){};
     
-    tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, html, (tree->global_offset + begin), 4, NULL);
+    tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, 4, NULL);
     
 #endif /* MyHTML_BUILD_WITHOUT_THREADS */
     
@@ -946,9 +1458,11 @@ void myhtml_queue_add(myhtml_tree_t *tree, const char *html, size_t begin, mythr
     tree->current_qnode->prev = qnode;
     
     if(qnode)
-        myhtml_tokenizer_calc_current_namespace(tree, qnode);
+        myhtml_tokenizer_calc_current_namespace(tree, token);
     
-    myhtml_token_node_malloc(tree->token, tree->current_qnode->token, tree->token->mcasync_token_id);
+    myhtml_token_node_malloc(tree->token, tree->current_token_node, tree->token->mcasync_token_id);
+    
+    tree->current_token_node->raw_begin = tree->current_token_node->element_begin = (tree->global_offset + begin);
 }
 
 bool myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size)
@@ -976,6 +1490,6 @@ bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id)
     if(node == NULL)
         return false;
     
-    return node->tag_idx == tag_id && node->my_namespace == MyHTML_NAMESPACE_HTML;
+    return node->tag_id == tag_id && node->ns == MyHTML_NAMESPACE_HTML;
 }
 

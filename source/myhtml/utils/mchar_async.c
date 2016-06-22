@@ -22,7 +22,7 @@
 
 mchar_async_t * mchar_async_create(size_t pos_size, size_t size)
 {
-    mchar_async_t *mcobj_async = (mchar_async_t*)calloc(1, sizeof(mchar_async_t));
+    mchar_async_t *mcobj_async = (mchar_async_t*)myhtml_calloc(1, sizeof(mchar_async_t));
     
     mchar_async_init(mcobj_async, pos_size, size);
     
@@ -38,18 +38,18 @@ void mchar_async_init(mchar_async_t *mchar_async, size_t chunk_len, size_t char_
     
     mchar_async->chunks_size      = chunk_len;
     mchar_async->chunks_pos_size  = 1024;
-    mchar_async->chunks           = (mchar_async_chunk_t**)mycalloc(mchar_async->chunks_pos_size, sizeof(mchar_async_chunk_t*));
-    mchar_async->chunks[0]        = (mchar_async_chunk_t*)mycalloc(mchar_async->chunks_size, sizeof(mchar_async_chunk_t));
+    mchar_async->chunks           = (mchar_async_chunk_t**)myhtml_calloc(mchar_async->chunks_pos_size, sizeof(mchar_async_chunk_t*));
+    mchar_async->chunks[0]        = (mchar_async_chunk_t*)myhtml_calloc(mchar_async->chunks_size, sizeof(mchar_async_chunk_t));
     
     mchar_async_cache_init(&mchar_async->chunk_cache);
     
     mchar_async->nodes_length     = 0;
     mchar_async->nodes_size       = 64;
-    mchar_async->nodes            = (mchar_async_node_t*)mycalloc(mchar_async->nodes_size, sizeof(mchar_async_node_t));
+    mchar_async->nodes            = (mchar_async_node_t*)myhtml_calloc(mchar_async->nodes_size, sizeof(mchar_async_node_t));
     
     mchar_async->nodes_cache_length = 0;
     mchar_async->nodes_cache_size   = mchar_async->nodes_size;
-    mchar_async->nodes_cache        = (size_t*)mymalloc(mchar_async->nodes_cache_size * sizeof(size_t));
+    mchar_async->nodes_cache        = (size_t*)myhtml_malloc(mchar_async->nodes_cache_size * sizeof(size_t));
     
     mchar_async_clean(mchar_async);
     
@@ -86,12 +86,12 @@ mchar_async_t * mchar_async_destroy(mchar_async_t *mchar_async, int destroy_self
             mchar_async_cache_destroy(&node->cache, false);
         }
         
-        free(mchar_async->nodes);
+        myhtml_free(mchar_async->nodes);
         mchar_async->nodes = NULL;
     }
     
     if(mchar_async->nodes_cache) {
-        free(mchar_async->nodes_cache);
+        myhtml_free(mchar_async->nodes_cache);
     }
     
     if(mchar_async->chunks)
@@ -101,14 +101,14 @@ mchar_async_t * mchar_async_destroy(mchar_async_t *mchar_async, int destroy_self
             {
                 for (size_t idx = 0; idx < mchar_async->chunks_size; idx++) {
                     if(mchar_async->chunks[pos_idx][idx].begin)
-                        free(mchar_async->chunks[pos_idx][idx].begin);
+                        myhtml_free(mchar_async->chunks[pos_idx][idx].begin);
                 }
                 
-                free(mchar_async->chunks[pos_idx]);
+                myhtml_free(mchar_async->chunks[pos_idx]);
             }
         }
         
-        free(mchar_async->chunks);
+        myhtml_free(mchar_async->chunks);
         mchar_async->chunks = NULL;
     }
     
@@ -119,7 +119,7 @@ mchar_async_t * mchar_async_destroy(mchar_async_t *mchar_async, int destroy_self
     memset(mchar_async, 0, sizeof(mchar_async_t));
     
     if(destroy_self)
-        free(mchar_async);
+        myhtml_free(mchar_async);
     else
         return mchar_async;
     
@@ -133,10 +133,10 @@ void mchar_async_mem_malloc(mchar_async_t *mchar_async, mchar_async_node_t *node
     
     if(chunk->begin) {
         if(length > chunk->size) {
-            free(chunk->begin);
+            myhtml_free(chunk->begin);
             
             chunk->size = length + mchar_async->origin_size;
-            chunk->begin = (char*)mymalloc(chunk->size * sizeof(char));
+            chunk->begin = (char*)myhtml_malloc(chunk->size * sizeof(char));
         }
     }
     else {
@@ -145,7 +145,7 @@ void mchar_async_mem_malloc(mchar_async_t *mchar_async, mchar_async_node_t *node
         if(length > chunk->size)
             chunk->size = length;
         
-        chunk->begin = (char*)mymalloc(chunk->size * sizeof(char));
+        chunk->begin = (char*)myhtml_malloc(chunk->size * sizeof(char));
     }
     
     chunk->length = 0;
@@ -169,7 +169,7 @@ mchar_async_chunk_t * mchar_async_chunk_malloc_without_lock(mchar_async_t *mchar
         if(mchar_async->chunks_pos_length >= mchar_async->chunks_pos_size)
         {
             mchar_async->chunks_pos_size <<= 1;
-            mchar_async_chunk_t **tmp_pos = myrealloc(mchar_async->chunks,
+            mchar_async_chunk_t **tmp_pos = myhtml_realloc(mchar_async->chunks,
                                                       sizeof(mchar_async_chunk_t*) * mchar_async->chunks_pos_size);
             
             if(tmp_pos) {
@@ -181,7 +181,7 @@ mchar_async_chunk_t * mchar_async_chunk_malloc_without_lock(mchar_async_t *mchar
         }
         
         if(mchar_async->chunks[current_idx] == NULL) {
-            mchar_async_chunk_t *tmp = mycalloc(mchar_async->chunks_size, sizeof(mchar_async_chunk_t));
+            mchar_async_chunk_t *tmp = myhtml_calloc(mchar_async->chunks_size, sizeof(mchar_async_chunk_t));
             
             if(tmp)
                 mchar_async->chunks[current_idx] = tmp;
@@ -285,7 +285,7 @@ void mchar_async_node_delete(mchar_async_t *mchar_async, size_t node_idx)
     if(mchar_async->nodes_cache_length >= mchar_async->nodes_cache_size) {
         size_t new_size = mchar_async->nodes_cache_size << 1;
         
-        size_t *tmp = (size_t*)myrealloc(mchar_async->nodes_cache, sizeof(size_t) * mchar_async->nodes_cache_size);
+        size_t *tmp = (size_t*)myhtml_realloc(mchar_async->nodes_cache, sizeof(size_t) * mchar_async->nodes_cache_size);
         
         if(tmp) {
             mchar_async->nodes_cache = tmp;
@@ -367,13 +367,13 @@ char * mchar_async_malloc(mchar_async_t *mchar_async, size_t node_idx, size_t si
             }
         }
         
-        chunk = mchar_sync_chunk_find_by_size(node, size);
+        chunk = mchar_sync_chunk_find_by_size(node, (size + sizeof(size_t)));
         
         if(chunk)
             chunk->length = 0;
         else {
             if((size + sizeof(size_t)) > mchar_async->origin_size)
-                chunk = mchar_async_chunk_malloc(mchar_async, node, (size + mchar_async->origin_size + sizeof(size_t)));
+                chunk = mchar_async_chunk_malloc(mchar_async, node, (size + sizeof(size_t) + mchar_async->origin_size));
             else
                 chunk = mchar_async_chunk_malloc(mchar_async, node, mchar_async->origin_size);
         }
@@ -483,7 +483,7 @@ void mchar_async_cache_init(mchar_async_cache_t *cache)
     cache->nodes_root   = 0;
     cache->nodes_length = 1;
     cache->nodes_size   = 1024;
-    cache->nodes        = (mchar_async_cache_node_t*)mymalloc(sizeof(mchar_async_cache_node_t) * cache->nodes_size);
+    cache->nodes        = (mchar_async_cache_node_t*)myhtml_malloc(sizeof(mchar_async_cache_node_t) * cache->nodes_size);
     
     cache->nodes[0].left  = 0;
     cache->nodes[0].right = 0;
@@ -492,7 +492,7 @@ void mchar_async_cache_init(mchar_async_cache_t *cache)
     
     cache->index_length = 0;
     cache->index_size   = cache->nodes_size;
-    cache->index = (size_t*)mymalloc(sizeof(size_t) * cache->index_size);
+    cache->index = (size_t*)myhtml_malloc(sizeof(size_t) * cache->index_size);
 }
 
 void mchar_async_cache_clean(mchar_async_cache_t *cache)
@@ -516,13 +516,13 @@ mchar_async_cache_t * mchar_async_cache_destroy(mchar_async_cache_t *cache, bool
         return NULL;
     
     if(cache->nodes)
-        free(cache->nodes);
+        myhtml_free(cache->nodes);
     
     if(cache->index)
-        free(cache->index);
+        myhtml_free(cache->index);
     
     if(self_destroy) {
-        free(cache);
+        myhtml_free(cache);
         return NULL;
     }
     
@@ -541,7 +541,7 @@ size_t mchar_async_cache_malloc(mchar_async_cache_t *cache)
     if(cache->nodes_length >= cache->nodes_size) {
         cache->nodes_size <<= 1;
         
-        mchar_async_cache_node_t *tmp = (mchar_async_cache_node_t*)myrealloc(cache->nodes, sizeof(mchar_async_cache_node_t) * cache->nodes_size);
+        mchar_async_cache_node_t *tmp = (mchar_async_cache_node_t*)myhtml_realloc(cache->nodes, sizeof(mchar_async_cache_node_t) * cache->nodes_size);
         
         if(tmp)
             cache->nodes = tmp;
@@ -559,40 +559,102 @@ size_t mchar_async_cache_delete(mchar_async_cache_t *cache, size_t size)
     {
         if(size <= list[idx].size)
         {
-            // for a left
-            size_t left = list[idx].left;
+            while( list[ list[idx].right ].size == size )
+                idx = list[idx].right;
             
-            list[left].parent = list[idx].parent;
+            size_t parent = list[idx].parent;
             
-            if(list[idx].parent) {
-                if(list[ list[idx].parent ].left == idx) {
-                    list[ list[idx].parent ].left = left;
+            if(parent) {
+                if(list[parent].left == idx)
+                {
+                    if(list[idx].right) {
+                        if(list[idx].left) {
+                            size_t last_left = list[ list[idx].right ].left;
+                            
+                            while( list[last_left].left )
+                                last_left = list[last_left].left;
+                            
+                            if(last_left) {
+                                list[last_left].left = list[idx].left;
+                                list[ list[idx].left ].parent = last_left;
+                            }
+                            else {
+                                list[ list[idx].right ].left = list[idx].left;
+                            }
+                        }
+                        
+                        list[parent].left = list[idx].right;
+                        list[ list[idx].right ].parent = parent;
+                    }
+                    else {
+                        list[parent].left = list[idx].left;
+                        list[ list[idx].left ].parent = parent;
+                    }
                 }
                 else {
-                    list[ list[idx].parent ].right = left;
+                    if(list[idx].left) {
+                        if(list[idx].right) {
+                            size_t last_right = list[ list[idx].left ].right;
+                            
+                            while( list[last_right].right )
+                                last_right = list[last_right].right;
+                            
+                            if(last_right) {
+                                list[last_right].right = list[idx].right;
+                                list[ list[idx].right ].parent = last_right;
+                            }
+                            else {
+                                list[ list[idx].left ].right = list[idx].right;
+                            }
+                        }
+                        
+                        list[parent].right = list[idx].left;
+                        list[ list[idx].left ].parent = parent;
+                    }
+                    else {
+                        list[parent].right = list[idx].right;
+                        list[ list[idx].right ].parent = parent;
+                    }
                 }
             }
             else {
-                cache->nodes_root = left;
+                if(list[idx].left) {
+                    if(list[idx].right) {
+                        size_t last_right = list[ list[idx].left ].right;
+                        
+                        while( list[last_right].right )
+                            last_right = list[last_right].right;
+                        
+                        if(last_right) {
+                            list[last_right].right = list[idx].right;
+                            list[ list[idx].right ].parent = last_right;
+                        }
+                        else {
+                            list[ list[idx].left ].right = list[idx].right;
+                        }
+                    }
+                    
+                    cache->nodes_root = list[idx].left;
+                    list[ list[idx].left ].parent = 0;
+                }
+                else {
+                    cache->nodes_root = list[idx].right;
+                    list[ list[idx].right ].parent = 0;
+                }
             }
-            
-            while(list[left].right)
-                left = list[left].right;
-            
-            list[left].right = list[idx].right;
-            
-            list[ list[idx].right ].parent = left;
             
             cache->index[cache->index_length] = idx;
             
             cache->index_length++;
             if(cache->index_length >= cache->index_size)
             {
-                cache->index_size <<= 1;
-                size_t *tmp = (size_t*)myrealloc(cache->index, sizeof(size_t) * cache->index_size);
+                size_t new_size = cache->index_size << 1;
+                size_t *tmp = (size_t*)myhtml_realloc(cache->index, sizeof(size_t) * new_size);
                 
-                if(tmp)
+                if(tmp) {
                     cache->index = tmp;
+                    cache->index_size = new_size;
+                }
             }
             
             cache->count--;
@@ -634,78 +696,54 @@ void mchar_async_cache_add(mchar_async_cache_t *cache, void* value, size_t size)
     {
         if(size == list[idx].size)
         {
-            if(list[idx].parent)
-            {
-                if(list[ list[idx].parent ].left == idx) {
-                    list[ list[idx].parent ].left = new_idx;
-                }
-                else {
-                    list[ list[idx].parent ].right = new_idx;
-                }
-                
-                list[new_idx].parent = list[idx].parent;
+            if(list[idx].right) {
+                list[new_idx].right = list[idx].right;
+                list[ list[idx].right ].parent = new_idx;
             }
             else {
-                list[new_idx].parent = 0;
-                cache->nodes_root = new_idx;
+                list[new_idx].right = 0;
             }
             
-            list[new_idx].right  = idx;
+            list[idx].right = new_idx;
+            
+            list[new_idx].parent = idx;
             list[new_idx].left   = 0;
             list[new_idx].size   = size;
             list[new_idx].value  = value;
-            
-            list[idx].parent = new_idx;
             
             break;
         }
         else if(size < list[idx].size)
         {
-            if(list[idx].parent)
-            {
-                if(list[ list[idx].parent ].left == idx) {
-                    list[ list[idx].parent ].left = new_idx;
-                }
-                else {
-                    list[ list[idx].parent ].right = new_idx;
-                }
+            size_t parent = list[idx].parent;
+            
+            if(parent) {
+                if(list[parent].left == idx)
+                    list[parent].left = new_idx;
+                else
+                    list[parent].right = new_idx;
                 
-                list[new_idx].parent = list[idx].parent;
+                list[new_idx].parent = parent;
             }
             else {
-                list[new_idx].parent = 0;
                 cache->nodes_root = new_idx;
+                list[new_idx].parent = 0;
             }
+            
+            list[idx].parent = new_idx;
             
             list[new_idx].right  = idx;
             list[new_idx].left   = 0;
             list[new_idx].size   = size;
             list[new_idx].value  = value;
             
-            list[idx].parent = new_idx;
-            
             break;
         }
-        else if(size > list[idx].size)
+        else // size > list[idx].size
         {
-            if(list[idx].right == 0)
-            {
-                list[idx].right = new_idx;
-                
-                list[new_idx].right  = 0;
-                list[new_idx].left   = 0;
-                list[new_idx].parent = idx;
-                list[new_idx].size   = size;
-                list[new_idx].value  = value;
-                
-                break;
-            }
-            else
+            if(list[idx].right)
                 idx = list[idx].right;
-        }
-        else {
-            if(list[idx].left == 0)
-            {
+            else {
                 list[idx].right = new_idx;
                 
                 list[new_idx].right  = 0;
@@ -713,11 +751,9 @@ void mchar_async_cache_add(mchar_async_cache_t *cache, void* value, size_t size)
                 list[new_idx].parent = idx;
                 list[new_idx].size   = size;
                 list[new_idx].value  = value;
-                
+            
                 break;
             }
-            else
-                idx = list[idx].left;
         }
     }
 }

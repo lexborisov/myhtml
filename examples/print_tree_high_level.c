@@ -65,7 +65,7 @@ void print_node_attr(myhtml_tree_node_t *node)
     myhtml_tree_attr_t *attr = myhtml_node_attribute_first(node);
     
     while (attr) {
-        const char *name = myhtml_attribute_name(attr, NULL);
+        const char *name = myhtml_attribute_key(attr, NULL);
         
         if(name) {
             printf(" %s", name);
@@ -104,7 +104,7 @@ void print_tree(myhtml_tree_t* tree, myhtml_tree_node_t *node, size_t inc)
         
         printf(">\n");
         
-        // print childs
+        // print children
         print_tree(tree, myhtml_node_child(node), (inc + 1));
         node = myhtml_node_next(node);
     }

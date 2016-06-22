@@ -41,7 +41,7 @@ int main(int argc, const char * argv[])
     
     // print original tree
     printf("Original Tree:\n");
-    myhtml_tree_print_node_childs(tree, myhtml_tree_get_document(tree), stdout, 0);
+    myhtml_tree_print_node_children(tree, myhtml_tree_get_document(tree), stdout, 0);
     
     printf("Change word: manipulate => test\n");
     
@@ -70,7 +70,7 @@ int main(int argc, const char * argv[])
     
     printf("Changed Tree:\n");
     // print tree
-    myhtml_tree_print_node_childs(tree, myhtml_tree_get_document(tree), stdout, 0);
+    myhtml_tree_print_node_children(tree, myhtml_tree_get_document(tree), stdout, 0);
     
     // release resources
     myhtml_tree_destroy(tree);

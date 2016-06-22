@@ -34,6 +34,7 @@ extern "C" {
 #include "myhtml/utils.h"
 #include "myhtml/utils/mctree.h"
 #include "myhtml/utils/mchar_async.h"
+#include "myhtml/utils/mcobject.h"
 #include "myhtml/utils/mcobject_async.h"
 #include "myhtml/utils/mcsimple.h"
 
@@ -51,7 +52,7 @@ extern "C" {
     tags->context_length++;                                                  \
     if(tags->context_length == tags->context_size) {                         \
         tags->context_size += 4096;                                          \
-        tags->context = (myhtml_tag_context_t*)myrealloc(tags->context,      \
+        tags->context = (myhtml_tag_context_t*)myhtml_realloc(tags->context,      \
             sizeof(myhtml_tag_context_t) * tags->context_size);              \
     }                                                                        \
     myhtml_tag_context_clean(tags, tags->context_length)
@@ -101,12 +102,10 @@ struct myhtml_tag {
     mcsimple_t* mcsimple_context;
     
     size_t tags_count;
-    
-    size_t mcobject_node;
     size_t mchar_node;
     
     mchar_async_t       *mchar;
-    mcobject_async_t    *tag_index;
+    mcobject_t          *mcobject_tag_index;
 };
 
 myhtml_tag_t * myhtml_tag_create(void);
@@ -118,7 +117,7 @@ myhtml_tag_id_t myhtml_tag_add(myhtml_tag_t* tags, const char* key, size_t key_s
                               enum myhtml_tokenizer_state data_parser, bool to_lcase);
 
 void myhtml_tag_set_category(myhtml_tag_t* tags, myhtml_tag_id_t tag_idx,
-                         enum myhtml_namespace my_namespace, enum myhtml_tag_categories cats);
+                         enum myhtml_namespace ns, enum myhtml_tag_categories cats);
 
 myhtml_tag_index_t * myhtml_tag_index_create(void);
 myhtml_status_t myhtml_tag_index_init(myhtml_tag_t* tags, myhtml_tag_index_t* tag_index);
