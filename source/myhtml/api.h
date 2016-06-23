@@ -1408,14 +1408,33 @@ myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_tree_node_t *node,
                                  const char* text, size_t length, myhtml_encoding_t encoding);
 
 /**
+ * Get token node
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return myhtml_token_node_t*
+ */
+myhtml_token_node_t*
+myhtml_node_token(myhtml_tree_node_t *node);
+
+/**
  * Get node namespace
  *
  * @param[in] myhtml_tree_node_t*
  *
- * @return enum myhtml_namespace
+ * @return myhtml_namespace_t
  */
-enum myhtml_namespace
+myhtml_namespace_t
 myhtml_node_namespace(myhtml_tree_node_t *node);
+
+/**
+ * Set node namespace
+ *
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] myhtml_namespace_t
+ */
+void
+myhtml_node_namespace_set(myhtml_tree_node_t *node, myhtml_namespace_t ns);
 
 /**
  * Get node tag id

@@ -633,9 +633,19 @@ myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_t
     return &node->token->str;
 }
 
-enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node)
+myhtml_token_node_t* myhtml_node_token(myhtml_tree_node_t *node)
+{
+    return node->token;
+}
+
+myhtml_namespace_t myhtml_node_namespace(myhtml_tree_node_t *node)
 {
     return node->ns;
+}
+
+void myhtml_node_namespace_set(myhtml_tree_node_t *node, myhtml_namespace_t ns)
+{
+    node->ns = ns;
 }
 
 myhtml_tag_id_t myhtml_node_tag_id(myhtml_tree_node_t *node)

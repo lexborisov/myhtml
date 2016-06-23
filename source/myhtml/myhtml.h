@@ -163,8 +163,10 @@ myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_node_t *node);
 void myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node);
 void myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node);
 void myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node);
-    
-enum myhtml_namespace myhtml_node_namespace(myhtml_tree_node_t *node);
+
+myhtml_token_node_t* myhtml_node_token(myhtml_tree_node_t *node);
+myhtml_namespace_t myhtml_node_namespace(myhtml_tree_node_t *node);
+void myhtml_node_namespace_set(myhtml_tree_node_t *node, myhtml_namespace_t ns);
 myhtml_tag_id_t myhtml_node_tag_id(myhtml_tree_node_t *node);
 const char * myhtml_tag_name_by_id(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, size_t *length);
 myhtml_tag_id_t myhtml_tag_id_by_name(myhtml_tree_t* tree, const char *tag_name, size_t length);
