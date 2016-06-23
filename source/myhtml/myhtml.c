@@ -694,7 +694,7 @@ myhtml_tree_attr_t * myhtml_node_attribute_first(myhtml_tree_node_t *node)
 myhtml_tree_attr_t * myhtml_node_attribute_last(myhtml_tree_node_t *node)
 {
     if(node->token)
-        return node->token->attr_first;
+        return node->token->attr_last;
     
     return NULL;
 }
@@ -1492,4 +1492,5 @@ bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id)
     
     return node->tag_id == tag_id && node->ns == MyHTML_NAMESPACE_HTML;
 }
+
 

@@ -122,7 +122,7 @@ mcsync_status_t mcsync_unlock(mcsync_t* mcsync)
 
 mcsync_status_t mcsync_mutex_lock(mcsync_t* mcsync)
 {
-#if !defined(MyHTML_FORCE_SPINLOCK)
+#ifndef MyHTML_FORCE_SPINLOCK
     if(mcsync->mutex == NULL) {
         mcsync->mutex = (pthread_mutex_t*)myhtml_malloc(sizeof(pthread_mutex_t));
         
@@ -143,7 +143,7 @@ mcsync_status_t mcsync_mutex_lock(mcsync_t* mcsync)
 
 mcsync_status_t mcsync_mutex_unlock(mcsync_t* mcsync)
 {
-#if !defined(MyHTML_FORCE_SPINLOCK)
+#ifndef MyHTML_FORCE_SPINLOCK
     if(pthread_mutex_unlock(mcsync->mutex) == 0)
         return MCSYNC_STATUS_OK;
     else

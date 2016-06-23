@@ -24,7 +24,7 @@
 #define MyHTML_DATA_PROCESS_APPEND_WITH_PREPROCESSING() \
 tmp_offset += myhtml_string_before_append_any_preprocessing(str, &data[tmp_offset], (offset - tmp_offset), \
                                                             proc_entry->tmp_str_pos_proc); \
-if((offset - tmp_offset) > 0) { \
+if(offset != tmp_offset) { \
     if(proc_entry->encoding == MyHTML_ENCODING_UTF_8) \
         proc_entry->tmp_str_pos_proc = myhtml_string_append_with_preprocessing(str, &data[tmp_offset], (offset - tmp_offset), \
                                                                                proc_entry->emit_null_char); \
@@ -62,7 +62,7 @@ size_t myhtml_data_process_state_data(myhtml_data_process_entry_t* proc_entry, m
         {
             tmp_offset += myhtml_string_before_append_any_preprocessing(str, &data[tmp_offset], (offset - tmp_offset),
                                                                         proc_entry->tmp_str_pos_proc);
-            if((offset - tmp_offset) > 0) {
+            if(offset != tmp_offset) {
                 if(proc_entry->encoding == MyHTML_ENCODING_UTF_8)
                     proc_entry->tmp_str_pos_proc = myhtml_string_append_with_preprocessing(str, &data[tmp_offset],
                                                                                            (offset - tmp_offset),

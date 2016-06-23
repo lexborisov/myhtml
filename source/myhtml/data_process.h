@@ -41,7 +41,7 @@ struct myhtml_data_process_entry {
     /* temp */
     size_t tmp_str_pos_proc;
     size_t tmp_str_pos;
-    long   tmp_num;
+    size_t tmp_num;
     
     /* &lt; current result */
     charef_entry_result_t charef_res;

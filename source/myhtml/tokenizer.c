@@ -1476,7 +1476,6 @@ myhtml_status_t myhtml_tokenizer_state_init(myhtml_t* myhtml)
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT_START]                 = myhtml_tokenizer_state_comment_start;
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT_START_DASH]            = myhtml_tokenizer_state_comment_start_dash;
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT]                       = myhtml_tokenizer_state_comment;
-    myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT]                       = myhtml_tokenizer_state_comment;
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT_END]                   = myhtml_tokenizer_state_comment_end;
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT_END_DASH]              = myhtml_tokenizer_state_comment_end_dash;
     myhtml->parse_state_func[MyHTML_TOKENIZER_STATE_COMMENT_END_BANG]              = myhtml_tokenizer_state_comment_end_bang;

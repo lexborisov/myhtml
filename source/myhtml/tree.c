@@ -820,6 +820,9 @@ void myhtml_tree_list_clean(myhtml_tree_list_t* list)
 
 myhtml_tree_list_t * myhtml_tree_list_destroy(myhtml_tree_list_t* list, bool destroy_self)
 {
+    if(list == NULL)
+        return NULL;
+    
     if(list->list)
         myhtml_free(list->list);
     
@@ -2138,6 +2141,9 @@ void myhtml_tree_template_insertion_clean(myhtml_tree_t* tree)
 
 myhtml_tree_insertion_list_t * myhtml_tree_template_insertion_destroy(myhtml_tree_t* tree)
 {
+    if(tree->template_insertion == NULL)
+        return NULL;
+        
     if(tree->template_insertion->list)
         myhtml_free(tree->template_insertion->list);
     
@@ -2304,6 +2310,9 @@ void myhtml_tree_token_list_clean(myhtml_tree_token_list_t* list)
 
 myhtml_tree_token_list_t * myhtml_tree_token_list_destroy(myhtml_tree_token_list_t* list, bool destroy_self)
 {
+    if(list == NULL)
+        return NULL;
+    
     if(list->list)
         myhtml_free(list->list);
     

@@ -638,8 +638,7 @@ bool myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_tok
         myhtml_tree_node_t* node = tree->open_elements->list[i];
         
         // step 2
-        while (node->tag_id == token->tag_id && node->ns == MyHTML_NAMESPACE_HTML)
-        {
+        if(node->tag_id == token->tag_id && node->ns == MyHTML_NAMESPACE_HTML) {
             myhtml_tree_generate_implied_end_tags(tree, token->tag_id, MyHTML_NAMESPACE_HTML);
             myhtml_tree_open_elements_pop_until_by_node(tree, node, false);
             

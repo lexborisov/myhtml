@@ -398,7 +398,7 @@ unsigned long myhtml_encoding_index_gb18030_ranges_code_point(unsigned long poin
         return 0xe7c7;
     
     // step 3
-    size_t offset = sizeof(myhtml_encoding_map_gb18030_ranges) / sizeof(unsigned long);
+    unsigned long offset = sizeof(myhtml_encoding_map_gb18030_ranges) / sizeof(unsigned long);
     
     unsigned long code_point_offset = 0;
     while (offset) {
