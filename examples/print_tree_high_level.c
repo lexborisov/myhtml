@@ -102,7 +102,15 @@ void print_tree(myhtml_tree_t* tree, myhtml_tree_node_t *node, size_t inc)
         if(myhtml_node_is_close_self(node))
             printf(" /");
         
-        printf(">\n");
+        myhtml_tag_id_t tag_id = myhtml_node_tag_id(node);
+        
+        if(tag_id == MyHTML_TAG__TEXT || tag_id == MyHTML_TAG__COMMENT) {
+            const char* node_text = myhtml_node_text(node, NULL);
+            printf(">: %s\n", node_text);
+        }
+        else {
+            printf(">\n");
+        }
         
         // print children
         print_tree(tree, myhtml_node_child(node), (inc + 1));
@@ -118,7 +126,7 @@ int main(int argc, const char * argv[])
         path = argv[1];
     }
     else {
-        printf("Bad ARGV!\nUse: get_title_low_level <path_to_html_file>\n");
+        printf("Bad ARGV!\nUse: print_tree_high_level <path_to_html_file>\n");
         exit(EXIT_FAILURE);
     }
     
