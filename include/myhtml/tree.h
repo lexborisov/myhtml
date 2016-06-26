@@ -44,6 +44,14 @@ extern "C" {
 
 #define myhtml_tree_node_get(tree, node_id, attr) tree->nodes[node_id].attr
 
+#define myhtml_tree_node_callback_insert(tree, node) \
+    if(tree->callback_tree_node_insert) \
+        tree->callback_tree_node_insert(tree, node, tree->callback_tree_node_insert_ctx)
+
+#define myhtml_tree_node_callback_remove(tree, node) \
+    if(tree->callback_tree_node_remove) \
+        tree->callback_tree_node_remove(tree, node, tree->callback_tree_node_remove_ctx)
+
 enum myhtml_tree_node_type {
     MyHTML_TYPE_NONE    = 0,
     MyHTML_TYPE_BLOCK   = 1,
@@ -231,6 +239,12 @@ struct myhtml_tree {
     
     void* callback_before_token_ctx;
     void* callback_after_token_ctx;
+    
+    myhtml_callback_tree_node_f callback_tree_node_insert;
+    myhtml_callback_tree_node_f callback_tree_node_remove;
+    
+    void* callback_tree_node_insert_ctx;
+    void* callback_tree_node_remove_ctx;
 };
 
 // base
@@ -350,7 +364,7 @@ void myhtml_tree_node_add_child(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* 
 void myhtml_tree_node_insert_before(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
 void myhtml_tree_node_insert_after(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
 void myhtml_tree_node_insert_by_mode(myhtml_tree_t* tree, myhtml_tree_node_t* adjusted_location, myhtml_tree_node_t* node, enum myhtml_tree_insertion_mode mode);
-myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_node_t* node);
+myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 
 myhtml_tree_node_t * myhtml_tree_node_insert_html_element(myhtml_tree_t* tree, myhtml_token_node_t* token);
 myhtml_tree_node_t * myhtml_tree_node_insert_foreign_element(myhtml_tree_t* tree, myhtml_token_node_t* token);

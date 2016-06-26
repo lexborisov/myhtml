@@ -44,4 +44,26 @@ void myhtml_callback_after_token_done_set(myhtml_tree_t *tree, myhtml_callback_t
     tree->callback_after_token_ctx = ctx;
 }
 
+myhtml_callback_tree_node_f myhtml_callback_tree_node_insert(myhtml_tree_t *tree)
+{
+    return tree->callback_tree_node_insert;
+}
+
+myhtml_callback_tree_node_f myhtml_callback_tree_node_remove(myhtml_tree_t *tree)
+{
+    return tree->callback_tree_node_remove;
+}
+
+void myhtml_callback_tree_node_insert_set(myhtml_tree_t *tree, myhtml_callback_tree_node_f func, void* ctx)
+{
+    tree->callback_tree_node_insert = func;
+    tree->callback_tree_node_insert_ctx = ctx;
+}
+
+void myhtml_callback_tree_node_remove_set(myhtml_tree_t *tree, myhtml_callback_tree_node_f func, void* ctx)
+{
+    tree->callback_tree_node_remove = func;
+    tree->callback_tree_node_remove_ctx = ctx;
+}
+
 

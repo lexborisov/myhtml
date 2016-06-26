@@ -36,8 +36,15 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     tree->parse_flags        = MyHTML_TREE_PARSE_FLAGS_CLEAN;
     tree->queue              = mythread_queue_create(9182, &status);
     
-    tree->callback_before_token = NULL;
-    tree->callback_after_token = NULL;
+    tree->callback_before_token     = NULL;
+    tree->callback_after_token      = NULL;
+    tree->callback_before_token_ctx = NULL;
+    tree->callback_after_token_ctx  = NULL;
+    
+    tree->callback_tree_node_insert     = NULL;
+    tree->callback_tree_node_remove     = NULL;
+    tree->callback_tree_node_insert_ctx = NULL;
+    tree->callback_tree_node_remove_ctx = NULL;
     
     if(status)
         return status;
@@ -434,6 +441,8 @@ void myhtml_tree_node_add_child(myhtml_tree_t* tree, myhtml_tree_node_t* root, m
     
     node->parent     = root;
     root->last_child = node;
+    
+    myhtml_tree_node_callback_insert(tree, node);
 }
 
 void myhtml_tree_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node)
@@ -449,6 +458,8 @@ void myhtml_tree_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t* roo
     node->parent = root->parent;
     node->next   = root;
     root->prev   = node;
+    
+    myhtml_tree_node_callback_insert(tree, node);
 }
 
 void myhtml_tree_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node)
@@ -464,6 +475,8 @@ void myhtml_tree_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t* root
     node->parent = root->parent;
     node->prev   = root;
     root->next   = node;
+    
+    myhtml_tree_node_callback_insert(tree, node);
 }
 
 myhtml_tree_node_t * myhtml_tree_node_find_parent_by_tag_id(myhtml_tree_node_t* node, myhtml_tag_id_t tag_id)
@@ -477,7 +490,7 @@ myhtml_tree_node_t * myhtml_tree_node_find_parent_by_tag_id(myhtml_tree_node_t* 
     return node;
 }
 
-myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_node_t* node)
+myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 {
     if(node->next)
         node->next->prev = node->prev;
@@ -494,6 +507,8 @@ myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_node_t* node)
     
     if(node->next)
         node->next = NULL;
+    
+    myhtml_tree_node_callback_remove(tree, node);
     
     return node;
 }
@@ -516,7 +531,7 @@ void myhtml_tree_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* node)
     if(node == NULL)
         return;
     
-    myhtml_tree_node_remove(node);
+    myhtml_tree_node_remove(tree, node);
     myhtml_tree_node_free(tree, node);
 }
 
@@ -549,10 +564,10 @@ myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_t* tree, myhtml_tree_nod
     
     myhtml_token_node_wait_for_done(node->token);
     
-    new_node->token            = myhtml_token_node_clone(tree->token, node->token, tree->mcasync_token_id, tree->mcasync_attr_id);
-    new_node->tag_id          = node->tag_id;
-    new_node->ns     = node->ns;
-    new_node->token->type     |= MyHTML_TOKEN_TYPE_DONE;
+    new_node->token        = myhtml_token_node_clone(tree->token, node->token, tree->mcasync_token_id, tree->mcasync_attr_id);
+    new_node->tag_id       = node->tag_id;
+    new_node->ns           = node->ns;
+    new_node->token->type |= MyHTML_TOKEN_TYPE_DONE;
     
     return new_node;
 }
@@ -573,9 +588,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert_by_token(myhtml_tree_t* tree, myhtm
 {
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->tag_id      = token->tag_id;
-    node->token        = token;
-    node->ns = ns;
+    node->tag_id = token->tag_id;
+    node->token  = token;
+    node->ns     = ns;
     
     enum myhtml_tree_insertion_mode mode;
     myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
@@ -592,9 +607,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert(myhtml_tree_t* tree, myhtml_tag_id_
 {
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->token        = NULL;
-    node->tag_id      = tag_idx;
-    node->ns = ns;
+    node->token  = NULL;
+    node->tag_id = tag_idx;
+    node->ns     = ns;
     
     enum myhtml_tree_insertion_mode mode;
     myhtml_tree_node_t* adjusted_location = myhtml_tree_appropriate_place_inserting(tree, NULL, &mode);
@@ -610,8 +625,8 @@ myhtml_tree_node_t * myhtml_tree_node_insert_comment(myhtml_tree_t* tree, myhtml
 {
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->token     = token;
-    node->tag_id   = MyHTML_TAG__COMMENT;
+    node->token  = token;
+    node->tag_id = MyHTML_TAG__COMMENT;
     
     enum myhtml_tree_insertion_mode mode = 0;
     if(parent == NULL) {
@@ -632,7 +647,7 @@ myhtml_tree_node_t * myhtml_tree_node_insert_doctype(myhtml_tree_t* tree, myhtml
     
     node->token        = token;
     node->ns           = MyHTML_NAMESPACE_HTML;
-    node->tag_id      = MyHTML_TAG__DOCTYPE;
+    node->tag_id       = MyHTML_TAG__DOCTYPE;
     
     myhtml_tree_node_add_child(tree, tree->document, node);
     myhtml_tree_index_append(tree, node);
@@ -649,8 +664,8 @@ myhtml_tree_node_t * myhtml_tree_node_insert_root(myhtml_tree_t* tree, myhtml_to
     else
         node->tag_id = MyHTML_TAG_HTML;
     
-    node->token        = token;
-    node->ns = ns;
+    node->token = token;
+    node->ns    = ns;
     
     myhtml_tree_node_add_child(tree, tree->document, node);
     myhtml_tree_open_elements_append(tree, node);
@@ -693,9 +708,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert_text(myhtml_tree_t* tree, myhtml_to
     
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->tag_id      = MyHTML_TAG__TEXT;
-    node->token        = token;
-    node->ns = adjusted_location->ns;
+    node->tag_id = MyHTML_TAG__TEXT;
+    node->token  = token;
+    node->ns     = adjusted_location->ns;
     
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_index_append(tree, node);
@@ -721,9 +736,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert_foreign_element(myhtml_tree_t* tree
     
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->tag_id      = token->tag_id;
-    node->token        = token;
-    node->ns = adjusted_location->ns;
+    node->tag_id = token->tag_id;
+    node->token  = token;
+    node->ns     = adjusted_location->ns;
     
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_open_elements_append(tree, node);
@@ -739,9 +754,9 @@ myhtml_tree_node_t * myhtml_tree_node_insert_html_element(myhtml_tree_t* tree, m
     
     myhtml_tree_node_t* node = myhtml_tree_node_create(tree);
     
-    node->tag_id      = token->tag_id;
-    node->token        = token;
-    node->ns = MyHTML_NAMESPACE_HTML;
+    node->tag_id = token->tag_id;
+    node->token  = token;
+    node->ns     = MyHTML_NAMESPACE_HTML;
     
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_open_elements_append(tree, node);
@@ -1860,7 +1875,7 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
             
             // step 13.9
             if(last->parent)
-                myhtml_tree_node_remove(last);
+                myhtml_tree_node_remove(tree, last);
             
             myhtml_tree_node_add_child(tree, node, last);
             
@@ -1869,7 +1884,7 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
         }
         
         if(last->parent)
-            myhtml_tree_node_remove(last);
+            myhtml_tree_node_remove(tree, last);
         
         // step 14
         enum myhtml_tree_insertion_mode insert_mode;
@@ -1886,7 +1901,7 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
         
         while (furthest_block_child) {
             myhtml_tree_node_t *next = furthest_block_child->next;
-            myhtml_tree_node_remove(furthest_block_child);
+            myhtml_tree_node_remove(tree, furthest_block_child);
             
             myhtml_tree_node_add_child(tree, new_formatting_element, furthest_block_child);
             furthest_block_child = next;
@@ -2224,7 +2239,12 @@ void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE*
     }
     else
     {
-        fprintf(out, "<%.*s", (int)ctx->name_length, ctx->name);
+        if(node->token && node->token->type & MyHTML_TOKEN_TYPE_CLOSE) {
+            fprintf(out, "</%.*s", (int)ctx->name_length, ctx->name);
+        }
+        else {
+            fprintf(out, "<%.*s", (int)ctx->name_length, ctx->name);
+        }
         
         if(node->ns != MyHTML_NAMESPACE_HTML) {
             switch (node->ns) {

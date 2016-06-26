@@ -481,9 +481,11 @@ typedef size_t (*myhtml_data_process_state_f)(myhtml_data_process_entry_t* chare
 
 // callback functions
 typedef void* (*myhtml_callback_token_f)(myhtml_tree_t* tree, myhtml_token_node_t* token, void* ctx);
+typedef void (*myhtml_callback_tree_node_f)(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx);
 
 // find attribute value functions
 typedef bool (*myhtml_attribute_value_find_f)(myhtml_string_t* str_key, const char* value, size_t value_len);
+
 
 void * myhtml_mem_malloc(size_t size);
 void * myhtml_mem_realloc(void* dst, size_t size);

@@ -479,9 +479,9 @@ myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag
     return node;
 }
 
-myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_node_t *node)
+myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_t* tree, myhtml_tree_node_t *node)
 {
-    return myhtml_tree_node_remove(node);
+    return myhtml_tree_node_remove(tree, node);
 }
 
 void myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node)

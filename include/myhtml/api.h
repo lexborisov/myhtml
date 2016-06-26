@@ -555,6 +555,7 @@ typedef struct myhtml_token_node myhtml_token_node_t;
 
 // callback functions
 typedef void* (*myhtml_callback_token_f)(myhtml_tree_t* tree, myhtml_token_node_t* token, void* ctx);
+typedef void (*myhtml_callback_tree_node_f)(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx);
 
 /***********************************************************************************
  *
@@ -2499,7 +2500,7 @@ myhtml_namespace_id_by_name(const char *name, size_t length, myhtml_namespace_t 
  * @return myhtml_callback_token_f
  */
 myhtml_callback_token_f
-myhtml_callback_before_token_done(myhtml_tree_t *tree);
+myhtml_callback_before_token_done(myhtml_tree_t* tree);
 
 /**
  * Get current callback for tokens after processing
@@ -2509,25 +2510,91 @@ myhtml_callback_before_token_done(myhtml_tree_t *tree);
  * @return myhtml_callback_token_f
  */
 myhtml_callback_token_f
-myhtml_callback_after_token_done(myhtml_tree_t *tree);
+myhtml_callback_after_token_done(myhtml_tree_t* tree);
 
 /**
  * Set callback for tokens before processing
+ *
+ * Warning!
+ * If you using thread mode parsing then this callback calls from thread (not Main thread)
+ * If you build MyHTML without thread or using MyHTML_OPTIONS_PARSE_MODE_SINGLE for create myhtml_t object
+ *  then this callback calls from Main thread
  *
  * @param[in] myhtml_tree_t*
  * @param[in] myhtml_callback_token_f callback function
  */
 void
-myhtml_callback_before_token_done_set(myhtml_tree_t *tree, myhtml_callback_token_f func, void* ctx);
+myhtml_callback_before_token_done_set(myhtml_tree_t* tree, myhtml_callback_token_f func, void* ctx);
 
 /**
  * Set callback for tokens before processing
+ *
+ * Warning!
+ * If you using thread mode parsing then this callback calls from thread (not Main thread)
+ * If you build MyHTML without thread or using MyHTML_OPTIONS_PARSE_MODE_SINGLE for create myhtml_t object
+ *  then this callback calls from Main thread
  *
  * @param[in] myhtml_tree_t*
  * @param[in] myhtml_callback_token_f callback function
  */
 void
-myhtml_callback_after_token_done_set(myhtml_tree_t *tree, myhtml_callback_token_f func, void* ctx);
+myhtml_callback_after_token_done_set(myhtml_tree_t* tree, myhtml_callback_token_f func, void* ctx);
+
+/**
+ * Get current callback for tree node after inserted
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_callback_tree_node_f
+ */
+myhtml_callback_tree_node_f
+myhtml_callback_tree_node_insert(myhtml_tree_t* tree);
+
+/**
+ * Get current callback for tree node after removed
+ *
+ * @param[in] myhtml_tree_t*
+ *
+ * @return myhtml_callback_tree_node_f
+ */
+myhtml_callback_tree_node_f
+myhtml_callback_tree_node_remove(myhtml_tree_t* tree);
+
+/**
+ * Set callback for tree node after inserted
+ *
+ * Warning!
+ * If you using thread mode parsing then this callback calls from thread (not Main thread)
+ * If you build MyHTML without thread or using MyHTML_OPTIONS_PARSE_MODE_SINGLE for create myhtml_t object
+ *  then this callback calls from Main thread
+ *
+ * Warning!!!
+ * If you well access to attributes or text for node and you using thread mode then 
+ * you need wait for token processing done. See myhtml_token_node_wait_for_done
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_callback_tree_node_f callback function
+ */
+void
+myhtml_callback_tree_node_insert_set(myhtml_tree_t* tree, myhtml_callback_tree_node_f func, void* ctx);
+
+/**
+ * Set callback for tree node after removed
+ *
+ * Warning!
+ * If you using thread mode parsing then this callback calls from thread (not Main thread)
+ * If you build MyHTML without thread or using MyHTML_OPTIONS_PARSE_MODE_SINGLE for create myhtml_t object
+ *  then this callback calls from Main thread
+ *
+ * Warning!!!
+ * If you well access to attributes or text for node and you using thread mode then
+ * you need wait for token processing done. See myhtml_token_node_wait_for_done
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_callback_tree_node_f callback function
+ */
+void
+myhtml_callback_tree_node_remove_set(myhtml_tree_t* tree, myhtml_callback_tree_node_f func, void* ctx);
 
 /***********************************************************************************
  *

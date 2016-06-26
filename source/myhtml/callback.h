@@ -35,6 +35,11 @@ myhtml_callback_token_f myhtml_callback_after_token_done(myhtml_tree_t *tree);
 void myhtml_callback_before_token_done_set(myhtml_tree_t *tree, myhtml_callback_token_f func, void* ctx);
 void myhtml_callback_after_token_done_set(myhtml_tree_t *tree, myhtml_callback_token_f func, void* ctx);
 
+myhtml_callback_tree_node_f myhtml_callback_tree_node_insert(myhtml_tree_t *tree);
+myhtml_callback_tree_node_f myhtml_callback_tree_node_remove(myhtml_tree_t *tree);
+void myhtml_callback_tree_node_insert_set(myhtml_tree_t *tree, myhtml_callback_tree_node_f func, void* ctx);
+void myhtml_callback_tree_node_remove_set(myhtml_tree_t *tree, myhtml_callback_tree_node_f func, void* ctx);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

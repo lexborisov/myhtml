@@ -159,7 +159,7 @@ myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_n
 myhtml_tree_node_t * myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
 
 myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
-myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_t* tree, myhtml_tree_node_t *node);
 void myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node);
 void myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node);
 void myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node);
