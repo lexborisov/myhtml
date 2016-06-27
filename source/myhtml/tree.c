@@ -138,9 +138,9 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
 
 void myhtml_tree_clean(myhtml_tree_t* tree)
 {
+#ifndef MyHTML_BUILD_WITHOUT_THREADS
     myhtml_t* myhtml = tree->myhtml;
     
-#ifndef MyHTML_BUILD_WITHOUT_THREADS
     for(size_t i = 0; i < myhtml->thread->batch_count; i++) {
         mchar_async_node_clean(tree->mchar, tree->async_args[(myhtml->thread->batch_first_id + i)].mchar_node_id);
     }
