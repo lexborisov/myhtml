@@ -174,7 +174,7 @@ void myhtml_string_append_lowercase(myhtml_string_t* str, const char* data, size
     MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
     
     unsigned char *ref = (unsigned char*)&str->data[str->length];
-    unsigned char *buf = (unsigned char*)data;
+    const unsigned char *buf = (const unsigned char*)data;
     
     size_t i;
     for(i = 0; i < length; i++) {
@@ -190,7 +190,7 @@ size_t myhtml_string_append_with_preprocessing(myhtml_string_t* str, const char*
     MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
     
     unsigned char *data = (unsigned char*)str->data;
-    const unsigned char *u_buff = (unsigned char*)buff;
+    const unsigned char *u_buff = (const unsigned char*)buff;
     
     /* 0x0D == \r */
     /* 0x0A == \n */
@@ -235,7 +235,7 @@ size_t myhtml_string_append_lowercase_with_preprocessing(myhtml_string_t* str, c
     MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
     
     unsigned char *data = (unsigned char*)str->data;
-    const unsigned char *u_buff = (unsigned char*)buff;
+    const unsigned char *u_buff = (const unsigned char*)buff;
     
     for (size_t i = 0; i < length; i++)
     {
@@ -301,7 +301,7 @@ size_t myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(myhtm
     MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
     
     unsigned const char* u_buff = (unsigned const char*)buff;
-    myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
+    const myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
     
     for (size_t i = 0; i < length; i++)
     {
@@ -328,9 +328,9 @@ size_t myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(myhtm
                     myhtml_string_realloc(str, (str->size + 5));
                     
                     // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
-                    str->data[str->length] = 0xEF; str->length++;
-                    str->data[str->length] = 0xBF; str->length++;
-                    str->data[str->length] = 0xBD;
+                    str->data[str->length] = (char)0xEF; str->length++;
+                    str->data[str->length] = (char)0xBF; str->length++;
+                    str->data[str->length] = (char)0xBD;
                 }
             }
             
@@ -356,7 +356,7 @@ size_t myhtml_string_append_lowercase_chunk_with_convert_encoding_with_preproces
     MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
     
     unsigned const char* u_buff = (unsigned const char*)buff;
-    myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
+    const myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
     
     for (size_t i = 0; i < length; i++)
     {
@@ -383,9 +383,9 @@ size_t myhtml_string_append_lowercase_chunk_with_convert_encoding_with_preproces
                     myhtml_string_realloc(str, (str->size + 5));
                     
                     // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
-                    str->data[str->length] = 0xEF; str->length++;
-                    str->data[str->length] = 0xBF; str->length++;
-                    str->data[str->length] = 0xBD;
+                    str->data[str->length] = (char)0xEF; str->length++;
+                    str->data[str->length] = (char)0xBF; str->length++;
+                    str->data[str->length] = (char)0xBD;
                 }
             }
             
@@ -413,7 +413,7 @@ void myhtml_string_append_with_convert_encoding(myhtml_string_t* str, const char
 void myhtml_string_append_chunk_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding)
 {
     unsigned const char* u_buff = (unsigned const char*)buff;
-    myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
+    const myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
     
     for (size_t i = 0; i < length; i++)
     {
@@ -428,7 +428,7 @@ void myhtml_string_append_chunk_with_convert_encoding(myhtml_string_t* str, myht
 
 void myhtml_string_append_one_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char data, myhtml_encoding_t encoding)
 {
-    myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
+    const myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
     
     if(func((unsigned const char)data, res) == MyHTML_ENCODING_STATUS_OK) {
         MyHTML_STRING_REALLOC_IF_NEED(str, 5, 0);
@@ -450,7 +450,7 @@ void myhtml_string_append_lowercase_ascii_with_convert_encoding(myhtml_string_t*
 void myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(myhtml_string_t* str, myhtml_encoding_result_t* res, const char* buff, size_t length, myhtml_encoding_t encoding)
 {
     unsigned const char* u_buff = (unsigned const char*)buff;
-    myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
+    const myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
     
     for (size_t i = 0; i < length; i++)
     {
@@ -460,7 +460,7 @@ void myhtml_string_append_chunk_lowercase_ascii_with_convert_encoding(myhtml_str
             size_t insert_len = myhtml_encoding_codepoint_to_ascii_utf_8(res->result, &str->data[str->length]);
             
             if(insert_len == 1) {
-                str->data[str->length] = myhtml_string_chars_lowercase_map[ u_buff[i] ];
+                str->data[str->length] = (const char)myhtml_string_chars_lowercase_map[ u_buff[i] ];
             }
             
             str->length += insert_len;
@@ -490,9 +490,9 @@ size_t myhtml_string_raw_copy(char* str1, const char* str2, size_t size)
 size_t myhtml_string_raw_set_replacement_character(myhtml_string_t* target, size_t position)
 {
     // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
-    target->data[(position)]     = 0xEF;
-    target->data[(position + 1)] = 0xBF;
-    target->data[(position + 2)] = 0xBD;
+    target->data[(position)]     = (char)0xEF;
+    target->data[(position + 1)] = (char)0xBF;
+    target->data[(position + 2)] = (char)0xBD;
     
     return 3;
 }
@@ -502,7 +502,7 @@ void myhtml_string_append_with_replacement_null_characters_only(myhtml_string_t*
     MyHTML_STRING_REALLOC_IF_NEED(str, (length + 1), 0);
     
     unsigned char *data = (unsigned char*)str->data;
-    const unsigned char *u_buff = (unsigned char*)buff;
+    const unsigned char *u_buff = (const unsigned char*)buff;
     
     for (size_t i = 0; i < length; i++)
     {
@@ -511,9 +511,9 @@ void myhtml_string_append_with_replacement_null_characters_only(myhtml_string_t*
             data = (unsigned char*)str->data;
             
             // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
-            data[str->length] = 0xEF; str->length++;
-            data[str->length] = 0xBF; str->length++;
-            data[str->length] = 0xBD;
+            data[str->length] = (char)0xEF; str->length++;
+            data[str->length] = (char)0xBF; str->length++;
+            data[str->length] = (char)0xBD;
         }
         else
             data[str->length] = u_buff[i];

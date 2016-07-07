@@ -67,3 +67,4 @@ myhtml_status_t mcobject_free(mcobject_t *mcobject, void *entry);
 #endif
 
 #endif /* MyHTML_UTILS_MCOBJECT_H */
+

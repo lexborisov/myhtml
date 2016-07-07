@@ -24,7 +24,7 @@
 
 
 
-myhtml_encoding_custom_f myhtml_encoding_get_function_by_id(myhtml_encoding_t idx)
+const myhtml_encoding_custom_f myhtml_encoding_get_function_by_id(myhtml_encoding_t idx)
 {
     return myhtml_encoding_function_index[idx];
 }

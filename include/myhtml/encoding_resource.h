@@ -9302,7 +9302,7 @@ static const unsigned long myhtml_encoding_map_x_mac_cyrillic[] = {
 	1096, 1097, 1098, 1099, 1100, 1101, 1102, 8364, 
 };
 
-myhtml_encoding_custom_f myhtml_encoding_function_index[] = {
+static const myhtml_encoding_custom_f myhtml_encoding_function_index[] = {
     myhtml_encoding_decode_utf_8, NULL, NULL, myhtml_encoding_decode_utf_8, myhtml_encoding_decode_utf_16le,
     myhtml_encoding_decode_utf_16be, myhtml_encoding_decode_x_user_defined,
     myhtml_encoding_decode_big5, myhtml_encoding_decode_euc_kr, myhtml_encoding_decode_gb18030,

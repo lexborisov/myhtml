@@ -214,7 +214,7 @@ bool myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id);
 
 // queue
-void myhtml_queue_add(myhtml_tree_t *tree, const char *html, size_t begin, myhtml_token_node_t* token);
+void myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* token);
 
 /** 
  * Platform-specific hdef performance clock queries.

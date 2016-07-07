@@ -81,7 +81,7 @@ typedef myhtml_encoding_detect_name_entry_t;
 
 typedef myhtml_encoding_status_t (*myhtml_encoding_custom_f)(unsigned const char data, myhtml_encoding_result_t *res);
 
-myhtml_encoding_custom_f myhtml_encoding_get_function_by_id(myhtml_encoding_t idx);
+const myhtml_encoding_custom_f myhtml_encoding_get_function_by_id(myhtml_encoding_t idx);
 
 enum myhtml_encoding_status myhtml_encoding_decode_utf_8(unsigned const char data, myhtml_encoding_result_t *res);
 enum myhtml_encoding_status myhtml_encoding_decode_ibm866(unsigned const char data, myhtml_encoding_result_t *res);

@@ -183,7 +183,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
                 html_offset++;
                 
                 token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-                myhtml_queue_add(tree, html, html_offset, token_node);
+                myhtml_queue_add(tree, html_offset, token_node);
                 
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             }
@@ -345,7 +345,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 html_offset++;
                 
                 token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-                myhtml_queue_add(tree, html, html_offset, token_node);
+                myhtml_queue_add(tree, html_offset, token_node);
             }
             else {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;

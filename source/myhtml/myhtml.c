@@ -1427,7 +1427,7 @@ myhtml_collection_t * myhtml_collection_destroy(myhtml_collection_t *collection)
 }
 
 /* queue */
-void myhtml_queue_add(myhtml_tree_t *tree, const char *html, size_t begin, myhtml_token_node_t* token)
+void myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* token)
 {
     mythread_queue_node_t *qnode = tree->current_qnode;
     
