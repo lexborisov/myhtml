@@ -355,15 +355,15 @@ char * mchar_async_malloc(mchar_async_t *mchar_async, size_t node_idx, size_t si
     {
         if((chunk->length + sizeof(size_t)) < chunk->size)
         {
-            size_t size = (chunk->size - chunk->length) - sizeof(size_t);
+            size_t calc_size = (chunk->size - chunk->length) - sizeof(size_t);
             
-            if(size) {
+            if(calc_size) {
                 char *tmp = &chunk->begin[(chunk->length + sizeof(size_t))];
-                *(size_t*)(&chunk->begin[chunk->length]) = size;
+                *(size_t*)(&chunk->begin[chunk->length]) = calc_size;
                 
                 chunk->length = chunk->size;
                 
-                mchar_async_cache_add(&node->cache, tmp, size);
+                mchar_async_cache_add(&node->cache, tmp, calc_size);
             }
         }
         

@@ -511,9 +511,9 @@ void myhtml_string_append_with_replacement_null_characters_only(myhtml_string_t*
             data = (unsigned char*)str->data;
             
             // Unicode Character 'REPLACEMENT CHARACTER' (U+FFFD)
-            data[str->length] = (char)0xEF; str->length++;
-            data[str->length] = (char)0xBF; str->length++;
-            data[str->length] = (char)0xBD;
+            data[str->length] = 0xEF; str->length++;
+            data[str->length] = 0xBF; str->length++;
+            data[str->length] = 0xBD;
         }
         else
             data[str->length] = u_buff[i];

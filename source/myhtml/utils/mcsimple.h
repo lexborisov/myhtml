@@ -58,3 +58,4 @@ void * mcsimple_get_by_absolute_position(mcsimple_t *mcsimple, size_t pos);
 #endif
 
 #endif /* MyHTML_UTILS_MCSIMPLE_H */
+

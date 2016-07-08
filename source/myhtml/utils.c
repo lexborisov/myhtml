@@ -67,8 +67,8 @@ size_t myhtml_strncasecmp(const char* str1, const char* str2, size_t size)
         return 1;
     }
     
-    unsigned char *ustr1 = (unsigned char *)str1;
-    unsigned char *ustr2 = (unsigned char *)str2;
+    const unsigned char *ustr1 = (const unsigned char *)str1;
+    const unsigned char *ustr2 = (const unsigned char *)str2;
     
     size_t i = 0;
     while (i < size) {
@@ -99,8 +99,8 @@ size_t myhtml_strcasecmp(const char* str1, const char* str2)
         return 1;
     }
     
-    unsigned char *ustr1 = (unsigned char *)str1;
-    unsigned char *ustr2 = (unsigned char *)str2;
+    const unsigned char *ustr1 = (const unsigned char *)str1;
+    const unsigned char *ustr2 = (const unsigned char *)str2;
     
     for (size_t i = 0;;)
     {
@@ -132,8 +132,8 @@ size_t myhtml_strncmp(const char* str1, const char* str2, size_t size)
         return 1;
     }
     
-    unsigned char *ustr1 = (unsigned char *)str1;
-    unsigned char *ustr2 = (unsigned char *)str2;
+    const unsigned char *ustr1 = (const unsigned char *)str1;
+    const unsigned char *ustr2 = (const unsigned char *)str2;
     
     size_t i = 0;
     while (i < size) {
@@ -164,8 +164,8 @@ size_t myhtml_strcmp(const char* str1, const char* str2)
         return 1;
     }
     
-    unsigned char *ustr1 = (unsigned char *)str1;
-    unsigned char *ustr2 = (unsigned char *)str2;
+    const unsigned char *ustr1 = (const unsigned char *)str1;
+    const unsigned char *ustr2 = (const unsigned char *)str2;
     
     for (size_t i = 0;;)
     {
@@ -197,8 +197,8 @@ size_t myhtml_strcmp_ws(const char* str1, const char* str2)
         return 1;
     }
     
-    unsigned char *ustr1 = (unsigned char *)str1;
-    unsigned char *ustr2 = (unsigned char *)str2;
+    const unsigned char *ustr1 = (const unsigned char *)str1;
+    const unsigned char *ustr2 = (const unsigned char *)str2;
     
     for (size_t i = 0;;)
     {

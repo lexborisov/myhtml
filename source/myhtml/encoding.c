@@ -24,7 +24,7 @@
 
 
 
-const myhtml_encoding_custom_f myhtml_encoding_get_function_by_id(myhtml_encoding_t idx)
+myhtml_encoding_custom_f myhtml_encoding_get_function_by_id(myhtml_encoding_t idx)
 {
     return myhtml_encoding_function_index[idx];
 }
@@ -91,7 +91,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_utf_8(unsigned const char dat
     res->second = 0xBF;
     
     res->third++;
-    res->result += (data - 0x80) << (6 * (res->flag - res->third));
+    res->result += (unsigned long)(data - 0x80) << (6 * (res->flag - res->third));
     
     if(res->third != res->flag)
         return MyHTML_ENCODING_STATUS_CONTINUE;
@@ -897,7 +897,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_shared_utf_16(unsigned const 
     if(res->flag)
         (code_unit = (res->first << 8) + data);
     else
-        (code_unit = (data << 8) + res->first);
+        (code_unit = (unsigned long)(data << 8) + res->first);
     
     res->first = 0x00;
     
@@ -1045,7 +1045,7 @@ size_t myhtml_encoding_codepoint_to_lowercase_ascii_utf_8(size_t codepoint, char
     
     if (codepoint <= 0x0000007F) {
         /* 0xxxxxxx */
-        data[0] = myhtml_string_chars_lowercase_map[ codepoint ];
+        data[0] = (char)myhtml_string_chars_lowercase_map[ codepoint ];
         return 1;
     }
     else if (codepoint <= 0x000007FF) {
@@ -1114,8 +1114,8 @@ size_t myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data)
         return 4;
     }
     
-    data[0] = codepoint >> 8;
-    data[1] = codepoint;
+    data[0] = (char)(codepoint >> 8);
+    data[1] = (char)codepoint;
     
     return 2;
 }
