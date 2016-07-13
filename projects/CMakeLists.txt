@@ -17,6 +17,33 @@ set(MyHTML_VERSION_STRING "${MyHTML_VERSION_MAJOR}.${MyHTML_VERSION_MINOR}.${MyH
 project(${MyHTML_PROJECT_NAME})
 
 ################
+## Detect OS
+#########################
+set(MyHTML_PLATFORM "UNDEF")
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if(EXISTS "/etc/debian_version")
+    set(MyHTML_PLATFORM "Debian")
+  endif(EXISTS "/etc/debian_version")
+  
+  if(EXISTS "/etc/redhat-release")
+    set(MyHTML_PLATFORM "Redhat")
+  endif(EXISTS "/etc/redhat-release")
+  
+  if(EXISTS "/etc/fedora-release")
+    set(MyHTML_PLATFORM "Redhat")
+  endif(EXISTS "/etc/fedora-release")
+  
+  if(EXISTS "/etc/SuSE-release")
+    set(MyHTML_PLATFORM "SuSe")
+  endif(EXISTS "/etc/SuSE-release")
+  
+  if(EXISTS "/etc/gentoo-release")
+    set(MyHTML_PLATFORM "Gentoo")
+  endif(EXISTS "/etc/gentoo-release")
+endif()
+
+################
 ## lib param
 #########################
 if(POLICY CMP0042)
@@ -137,3 +164,37 @@ if(MyHTML_BUILD_STATIC)
   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endif()
 
+################
+## Build an RPM.
+#########################
+set(CPACK_PACKAGE_VERSION ${MyHTML_VERSION_STRING})
+
+if(MyHTML_PLATFORM STREQUAL "Debian")
+  set(CPACK_GENERATOR "DEB")
+elseif(MyHTML_PLATFORM STREQUAL "Redhat")
+  set(CPACK_GENERATOR "RPM")
+elseif(MyHTML_PLATFORM STREQUAL "SuSe")
+  set(CPACK_GENERATOR "RPM")
+else()
+  set(CPACK_GENERATOR "TGZ")
+endif()
+
+set(CPACK_PACKAGE_NAME "myhtml")
+set(CPACK_PACKAGE_RELEASE 1)
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Fast C/C++ HTML 5 Parser. Using threads.")
+set(CPACK_PACKAGE_CONTACT "Alexander Borisov")
+set(CPACK_PACKAGE_VENDOR "Alexander Borisov")
+
+if(32BIT)
+  set(CPACK_RPM_PACKAGE_ARCHITECTURE i686)
+else()
+  set(CPACK_RPM_PACKAGE_ARCHITECTURE x86_64)
+endif()
+
+if(MyHTML_BUILD_WITHOUT_THREADS STREQUAL "YES")
+  set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}-without-threads.${CPACK_RPM_PACKAGE_ARCHITECTURE}")
+else()
+  set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}")
+endif()
+
+include(CPack)

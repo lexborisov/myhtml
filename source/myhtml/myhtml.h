@@ -184,9 +184,6 @@ myhtml_tree_attr_t * myhtml_attribute_prev(myhtml_tree_attr_t *attr);
 enum myhtml_namespace myhtml_attribute_namespace(myhtml_tree_attr_t *attr);
 void myhtml_attribute_namespace_set(myhtml_tree_attr_t *attr, myhtml_namespace_t ns);
 
-/* use myhtml_attribute_key */
-MyHTML_DEPRECATED(const char * myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length), "use myhtml_attribute_key");
-
 const char * myhtml_attribute_key(myhtml_tree_attr_t *attr, size_t *length);
 const char * myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length);
 myhtml_string_t * myhtml_attribute_key_string(myhtml_tree_attr_t* attr);

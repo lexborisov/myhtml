@@ -1568,17 +1568,6 @@ void
 myhtml_attribute_namespace_set(myhtml_tree_attr_t *attr, myhtml_namespace_t ns);
 
 /**
- * Get attribute name (key)
- *
- * @param[in] myhtml_tree_attr_t*
- * @param[out] optional, name length
- *
- * @return const char* if exists, otherwise an NULL value
- */
-MyHTML_DEPRECATED(const char*
-myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length), "use myhtml_attribute_key");
-
-/**
  * Get attribute key
  *
  * @param[in] myhtml_tree_attr_t*

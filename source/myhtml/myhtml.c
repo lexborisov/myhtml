@@ -1213,22 +1213,6 @@ void myhtml_attribute_namespace_set(myhtml_tree_attr_t *attr, myhtml_namespace_t
     attr->ns = ns;
 }
 
-const char * myhtml_attribute_name(myhtml_tree_attr_t *attr, size_t *length)
-{
-    if(attr->key.data && attr->key.length)
-    {
-        if(length)
-            *length = attr->key.length;
-        
-        return attr->key.data;
-    }
-    
-    if(length)
-        *length = 0;
-    
-    return NULL;
-}
-
 const char * myhtml_attribute_key(myhtml_tree_attr_t *attr, size_t *length)
 {
     if(attr->key.data && attr->key.length)
