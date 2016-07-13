@@ -7,7 +7,7 @@ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library wit
 ## Now
 
 ```text
-The current version is 1.0.0 - Release Candidate (rc)
+The current version is 1.0.1 - Release
 ```
 
 ## Changes

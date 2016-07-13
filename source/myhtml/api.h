@@ -36,7 +36,7 @@
 
 #define MyHTML_VERSION_MAJOR 1
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 0
+#define MyHTML_VERSION_PATCH 1
 
 #include <stdbool.h>
 #include <stddef.h>
