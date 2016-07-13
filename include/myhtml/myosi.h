@@ -29,6 +29,9 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+#define MyHTML_VERSION_MAJOR 1
+#define MyHTML_VERSION_MINOR 0
+#define MyHTML_VERSION_PATCH 1
 
 #if (defined(_WIN32) || defined(_WIN64)) && !defined(__WINPTHREADS_VERSION)
 #define IS_OS_WINDOWS
@@ -458,6 +461,13 @@ struct myhtml_position {
     size_t length;
 }
 typedef myhtml_position_t;
+
+struct myhtml_version {
+    int major;
+    int minor;
+    int patch;
+}
+typedef myhtml_version_t;
 
 typedef struct myhtml_incoming_buffer myhtml_incoming_buffer_t;
 typedef myhtml_token_attr_t myhtml_tree_attr_t;

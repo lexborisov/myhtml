@@ -553,6 +553,16 @@ typedef myhtml_position_t;
  */
 typedef struct myhtml_token_node myhtml_token_node_t;
 
+/**
+ * @struct myhtml_version_t
+ */
+struct myhtml_version {
+    int major;
+    int minor;
+    int patch;
+}
+typedef myhtml_version_t;
+    
 // callback functions
 typedef void* (*myhtml_callback_token_f)(myhtml_tree_t* tree, myhtml_token_node_t* token, void* ctx);
 typedef void (*myhtml_callback_tree_node_f)(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx);
@@ -2613,6 +2623,19 @@ myhtml_strcasecmp(const char* str1, const char* str2);
 size_t
 myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
 
+/***********************************************************************************
+ *
+ * MyHTML_VERSION
+ *
+ ***********************************************************************************/
+
+/**
+ * Get current version
+ *
+ * @return myhtml_version_t
+ */
+myhtml_version_t
+myhtml_version(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

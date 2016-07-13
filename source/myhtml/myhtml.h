@@ -228,6 +228,9 @@ uint64_t myhtml_hperf_clock(myhtml_status_t *status);
 myhtml_status_t myhtml_hperf_print(const char *name, uint64_t x, uint64_t y, FILE *fh);
 myhtml_status_t myhtml_hperf_print_by_val(const char *name, uint64_t x, FILE *fh);
 
+/* version */
+myhtml_version_t myhtml_version(void);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

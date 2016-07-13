@@ -1456,4 +1456,12 @@ bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id)
     return node->tag_id == tag_id && node->ns == MyHTML_NAMESPACE_HTML;
 }
 
+/* version */
+myhtml_version_t myhtml_version(void)
+{
+    return (myhtml_version_t){MyHTML_VERSION_MAJOR, MyHTML_VERSION_MINOR, MyHTML_VERSION_PATCH};
+}
+
+
+
 
