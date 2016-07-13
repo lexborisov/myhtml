@@ -20,11 +20,6 @@
 
 #include "myhtml/parser.h"
 
-void myhtml_parser_index(mythread_id_t thread_id, mythread_queue_node_t *qnode)
-{
-    // TODO: Create index for attributes
-}
-
 void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
 {
     if((qnode->tree->parse_flags & MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE) == 0) {
@@ -276,28 +271,10 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
         tree->callback_after_token_ctx = tree->callback_after_token(tree, token, tree->callback_after_token_ctx);
 }
 
-void myhtml_parser_worker_index_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
-{
-    myhtml_parser_worker(thread_id, qnode);
-    myhtml_parser_index(thread_id, qnode);
-    myhtml_parser_stream(thread_id, qnode);
-}
-
 void myhtml_parser_worker_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
 {
     myhtml_parser_worker(thread_id, qnode);
     myhtml_parser_stream(thread_id, qnode);
 }
 
-void myhtml_parser_worker_index(mythread_id_t thread_id, mythread_queue_node_t *qnode)
-{
-    myhtml_parser_worker(thread_id, qnode);
-    myhtml_parser_index(thread_id, qnode);
-}
-
-void myhtml_parser_stream_index(mythread_id_t thread_id, mythread_queue_node_t *qnode)
-{
-    myhtml_parser_stream(thread_id, qnode);
-    myhtml_parser_index(thread_id, qnode);
-}
 

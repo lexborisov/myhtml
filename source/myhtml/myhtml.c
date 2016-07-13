@@ -84,37 +84,7 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
             if(status)
                 return status;
             
-            myhread_create_stream(myhtml->thread, myhtml_parser_worker_index_stream, &status);
-            break;
-            
-        case MyHTML_OPTIONS_PARSE_MODE_WORKER_TREE:
-            status = mythread_init(myhtml->thread, "lastmac", 2, queue_size);
-            if(status)
-                return status;
-            
-            myhread_create_stream(myhtml->thread, myhtml_parser_index, &status);
             myhread_create_stream(myhtml->thread, myhtml_parser_worker_stream, &status);
-            break;
-            
-        case MyHTML_OPTIONS_PARSE_MODE_WORKER_INDEX:
-            status = mythread_init(myhtml->thread, "lastmac", 2, queue_size);
-            if(status)
-                return status;
-            
-            myhread_create_stream(myhtml->thread, myhtml_parser_worker_index, &status);
-            myhread_create_stream(myhtml->thread, myhtml_parser_stream, &status);
-            break;
-            
-        case MyHTML_OPTIONS_PARSE_MODE_TREE_INDEX:
-            if(thread_count == 0)
-                thread_count = 1;
-            
-            status = mythread_init(myhtml->thread, "lastmac", (thread_count + 1), queue_size);
-            if(status)
-                return status;
-            
-            myhread_create_stream(myhtml->thread, myhtml_parser_stream_index, &status);
-            myhread_create_batch(myhtml->thread, myhtml_parser_worker, &status, thread_count);
             break;
             
         default:
@@ -122,11 +92,10 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
             if(thread_count == 0)
                 thread_count = 1;
             
-            status = mythread_init(myhtml->thread, "lastmac", (thread_count + 2), queue_size);
+            status = mythread_init(myhtml->thread, "lastmac", (thread_count + 1), queue_size);
             if(status)
                 return status;
             
-            myhread_create_stream(myhtml->thread, myhtml_parser_index, &status);
             myhread_create_stream(myhtml->thread, myhtml_parser_stream, &status);
             myhread_create_batch(myhtml->thread, myhtml_parser_worker, &status, thread_count);
             break;
