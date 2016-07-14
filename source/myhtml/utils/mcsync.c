@@ -20,7 +20,7 @@
 
 #include "myhtml/utils/mcsync.h"
 
-#if !defined(MyHTML_WITHOUT_THREADS) && ((defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)) || \
+#if !defined(MyHTML_BUILD_WITHOUT_THREADS) && ((defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)) || \
     defined(__ATOMIC_SEQ_CST))
 #define MyHTML_FORCE_SPINLOCK
 #endif
@@ -37,7 +37,7 @@ static void mcsync_atomic_store(int* ptr, int value)
 }
 #endif
 
-#if !defined(MyHTML_WITHOUT_THREADS) && defined(IS_OS_WINDOWS)
+#if !defined(MyHTML_BUILD_WITHOUT_THREADS) && defined(IS_OS_WINDOWS)
 static int pthread_mutex_lock(pthread_mutex_t *mutex)
 {
     EnterCriticalSection(mutex);
@@ -80,7 +80,7 @@ mcsync_t * mcsync_destroy(mcsync_t* mcsync, int destroy_self)
     if(mcsync == NULL)
         return NULL;
     
-#if !defined(MyHTML_FORCE_SPINLOCK)
+#if !defined(MyHTML_BUILD_WITHOUT_THREADS) && !defined(MyHTML_FORCE_SPINLOCK)
     if(mcsync->mutex) {
         pthread_mutex_destroy(mcsync->mutex);
         myhtml_free(mcsync->mutex);
@@ -102,7 +102,7 @@ mcsync_status_t mcsync_lock(mcsync_t* mcsync)
 {
 #if defined(MyHTML_FORCE_SPINLOCK)
     while (!mcsync_atomic_compare_exchange(&mcsync->spinlock, 0, 1)) {}
-#else
+#elif !defined(MyHTML_BUILD_WITHOUT_THREADS)
     mcsync_mutex_lock(mcsync);
 #endif
     
@@ -113,7 +113,7 @@ mcsync_status_t mcsync_unlock(mcsync_t* mcsync)
 {
 #if defined(MyHTML_FORCE_SPINLOCK)
     mcsync_atomic_store(&mcsync->spinlock, 0);
-#else
+#elif !defined(MyHTML_BUILD_WITHOUT_THREADS)
     mcsync_mutex_unlock(mcsync);
 #endif
     
@@ -122,7 +122,7 @@ mcsync_status_t mcsync_unlock(mcsync_t* mcsync)
 
 mcsync_status_t mcsync_mutex_lock(mcsync_t* mcsync)
 {
-#ifndef MyHTML_FORCE_SPINLOCK
+#if !defined(MyHTML_BUILD_WITHOUT_THREADS) && !defined(MyHTML_FORCE_SPINLOCK)
     if(mcsync->mutex == NULL) {
         mcsync->mutex = (pthread_mutex_t*)myhtml_malloc(sizeof(pthread_mutex_t));
         
@@ -143,7 +143,7 @@ mcsync_status_t mcsync_mutex_lock(mcsync_t* mcsync)
 
 mcsync_status_t mcsync_mutex_unlock(mcsync_t* mcsync)
 {
-#ifndef MyHTML_FORCE_SPINLOCK
+#if !defined(MyHTML_BUILD_WITHOUT_THREADS) && !defined(MyHTML_FORCE_SPINLOCK)
     if(pthread_mutex_unlock(mcsync->mutex) == 0)
         return MCSYNC_STATUS_OK;
     else
