@@ -990,6 +990,9 @@ size_t myhtml_tokenizer_state_before_attribute_name(myhtml_tree_t* tree, myhtml_
         tree->attr_current->raw_value_begin  = 0;
         tree->attr_current->raw_value_length = 0;
         
+        if(html[html_offset] == '=')
+            html_offset++;
+        
         myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_ATTRIBUTE_NAME;
     }
     
