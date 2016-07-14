@@ -47,6 +47,8 @@ myhtml_token_node_t * myhtml_insertion_fix_split_for_text_begin_ws(myhtml_tree_t
     
     myhtml_string_append(&new_token->str, token->str.data, len);
     
+    new_token->type |= MyHTML_TOKEN_TYPE_DONE;
+    
     // and cut ws for original
     token->str.data    = mchar_async_crop_first_chars_without_cache(token->str.data, len);
     token->str.length -= len;
