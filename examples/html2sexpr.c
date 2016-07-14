@@ -57,7 +57,13 @@ static void walk_subtree(myhtml_tree_t* tree, myhtml_tree_node_t* root, int leve
     myhtml_tree_attr_t* attr = myhtml_node_attribute_first(root);
     while (attr != NULL) {
         /* attribute sexpr (name value)*/
-        printf("(%s \'%s\')", myhtml_attribute_key(attr, NULL), myhtml_attribute_value(attr, NULL));
+        const char *value = myhtml_attribute_value(attr, NULL);
+        
+        if (value)
+            printf("(%s \'%s\')", myhtml_attribute_key(attr, NULL), value);
+        else
+            printf("(%s)", myhtml_attribute_key(attr, NULL));
+        
         attr = myhtml_attribute_next(attr);
     }
 
