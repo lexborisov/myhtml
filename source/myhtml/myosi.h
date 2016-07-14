@@ -31,7 +31,7 @@
 
 #define MyHTML_VERSION_MAJOR 1
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 1
+#define MyHTML_VERSION_PATCH 2
 
 #if (defined(_WIN32) || defined(_WIN64)) && !defined(__WINPTHREADS_VERSION)
 #define IS_OS_WINDOWS
