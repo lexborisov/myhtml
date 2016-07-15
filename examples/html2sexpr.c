@@ -135,6 +135,10 @@ int main(int argc, char** argv)
 
 	// basic init
     myhtml_t* myhtml = myhtml_create();
+    if (!myhtml) {
+        DIE("myhtml_create failed\n");
+    }
+ 
     res = myhtml_init(myhtml, MyHTML_OPTIONS_DEFAULT, 1, 0);
     if (MYHTML_FAILED(res)) {
     	DIE("myhtml_init failed with %d\n", res);
@@ -142,6 +146,10 @@ int main(int argc, char** argv)
     
     // init tree
     myhtml_tree_t* tree = myhtml_tree_create();
+    if (!tree) {
+        DIE("myhtml_tree_create failed\n");
+    }
+
     res = myhtml_tree_init(tree, myhtml);
     if (MYHTML_FAILED(res)) {
     	DIE("myhtml_tree_init failed with %d\n", res);
