@@ -63,6 +63,9 @@ myhtml_status_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t th
     myhtml->opt = opt;
     myhtml->thread = mythread_create();
     
+    if(myhtml->thread == NULL)
+        return MyHTML_STATUS_THREAD_ERROR_MEMORY_ALLOCATION;
+    
 #ifdef MyHTML_BUILD_WITHOUT_THREADS
     
     status = mythread_init(myhtml->thread, NULL, thread_count, queue_size);

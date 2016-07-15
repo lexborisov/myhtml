@@ -382,6 +382,7 @@ enum myhtml_tags {
 enum myhtml_status {
     MyHTML_STATUS_OK                                   = 0x0000,
     MyHTML_STATUS_ERROR_MEMORY_ALLOCATION              = 0x0001,
+    MyHTML_STATUS_THREAD_ERROR_MEMORY_ALLOCATION       = 0x0009,
     MyHTML_STATUS_THREAD_ERROR_LIST_INIT               = 0x000a,
     MyHTML_STATUS_THREAD_ERROR_ATTR_MALLOC             = 0x000b,
     MyHTML_STATUS_THREAD_ERROR_ATTR_INIT               = 0x000c,
