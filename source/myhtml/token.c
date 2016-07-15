@@ -103,9 +103,19 @@ myhtml_token_t * myhtml_token_create(myhtml_tree_t* tree, size_t size)
         size = 4096;
     
     myhtml_token_t* token = (myhtml_token_t*)myhtml_malloc(sizeof(myhtml_token_t));
-    
+    if (!token) return token;
+
     token->nodes_obj = mcobject_async_create();
+    if (!token->nodes_obj) {
+        free(token);
+        return NULL;
+    }
     token->attr_obj  = mcobject_async_create();
+    if (!token->attr_obj) {
+        free(token->attr_obj);
+        free(token);
+        return NULL;
+    }
     
     mcobject_async_init(token->nodes_obj, 128, size, sizeof(myhtml_token_node_t));
     mcobject_async_init(token->attr_obj, 128, size, sizeof(myhtml_token_attr_t));
