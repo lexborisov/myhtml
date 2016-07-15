@@ -31,8 +31,10 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     
     tree->myhtml             = myhtml;
     tree->token              = myhtml_token_create(tree, 4096);
+    
     if(tree->token == NULL)
       return MyHTML_STATUS_TOKENIZER_ERROR_MEMORY_ALLOCATION;
+    
     tree->temp_tag_name.data = NULL;
     tree->stream_buffer      = NULL;
     tree->parse_flags        = MyHTML_TREE_PARSE_FLAGS_CLEAN;
