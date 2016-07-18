@@ -2017,12 +2017,14 @@ myhtml_collection_destroy(myhtml_collection_t *collection);
  * Check size by length and increase if necessary
  *
  * @param[in] myhtml_collection_t*
- * @param[in] count of add nodes
+ * @param[in] need nodes
+ * @param[in] upto_length: count for up if nodes not exists 
+ *            (current length + need + upto_length + 1)
  *
  * @return NULL if successful, otherwise an myhtml_collection_t* structure
  */
 myhtml_status_t
-myhtml_collection_check_size(myhtml_collection_t *collection, size_t up_to_length);
+myhtml_collection_check_size(myhtml_collection_t *collection, size_t need, size_t upto_length);
 
 /***********************************************************************************
  *
