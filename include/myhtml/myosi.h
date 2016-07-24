@@ -446,6 +446,9 @@ enum myhtml_namespace {
     MyHTML_NAMESPACE_XLINK      = 0x04,
     MyHTML_NAMESPACE_XML        = 0x05,
     MyHTML_NAMESPACE_XMLNS      = 0x06,
+    
+    /* MyHTML_NAMESPACE_ANY == MyHTML_NAMESPACE_LAST_ENTRY */
+    MyHTML_NAMESPACE_ANY        = 0x07,
     MyHTML_NAMESPACE_LAST_ENTRY = 0x07
 }
 typedef myhtml_namespace_t;

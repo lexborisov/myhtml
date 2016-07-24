@@ -446,6 +446,9 @@ enum myhtml_namespace {
     MyHTML_NAMESPACE_XLINK      = 0x04,
     MyHTML_NAMESPACE_XML        = 0x05,
     MyHTML_NAMESPACE_XMLNS      = 0x06,
+    
+    /* MyHTML_NAMESPACE_ANY == MyHTML_NAMESPACE_LAST_ENTRY */
+    MyHTML_NAMESPACE_ANY        = 0x07,
     MyHTML_NAMESPACE_LAST_ENTRY = 0x07
 }
 typedef myhtml_namespace_t;
@@ -2526,7 +2529,7 @@ void
 myhtml_callback_before_token_done_set(myhtml_tree_t* tree, myhtml_callback_token_f func, void* ctx);
 
 /**
- * Set callback for tokens before processing
+ * Set callback for tokens after processing
  *
  * Warning!
  * If you using thread mode parsing then this callback calls from thread (not Main thread)

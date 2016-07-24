@@ -67,7 +67,7 @@ bool myhtml_namespace_id_by_name(const char *name, size_t length, myhtml_namespa
 
 const char * myhtml_namespace_name_by_id(myhtml_namespace_t ns, size_t *length)
 {
-    if(ns >= MyHTML_NAMESPACE_LAST_ENTRY) {
+    if(ns > MyHTML_NAMESPACE_LAST_ENTRY) {
         if(length)
             *length = 0;
         
@@ -80,6 +80,35 @@ const char * myhtml_namespace_name_by_id(myhtml_namespace_t ns, size_t *length)
         *length = strlen(name_ns);
     
     return name_ns;
+}
+
+myhtml_namespace_t myhtml_namespace_id_by_url(const char *url, size_t length)
+{
+    size_t i = 0;
+    while(myhtml_namespace_detect_url_entry_static_list_index[i].ns)
+    {
+        if(myhtml_namespace_detect_url_entry_static_list_index[i].url_length == length) {
+            size_t k = length;
+            
+            const unsigned char *u_url = (const unsigned char*)myhtml_namespace_detect_url_entry_static_list_index[i].url;
+            const unsigned char *u_target_url = (const unsigned char*)url;
+            
+            while(k) {
+                k--;
+                
+                if(u_url[k] != u_target_url[k]) {
+                    i++;
+                    continue;
+                }
+            }
+            
+            return myhtml_namespace_detect_url_entry_static_list_index[i].ns;
+        }
+        
+        i++;
+    }
+    
+    return MyHTML_NAMESPACE_UNDEF;
 }
 
 
