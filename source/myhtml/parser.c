@@ -231,15 +231,14 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
         myhtml_string_clean_all(&token->str);
         
         myhtml_token_attr_t* attr = token->attr_first;
-        
         myhtml_data_process_entry_t proc_entry;
-        myhtml_data_process_entry_clean(&proc_entry);
-        
-        proc_entry.encoding = tree->encoding;
         
         while(attr)
         {
             if(attr->raw_key_length) {
+                myhtml_data_process_entry_clean(&proc_entry);
+                proc_entry.encoding = tree->encoding;
+                
                 myhtml_string_init(tree->mchar, mchar_node_id, &attr->key, (attr->raw_key_length + 1));
                 myhtml_parser_token_data_to_string_lowercase(tree, &attr->key, &proc_entry, attr->raw_key_begin, attr->raw_key_length);
             }
@@ -247,9 +246,11 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
                 myhtml_string_clean_all(&attr->key);
             
             if(attr->raw_value_length) {
-                myhtml_string_init(tree->mchar, mchar_node_id, &attr->value, (attr->raw_value_length + 1));
+                myhtml_data_process_entry_clean(&proc_entry);
+                proc_entry.encoding = tree->encoding;
                 proc_entry.is_attributes = true;
                 
+                myhtml_string_init(tree->mchar, mchar_node_id, &attr->value, (attr->raw_value_length + 1));
                 myhtml_parser_token_data_to_string_charef(tree, &attr->value, &proc_entry, attr->raw_value_begin, attr->raw_value_length);
             }
             else
