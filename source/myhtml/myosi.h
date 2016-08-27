@@ -31,7 +31,7 @@
 
 #define MyHTML_VERSION_MAJOR 1
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 2
+#define MyHTML_VERSION_PATCH 3
 
 #if (defined(_WIN32) || defined(_WIN64)) && !defined(__WINPTHREADS_VERSION)
 #define IS_OS_WINDOWS
@@ -378,11 +378,12 @@ enum myhtml_insertion_mode {
  
  for myhtml             0..00ffff;      MyHTML_STATUS_OK    == 0x000000
  for mycss and modules  010000..01ffff; MyCSS_STATUS_OK     == 0x000000
- for myrender           020000..02ffff; MyRENDER_STATUS_OK  == 0x000000
- for mydom              030000..03ffff; MyDOM_STATUS_OK     == 0x000000
- for mynetwork          040000..04ffff; MyNETWORK_STATUS_OK == 0x000000
- for myecma             050000..05ffff; MyECMA_STATUS_OK    == 0x000000
- not occupied           060000..
+ for modest             020000..02ffff; MODEST_STATUS_OK    == 0x000000
+ for myrender           030000..03ffff; MyRENDER_STATUS_OK  == 0x000000
+ for mydom              040000..04ffff; MyDOM_STATUS_OK     == 0x000000
+ for mynetwork          050000..05ffff; MyNETWORK_STATUS_OK == 0x000000
+ for myecma             060000..06ffff; MyECMA_STATUS_OK    == 0x000000
+ not occupied           070000..
 */
 enum myhtml_status {
     MyHTML_STATUS_OK                                   = 0x0000,

@@ -179,6 +179,7 @@ struct myhtml_tree {
     mythread_queue_list_entry_t* queue_entry;
     mythread_queue_t*            queue;
     myhtml_tag_t*                tags;
+    void*                        modest;
     
     // init id's
     size_t                  mcasync_token_id;

@@ -7,7 +7,7 @@ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library wit
 ## Now
 
 ```text
-The current version is 1.0.2 - Release
+The current version is 1.0.3 - Release
 ```
 
 ## Changes
@@ -29,6 +29,7 @@ Please, see [CHANGELOG.md] file
 - No outside dependencies
 - C99 support
 - Passes all tree construction tests from [html5lib-tests]
+- Tested by 1 billion HTML pages (by [commoncrawl.org], see [test file])
 
 ## Further developments
 
@@ -213,6 +214,8 @@ See the [LICENSE] file.
 [parsing by chunks]: https://github.com/lexborisov/myhtml/blob/master/examples/chunks_high_level.c
 [encoding.spec.whatwg.org]: https://encoding.spec.whatwg.org/
 [html5lib-tests]: https://github.com/html5lib/html5lib-tests
+[commoncrawl.org]: http://commoncrawl.org/
+[test file]: https://github.com/lexborisov/myhtml/blob/master/test/commoncrawl.c
 [MyCSS]: https://github.com/lexborisov/mycss
 [CHANGELOG.md]: https://github.com/lexborisov/myhtml/blob/master/CHANGELOG.md
 [Perl 5]: https://metacpan.org/release/HTML-MyHTML

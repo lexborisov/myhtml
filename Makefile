@@ -17,6 +17,7 @@ all: create
 
 clean:
 	$(MAKE) -C $(SRCDIR) clean
+	$(MAKE) -C test clean
 	for f in $(SUBDIRS); do $(MAKE) -C $$f clean; done
 	rm -rf lib/*
 
@@ -29,5 +30,8 @@ clone: create
 
 create:
 	mkdir -p bin lib include/myhtml/utils
+
+build_test:
+	$(MAKE) -C test
 
 .PHONY:all clean
