@@ -4,6 +4,8 @@
 
 MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.
 
+This is one of module of the project [Modest]
+
 ## Now
 
 ```text
@@ -208,6 +210,7 @@ See the [LICENSE] file.
 
 
 [HTML5 specification]: https://html.spec.whatwg.org/multipage/
+[Modest]: https://github.com/lexborisov/Modest
 [high]: https://github.com/lexborisov/myhtml/blob/master/include/myhtml/api.h
 [low]: https://github.com/lexborisov/myhtml/tree/master/include/myhtml
 [examples]: https://github.com/lexborisov/myhtml/tree/master/examples
