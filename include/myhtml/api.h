@@ -434,7 +434,8 @@ enum myhtml_status {
 }
 typedef myhtml_status_t;
 
-#define MYHTML_FAILED(_status_) ((_status_) != MyHTML_STATUS_OK)
+#define MYHTML_FAILED(_status_) ((_status_) != MyHTML_STATUS_OK) /* deprecated */
+#define MyHTML_FAILED(_status_) ((_status_) != MyHTML_STATUS_OK)
 
 /**
  * @struct myhtml namespace
@@ -471,7 +472,7 @@ enum myhtml_tree_parse_flags {
     MyHTML_TREE_PARSE_FLAGS_CLEAN                   = 0x000,
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE      = 0x001,
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN   = 0x003,
-    MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004,
+    MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004, /* skip ws not for RCDATA, RAWTEXT, CDATA, PLAINTEXT */
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE = 0x008,
 }
 typedef myhtml_tree_parse_flags_t;

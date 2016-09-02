@@ -102,6 +102,7 @@ extern "C" {
             sizeof(strcn) * myhtml->sizen);                         \
     }
 
+#define MyHTML_FAILED(_status_) ((_status_) != MyHTML_STATUS_OK)
 
 // encoding
 // https://encoding.spec.whatwg.org/#the-encoding
@@ -203,7 +204,7 @@ enum myhtml_tree_parse_flags {
     MyHTML_TREE_PARSE_FLAGS_CLEAN                   = 0x000,
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE      = 0x001,
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN   = 0x003,
-    MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004,
+    MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004, /* skip ws token, but not for RCDATA, RAWTEXT, CDATA and PLAINTEXT */
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE = 0x008,
 }
 typedef myhtml_tree_parse_flags_t;

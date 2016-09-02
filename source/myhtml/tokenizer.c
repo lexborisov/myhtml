@@ -438,7 +438,8 @@ bool _myhtml_tokenizer_state_andata_end_tag_name(myhtml_tree_t* tree, myhtml_tok
         token_node->element_begin   = tmp_begin;
         token_node->element_length  = token_node->raw_length;
         token_node->type           |= type;
-        token_node->tag_id     = MyHTML_TAG__TEXT;
+        token_node->type           ^= (token_node->type & MyHTML_TOKEN_TYPE_WHITESPACE);
+        token_node->tag_id          = MyHTML_TAG__TEXT;
         
         myhtml_queue_add(tree, *html_offset, token_node);
         token_node = tree->current_token_node;
@@ -648,9 +649,10 @@ size_t myhtml_tokenizer_state_plaintext(myhtml_tree_t* tree, myhtml_token_node_t
     if((token_node->type & MyHTML_TOKEN_TYPE_PLAINTEXT) == 0)
         token_node->type |= MyHTML_TOKEN_TYPE_PLAINTEXT;
     
-    token_node->raw_begin = (html_offset + tree->global_offset);
+    token_node->type      ^= (token_node->type & MyHTML_TOKEN_TYPE_WHITESPACE);
+    token_node->raw_begin  = (html_offset + tree->global_offset);
     token_node->raw_length = token_node->element_length = (html_size + tree->global_offset) - token_node->raw_begin;
-    token_node->tag_id = MyHTML_TAG__TEXT;
+    token_node->tag_id     = MyHTML_TAG__TEXT;
     
     myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
     myhtml_queue_add(tree, html_size, token_node);
@@ -871,6 +873,7 @@ size_t myhtml_tokenizer_state_markup_declaration_open(myhtml_tree_t* tree, myhtm
                 token_node->raw_begin += 7;
                 token_node->raw_length = 0;
                 token_node->tag_id = MyHTML_TAG__TEXT;
+                token_node->type ^= (token_node->type & MyHTML_TOKEN_TYPE_WHITESPACE);
                 
                 return html_offset;
             }
