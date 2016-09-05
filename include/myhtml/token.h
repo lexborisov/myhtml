@@ -125,6 +125,7 @@ myhtml_tree_attr_t * myhtml_token_node_attribute_last(myhtml_token_node_t *token
 const char * myhtml_token_node_text(myhtml_token_node_t *token_node, size_t *length);
 myhtml_string_t * myhtml_token_node_string(myhtml_token_node_t *token_node);
 
+bool myhtml_token_node_is_close(myhtml_token_node_t *token_node);
 bool myhtml_token_node_is_close_self(myhtml_token_node_t *token_node);
 
 void myhtml_token_node_clean(myhtml_token_node_t* node);

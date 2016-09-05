@@ -472,7 +472,7 @@ enum myhtml_tree_parse_flags {
     MyHTML_TREE_PARSE_FLAGS_CLEAN                   = 0x000,
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE      = 0x001,
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN   = 0x003,
-    MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004, /* skip ws not for RCDATA, RAWTEXT, CDATA, PLAINTEXT */
+    MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004, /* skip ws token, but not for RCDATA, RAWTEXT, CDATA and PLAINTEXT */
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE = 0x008,
 }
 typedef myhtml_tree_parse_flags_t;
@@ -1800,6 +1800,16 @@ myhtml_token_node_text(myhtml_token_node_t *token_node, size_t *length);
  */
 myhtml_string_t*
 myhtml_token_node_string(myhtml_token_node_t *token_node);
+
+/**
+ * Token node has closing flag?
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return true or false
+ */
+bool
+myhtml_token_node_is_close(myhtml_token_node_t *token_node);
 
 /**
  * Token node has self-closing flag?

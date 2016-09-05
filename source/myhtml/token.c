@@ -223,6 +223,11 @@ myhtml_string_t * myhtml_token_node_string(myhtml_token_node_t *token_node)
     return &token_node->str;
 }
 
+bool myhtml_token_node_is_close(myhtml_token_node_t *token_node)
+{
+    return (token_node->type & MyHTML_TOKEN_TYPE_CLOSE);
+}
+
 bool myhtml_token_node_is_close_self(myhtml_token_node_t *token_node)
 {
     return (token_node->type & MyHTML_TOKEN_TYPE_CLOSE_SELF);

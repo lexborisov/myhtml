@@ -1802,6 +1802,16 @@ myhtml_string_t*
 myhtml_token_node_string(myhtml_token_node_t *token_node);
 
 /**
+ * Token node has closing flag?
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return true or false
+ */
+bool
+myhtml_token_node_is_close(myhtml_token_node_t *token_node);
+
+/**
  * Token node has self-closing flag?
  *
  * @param[in] myhtml_tree_node_t*
