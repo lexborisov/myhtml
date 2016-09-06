@@ -185,7 +185,21 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
     myhtml_tree_t* tree = qnode->tree;
     myhtml_token_node_t* token = qnode->token;
     
-    if(qnode->tree->parse_flags & MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN) {
+    /* 
+     * Tree can not be built without tokens
+     *
+     * MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN == 3
+     * MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE    == 1
+     *
+     * MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN include MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE 
+     *
+     * if set only MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE and check only for MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN
+     *   return true
+     * we need check both, 1 and 2
+     */
+    if((qnode->tree->parse_flags & MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN) &&
+       (qnode->tree->parse_flags & 2))
+    {
         if(tree->callback_before_token)
             tree->callback_before_token_ctx = tree->callback_before_token(tree, token, tree->callback_before_token_ctx);
         
