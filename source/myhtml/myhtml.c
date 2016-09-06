@@ -1403,7 +1403,7 @@ void myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* to
     
     if(tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) {
         myhtml_parser_worker(0, qnode);
-        while(myhtml_rules_tree_dispatcher(tree, token)){};
+        myhtml_parser_stream(0, qnode);
         
         tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, 4, NULL);
     }
@@ -1414,7 +1414,7 @@ void myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* to
 #else
     
     myhtml_parser_worker(0, qnode);
-    while(myhtml_rules_tree_dispatcher(tree, token)){};
+    myhtml_parser_stream(0, qnode);
     
     tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, 4, NULL);
     
