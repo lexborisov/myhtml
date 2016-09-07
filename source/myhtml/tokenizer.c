@@ -257,24 +257,26 @@ void myhtml_tokenizer_pause(myhtml_tree_t* tree)
 
 void myhtml_tokenizer_calc_current_namespace(myhtml_tree_t* tree, myhtml_token_node_t* token_node)
 {
-    if(tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE)
-    {
-        myhtml_tokenizer_state_set(tree) = tree->state_of_builder;
-    }
-    else {
-        if(token_node->tag_id == MyHTML_TAG_MATH ||
-           token_node->tag_id == MyHTML_TAG_SVG ||
-           token_node->tag_id == MyHTML_TAG_FRAMESET)
+    if((tree->parse_flags & MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE) == 0) {
+        if(tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE)
         {
-            tree->token_namespace = token_node;
+            myhtml_tokenizer_state_set(tree) = tree->state_of_builder;
         }
-        else if(tree->token_namespace && (token_node->type & MyHTML_TOKEN_TYPE_CLOSE) == 0) {
-            const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, token_node->tag_id);
-            
-            if(tag_ctx->data_parser != MyHTML_TOKENIZER_STATE_DATA)
+        else {
+            if(token_node->tag_id == MyHTML_TAG_MATH ||
+               token_node->tag_id == MyHTML_TAG_SVG ||
+               token_node->tag_id == MyHTML_TAG_FRAMESET)
             {
-                myhtml_tree_wait_for_last_done_token(tree, token_node);
-                myhtml_tokenizer_state_set(tree) = tree->state_of_builder;
+                tree->token_namespace = token_node;
+            }
+            else if(tree->token_namespace && (token_node->type & MyHTML_TOKEN_TYPE_CLOSE) == 0) {
+                const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, token_node->tag_id);
+                
+                if(tag_ctx->data_parser != MyHTML_TOKENIZER_STATE_DATA)
+                {
+                    myhtml_tree_wait_for_last_done_token(tree, token_node);
+                    myhtml_tokenizer_state_set(tree) = tree->state_of_builder;
+                }
             }
         }
     }
