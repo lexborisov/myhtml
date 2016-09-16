@@ -127,6 +127,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_x_user_defined(unsigned const
 size_t myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data);
 size_t myhtml_encoding_codepoint_to_lowercase_ascii_utf_8(size_t codepoint, char *data);
 size_t myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data);
+size_t myhtml_encoding_ascii_utf_8_to_codepoint(const unsigned char* data, size_t* codepoint);
 
 void myhtml_encoding_result_clean(myhtml_encoding_result_t *res);
 

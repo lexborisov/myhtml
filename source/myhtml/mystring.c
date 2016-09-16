@@ -55,10 +55,40 @@ myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, bool destroy_obj)
     if(str->data && str->mchar && str->node_idx)
         mchar_async_free(str->mchar, str->node_idx, str->data);
     
-    if(destroy_obj && str)
+    if(destroy_obj && str) {
         myhtml_free(str);
+        return NULL;
+    }
     
-    return NULL;
+    return str;
+}
+
+void myhtml_string_raw_clean(myhtml_string_raw_t* str_raw)
+{
+    str_raw->length = 0;
+}
+
+void myhtml_string_raw_clean_all(myhtml_string_raw_t* str_raw)
+{
+    memset(str_raw, 0, sizeof(myhtml_string_raw_t));
+}
+
+myhtml_string_raw_t * myhtml_string_raw_destroy(myhtml_string_raw_t* str_raw, bool destroy_obj)
+{
+    if(str_raw == NULL)
+        return NULL;
+    
+    if(str_raw->data) {
+        myhtml_free(str_raw->data);
+        str_raw->data = NULL;
+    }
+    
+    if(destroy_obj && str_raw) {
+        myhtml_free(str_raw);
+        return NULL;
+    }
+    
+    return str_raw;
 }
 
 char * myhtml_string_realloc(myhtml_string_t *str, size_t new_size)

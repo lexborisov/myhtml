@@ -164,6 +164,7 @@ typedef myhtml_encoding_t;
 typedef struct myhtml_data_process_entry myhtml_data_process_entry_t;
 
 // strings
+typedef struct myhtml_string_raw myhtml_string_raw_t;
 typedef struct myhtml_string myhtml_string_t;
 
 // thread

@@ -1098,6 +1098,41 @@ size_t myhtml_encoding_codepoint_to_lowercase_ascii_utf_8(size_t codepoint, char
     return 0;
 }
 
+size_t myhtml_encoding_ascii_utf_8_to_codepoint(const unsigned char* data, size_t* codepoint)
+{
+    if (*data < 0x80){
+        /* 0xxxxxxx */
+        *codepoint = (size_t)*data;
+        return 1;
+    }
+    else if ((*data & 0xe0) == 0xc0) {
+        /* 110xxxxx 10xxxxxx */
+        *codepoint  = (data[0] ^ (0xC0 & data[0])) << 6;
+        *codepoint |= (data[1] ^ (0x80 & data[1]));
+        
+        return 2;
+    }
+    else if ((*data & 0xf0) == 0xe0) {
+        /* 1110xxxx 10xxxxxx 10xxxxxx */
+        *codepoint  = (data[0] ^ (0xE0 & data[0])) << 12;
+        *codepoint |= (data[1] ^ (0x80 & data[1])) << 6;
+        *codepoint |= (data[2] ^ (0x80 & data[2]));
+        
+        return 3;
+    }
+    else if ((*data & 0xf8) == 0xf0) {
+        /* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
+        *codepoint  = (data[0] ^ (0xF0 & data[0])) << 18;
+        *codepoint |= (data[1] ^ (0x80 & data[1])) << 12;
+        *codepoint |= (data[2] ^ (0x80 & data[2])) << 6;
+        *codepoint |= (data[3] ^ (0x80 & data[3]));
+        
+        return 4;
+    }
+    
+    return 0;
+}
+
 size_t myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data)
 {
     if((codepoint >> 16)) {

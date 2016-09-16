@@ -532,6 +532,13 @@ struct myhtml_string {
 }
 typedef myhtml_string_t;
 
+struct myhtml_string_raw {
+    char*  data;
+    size_t size;
+    size_t length;
+}
+typedef myhtml_string_raw_t;
+
 /**
  * @struct myhtml_collection_t
  */
@@ -2364,6 +2371,48 @@ myhtml_string_data_free(mchar_async_t *mchar, size_t node_id, char *data);
 
 /***********************************************************************************
  *
+ * MyHTML_STRING_RAW
+ *
+ * All work with myhtml_string_raw_t object occurs through 
+ *    myhtml_malloc (standart malloc), myhtml_realloc (standart realloc),
+ *    myhtml_free (standart free).
+ * 
+ * You are free to change them on without fear that something will happen
+ * You can call free for str_raw.data, or change str_raw.length = 0
+ *
+ ***********************************************************************************/
+
+/**
+ * Clean myhtml_string_raw_t object. In reality, data length set to 0
+ *
+ * @param[in] myhtml_string_raw_t*
+ */
+void
+myhtml_string_raw_clean(myhtml_string_raw_t* str_raw);
+
+/**
+ * Full clean myhtml_string_raw_t object.
+ * Equivalently: memset(str_raw, 0, sizeof(myhtml_string_raw_t))
+ *
+ * @param[in] myhtml_string_raw_t*
+ */
+void
+myhtml_string_raw_clean_all(myhtml_string_raw_t* str_raw);
+
+/**
+ * Free resources for myhtml_string_raw_t object
+ *
+ * @param[in] myhtml_string_raw_t*
+ * @param[in] call free function for current object or not
+ *
+ * @return NULL if destroy_obj set true, otherwise a current myhtml_string_raw_t object
+ */
+myhtml_string_raw_t*
+myhtml_string_raw_destroy(myhtml_string_raw_t* str_raw, bool destroy_obj);
+
+
+/***********************************************************************************
+ *
  * MyHTML_INCOMING
  *
  * @description
@@ -2637,6 +2686,36 @@ myhtml_strcasecmp(const char* str1, const char* str2);
  */
 size_t
 myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
+
+/***********************************************************************************
+ *
+ * MyHTML_SERIALIZATION
+ *
+ ***********************************************************************************/
+
+/**
+ * Tree fragment serialization
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] scope node, myhtml_tree_node_t*
+ * @param[in] myhtml_string_raw_t* (date to be created if str_raw.data == NULL)
+ *
+ * @return true if successful, otherwise false
+ */
+bool
+myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
+
+/**
+ * Only one tree node serialization
+ *
+ * @param[in] myhtml_tree_t*
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] myhtml_string_raw_t* (date to be created if str_raw.data == NULL)
+ *
+ * @return true if successful, otherwise false
+ */
+bool
+myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);
 
 /***********************************************************************************
  *
