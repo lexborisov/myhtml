@@ -729,6 +729,7 @@ myhtml_tree_node_t * myhtml_tree_node_insert_by_node(myhtml_tree_t* tree, myhtml
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     
     myhtml_tree_open_elements_append(tree, node);
+    myhtml_tree_index_append(tree, node);
     
     return node;
 }
