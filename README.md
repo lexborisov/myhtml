@@ -4,7 +4,7 @@
 
 MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.
 
-This is one of module of the project [Modest]
+This is one of module of the [Modest] project 
 
 ## Now
 
