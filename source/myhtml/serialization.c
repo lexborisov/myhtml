@@ -33,11 +33,12 @@ static void process_close(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_
  *  The serialize function for an entire tree
  *  @param  tree        the tree to be serialized
  *  @param  scope_node  the scope_node 
+ *  @param  flags       serialization flags
  *  @param  callback    function that will be called for all strings that have to be printed
  *  @param  ptr         user-supplied pointer
  *  @return bool
  */
-bool myhtml_serialize(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_callback_serialize_f callback, void *ptr)
+bool myhtml_serialize(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_tree_serialize_flags_t flags, myhtml_callback_serialize_f callback, void *ptr)
 {
     myhtml_tree_node_t* node = scope_node;
     
@@ -47,7 +48,7 @@ bool myhtml_serialize(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtm
     }
     
     while(node) {
-        if(!myhtml_serialize_node(tree, node, callback, ptr)) return false;
+        if(!myhtml_serialize_node(tree, node, flags, callback, ptr)) return false;
         
         if(node->child)
             node = node->child;
@@ -74,11 +75,12 @@ bool myhtml_serialize(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtm
  *  The serialize function for a single node
  *  @param  tree        the tree to be serialized
  *  @param  node        the node that is going to be serialized 
+ *  @param  flags       serialization flags
  *  @param  callback    function that will be called for all strings that have to be printed
  *  @param  ptr         user-supplied pointer
  *  @return bool
  */
-bool myhtml_serialize_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void *ptr)
+bool myhtml_serialize_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_tree_serialize_flags_t flags, myhtml_callback_serialize_f callback, void *ptr)
 {
     switch (node->tag_id) {
         case MyHTML_TAG__TEXT: {
@@ -357,7 +359,7 @@ bool myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, m
     }
 
     // pass on
-    return myhtml_serialize(tree, scope_node, concatenate, str);
+    return myhtml_serialize(tree, scope_node, MyHTML_TREE_SERIALIZE_FLAGS_FULL, concatenate, str);
 }
 
 /**
@@ -385,5 +387,5 @@ bool myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, my
     }
 
     // pass on
-    return myhtml_serialize_node(tree, node, concatenate, str);
+    return myhtml_serialize_node(tree, node, MyHTML_TREE_SERIALIZE_FLAGS_FULL, concatenate, str);
 }
