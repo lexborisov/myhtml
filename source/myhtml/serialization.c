@@ -18,6 +18,7 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
+#include <setjmp.h>
 #include "myhtml/serialization.h"
 
 /**
@@ -304,6 +305,41 @@ static void process_attr(const char* data, size_t size, myhtml_callback_serializ
 }
 
 /**
+ *  Because we want to leap out of the algorithm if we're halfway through
+ *  serializing, we use a longjmp() call to jump back to the public APP
+ *  @var jmp_buf
+ */
+static jmp_buf leap;
+
+/**
+ *  Reallocate the buffer
+ *  @param  str         the buffer to reallocate
+ *  @param  size        new size
+ */
+static void reallocate(myhtml_string_raw_t *str, size_t size)
+{
+    // construct a buffer
+    char *data = (char*)myhtml_realloc(str->data, size * sizeof(char));
+
+    // was it ok?
+    if (data == NULL) {
+        
+        // allocation failed, reset the string object
+        myhtml_free(str->data);
+        memset(str, 0, sizeof(myhtml_string_raw_t));
+        
+        // leap back to the source of the serialization algorithm
+        longjmp(leap, 1);
+    }
+    else {
+        
+        // reallocation succeeded
+        str->data = data;
+        str->size = size;
+    }
+}
+
+/**
  *  Implementation of the myhtml_callback_serialize_f function for internal
  *  use that concatenats everything to a string
  *  @param  data
@@ -314,17 +350,8 @@ static void concatenate(const char* data, size_t length, void *ptr)
     // get the string back
     myhtml_string_raw_t* str = (myhtml_string_raw_t *)ptr;
     
-    // skip if not set
-    if (str == NULL) return;
-    
-    // @todo add longjmp on allocation failure
-    
     // do we still have enough size in the output buffer?
-    if((length + str->length) >= str->size) {
-        size_t size = (length + str->length) + 4096;
-        char *data = (char*)myhtml_realloc(str->data, size * sizeof(char));
-        if(data == NULL) return;
-    }
+    if ((length + str->length) >= str->size) reallocate(str, length + str->length + 4096);
     
     // copy data
     strncpy(&str->data[ str->length ], data, length);
@@ -357,9 +384,18 @@ bool myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, m
             return false;
         }
     }
-
-    // pass on
-    return myhtml_serialize(tree, scope_node, MyHTML_TREE_SERIALIZE_FLAGS_FULL, concatenate, str);
+    
+    // if allocation halfway the algorithm fails, we want to leap back
+    if (setjmp(leap) == 0)
+    {
+        // serialize the entire tree
+        return myhtml_serialize(tree, scope_node, MyHTML_TREE_SERIALIZE_FLAGS_FULL, concatenate, str);
+    }
+    else
+    {
+        // the serialization algorithm failed because of a memory-allocation failure
+        return false;
+    }
 }
 
 /**
@@ -386,6 +422,16 @@ bool myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, my
         }
     }
 
-    // pass on
-    return myhtml_serialize_node(tree, node, MyHTML_TREE_SERIALIZE_FLAGS_FULL, concatenate, str);
+    // if allocation halfway the algorithm fails, we want to leap back
+    if (setjmp(leap) == 0)
+    {
+        // pass on
+        return myhtml_serialize_node(tree, node, MyHTML_TREE_SERIALIZE_FLAGS_FULL, concatenate, str);
+    }
+    else
+    {
+        // the serialization algorithm failed because of a memory-allocation failure
+        return false;
+    }
 }
+
