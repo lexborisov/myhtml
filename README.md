@@ -9,7 +9,9 @@ This is one of module of the [Modest] project
 ## Now
 
 ```text
-The current version is 1.0.3 - Release
+The current version is 1.0.4. Last version is 1.0.3
+
+See [Releases](https://github.com/lexborisov/myhtml/releases)
 ```
 
 ## Changes

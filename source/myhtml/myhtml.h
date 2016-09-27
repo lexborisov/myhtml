@@ -177,6 +177,8 @@ const char * myhtml_node_text(myhtml_tree_node_t *node, size_t *length);
 myhtml_string_t * myhtml_node_string(myhtml_tree_node_t *node);
 myhtml_position_t myhtml_node_raw_pasition(myhtml_tree_node_t *node);
 myhtml_position_t myhtml_node_element_pasition(myhtml_tree_node_t *node);
+void myhtml_node_set_data(myhtml_tree_node_t *node, void* data);
+void * myhtml_node_get_data(myhtml_tree_node_t *node);
 
 /* attributes */
 myhtml_tree_attr_t * myhtml_attribute_next(myhtml_tree_attr_t *attr);

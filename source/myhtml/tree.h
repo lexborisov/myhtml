@@ -75,20 +75,20 @@ enum myhtml_tree_node_flags {
 };
 
 struct myhtml_tree_node {
-    void* data;                              // user data
     enum myhtml_tree_node_flags flags;
     
     myhtml_tag_id_t tag_id;
     enum myhtml_namespace ns;
     
-    myhtml_tree_node_t* prev;                // предыдущий ид элемента этого же уровня
-    myhtml_tree_node_t* next;                // следеющий ид эелента этого же уровня
-    myhtml_tree_node_t* child;               // ид чилда
-    myhtml_tree_node_t* parent;              // ид родителя
+    myhtml_tree_node_t* prev;
+    myhtml_tree_node_t* next;
+    myhtml_tree_node_t* child;
+    myhtml_tree_node_t* parent;
     
-    myhtml_tree_node_t* last_child;          //
+    myhtml_tree_node_t* last_child;
     
     myhtml_token_node_t* token;
+    void* data;
 };
 
 enum myhtml_tree_compat_mode {
