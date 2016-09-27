@@ -109,8 +109,14 @@ bool myhtml_serialize_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml
             break;
         }
         default: {
+            // @todo remove debug code
+            myhtml_position_t pos = myhtml_node_element_pasition(node);
+            
             size_t length;
             const char *tag = myhtml_tag_name_by_id(tree, node->tag_id, &length);
+            // @todo remove debug code
+            printf("%s %d %d\n", tag, (int)pos.begin, (int)pos.length);
+
             callback("<", 1, ptr);
             callback(tag, length, ptr);
             if(node->token) process_attributes(tree, node->token->attr_first, callback, ptr);
@@ -158,8 +164,11 @@ static void process_attributes(myhtml_tree_t* tree, myhtml_tree_attr_t* attr, my
                 break;
         }
         
+        
         size_t length;
         const char *data = myhtml_attribute_key(attr, &length);
+        // @todo remove debug code
+        if (data) printf("attribute %s %d %d %d %d\n", data, (int)attr->raw_key_begin, (int)attr->raw_key_length, (int)attr->raw_value_begin, (int)attr->raw_value_length);
         if(data) callback(data, length, ptr);
         callback("=\"", 2, ptr);
         

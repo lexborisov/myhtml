@@ -10,6 +10,7 @@ get_title_high_level
 get_title_low_level
 html2sexpr
 insert_in_appropriate_place_high_level
+modify_and_serialize
 nodes_by_attr_key_high_level
 nodes_by_attr_value_high_level
 parse_without_whitespace

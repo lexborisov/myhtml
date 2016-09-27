@@ -721,6 +721,36 @@ myhtml_position_t myhtml_node_element_pasition(myhtml_tree_node_t *node)
     return (myhtml_position_t){0, 0};
 }
 
+bool myhtml_node_is_modified(myhtml_tree_node_t *node)
+{
+    // if there is no node, we can not treat it as being modified
+    if (node == NULL) return false;
+    
+    // if the node does not even come from the original input, then of course it is 
+    // modified (we consider everything that is not parsed from an input string as modified)
+    if (!node->token || node->token->element_length == 0) return true;
+    
+    // what type of node are we dealing with here?
+    switch (node->tag_id) {
+    case MyHTML_TAG__TEXT:
+        // this is a text node
+        // @todo add better implementation, for now we do not consider this modified
+        return false;
+    case MyHTML_TAG__COMMENT:
+        // this is a comment
+        // @todo add better implementation, for now we do not consider this modified
+        return false;
+    case MyHTML_TAG__DOCTYPE:
+        // this is a <!doctype
+        // @todo add better implementation, for now we do not consider this modified
+        return false;
+    default:
+        // this is a regular node, we are going to check all attributes
+        // @todo implementation
+        return false;
+    }
+}
+
 myhtml_status_t myhtml_get_nodes_by_attribute_key_recursion(myhtml_tree_t *tree, myhtml_tree_node_t* node, myhtml_collection_t* collection, const char* key, size_t key_len)
 {
     while(node)
