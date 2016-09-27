@@ -721,6 +721,16 @@ myhtml_position_t myhtml_node_element_pasition(myhtml_tree_node_t *node)
     return (myhtml_position_t){0, 0};
 }
 
+void* myhtml_node_get_data(myhtml_tree_node_t *node)
+{
+    return node->data;
+}
+
+void myhtml_node_set_data(myhtml_tree_node_t *node, void* data)
+{
+    node->data = data;
+}
+
 myhtml_status_t myhtml_get_nodes_by_attribute_key_recursion(myhtml_tree_t *tree, myhtml_tree_node_t* node, myhtml_collection_t* collection, const char* key, size_t key_len)
 {
     while(node)
