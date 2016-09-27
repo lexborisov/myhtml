@@ -745,8 +745,18 @@ bool myhtml_node_is_modified(myhtml_tree_node_t *node)
         // @todo add better implementation, for now we do not consider this modified
         return false;
     default:
-        // this is a regular node, we are going to check all attributes
-        // @todo implementation
+        // iterate over all the attributes
+        for (myhtml_token_attr_t *attr = node->token->attr_first; attr; attr = attr->next) {
+
+            // both the key and the value must originate in the buffer
+            if (!attr->raw_key_begin || !attr->raw_key_length || !attr->raw_value_begin || !attr->raw_value_length) {
+
+                // either the key or the value did not come from the buffer
+                return true;
+            }
+        }
+
+        // all of the attributes appear to be coming from the buffer
         return false;
     }
 }

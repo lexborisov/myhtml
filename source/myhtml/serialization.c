@@ -246,23 +246,23 @@ static void process_buffer(const char *data, size_t size, myhtml_callback_serial
     for (size_t i = 0; i < size; ++i) {
         switch ((unsigned char)data[i]) {
         case '&':
-            if (notwritten) callback(data + i - notwritten, notwritten, NULL);
-            callback("&amp;", 5, NULL);
+            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
+            callback("&amp;", 5, ptr);
             notwritten = 0;
             break;
         case '<':
-            if (notwritten) callback(data + i - notwritten, notwritten, NULL);
-            callback("&lt;", 4, NULL);
+            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
+            callback("&lt;", 4, ptr);
             notwritten = 0;
             break;
         case '>':
-            if (notwritten) callback(data + i - notwritten, notwritten, NULL);
-            callback("&gt;", 4, NULL);
+            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
+            callback("&gt;", 4, ptr);
             notwritten = 0;
             break;
         case 0xA0:
-            if (notwritten) callback(data + i - notwritten, notwritten, NULL);
-            callback("&nbsp;", 6, NULL);
+            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
+            callback("&nbsp;", 6, ptr);
             notwritten = 0;
             break;
         default:
@@ -271,7 +271,7 @@ static void process_buffer(const char *data, size_t size, myhtml_callback_serial
         }
     }
     
-    if (notwritten) callback(data + size - notwritten, notwritten, NULL);
+    if (notwritten) callback(data + size - notwritten, notwritten, ptr);
 }
 
 /**
@@ -290,17 +290,17 @@ static void process_attr(const char* data, size_t size, myhtml_callback_serializ
     for (size_t i = 0; i < size; ++i) {
         switch ((unsigned char)data[i]) {
         case '&':
-            if (notwritten) callback(data + i - notwritten, notwritten, NULL);
-            callback("&amp;", 5, NULL);
+            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
+            callback("&amp;", 5, ptr);
             notwritten = 0;
             break;
         case '"':
-            if (notwritten) callback(data + i - notwritten, notwritten, NULL);
-            callback("&quot;", 6, NULL);
+            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
+            callback("&quot;", 6, ptr);
             notwritten = 0;
             break;
         case 0xA0:
-            if (notwritten) callback(data + i - notwritten, notwritten, NULL);
+            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
             callback("&nbsp;", 6, NULL);
             notwritten = 0;
             break;
@@ -310,7 +310,7 @@ static void process_attr(const char* data, size_t size, myhtml_callback_serializ
         }
     }
     
-    if (notwritten) callback(data + size - notwritten, notwritten, NULL);
+    if (notwritten) callback(data + size - notwritten, notwritten, ptr);
 }
 
 /**
