@@ -75,6 +75,7 @@ enum myhtml_tree_node_flags {
 };
 
 struct myhtml_tree_node {
+    void* data;                              // user data
     enum myhtml_tree_node_flags flags;
     
     myhtml_tag_id_t tag_id;

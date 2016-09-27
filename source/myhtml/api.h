@@ -1542,6 +1542,25 @@ myhtml_node_raw_pasition(myhtml_tree_node_t *node);
 myhtml_position_t
 myhtml_node_element_pasition(myhtml_tree_node_t *node);
 
+/**
+ * Get node user data
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return void*
+ */
+void*
+myhtml_node_get_data(myhtml_tree_node_t *node);
+
+/**
+ * Set node user data
+ *
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] void*
+ */
+void
+myhtml_node_set_data(myhtml_tree_node_t *node, void* data);
+
 /***********************************************************************************
  *
  * MyHTML_ATTRIBUTE

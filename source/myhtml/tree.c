@@ -307,6 +307,7 @@ void myhtml_tree_node_clean(myhtml_tree_node_t* tree_node)
     tree_node->parent        = 0;
     tree_node->last_child    = 0;
     tree_node->token         = 0;
+    tree_node->data          = NULL;
     tree_node->ns            = MyHTML_NAMESPACE_HTML;
 }
 
