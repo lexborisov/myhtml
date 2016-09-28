@@ -1542,21 +1542,6 @@ myhtml_node_raw_pasition(myhtml_tree_node_t *node);
 myhtml_position_t
 myhtml_node_element_pasition(myhtml_tree_node_t *node);
 
-/**
- * Is a node modified?
- * 
- * This function returns false if the node is exactly identical to how it came 
- * from the originally parsed source code, and true in all other situations
- * (for example: when an attribute was added or removed, or anything else
- * was modified, completely new nodes are also considered modified).
- * 
- * @param[in] myhtml_tree_node_t*
- * 
- * @return bool
- */
-bool
-myhtml_node_is_modified(myhtml_tree_node_t *node);
-
 
 /***********************************************************************************
  *
