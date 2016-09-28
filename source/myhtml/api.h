@@ -36,7 +36,7 @@
 
 #define MyHTML_VERSION_MAJOR 1
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 3
+#define MyHTML_VERSION_PATCH 4
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -1541,6 +1541,25 @@ myhtml_node_raw_pasition(myhtml_tree_node_t *node);
  */
 myhtml_position_t
 myhtml_node_element_pasition(myhtml_tree_node_t *node);
+
+/**
+ * Get data value from tree node
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return void*
+ */
+void*
+myhtml_node_get_data(myhtml_tree_node_t *node);
+
+/**
+ * Set data value to tree node
+ *
+ * @param[in] myhtml_tree_node_t*
+ * @param[in] void*
+ */
+void
+myhtml_node_set_data(myhtml_tree_node_t *node, void* data);
 
 /***********************************************************************************
  *
