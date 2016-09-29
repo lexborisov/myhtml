@@ -576,6 +576,7 @@ typedef myhtml_version_t;
 // callback functions
 typedef void* (*myhtml_callback_token_f)(myhtml_tree_t* tree, myhtml_token_node_t* token, void* ctx);
 typedef void (*myhtml_callback_tree_node_f)(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx);
+typedef void (*myhtml_callback_serialize_f)(const char* buffer, size_t size, void* ctx);
 
 /***********************************************************************************
  *
@@ -2722,7 +2723,7 @@ myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
  * @return true if successful, otherwise false
  */
 bool
-myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
+myhtml_serialization_tree_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
 
 /**
  * Only one tree node serialization
@@ -2734,7 +2735,32 @@ myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml
  * @return true if successful, otherwise false
  */
 bool
-myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+myhtml_serialization_node_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+
+/**
+ *  Serialize an entire tree (fragment), providing the serialized data
+ *  to the given callback in chunks.
+ *
+ *  @param[in] myhtml_tree_t*                   The tree to serialize
+ *  @param[in] myhtml_tree_node_t*              The scope node?
+ *  @param[in] myhtml_callback_serialize_f*     The callback to be invoked
+ *
+ *  @return true if successful, otherwise false
+ */
+bool
+myhtml_serialization_tree_callback(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_callback_serialize_f callback, void* ptr);
+
+/**
+ *  Serialize only a single node, providing the serialized data
+ *  to the given callback in chunks.
+ *  @param[in] myhtml_tree_t*                   The tree the node belongs to
+ *  @param[in] myhtml_tree_node_t*              The node to serialize
+ *  @param[in] myhtml_callback_serialize_f*     The callback to be invoked
+ *
+ *  @return true if successful, otherwise false
+ */
+bool
+myhtml_serialization_node_callback(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void* ptr);
 
 /***********************************************************************************
  *

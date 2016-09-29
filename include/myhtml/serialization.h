@@ -33,20 +33,11 @@ extern "C" {
 // callback to be implemented by the user
 typedef void (*myhtml_callback_serialize_f)(const char* buffer, size_t size, void* ctx);
 
-/**
- * @struct myhtml_tree serialization flags
- */
-enum myhtml_tree_serialize_flags {
-    MyHTML_TREE_SERIALIZE_FLAGS_FULL                    = 0x000,    /* all nodes are regenerated */
-}
-typedef myhtml_tree_serialize_flags_t;
-
-
 // the serialization functions
-bool myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
-bool myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);
-bool myhtml_serialize(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_tree_serialize_flags_t flags, myhtml_callback_serialize_f callback, void* ptr);
-bool myhtml_serialize_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_tree_serialize_flags_t flags, myhtml_callback_serialize_f callback, void* ptr);
+bool myhtml_serialization_tree_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
+bool myhtml_serialization_node_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+bool myhtml_serialization_tree_callback(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_callback_serialize_f callback, void* ptr);
+bool myhtml_serialization_node_callback(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void* ptr);
 
 #ifdef __cplusplus
 } /* extern "C" */

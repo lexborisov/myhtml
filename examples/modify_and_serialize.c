@@ -59,7 +59,7 @@ int main()
     
 
     // write the document again
-    myhtml_serialize(tree, myhtml_tree_get_document(tree), MyHTML_TREE_SERIALIZE_FLAGS_FULL, write_output, NULL);
+    myhtml_serialization_tree_callback(tree, myhtml_tree_get_document(tree), write_output, NULL);
 
     /*
     
