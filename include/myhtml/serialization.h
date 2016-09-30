@@ -26,25 +26,18 @@
 #include <myhtml/mystring.h>
 #include <myhtml/tree.h>
 
-#define myhtml_serialization_realloc_if_need(len)                        \
-if((len + str->length) >= str->size) {                                   \
-    size_t size = (len + str->length) + 4096;                            \
-    char *data = (char*)myhtml_realloc(str->data, size * sizeof(char));  \
-                                                                         \
-    if(data) {                                                           \
-        str->data = data;                                                \
-        str->size = size;                                                \
-    }                                                                    \
-    else                                                                 \
-        return false;                                                    \
-}
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
-bool myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+// callback to be implemented by the user
+typedef void (*myhtml_callback_serialize_f)(const char* buffer, size_t size, void* ctx);
+
+// the serialization functions
+bool myhtml_serialization_tree_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
+bool myhtml_serialization_node_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+bool myhtml_serialization_tree_callback(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_callback_serialize_f callback, void* ptr);
+bool myhtml_serialization_node_callback(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void* ptr);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -88,7 +88,7 @@ int main(int argc, const char * argv[])
     myhtml_string_raw_t str_raw;
     myhtml_string_raw_clean_all(&str_raw);
     
-    if(myhtml_serialization(tree, myhtml_tree_get_document(tree), &str_raw)) {
+    if(myhtml_serialization_tree_buffer(tree, myhtml_tree_get_document(tree), &str_raw)) {
         /* 
             or myhtml_tree_get_node_html(tree) or myhtml_tree_get_node_head(tree)
             or myhtml_tree_get_node_body(tree) or some node
