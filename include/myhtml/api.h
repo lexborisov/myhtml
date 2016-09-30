@@ -2714,53 +2714,74 @@ myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
  ***********************************************************************************/
 
 /**
- * Tree fragment serialization
- *
- * @param[in] myhtml_tree_t*
- * @param[in] scope node, myhtml_tree_node_t*
- * @param[in] myhtml_string_raw_t* (date to be created if str_raw.data == NULL)
- *
- * @return true if successful, otherwise false
+ * Tree fragment serialization 
+ * The same as myhtml_serialization_tree_buffer function
  */
 bool
-myhtml_serialization_tree_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
+myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node,
+                     myhtml_string_raw_t* str);
 
 /**
  * Only one tree node serialization
+ * The same as myhtml_serialization_node_buffer function
+ */
+bool
+myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node,
+                          myhtml_string_raw_t* str);
+
+/**
+ * Serialize tree to an output string
  *
  * @param[in] myhtml_tree_t*
- * @param[in] myhtml_tree_node_t*
- * @param[in] myhtml_string_raw_t* (date to be created if str_raw.data == NULL)
+ * @param[in] scope node
+ * @param[in] myhtml_string_raw_t*
  *
  * @return true if successful, otherwise false
  */
 bool
-myhtml_serialization_node_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+myhtml_serialization_tree_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node,
+                                 myhtml_string_raw_t* str);
 
 /**
- *  Serialize an entire tree (fragment), providing the serialized data
- *  to the given callback in chunks.
+ * Serialize node to an output string
  *
- *  @param[in] myhtml_tree_t*                   The tree to serialize
- *  @param[in] myhtml_tree_node_t*              The scope node?
- *  @param[in] myhtml_callback_serialize_f*     The callback to be invoked
+ * @param[in] myhtml_tree_t*
+ * @param[in] node
+ * @param[in] myhtml_string_raw_t*
  *
- *  @return true if successful, otherwise false
+ * @return true if successful, otherwise false
  */
 bool
-myhtml_serialization_tree_callback(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_callback_serialize_f callback, void* ptr);
+myhtml_serialization_node_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* node,
+                                 myhtml_string_raw_t* str);
 
 /**
- *  Serialize only a single node, providing the serialized data
- *  to the given callback in chunks.
- *  @param[in] myhtml_tree_t*                   The tree the node belongs to
- *  @param[in] myhtml_tree_node_t*              The node to serialize
- *  @param[in] myhtml_callback_serialize_f*     The callback to be invoked
+ * The serialize function for an entire tree
  *
- *  @return true if successful, otherwise false
+ * @param[in] tree        the tree to be serialized
+ * @param[in] scope_node  the scope_node
+ * @param[in] callback    function that will be called for all strings that have to be printed
+ * @param[in] ptr         user-supplied pointer
+ *
+ * @return true if successful, otherwise false
  */
 bool
-myhtml_serialization_node_callback(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void* ptr);
+myhtml_serialization_tree_callback(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node,
+                                   myhtml_callback_serialize_f callback, void* ptr);
+
+/**
+ * The serialize function for a single node
+ *
+ * @param[in] tree        the tree to be serialized
+ * @param[in] node        the node that is going to be serialized
+ * @param[in] callback    function that will be called for all strings that have to be printed
+ * @param[in] ptr         user-supplied pointer
+ *
+ * @return true if successful, otherwise false
+ */
+bool
+myhtml_serialization_node_callback(myhtml_tree_t* tree, myhtml_tree_node_t* node,
+                                   myhtml_callback_serialize_f callback, void* ptr);
 
 /***********************************************************************************
  *

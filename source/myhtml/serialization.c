@@ -16,6 +16,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  
  Author: lex.borisov@gmail.com (Alexander Borisov)
+ Author: https://github.com/EmielBruijntjes (Emiel Bruijntjes)
 */
 
 #include <setjmp.h>
@@ -29,6 +30,22 @@ static void myhtml_serialization_append_attr(const char* str, size_t length, myh
 static void myhtml_serialization_attributes(myhtml_tree_t* tree, myhtml_tree_attr_t* attr, myhtml_callback_serialize_f callback, void *ptr);
 static void myhtml_serialization_node_append_text_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void *ptr);
 static void myhtml_serialization_node_append_close(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void *ptr);
+
+/**
+ *  See the function myhtml_serialization_tree_buffer
+ */
+bool myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str)
+{
+    return myhtml_serialization_tree_buffer(tree, scope_node, str);
+}
+
+/**
+ *  See the function myhtml_serialization_node_buffer
+ */
+bool myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str)
+{
+    return myhtml_serialization_node_buffer(tree, node, str);
+}
 
 /**
  *  The serialize function for an entire tree

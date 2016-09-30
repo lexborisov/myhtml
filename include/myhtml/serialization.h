@@ -39,6 +39,11 @@ bool myhtml_serialization_node_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* n
 bool myhtml_serialization_tree_callback(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_callback_serialize_f callback, void* ptr);
 bool myhtml_serialization_node_callback(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void* ptr);
 
+// in versuon 1.0.3 this is in public api.
+// Need to set deprecated?
+bool myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
+bool myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
