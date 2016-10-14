@@ -53,8 +53,9 @@ struct res_html load_html_file(const char* filename)
 
     fclose(fh);
     
-    if(size < 0)
+    if(size < 0) {
         size = 0;
+    }
     
     struct res_html res = {html, (size_t)size};
     return res;
