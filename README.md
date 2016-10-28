@@ -10,9 +10,9 @@ This is one of module of the [Modest] project
 
 ```text
 The current version is 1.0.4. Last version is 1.0.3
+```
 
 See [Releases](https://github.com/lexborisov/myhtml/releases)
-```
 
 ## Changes
 Please, see [CHANGELOG.md] file
@@ -57,9 +57,9 @@ WINDOWS_1257, WINDOWS_1258, WINDOWS_874, X_MAC_CYRILLIC, ISO_2022_JP, GBK, SHIFT
 
 Now it UTF-8, UTF-16LE, UTF16BE and russian windows-1251,  koi8-r, iso-8859-5, x-mac-cyrillic, ibm866
 
-## The Story of Creation
+## Introduction
 
-[The Story of Creation]
+[Introduction]
 
 ## Benchmark
 
@@ -226,7 +226,7 @@ See the [LICENSE] file.
 [Perl 5]: https://metacpan.org/release/HTML-MyHTML
 [Perl 6]: https://github.com/MadcapJake/p6-MyHTML
 [Crystal]: https://github.com/kostya/myhtml
-[The Story of Creation]: http://lexborisov.github.io/myhtml/
+[Introduction]: http://lexborisov.github.io/myhtml/
 [Article with charts]: http://lexborisov.github.io/benchmark-html-persers/
 [Benchmark code]: https://github.com/lexborisov/benchmark-html-persers/tree/master
 [Images and CSV]: https://github.com/lexborisov/benchmark-html-persers/tree/master/Results
