@@ -472,9 +472,18 @@ char * mchar_async_crop_first_chars_without_cache(char *data, size_t crop_len)
     return data;
 }
 
+size_t mchar_async_get_size_by_data(const char *data)
+{
+    if(data == NULL)
+        return 0;
+    
+    return *((size_t*)(data - sizeof(size_t)));
+}
+
 void mchar_async_free(mchar_async_t *mchar_async, size_t node_idx, char *entry)
 {
-    mchar_async_cache_add(&mchar_async->nodes[node_idx].cache, entry, *(size_t*)(entry - sizeof(size_t)));
+    if(entry)
+        mchar_async_cache_add(&mchar_async->nodes[node_idx].cache, entry, *(size_t*)(entry - sizeof(size_t)));
 }
 
 void mchar_async_cache_init(mchar_async_cache_t *cache)

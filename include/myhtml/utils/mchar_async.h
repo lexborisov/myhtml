@@ -113,6 +113,8 @@ mchar_async_chunk_t * mchar_async_chunk_malloc(mchar_async_t *mchar_async, mchar
 char * mchar_async_crop_first_chars(mchar_async_t *mchar_async, size_t node_idx, char *data, size_t crop_len);
 char * mchar_async_crop_first_chars_without_cache(char *data, size_t crop_len);
 
+size_t mchar_async_get_size_by_data(const char *data);
+
 // cache
 void mchar_async_cache_init(mchar_async_cache_t *cache);
 mchar_async_cache_t * mchar_async_cache_destroy(mchar_async_cache_t *cache, bool self_destroy);
