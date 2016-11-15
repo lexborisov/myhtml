@@ -49,6 +49,25 @@ void myhtml_incomming_buffer_clean(myhtml_incoming_buffer_t *current)
     memset(current, 0, sizeof(myhtml_incoming_buffer_t));
 }
 
+myhtml_incoming_buffer_t * myhtml_incomming_buffer_split(myhtml_incoming_buffer_t *current, mcobject_t *mcobject, size_t global_pos)
+{
+    size_t relative_pos = global_pos - current->offset;
+    myhtml_incoming_buffer_t *inc_buf = mcobject_malloc(mcobject, NULL);
+    
+    inc_buf->size   = current->size - relative_pos;
+    inc_buf->length = inc_buf->size;
+    inc_buf->data   = &current->data[relative_pos];
+    inc_buf->offset = current->offset + relative_pos;
+    inc_buf->next   = NULL;
+    inc_buf->prev   = current;
+    
+    current->next   = inc_buf;
+    current->size   = relative_pos;
+    current->length = relative_pos;
+    
+    return inc_buf;
+}
+
 myhtml_incoming_buffer_t * myhtml_incoming_buffer_find_by_position(myhtml_incoming_buffer_t *inc_buf, size_t begin)
 {
     if(inc_buf->offset < begin) {
