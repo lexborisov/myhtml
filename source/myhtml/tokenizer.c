@@ -46,7 +46,7 @@ myhtml_status_t myhtml_tokenizer_chunk_process(myhtml_tree_t* tree, const char* 
     myhtml_tokenizer_state_f* state_f = myhtml->parse_state_func;
     
     // add for a chunk
-    tree->incoming_buf = myhtml_incomming_buffer_add(tree->incoming_buf, tree->mcobject_incoming_buf, html, html_length);
+    tree->incoming_buf = myhtml_incoming_buffer_add(tree->incoming_buf, tree->mcobject_incoming_buf, html, html_length);
     
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
     

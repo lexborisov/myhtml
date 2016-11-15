@@ -21,7 +21,7 @@
 #include "myhtml/incoming.h"
 #include "myhtml/utils/resources.h"
 
-myhtml_incoming_buffer_t * myhtml_incomming_buffer_add(myhtml_incoming_buffer_t *current, mcobject_t *mcobject,
+myhtml_incoming_buffer_t * myhtml_incoming_buffer_add(myhtml_incoming_buffer_t *current, mcobject_t *mcobject,
                                                        const char *html, size_t html_size)
 {
     myhtml_incoming_buffer_t *inc_buf = mcobject_malloc(mcobject, NULL);
@@ -44,12 +44,12 @@ myhtml_incoming_buffer_t * myhtml_incomming_buffer_add(myhtml_incoming_buffer_t 
     return inc_buf;
 }
 
-void myhtml_incomming_buffer_clean(myhtml_incoming_buffer_t *current)
+void myhtml_incoming_buffer_clean(myhtml_incoming_buffer_t *current)
 {
     memset(current, 0, sizeof(myhtml_incoming_buffer_t));
 }
 
-myhtml_incoming_buffer_t * myhtml_incomming_buffer_split(myhtml_incoming_buffer_t *current, mcobject_t *mcobject, size_t global_pos)
+myhtml_incoming_buffer_t * myhtml_incoming_buffer_split(myhtml_incoming_buffer_t *current, mcobject_t *mcobject, size_t global_pos)
 {
     size_t relative_pos = global_pos - current->offset;
     myhtml_incoming_buffer_t *inc_buf = mcobject_malloc(mcobject, NULL);

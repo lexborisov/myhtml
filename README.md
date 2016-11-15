@@ -9,7 +9,7 @@ This is one of module of the [Modest] project
 ## Now
 
 ```text
-The current version is 1.0.4. Last version is 1.0.3
+The current version is 1.0.5. Last stable version is 1.0.4
 ```
 
 See [Releases](https://github.com/lexborisov/myhtml/releases)
@@ -37,7 +37,9 @@ Please, see [CHANGELOG.md] file
 
 ## Further developments
 
+- [Modest] — Modest is a fast HTML Render implemented as a pure C99 library with no outside dependencies
 - [MyCSS] — Fast C/C++ CSS Parser (Cascading Style Sheets Parser) 
+
 
 ## Support encodings for InputStream
 

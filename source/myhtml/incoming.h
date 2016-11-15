@@ -42,9 +42,9 @@ struct myhtml_incoming_buffer {
 
 
 // incoming buffer
-myhtml_incoming_buffer_t * myhtml_incomming_buffer_add(myhtml_incoming_buffer_t *current, mcobject_t *mcobject, const char *html, size_t html_size);
-void myhtml_incomming_buffer_clean(myhtml_incoming_buffer_t *current);
-myhtml_incoming_buffer_t * myhtml_incomming_buffer_split(myhtml_incoming_buffer_t *current, mcobject_t *mcobject, size_t global_pos);
+myhtml_incoming_buffer_t * myhtml_incoming_buffer_add(myhtml_incoming_buffer_t *current, mcobject_t *mcobject, const char *html, size_t html_size);
+void myhtml_incoming_buffer_clean(myhtml_incoming_buffer_t *current);
+myhtml_incoming_buffer_t * myhtml_incoming_buffer_split(myhtml_incoming_buffer_t *current, mcobject_t *mcobject, size_t global_pos);
 
 myhtml_incoming_buffer_t * myhtml_incoming_buffer_find_by_position(myhtml_incoming_buffer_t *inc_buf, size_t begin);
 

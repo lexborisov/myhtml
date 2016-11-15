@@ -99,9 +99,9 @@ myhtml_tree_attr_t * replacing_find_attribute_by_key(myhtml_tree_t* tree, myhtml
 
 long replacing_change_attribute_value(myhtml_tree_t* tree, myhtml_tree_attr_t* attr, struct res_context *change_data)
 {
-    myhtml_incoming_buffer_t *next_inc_buf = myhtml_incomming_buffer_split(tree->incoming_buf, tree->mcobject_incoming_buf, attr->raw_value_begin);
-    myhtml_incoming_buffer_t *new_inc_buf  = myhtml_incomming_buffer_add(tree->incoming_buf, tree->mcobject_incoming_buf,
-                                                                         change_data->value, change_data->value_length);
+    myhtml_incoming_buffer_t *next_inc_buf = myhtml_incoming_buffer_split(tree->incoming_buf, tree->mcobject_incoming_buf, attr->raw_value_begin);
+    myhtml_incoming_buffer_t *new_inc_buf  = myhtml_incoming_buffer_add(tree->incoming_buf, tree->mcobject_incoming_buf,
+                                                                        change_data->value, change_data->value_length);
     
     next_inc_buf->prev->next = new_inc_buf;
     next_inc_buf->offset = new_inc_buf->offset + new_inc_buf->size;
