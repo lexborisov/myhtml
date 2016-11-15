@@ -160,13 +160,13 @@ void myhtml_serialization_attributes(myhtml_tree_t* tree, myhtml_tree_attr_t* at
                     The attribute's serialized name is the string "xmlns:" followed by the attribute's local name.
                  */
                 if(attr->key.data && attr->key.length == 5 && myhtml_strcmp(attr->key.data, "xmlns")) {
-                    callback("xmlns:", 6, callback);
+                    callback("xmlns:", 6, ptr);
                 }
                 
                 break;
             }
             case MyHTML_NAMESPACE_XLINK: {
-                callback("xlink:", 6, callback);
+                callback("xlink:", 6, ptr);
                 
                 break;
             }
@@ -309,7 +309,7 @@ void myhtml_serialization_append_attr(const char* data, size_t size, myhtml_call
             break;
         case 0xA0:
             if (notwritten) callback(data + i - notwritten, notwritten, ptr);
-            callback("&nbsp;", 6, NULL);
+            callback("&nbsp;", 6, ptr);
             notwritten = 0;
             break;
         default:
