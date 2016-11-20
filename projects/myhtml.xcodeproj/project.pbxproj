@@ -16,6 +16,10 @@
 		0E8499931D1B1DDB0027A80B /* callback.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E84998C1D1B1DDB0027A80B /* callback.c */; };
 		0E8499941D1B1DDB0027A80B /* charef_resource.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E84998D1D1B1DDB0027A80B /* charef_resource.h */; };
 		0E8499951D1B1DDB0027A80B /* data_process.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E84998E1D1B1DDB0027A80B /* data_process.h */; };
+		0E993FC71DE2637A00CC7E30 /* avl_tree.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E993FC51DE2637A00CC7E30 /* avl_tree.c */; };
+		0E993FC81DE2637A00CC7E30 /* avl_tree.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E993FC61DE2637A00CC7E30 /* avl_tree.h */; };
+		0E993FCB1DE2639200CC7E30 /* serialization.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E993FC91DE2639200CC7E30 /* serialization.c */; };
+		0E993FCC1DE2639200CC7E30 /* serialization.h in Headers */ = {isa = PBXBuildFile; fileRef = 0E993FCA1DE2639200CC7E30 /* serialization.h */; };
 		0EBD22A41CE3D65300F1CA9C /* api_encoding.h in Headers */ = {isa = PBXBuildFile; fileRef = 0EBD226D1CE3D65300F1CA9C /* api_encoding.h */; };
 		0EBD22A51CE3D65300F1CA9C /* api.h in Headers */ = {isa = PBXBuildFile; fileRef = 0EBD226E1CE3D65300F1CA9C /* api.h */; };
 		0EBD22A61CE3D65300F1CA9C /* charef.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EBD226F1CE3D65300F1CA9C /* charef.c */; };
@@ -86,6 +90,10 @@
 		0E84998C1D1B1DDB0027A80B /* callback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = callback.c; path = ../source/myhtml/callback.c; sourceTree = "<group>"; };
 		0E84998D1D1B1DDB0027A80B /* charef_resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = charef_resource.h; path = ../source/myhtml/charef_resource.h; sourceTree = "<group>"; };
 		0E84998E1D1B1DDB0027A80B /* data_process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = data_process.h; path = ../source/myhtml/data_process.h; sourceTree = "<group>"; };
+		0E993FC51DE2637A00CC7E30 /* avl_tree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = avl_tree.c; sourceTree = "<group>"; };
+		0E993FC61DE2637A00CC7E30 /* avl_tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avl_tree.h; sourceTree = "<group>"; };
+		0E993FC91DE2639200CC7E30 /* serialization.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = serialization.c; path = ../source/myhtml/serialization.c; sourceTree = "<group>"; };
+		0E993FCA1DE2639200CC7E30 /* serialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = serialization.h; path = ../source/myhtml/serialization.h; sourceTree = "<group>"; };
 		0EBD226D1CE3D65300F1CA9C /* api_encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = api_encoding.h; path = ../source/myhtml/api_encoding.h; sourceTree = "<group>"; };
 		0EBD226E1CE3D65300F1CA9C /* api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = api.h; path = ../source/myhtml/api.h; sourceTree = "<group>"; };
 		0EBD226F1CE3D65300F1CA9C /* charef.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = charef.c; path = ../source/myhtml/charef.c; sourceTree = "<group>"; };
@@ -175,6 +183,8 @@
 		0E82BB6C1C3A7A8100B38816 /* myhtml */ = {
 			isa = PBXGroup;
 			children = (
+				0E993FC91DE2639200CC7E30 /* serialization.c */,
+				0E993FCA1DE2639200CC7E30 /* serialization.h */,
 				0E8499881D1B1DDB0027A80B /* callback.h */,
 				0E84998C1D1B1DDB0027A80B /* callback.c */,
 				0E84998E1D1B1DDB0027A80B /* data_process.h */,
@@ -236,6 +246,8 @@
 		0EBD22981CE3D65300F1CA9C /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				0E993FC61DE2637A00CC7E30 /* avl_tree.h */,
+				0E993FC51DE2637A00CC7E30 /* avl_tree.c */,
 				0E8499851D1B1DB10027A80B /* mcobject.h */,
 				0E8499841D1B1DB10027A80B /* mcobject.c */,
 				0EBD22991CE3D65300F1CA9C /* mchar_async.c */,
@@ -279,8 +291,10 @@
 				0EEA5B211D07A649009E28A6 /* mynamespace_resource.h in Headers */,
 				0EBD22AD1CE3D65300F1CA9C /* encoding.h in Headers */,
 				0EBD22D01CE3D65300F1CA9C /* mchar_async.h in Headers */,
+				0E993FC81DE2637A00CC7E30 /* avl_tree.h in Headers */,
 				0EBD22C01CE3D65300F1CA9C /* thread.h in Headers */,
 				0EBD22B11CE3D65300F1CA9C /* myhtml.h in Headers */,
+				0E993FCC1DE2639200CC7E30 /* serialization.h in Headers */,
 				0EBD22B51CE3D65300F1CA9C /* mystring.h in Headers */,
 				0EBD22AF1CE3D65300F1CA9C /* incoming.h in Headers */,
 				0EBD22A81CE3D65300F1CA9C /* def.h in Headers */,
@@ -372,6 +386,7 @@
 				0EBD22A61CE3D65300F1CA9C /* charef.c in Sources */,
 				0EBD22C71CE3D65300F1CA9C /* tokenizer_script.c in Sources */,
 				0EBD22B91CE3D65300F1CA9C /* rules.c in Sources */,
+				0E993FC71DE2637A00CC7E30 /* avl_tree.c in Sources */,
 				0EBD22AA1CE3D65300F1CA9C /* encoding_detect.c in Sources */,
 				0EBD22C31CE3D65300F1CA9C /* tokenizer_doctype.c in Sources */,
 				0EBD22BF1CE3D65300F1CA9C /* thread.c in Sources */,
@@ -385,6 +400,7 @@
 				0EBD22B61CE3D65300F1CA9C /* parser.c in Sources */,
 				0EBD22D51CE3D65300F1CA9C /* mcsync.c in Sources */,
 				0EBD22AE1CE3D65300F1CA9C /* incoming.c in Sources */,
+				0E993FCB1DE2639200CC7E30 /* serialization.c in Sources */,
 				0EBD22D71CE3D65300F1CA9C /* mctree.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

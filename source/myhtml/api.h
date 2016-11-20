@@ -36,7 +36,7 @@
 
 #define MyHTML_VERSION_MAJOR 1
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 4
+#define MyHTML_VERSION_PATCH 5
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -382,7 +382,8 @@ enum myhtml_tags {
 */
 enum myhtml_status {
     MyHTML_STATUS_OK                                   = 0x0000,
-    MyHTML_STATUS_ERROR_MEMORY_ALLOCATION              = 0x0001,
+    MyHTML_STATUS_ERROR                                = 0x0001,
+    MyHTML_STATUS_ERROR_MEMORY_ALLOCATION              = 0x0002,
     MyHTML_STATUS_THREAD_ERROR_MEMORY_ALLOCATION       = 0x0009,
     MyHTML_STATUS_THREAD_ERROR_LIST_INIT               = 0x000a,
     MyHTML_STATUS_THREAD_ERROR_ATTR_MALLOC             = 0x000b,
