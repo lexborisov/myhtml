@@ -52,7 +52,7 @@ myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, bool destroy_obj)
     if(str == NULL)
         return NULL;
     
-    if(str->data && str->mchar && str->node_idx)
+    if(str->data && str->mchar)
         mchar_async_free(str->mchar, str->node_idx, str->data);
     
     if(destroy_obj && str) {
