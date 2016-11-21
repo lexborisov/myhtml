@@ -236,9 +236,91 @@ void myhtml_utils_avl_tree_add(myhtml_utils_avl_tree_t* avl_tree, myhtml_utils_a
     }
 }
 
-myhtml_utils_avl_tree_node_t * myhtml_utils_avl_tree_delete(myhtml_utils_avl_tree_t *avl_tree, myhtml_utils_avl_tree_node_t** root, size_t type)
+myhtml_utils_avl_tree_node_t * myhtml_utils_avl_tree_find_min(myhtml_utils_avl_tree_node_t* node)
 {
-    //myhtml_utils_avl_tree_node_t* node = *root;
+    if(node == NULL)
+        return NULL;
+    
+    while(node->right) {
+        node = node->right;
+    }
+    
+    return node;
+}
+
+void myhtml_utils_avl_tree_rotate_for_delete(myhtml_utils_avl_tree_node_t* delete_node, myhtml_utils_avl_tree_node_t* node, myhtml_utils_avl_tree_node_t** root)
+{
+    myhtml_utils_avl_tree_node_t* balance_node;
+    
+    if(node) {
+        if(delete_node->left == node) {
+            balance_node = node->left ? node->left : node;
+            
+            node->parent = delete_node->parent;
+            node->right = delete_node->right;
+            
+            if(delete_node->right)
+                delete_node->right->parent = node;
+        }
+        else {
+            balance_node = node;
+            
+            node->parent->right = NULL;
+            node->parent = delete_node->parent;
+            node->right = delete_node->right;
+            node->left = delete_node->left;
+            
+            if(delete_node->left)
+                delete_node->left->parent = node;
+            if(delete_node->right)
+                delete_node->right->parent = node;
+        }
+        
+        if(delete_node->parent) {
+            if(delete_node->parent->left == delete_node) { delete_node->parent->left = node; }
+            else { delete_node->parent->right = node; }
+        }
+        else {
+            *root = node;
+        }
+    }
+    else {
+        balance_node = delete_node->parent;
+        
+        if(delete_node->parent) {
+            if(delete_node->parent->left == delete_node) { delete_node->parent->left = delete_node->right; }
+            else { delete_node->parent->right = delete_node->right; }
+        }
+        else {
+            *root = delete_node->right;
+        }
+    }
+    
+    while(balance_node) {
+        balance_node = myhtml_utils_avl_tree_node_balance(balance_node, root);
+    }
+}
+
+void * myhtml_utils_avl_tree_delete(myhtml_utils_avl_tree_t *avl_tree, myhtml_utils_avl_tree_node_t** root, size_t type)
+{
+    myhtml_utils_avl_tree_node_t* node = *root;
+    
+    while(node)
+    {
+        if(type == node->type) {
+            myhtml_utils_avl_tree_rotate_for_delete(node, myhtml_utils_avl_tree_find_min(node->left), root);
+            
+            void *value = node->value;
+            mcobject_free(avl_tree->mc_nodes, node);
+            
+            return value;
+        }
+        else if(type < node->type)
+            node = node->left;
+        else
+            node = node->right;
+    }
+    
     return NULL;
 }
 

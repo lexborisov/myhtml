@@ -56,7 +56,7 @@ myhtml_utils_avl_tree_t * myhtml_utils_avl_tree_destroy(myhtml_utils_avl_tree_t*
 myhtml_utils_avl_tree_node_t * myhtml_utils_avl_tree_node_create_root(myhtml_utils_avl_tree_t* avl_tree, size_t type, void* value);
 
 void myhtml_utils_avl_tree_add(myhtml_utils_avl_tree_t* avl_tree, myhtml_utils_avl_tree_node_t** root, size_t type, void* value);
-myhtml_utils_avl_tree_node_t * myhtml_utils_avl_tree_delete(myhtml_utils_avl_tree_t *avl_tree, myhtml_utils_avl_tree_node_t** root, size_t type);
+void * myhtml_utils_avl_tree_delete(myhtml_utils_avl_tree_t *avl_tree, myhtml_utils_avl_tree_node_t** root, size_t type);
 myhtml_utils_avl_tree_node_t * myhtml_utils_avl_tree_search_by_type(myhtml_utils_avl_tree_t *avl_tree, myhtml_utils_avl_tree_node_t* node, size_t type);
 
 void myhtml_utils_avl_tree_list_all_nodes(myhtml_utils_avl_tree_t *avl_tree, myhtml_utils_avl_tree_node_t* root, myhtml_utils_avl_tree_node_callback_f callback, void* ctx);
