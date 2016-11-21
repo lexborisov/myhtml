@@ -33,6 +33,8 @@
 		0E770C151C3FE6A400F68C82 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E770C131C3FE6A400F68C82 /* utils.c */; };
 		0E7E16631CA31449006310B5 /* mcsimple.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E7E16611CA31449006310B5 /* mcsimple.c */; };
 		0E8499831D1B0C430027A80B /* mcobject.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E8499821D1B0C430027A80B /* mcobject.c */; };
+		0E993FC41DE25C1A00CC7E30 /* avl_tree.c in Sources */ = {isa = PBXBuildFile; fileRef = 0E993FC21DE25C1A00CC7E30 /* avl_tree.c */; };
+		0EB293881D8C3587007F1D9A /* serialization.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EB293861D8C3587007F1D9A /* serialization.c */; };
 		0EBC8AED1D17EEE100592890 /* callback.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EBC8AEB1D17EEE100592890 /* callback.c */; };
 		0EBC8AF01D1855A300592890 /* stream.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EBC8AEE1D1855A300592890 /* stream.c */; };
 		0EEADE9E1C5550690086B3D6 /* charef.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEADE9C1C5550690086B3D6 /* charef.c */; };
@@ -109,7 +111,11 @@
 		0E7E16621CA31449006310B5 /* mcsimple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mcsimple.h; sourceTree = "<group>"; };
 		0E8499811D1B0C3E0027A80B /* mcobject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mcobject.h; sourceTree = "<group>"; };
 		0E8499821D1B0C430027A80B /* mcobject.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mcobject.c; sourceTree = "<group>"; };
+		0E993FC21DE25C1A00CC7E30 /* avl_tree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = avl_tree.c; sourceTree = "<group>"; };
+		0E993FC31DE25C1A00CC7E30 /* avl_tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avl_tree.h; sourceTree = "<group>"; };
 		0EA18AC21C91C0A1008E8DE0 /* resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = resources.h; sourceTree = "<group>"; };
+		0EB293861D8C3587007F1D9A /* serialization.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = serialization.c; sourceTree = "<group>"; };
+		0EB293871D8C3587007F1D9A /* serialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = serialization.h; sourceTree = "<group>"; };
 		0EBC8AEB1D17EEE100592890 /* callback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = callback.c; sourceTree = "<group>"; };
 		0EBC8AEC1D17EEE100592890 /* callback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = callback.h; sourceTree = "<group>"; };
 		0EBC8AEE1D1855A300592890 /* stream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = stream.c; sourceTree = "<group>"; };
@@ -217,6 +223,8 @@
 				0E1ED9B31C68AE0E001B5FD6 /* encoding_detect.c */,
 				0EEC1B5F1CC0E692000D7AD3 /* incoming.h */,
 				0EEC1B5E1CC0E691000D7AD3 /* incoming.c */,
+				0EB293871D8C3587007F1D9A /* serialization.h */,
+				0EB293861D8C3587007F1D9A /* serialization.c */,
 				0E770BF71C3E87BA00F68C82 /* utils */,
 			);
 			name = myhtml;
@@ -226,6 +234,8 @@
 		0E770BF71C3E87BA00F68C82 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				0E993FC31DE25C1A00CC7E30 /* avl_tree.h */,
+				0E993FC21DE25C1A00CC7E30 /* avl_tree.c */,
 				0E8499811D1B0C3E0027A80B /* mcobject.h */,
 				0E8499821D1B0C430027A80B /* mcobject.c */,
 				0E7E16621CA31449006310B5 /* mcsimple.h */,
@@ -312,6 +322,7 @@
 				0E8499831D1B0C430027A80B /* mcobject.c in Sources */,
 				0E770C071C3E87BA00F68C82 /* tag.c in Sources */,
 				0E770C041C3E87BA00F68C82 /* parser.c in Sources */,
+				0E993FC41DE25C1A00CC7E30 /* avl_tree.c in Sources */,
 				0E770C0B1C3E87BA00F68C82 /* tokenizer.c in Sources */,
 				0EEC1B601CC0E692000D7AD3 /* incoming.c in Sources */,
 				0E770C0A1C3E87BA00F68C82 /* token.c in Sources */,
@@ -329,6 +340,7 @@
 				0EEADE9E1C5550690086B3D6 /* charef.c in Sources */,
 				0E2578981D07ABEE00442BDE /* mynamespace.c in Sources */,
 				0EEF775A1C425D20006DB566 /* tokenizer_end.c in Sources */,
+				0EB293881D8C3587007F1D9A /* serialization.c in Sources */,
 				0EBC8AF01D1855A300592890 /* stream.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -418,7 +430,7 @@
 		0E770BC11C3A7FBF00F68C82 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					MyHTML_WITH_PERF,
