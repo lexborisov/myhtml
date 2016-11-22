@@ -173,8 +173,7 @@ myhtml_status_t myhtml_tokenizer_end(myhtml_tree_t* tree)
         mythread_queue_list_entry_wait_for_done(tree->myhtml->thread, tree->queue_entry);
         tree->queue_entry = mythread_queue_list_entry_delete(tree->myhtml->thread, tree->queue_entry, false);
         
-        if(tree->myhtml->thread->queue_list->count == 0) {
-            //myhtml_tokenizer_wait(tree);
+        if(mythread_queue_list_get_count(tree->myhtml->thread->context) == 0) {
             myhtml_tokenizer_pause(tree);
         }
     }
@@ -242,7 +241,7 @@ myhtml_tree_node_t * myhtml_tokenizer_fragment_init(myhtml_tree_t* tree, myhtml_
 
 void myhtml_tokenizer_wait(myhtml_tree_t* tree)
 {
-    mythread_wait_all_for_done(tree->myhtml->thread);
+    mythread_queue_wait_all_for_done(tree->myhtml->thread);
 }
 
 void myhtml_tokenizer_post(myhtml_tree_t* tree)

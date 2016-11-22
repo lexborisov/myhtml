@@ -20,8 +20,10 @@
 
 #include "myhtml/parser.h"
 
-void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
+void myhtml_parser_stream(mythread_id_t thread_id, void* ctx)
 {
+    mythread_queue_node_t *qnode = (mythread_queue_node_t*)ctx;
+    
     if((qnode->tree->parse_flags & MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE) == 0) {
         while(myhtml_rules_tree_dispatcher(qnode->tree, qnode->token)){}
     }
@@ -180,8 +182,10 @@ size_t myhtml_parser_token_data_to_string_charef(myhtml_tree_t *tree, myhtml_str
     return str->length;
 }
 
-void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
+void myhtml_parser_worker(mythread_id_t thread_id, void* ctx)
 {
+    mythread_queue_node_t *qnode = (mythread_queue_node_t*)ctx;
+    
     myhtml_tree_t* tree = qnode->tree;
     myhtml_token_node_t* token = qnode->token;
     
@@ -286,8 +290,10 @@ void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode)
         tree->callback_after_token_ctx = tree->callback_after_token(tree, token, tree->callback_after_token_ctx);
 }
 
-void myhtml_parser_worker_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode)
+void myhtml_parser_worker_stream(mythread_id_t thread_id, void* ctx)
 {
+    mythread_queue_node_t *qnode = (mythread_queue_node_t*)ctx;
+    
     myhtml_parser_worker(thread_id, qnode);
     myhtml_parser_stream(thread_id, qnode);
 }

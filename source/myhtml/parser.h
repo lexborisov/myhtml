@@ -33,9 +33,9 @@ extern "C" {
 #include "myhtml/token.h"
 #include "myhtml/data_process.h"
 
-void myhtml_parser_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode);
-void myhtml_parser_worker(mythread_id_t thread_id, mythread_queue_node_t *qnode);
-void myhtml_parser_worker_stream(mythread_id_t thread_id, mythread_queue_node_t *qnode);
+void myhtml_parser_stream(mythread_id_t thread_id, void* ctx);
+void myhtml_parser_worker(mythread_id_t thread_id, void* ctx);
+void myhtml_parser_worker_stream(mythread_id_t thread_id, void* ctx);
 
 size_t myhtml_parser_token_data_to_string(myhtml_tree_t *tree, myhtml_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length);
 size_t myhtml_parser_token_data_to_string_lowercase(myhtml_tree_t *tree, myhtml_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length);

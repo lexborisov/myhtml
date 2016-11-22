@@ -258,14 +258,14 @@ mythread_t * mythread_create(void)
 
 #ifdef MyHTML_BUILD_WITHOUT_THREADS
 
-myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size_t thread_count, size_t queue_size)
+myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size_t thread_count)
 {
     return MyHTML_STATUS_OK;
 }
 
 #else /* MyHTML_BUILD_WITHOUT_THREADS */
 
-myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size_t thread_count, size_t queue_size)
+myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size_t thread_count)
 {
     mythread->batch_count    = 0;
     mythread->batch_first_id = 0;
@@ -296,12 +296,6 @@ myhtml_status_t mythread_init(mythread_t *mythread, const char *sem_prefix, size
         mythread->pth_list        = NULL;
     }
     
-    myhtml_status_t status;
-    mythread->queue_list = mythread_queue_list_create(mythread, &status);
-    
-    if(mythread->queue_list == NULL)
-        return status;
-    
     if(sem_prefix)
     {
         mythread->sem_prefix_length = strlen(sem_prefix);
@@ -328,7 +322,7 @@ void mythread_clean(mythread_t *mythread)
     mythread->sys_last_error = 0;
 }
 
-mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
+mythread_t * mythread_destroy(mythread_t *mythread, mythread_callback_before_join_f before_join, bool self_destroy)
 {
     if(mythread == NULL)
         return NULL;
@@ -341,7 +335,9 @@ mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
         mythread_resume_all(mythread);
         mythread_stream_quit_all(mythread);
         mythread_batch_quit_all(mythread);
-        mythread_wait_all_for_done(mythread);
+        
+        if(before_join)
+            before_join(mythread);
         
         for (size_t i = mythread->pth_list_root; i < mythread->pth_list_length; i++)
         {
@@ -350,10 +346,6 @@ mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
         
         myhtml_free(mythread->pth_list);
         mythread->pth_list = NULL;
-    }
-    
-    if(mythread->queue_list) {
-        myhtml_free(mythread->queue_list);
     }
     
     if(mythread->sem_prefix) {
@@ -375,7 +367,7 @@ mythread_t * mythread_destroy(mythread_t *mythread, bool self_destroy)
 
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
 
-mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_f func, void *work_func, myhtml_status_t *status, size_t total_count)
+mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_work_f work_func, void *process_func, mythread_thread_opt_t opt, myhtml_status_t *status, size_t total_count)
 {
     mythread->sys_last_error = 0;
     
@@ -392,10 +384,10 @@ mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_f func, 
     mythread_list_t *thr = &mythread->pth_list[mythread->pth_list_length];
     
     thr->data.mythread = mythread;
-    thr->data.func     = func;
+    thr->data.func     = work_func;
     thr->data.id       = mythread->pth_list_length;
     thr->data.t_count  = total_count;
-    thr->data.opt      = MyTHREAD_OPT_STOP;
+    thr->data.opt      = opt;
     
     myhtml_status_t m_status = myhtml_hread_mutex_create(mythread, &thr->data, 0);
     
@@ -404,7 +396,7 @@ mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_f func, 
         return 0;
     }
     
-    m_status = myhtml_thread_create(mythread, thr, work_func);
+    m_status = myhtml_thread_create(mythread, thr, process_func);
     if(m_status != MyHTML_STATUS_OK)
         return 0;
     
@@ -412,12 +404,12 @@ mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_f func, 
     return thr->data.id;
 }
 
-mythread_id_t myhread_create_stream(mythread_t *mythread, mythread_f func, myhtml_status_t *status)
+mythread_id_t myhread_create_stream(mythread_t *mythread, mythread_process_f process_func, mythread_work_f work_func, mythread_thread_opt_t opt, myhtml_status_t *status)
 {
-    return _myhread_create_stream_raw(mythread, func, mythread_function_stream, status, 0);
+    return _myhread_create_stream_raw(mythread, work_func, process_func, opt, status, 0);
 }
 
-mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml_status_t *status, size_t count)
+mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_process_f process_func, mythread_work_f work_func, mythread_thread_opt_t opt, myhtml_status_t *status, size_t count)
 {
     if(mythread->batch_count) {
         *status = MyHTML_STATUS_THREAD_ERROR_BATCH_INIT;
@@ -443,7 +435,7 @@ mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml
     
     for (size_t i = 0; i < count; i++)
     {
-        mythread_id_t curr_id = _myhread_create_stream_raw(mythread, func, mythread_function_batch, status, i);
+        mythread_id_t curr_id = _myhread_create_stream_raw(mythread, work_func, process_func, opt, status, i);
         
         if(init_first == false) {
             mythread->batch_first_id = curr_id;
@@ -475,9 +467,8 @@ mythread_id_t myhread_create_batch(mythread_t *mythread, mythread_f func, myhtml
 #endif /* MyHTML_BUILD_WITHOUT_THREADS */
 
 // mythread queue functions
-// TODO: size = 1024; -- never use
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
-mythread_queue_list_t * mythread_queue_list_create(mythread_t *mythread, myhtml_status_t *status)
+mythread_queue_list_t * mythread_queue_list_create(myhtml_status_t *status)
 {
     if(status)
         *status = MyHTML_STATUS_OK;
@@ -493,9 +484,22 @@ mythread_queue_list_t * mythread_queue_list_create(mythread_t *mythread, myhtml_
     return queue_list;
 }
 
+void mythread_queue_list_destroy(mythread_queue_list_t* queue_list)
+{
+    if(queue_list == NULL)
+        return;
+    
+    myhtml_free(queue_list);
+}
+
+size_t mythread_queue_list_get_count(mythread_queue_list_t* queue_list)
+{
+    return queue_list->count;
+}
+
 mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t *mythread, mythread_queue_t *queue, myhtml_status_t *status)
 {
-    mythread_queue_list_t *queue_list = mythread->queue_list;
+    mythread_queue_list_t *queue_list = (mythread_queue_list_t*)mythread->context;
     
     if(status)
         *status = MyHTML_STATUS_OK;
@@ -553,7 +557,7 @@ mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t *mythrea
 
 mythread_queue_list_entry_t * mythread_queue_list_entry_delete(mythread_t *mythread, mythread_queue_list_entry_t *entry, bool destroy_queue)
 {
-    mythread_queue_list_t *queue_list = mythread->queue_list;
+    mythread_queue_list_t *queue_list = (mythread_queue_list_t*)mythread->context;
     
     mythread_queue_list_entry_t *next = entry->next;
     mythread_queue_list_entry_t *prev = entry->prev;
@@ -736,7 +740,7 @@ mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythrea
         
         if(queue->nodes_pos >= queue->nodes_pos_size)
         {
-            mythread_wait_all_for_done(mythread);
+            mythread_queue_wait_all_for_done(mythread);
             
             queue->nodes_pos_size <<= 1;
             mythread_queue_node_t** tmp = myhtml_realloc(queue->nodes, sizeof(mythread_queue_node_t*) * queue->nodes_pos_size);
@@ -779,7 +783,7 @@ mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, m
     
     if(queue->nodes_uses >= limit) {
         queue->nodes_uses++;
-        mythread_wait_all_for_done(mythread);
+        mythread_queue_wait_all_for_done(mythread);
         
         queue->nodes_length = 0;
         queue->nodes_pos    = 0;
@@ -792,7 +796,7 @@ mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, m
         
         if(queue->nodes_pos >= queue->nodes_pos_size)
         {
-            mythread_wait_all_for_done(mythread);
+            mythread_queue_wait_all_for_done(mythread);
             
             queue->nodes_pos_size <<= 1;
             mythread_queue_node_t** tmp = myhtml_realloc(queue->nodes, sizeof(mythread_queue_node_t*) * queue->nodes_pos_size);
@@ -849,18 +853,40 @@ mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, m
     return &queue->nodes[queue->nodes_pos][queue->nodes_length];
 }
 
+void mythread_queue_wait_all_for_done(mythread_t *mythread)
+{
+    const struct timespec tomeout = {0, 0};
+    
+    mythread_queue_list_t *queue_list = (mythread_queue_list_t*)mythread->context;
+    mythread_queue_list_entry_t *entry = queue_list->first;
+    
+    while(entry)
+    {
+        for (size_t idx = mythread->pth_list_root; idx < mythread->pth_list_size; idx++) {
+            while(entry->thread_param[idx].use < entry->queue->nodes_uses) {
+                myhtml_thread_nanosleep(&tomeout);
+            }
+        }
+        
+        entry = entry->next;
+    }
+}
+
+#else
+
+void mythread_queue_wait_all_for_done(mythread_t *mythread) {}
+
 #endif /* MyHTML_BUILD_WITHOUT_THREADS */
 
 #ifdef MyHTML_BUILD_WITHOUT_THREADS
 
 void mythread_stream_quit_all(mythread_t *mythread) {}
 void mythread_batch_quit_all(mythread_t *mythread) {}
-void mythread_stream_stop_all(mythread_t *mythread) {};
-void mythread_batch_stop_all(mythread_t *mythread) {};
-void mythread_stop_all(mythread_t *mythread) {};
-void mythread_resume_all(mythread_t *mythread) {};
-void mythread_wait_all_for_done(mythread_t *mythread) {};
-void mythread_suspend_all(mythread_t *mythread) {};
+void mythread_stream_stop_all(mythread_t *mythread) {}
+void mythread_batch_stop_all(mythread_t *mythread) {}
+void mythread_stop_all(mythread_t *mythread) {}
+void mythread_resume_all(mythread_t *mythread) {}
+void mythread_suspend_all(mythread_t *mythread) {}
 
 #else /* MyHTML_BUILD_WITHOUT_THREADS */
 
@@ -933,25 +959,6 @@ void mythread_resume_all(mythread_t *mythread)
     }
 }
 
-void mythread_wait_all_for_done(mythread_t *mythread)
-{
-    const struct timespec tomeout = {0, 0};
-    
-    mythread_queue_list_t *queue_list = mythread->queue_list;
-    mythread_queue_list_entry_t *entry = queue_list->first;
-    
-    while(entry)
-    {
-        for (size_t idx = mythread->pth_list_root; idx < mythread->pth_list_size; idx++) {
-            while(entry->thread_param[idx].use < entry->queue->nodes_uses) {
-                myhtml_thread_nanosleep(&tomeout);
-            }
-        }
-        
-        entry = entry->next;
-    }
-}
-
 void mythread_suspend_all(mythread_t *mythread)
 {
     if(mythread->stream_opt != MyTHREAD_OPT_WAIT)
@@ -992,7 +999,7 @@ bool mythread_function_see_for_all_done(mythread_queue_list_t *queue_list, size_
 bool mythread_function_see_opt(mythread_context_t *ctx, volatile mythread_thread_opt_t opt, size_t done_count, const struct timespec *timeout)
 {
     mythread_t * mythread = ctx->mythread;
-    mythread_queue_list_t *queue_list = mythread->queue_list;
+    mythread_queue_list_t *queue_list = (mythread_queue_list_t*)mythread->context;
     
     if(done_count != queue_list->count)
         return false;
@@ -1023,11 +1030,11 @@ bool mythread_function_see_opt(mythread_context_t *ctx, volatile mythread_thread
     return false;
 }
 
-void mythread_function_batch(void *arg)
+void mythread_function_queue_batch(void *arg)
 {
     mythread_context_t *ctx = (mythread_context_t*)arg;
     mythread_t * mythread = ctx->mythread;
-    mythread_queue_list_t *queue_list = mythread->queue_list;
+    mythread_queue_list_t *queue_list = (mythread_queue_list_t*)mythread->context;
     
     const struct timespec timeout = {0, 0};
     myhtml_hread_mutex_wait(mythread, ctx);
@@ -1058,7 +1065,7 @@ void mythread_function_batch(void *arg)
                 mythread_queue_node_t *qnode = &entry->queue->nodes[pos][len];
                 
                 if((qnode->tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
-                    ctx->func(ctx->id, qnode);
+                    ctx->func(ctx->id, (void*)qnode);
                 
                 thread_param->use += mythread->batch_count;
             }
@@ -1075,11 +1082,11 @@ void mythread_function_batch(void *arg)
     while (1);
 }
 
-void mythread_function_stream(void *arg)
+void mythread_function_queue_stream(void *arg)
 {
     mythread_context_t *ctx = (mythread_context_t*)arg;
     mythread_t * mythread = ctx->mythread;
-    mythread_queue_list_t *queue_list = mythread->queue_list;
+    mythread_queue_list_t *queue_list = (mythread_queue_list_t*)mythread->context;
     
     const struct timespec timeout = {0, 0};
     myhtml_hread_mutex_wait(mythread, ctx);
@@ -1110,7 +1117,7 @@ void mythread_function_stream(void *arg)
                 mythread_queue_node_t *qnode = &entry->queue->nodes[pos][len];
                 
                 if((qnode->tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) == 0)
-                    ctx->func(ctx->id, qnode);
+                    ctx->func(ctx->id, (void*)qnode);
                 
                 thread_param->use++;
             }
@@ -1123,6 +1130,40 @@ void mythread_function_stream(void *arg)
         if(done_count == queue_list->count &&
            mythread_function_see_opt(ctx, mythread->stream_opt, done_count, &timeout))
             break;
+    }
+    while (1);
+}
+
+void mythread_function(void *arg)
+{
+    mythread_context_t *ctx = (mythread_context_t*)arg;
+    mythread_t * mythread = ctx->mythread;
+    
+    myhtml_hread_mutex_wait(mythread, ctx);
+    
+    do {
+        if(mythread->stream_opt & MyTHREAD_OPT_STOP || ctx->opt & MyTHREAD_OPT_STOP)
+        {
+            ctx->opt |= MyTHREAD_OPT_DONE;
+            myhtml_hread_mutex_wait(mythread, ctx);
+            
+            if(mythread->stream_opt & MyTHREAD_OPT_QUIT || ctx->opt & MyTHREAD_OPT_QUIT)
+            {
+                myhtml_hread_mutex_close(mythread, ctx);
+                ctx->opt = MyTHREAD_OPT_QUIT;
+                break;
+            }
+            
+            ctx->opt = MyTHREAD_OPT_UNDEF;
+        }
+        else if(mythread->stream_opt & MyTHREAD_OPT_QUIT || ctx->opt & MyTHREAD_OPT_QUIT)
+        {
+            myhtml_hread_mutex_close(mythread, ctx);
+            ctx->opt = MyTHREAD_OPT_QUIT;
+            break;
+        }
+        
+        ctx->func(ctx->id, ctx);
     }
     while (1);
 }
