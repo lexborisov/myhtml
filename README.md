@@ -1,6 +1,7 @@
 # MyHTML C/C++ HTML 5 Parser. Using threads.
 
 [![Build Status](https://travis-ci.org/lexborisov/myhtml.svg?branch=master)](https://travis-ci.org/lexborisov/myhtml)
+[![Codewake](https://www.codewake.com/badges/ask_question.svg)](https://www.codewake.com/p/myhtml)
 
 MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.
 
