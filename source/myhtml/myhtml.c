@@ -418,6 +418,10 @@ myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_col
 myhtml_collection_t * myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection, const char* html, size_t length, myhtml_status_t *status)
 {
     const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_name(tree->tags, html, length);
+    
+    if(tag_ctx == NULL)
+        return NULL;
+    
     return myhtml_get_nodes_by_tag_id(tree, collection, tag_ctx->id, status);
 }
 
