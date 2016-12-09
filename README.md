@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/lexborisov/myhtml.svg?branch=master)](https://travis-ci.org/lexborisov/myhtml)
 [![Codewake](https://www.codewake.com/badges/ask_question.svg)](https://www.codewake.com/p/myhtml)
-
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=L59E49K2NVUHE)
 
 MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.
