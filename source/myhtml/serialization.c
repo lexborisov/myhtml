@@ -269,9 +269,15 @@ void myhtml_serialization_append(const char *data, size_t size, myhtml_callback_
             notwritten = 0;
             break;
         case 0xA0:
-            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
-            callback("&nbsp;", 6, ptr);
-            notwritten = 0;
+            if(i > 0 && (unsigned char)(data[(i - 1)]) == 0xC2) {
+                if (notwritten) callback(data + i - notwritten, (notwritten - 1), ptr);
+                callback("&nbsp;", 6, ptr);
+                notwritten = 0;
+            }
+            else {
+                ++notwritten;
+            }
+            
             break;
         default:
             ++notwritten;
@@ -308,9 +314,15 @@ void myhtml_serialization_append_attr(const char* data, size_t size, myhtml_call
             notwritten = 0;
             break;
         case 0xA0:
-            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
-            callback("&nbsp;", 6, ptr);
-            notwritten = 0;
+            if(i > 0 && (unsigned char)(data[(i - 1)]) == 0xC2) {
+                if (notwritten) callback(data + i - notwritten, (notwritten - 1), ptr);
+                callback("&nbsp;", 6, ptr);
+                notwritten = 0;
+            }
+            else {
+                ++notwritten;
+            }
+            
             break;
         default:
             ++notwritten;
