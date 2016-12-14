@@ -1434,35 +1434,50 @@ void myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* to
         }
     }
     
-    qnode->token = token;
-    
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
     
     if(tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) {
-        myhtml_parser_worker(0, qnode);
-        myhtml_parser_stream(0, qnode);
+        if(qnode) {
+            qnode->token = token;
+            
+            myhtml_parser_worker(0, qnode);
+            myhtml_parser_stream(0, qnode);
+        }
         
         tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, 4, NULL);
     }
     else {
+        if(qnode)
+            qnode->token = token;
+            
         tree->current_qnode = mythread_queue_node_malloc_round(tree->myhtml->thread, tree->queue_entry, NULL);
     }
     
 #else
     
-    myhtml_parser_worker(0, qnode);
-    myhtml_parser_stream(0, qnode);
+    f(qnode) {
+        qnode->token = token;
+        
+        myhtml_parser_worker(0, qnode);
+        myhtml_parser_stream(0, qnode);
+    }
     
     tree->current_qnode = mythread_queue_node_malloc_limit(tree->myhtml->thread, tree->queue, 4, NULL);
     
 #endif /* MyHTML_BUILD_WITHOUT_THREADS */
     
+    if(tree->current_qnode == NULL) {
+        // TODO: add return status
+        return;
+    }
+    
     tree->current_qnode->tree = tree;
     tree->current_qnode->prev = qnode;
     
-    if(qnode)
+    if(qnode && token)
         myhtml_tokenizer_calc_current_namespace(tree, token);
     
+    // TODO: add check created node
     myhtml_token_node_malloc(tree->token, tree->current_token_node, tree->token->mcasync_token_id);
     
     tree->current_token_node->raw_begin = tree->current_token_node->element_begin = (tree->global_offset + begin);

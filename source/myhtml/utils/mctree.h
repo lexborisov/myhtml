@@ -45,8 +45,8 @@ extern "C" {
 
 #define mctree_node_add(mctree)                                     \
     mctree->nodes_length++;                                         \
-    if(mctree->nodes_length == mctree->nodes_size) {                \
-        mctree->nodes_size += 4096;                                 \
+    if(mctree->nodes_length >= mctree->nodes_size) {                \
+        mctree->nodes_size = mctree->nodes_length + 4096;           \
         mctree->nodes = (mctree_node_t*)myhtml_realloc(mctree->nodes,    \
             sizeof(mctree_node_t) * mctree->nodes_size);            \
     }                                                               \

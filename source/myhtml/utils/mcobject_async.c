@@ -354,13 +354,20 @@ void mcobject_async_node_delete(mcobject_async_t *mcobj_async, size_t node_idx)
     while (chunk)
     {
         if(mcobj_async->chunk_cache_length >= mcobj_async->chunk_cache_size) {
-            mcobj_async->chunk_cache_size <<= 1;
+            size_t new_size = mcobj_async->chunk_cache_size << 1;
             
             mcobject_async_chunk_t **tmp = (mcobject_async_chunk_t**)myhtml_realloc(mcobj_async->chunk_cache,
-                                                                               sizeof(mcobject_async_chunk_t*) * mcobj_async->chunk_cache_size);
+                                                                               sizeof(mcobject_async_chunk_t*) * new_size);
             
-            if(tmp)
+            if(tmp) {
+                mcobj_async->chunk_cache_size = new_size;
                 mcobj_async->chunk_cache = tmp;
+            }
+            else {
+                // TODO: add return status
+                mcsync_unlock(mcobj_async->mcsync);
+                return;
+            }
         }
         
         mcobj_async->chunk_cache[ mcobj_async->chunk_cache_length ] = chunk;

@@ -54,14 +54,8 @@ static const unsigned char myhtml_utils_chars_map[] = {
 
 size_t myhtml_strncasecmp(const char* str1, const char* str2, size_t size)
 {
-    if(str1 == NULL) {
-        if(str2 == NULL)
-            return 0;
-        
-        return 1;
-    }
-    else if(str2 == NULL) {
-        if(str1 == NULL)
+    if(str1 == NULL || str2 == NULL) {
+        if(str1 == str2)
             return 0;
         
         return 1;
@@ -86,14 +80,8 @@ size_t myhtml_strncasecmp(const char* str1, const char* str2, size_t size)
 
 size_t myhtml_strcasecmp(const char* str1, const char* str2)
 {
-    if(str1 == NULL) {
-        if(str2 == NULL)
-            return 0;
-        
-        return 1;
-    }
-    else if(str2 == NULL) {
-        if(str1 == NULL)
+    if(str1 == NULL || str2 == NULL) {
+        if(str1 == str2)
             return 0;
         
         return 1;
@@ -119,14 +107,8 @@ size_t myhtml_strcasecmp(const char* str1, const char* str2)
 
 size_t myhtml_strncmp(const char* str1, const char* str2, size_t size)
 {
-    if(str1 == NULL) {
-        if(str2 == NULL)
-            return 0;
-        
-        return 1;
-    }
-    else if(str2 == NULL) {
-        if(str1 == NULL)
+    if(str1 == NULL || str2 == NULL) {
+        if(str1 == str2)
             return 0;
         
         return 1;
@@ -151,14 +133,8 @@ size_t myhtml_strncmp(const char* str1, const char* str2, size_t size)
 
 size_t myhtml_strcmp(const char* str1, const char* str2)
 {
-    if(str1 == NULL) {
-        if(str2 == NULL)
-            return 0;
-        
-        return 1;
-    }
-    else if(str2 == NULL) {
-        if(str1 == NULL)
+    if(str1 == NULL || str2 == NULL) {
+        if(str1 == str2)
             return 0;
         
         return 1;
@@ -184,14 +160,8 @@ size_t myhtml_strcmp(const char* str1, const char* str2)
 
 size_t myhtml_strcmp_ws(const char* str1, const char* str2)
 {
-    if(str1 == NULL) {
-        if(str2 == NULL)
-            return 0;
-        
-        return 1;
-    }
-    else if(str2 == NULL) {
-        if(str1 == NULL)
+    if(str1 == NULL || str2 == NULL) {
+        if(str1 == str2)
             return 0;
         
         return 1;

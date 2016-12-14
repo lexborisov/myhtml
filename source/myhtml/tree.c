@@ -71,14 +71,6 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     if(mcstatus)
         return MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT;
     
-    if(status) {
-        myhtml->parse_state_func = NULL;
-        myhtml->insertion_func = NULL;
-        myhtml->thread = NULL;
-        
-        return status;
-    }
-    
     tree->mchar              = mchar_async_create(128, (4096 * 5));
     tree->active_formatting  = myhtml_tree_active_formatting_init(tree);
     tree->open_elements      = myhtml_tree_open_elements_init(tree);
@@ -880,7 +872,7 @@ void myhtml_tree_list_insert_by_index(myhtml_tree_list_t* list, myhtml_tree_node
     
     myhtml_tree_node_t** node_list = list->list;
     
-    memmove(&node_list[(index + 1)], &node_list[index], sizeof(myhtml_tree_node_t**) * (list->length - index));
+    memmove(&node_list[(index + 1)], &node_list[index], sizeof(myhtml_tree_node_t*) * (list->length - index));
     
     list->list[index] = node;
     list->length++;
@@ -961,7 +953,7 @@ void myhtml_tree_open_elements_remove(myhtml_tree_t* tree, myhtml_tree_node_t* n
         
         if(list[el_idx] == node)
         {
-            memmove(&list[el_idx], &list[el_idx + 1], sizeof(myhtml_tree_node_t**) * (tree->open_elements->length - el_idx));
+            memmove(&list[el_idx], &list[el_idx + 1], sizeof(myhtml_tree_node_t*) * (tree->open_elements->length - el_idx));
             tree->open_elements->length--;
             
             break;
@@ -1451,7 +1443,7 @@ void myhtml_tree_active_formatting_remove(myhtml_tree_t* tree, myhtml_tree_node_
         
         if(list[el_idx] == node)
         {
-            memmove(&list[el_idx], &list[el_idx + 1], sizeof(myhtml_tree_node_t**) * (tree->active_formatting->length - el_idx));
+            memmove(&list[el_idx], &list[el_idx + 1], sizeof(myhtml_tree_node_t*) * (tree->active_formatting->length - el_idx));
             tree->active_formatting->length--;
             
             break;
@@ -1469,7 +1461,7 @@ void myhtml_tree_active_formatting_remove_by_index(myhtml_tree_t* tree, size_t i
 {
     myhtml_tree_node_t** list = tree->active_formatting->list;
     
-    memmove(&list[idx], &list[idx + 1], sizeof(myhtml_tree_node_t**) * (tree->active_formatting->length - idx));
+    memmove(&list[idx], &list[idx + 1], sizeof(myhtml_tree_node_t*) * (tree->active_formatting->length - idx));
     tree->active_formatting->length--;
     
 #ifdef DEBUG_MODE
