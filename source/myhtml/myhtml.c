@@ -1422,6 +1422,8 @@ myhtml_collection_t * myhtml_collection_destroy(myhtml_collection_t *collection)
 /* queue */
 void myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* token)
 {
+    // TODO: need refactoring this code
+    // too many conditions
     mythread_queue_node_t *qnode = tree->current_qnode;
     
     if(tree->parse_flags & MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN) {
@@ -1437,7 +1439,7 @@ void myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* to
 #ifndef MyHTML_BUILD_WITHOUT_THREADS
     
     if(tree->flags & MyHTML_TREE_FLAGS_SINGLE_MODE) {
-        if(qnode) {
+        if(qnode && token) {
             qnode->token = token;
             
             myhtml_parser_worker(0, qnode);
@@ -1455,7 +1457,7 @@ void myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* to
     
 #else
     
-    f(qnode) {
+    if(qnode && token) {
         qnode->token = token;
         
         myhtml_parser_worker(0, qnode);
