@@ -1,11 +1,15 @@
-# MyHTML C/C++ HTML 5 Parser. Using threads.
+# MyHTML — a pure C HTML parser
 
 [![Build Status](https://travis-ci.org/lexborisov/myhtml.svg?branch=master)](https://travis-ci.org/lexborisov/myhtml)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=L59E49K2NVUHE)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=L59E49K2NVUHE)
 
 MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.
 
-This is one of module of the [Modest] project 
+* Mailing List: [https://groups.google.com/forum/#!forum/modest-engine](https://groups.google.com/forum/#!forum/modest-engine)
+* IRC: [#modest-engine on `irc.freenode.net <http://freenode.net>`](http://webchat.freenode.net?channels=%23modest-engine)
+* Or you can ask questions on [stackoverflow.com](https://stackoverflow.com/questions/ask?tags=myhtml) by myhtml tag
+
+This is one of module of the [Modest] project.
 
 ## Now
 
@@ -14,9 +18,6 @@ The current version is 1.0.5. Last stable version is 1.0.4
 ```
 
 See [Releases](https://github.com/lexborisov/myhtml/releases)
-
-## Changes
-Please, see [CHANGELOG.md] file
 
 ## Features
 
@@ -36,11 +37,13 @@ Please, see [CHANGELOG.md] file
 - Passes all tree construction tests from [html5lib-tests]
 - Tested by 1 billion HTML pages (by [commoncrawl.org], see [test file])
 
+## Changes
+Please, see [CHANGELOG.md] file
+
 ## Further developments
 
 - [Modest] — Modest is a fast HTML Render implemented as a pure C99 library with no outside dependencies
 - [MyCSS] — Fast C/C++ CSS Parser (Cascading Style Sheets Parser) 
-
 
 ## Support encodings for InputStream
 
@@ -70,96 +73,19 @@ Now it UTF-8, UTF-16LE, UTF16BE and russian windows-1251,  koi8-r, iso-8859-5, x
 - [Benchmark code]
 - [Images and CSV]
 
-
-## Build and Installation
-
-**Make**
-
-```bash
-make
-```
-
-If successful copy lib/* and include/* at the right place for you
-
-Flags that can be passed to make:
-- `MyHTML_OPTIMIZATION_LEVEL=-O2` set compiler optimization level. Default: -O2
-- `MyHTML_BUILD_WITHOUT_THREADS=YES` build without POSIX Threads. Default: NO
-
-*for example*
-```bash
-make MyHTML_BUILD_WITHOUT_THREADS=NO
-```
-
-
-```bash
-cp lib/* /usr/local/lib
-cp -r include/* /usr/local/include
-```
-
-**CMake**
-
-In myhtml/project directory:
-
-```bash
-cmake .
-make
-sudo make install
-```
-
-Flags that can be passed to CMake:
-- `MyHTML_OPTIMIZATION_LEVEL=-O2` set compiler optimization level. Default: -O2
-- `CMAKE_INSTALL_LIBDIR=lib` set path to install created library. Default: lib
-- `MyHTML_BUILD_SHARED=ON` build shared library. Default: ON
-- `MyHTML_BUILD_STATIC=ON` build static library. Default: ON
-- `MyHTML_INSTALL_HEADER=OFF` install header files. Default OFF
-- `MyHTML_BUILD_WITHOUT_THREADS=YES` build without POSIX Threads. Default: NO
-- `MyHTML_EXTERN_MALLOC=my_malloc_func` set extern malloc function. Default: UNDEFINED
-- `MyHTML_EXTERN_REALLOC=my_realloc_func` set extern realloc function. Default: UNDEFINED
-- `MyHTML_EXTERN_CALLOC=my_calloc_func` set extern calloc function. Default: UNDEFINED
-- `MyHTML_EXTERN_FREE=my_free_func` set extern free function. Default: UNDEFINED
-
-*for example*
-```bash
-cmake . -DCMAKE_INSTALL_LIBDIR=lib64 -DMyHTML_INSTALL_HEADER=ON
-```
-
-
-## Build with your program
-
-I advise to build using clang, but decided to show examples of gcc
-
-**for example**
-
-*build with shared library*
-```bash
-gcc -Wall -Werror -O2 -lmyhtml your_program.c -o your_program
-```
-
-*build with static library*
-```bash
-gcc -Wall -Werror -O2 your_program.c /path/to/libmyhtml_static.a -o your_program
-```
-
-## Future
-
-Works are in full swing
-
-- make test && make install
-- css ([MyCSS])
-- html render
-- js
-- ...
-
 ## Dependencies
 
 None
 
-## In other languages, external bindings
+## Installation
+
+See [INSTALL.md](https://github.com/lexborisov/myhtml/blob/master/INSTALL.md)
+
+## External Bindings and Wrappers
 
 - [Perl 5] module
 - [Perl 6] module
 - [Crystal] binding
-
 
 ## Examples
 
@@ -196,12 +122,6 @@ int main(int argc, const char * argv[])
     return 0;
 }
 ```
-
-## Support & Community
-[![Codewake](https://www.codewake.com/badges/ask_question.svg)](https://www.codewake.com/p/myhtml)
-[![Gitter](https://badges.gitter.im/gitterHQ/gitter.svg)](https://gitter.im/Modest-Engine/Lobby)
-
-You can ask questions on [stackoverflow.com](https://stackoverflow.com/questions/ask?tags=myhtml) by myhtml tag
 
 ## AUTHOR
 
