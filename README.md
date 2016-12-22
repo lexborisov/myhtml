@@ -14,7 +14,7 @@ This is one of module of the [Modest] project.
 ## Now
 
 ```text
-The current version is 1.0.5. Last stable version is 1.0.4
+The current version is 2.0.1. Last stable version is 2.0.0
 ```
 
 See [Releases](https://github.com/lexborisov/myhtml/releases)

@@ -369,48 +369,50 @@ myhtml_collection_t * myhtml_get_nodes_by_name_in_scope(myhtml_tree_t* tree, myh
 
 myhtml_collection_t * myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tag_id_t tag_id, myhtml_status_t *status)
 {
-    myhtml_tag_index_entry_t *index_tag = myhtml_tag_index_entry(tree->indexes->tags, tag_id);
-    myhtml_tag_index_node_t *index_node = myhtml_tag_index_first(tree->indexes->tags, tag_id);
-    
-    if(index_tag->count == 0) {
-        if(status)
-            *status = MyHTML_STATUS_OK;
-        
-        return collection;
-    }
-    
-    myhtml_status_t mystatus = MyHTML_STATUS_OK;
-    size_t idx = 0;
-    
     if(collection == NULL) {
-        collection = myhtml_collection_create((index_tag->count + 128), &mystatus);
+        collection = myhtml_collection_create(1024, NULL);
         
-        collection->length += index_tag->count;
-    }
-    else {
-        idx = collection->length;
-        mystatus = myhtml_collection_check_size(collection, index_tag->count, 128);
+        if(collection == NULL)
+            return NULL;
     }
     
-    if(mystatus) {
-        if(status)
-            *status = mystatus;
-        
-        return collection;
-    }
+    myhtml_tree_node_t *node = tree->node_html;
     
-    while (index_node)
+    while(node)
     {
-        collection->list[idx] = index_node->node;
-        idx++;
+        if(node->tag_id == tag_id)
+        {
+            if(myhtml_collection_check_size(collection, 1, 1024) == MyHTML_STATUS_OK) {
+                collection->list[ collection->length ] = node;
+                collection->length++;
+            }
+            else {
+                if(status)
+                    *status = MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+                
+                return collection;
+            }
+        }
         
-        index_node = index_node->next;
+        if(node->child)
+            node = node->child;
+        else {
+            while(node != tree->node_html && node->next == NULL)
+                node = node->parent;
+            
+            if(node == tree->node_html)
+                break;
+            
+            node = node->next;
+        }
     }
     
-    collection->list[idx] = NULL;
-    
-    if(status)
-        *status = mystatus;
+    if(myhtml_collection_check_size(collection, 1, 1024) == MyHTML_STATUS_OK) {
+        collection->list[ collection->length ] = NULL;
+    }
+    else if(status) {
+        *status = MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+    }
     
     return collection;
 }

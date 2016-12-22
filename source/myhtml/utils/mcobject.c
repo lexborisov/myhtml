@@ -150,10 +150,15 @@ void * mcobject_malloc(mcobject_t *mcobject, myhtml_status_t* status)
     
     if(chunk == NULL || chunk->length >= chunk->size)
     {
-        mcobject_chunk_malloc(mcobject, status);
+        myhtml_status_t ns_status;
+        mcobject_chunk_malloc(mcobject, &ns_status);
         
-        if(status && *status)
+        if(ns_status) {
+            if(status)
+                *status = ns_status;
+            
             return NULL;
+        }
         
         chunk = mcobject->chunk;
     }

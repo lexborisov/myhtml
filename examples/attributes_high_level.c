@@ -40,10 +40,8 @@ int main(int argc, const char * argv[])
     myhtml_parse_fragment(tree, MyHTML_ENCODING_UTF_8, html, strlen(html), MyHTML_TAG_DIV, MyHTML_NAMESPACE_HTML);
     
     // get first DIV from index
-    myhtml_tag_index_t *tag_index = myhtml_tree_get_tag_index(tree);
-    myhtml_tag_index_node_t *index_node = myhtml_tag_index_first(tag_index, MyHTML_TAG_DIV);
-    
-    myhtml_tree_node_t *node = myhtml_tag_index_tree_node(index_node);
+    myhtml_collection_t *div_list = myhtml_get_nodes_by_name(tree, NULL, "div", 3, NULL);
+    myhtml_tree_node_t *node = div_list->list[0];
     
     // print original tree
     printf("Original tree:\n");
@@ -68,6 +66,7 @@ int main(int argc, const char * argv[])
     printf("Get attr by key name \"key\": %s\n", attr_char);
     
     // release resources
+    myhtml_collection_destroy(div_list);
     myhtml_tree_destroy(tree);
     myhtml_destroy(myhtml);
     

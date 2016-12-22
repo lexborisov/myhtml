@@ -125,8 +125,6 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     tree->tags = myhtml_tag_create();
     status = myhtml_tag_init(tree, tree->tags);
     
-    tree->indexes = myhtml_tree_index_create(tree, tree->tags);
-    
     myhtml_tree_clean(tree);
     
     return status;
@@ -194,7 +192,6 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     myhtml_tree_list_clean(tree->other_elements);
     myhtml_tree_token_list_clean(tree->token_list);
     myhtml_tree_template_insertion_clean(tree);
-    myhtml_tree_index_clean(tree, tree->tags);
     mcobject_clean(tree->mcobject_incoming_buf);
     myhtml_tag_clean(tree->tags);
     mythread_queue_clean(tree->queue);
@@ -249,7 +246,6 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     myhtml_tree_list_clean(tree->other_elements);
     myhtml_tree_token_list_clean(tree->token_list);
     myhtml_tree_template_insertion_clean(tree);
-    myhtml_tree_index_clean(tree, tree->tags);
     mcobject_clean(tree->mcobject_incoming_buf);
     myhtml_tag_clean(tree->tags);
     
@@ -266,7 +262,6 @@ myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree)
         return NULL;
     
     /* destroy tags before other objects */
-    tree->indexes               = myhtml_tree_index_destroy(tree, tree->tags);
     tree->tags                  = myhtml_tag_destroy(tree->tags);
     tree->active_formatting     = myhtml_tree_active_formatting_destroy(tree);
     tree->open_elements         = myhtml_tree_open_elements_destroy(tree);
@@ -306,57 +301,6 @@ void myhtml_tree_parse_flags_set(myhtml_tree_t* tree, myhtml_tree_parse_flags_t 
     tree->parse_flags = flags;
 }
 
-/* index */
-myhtml_tree_indexes_t * myhtml_tree_index_create(myhtml_tree_t* tree, myhtml_tag_t* tags)
-{
-    myhtml_tree_indexes_t* indexes = (myhtml_tree_indexes_t*)myhtml_malloc(sizeof(myhtml_tree_indexes_t));
-    
-    indexes->tags = myhtml_tag_index_create();
-    myhtml_tag_index_init(tags, indexes->tags);
-    
-    return indexes;
-}
-
-void myhtml_tree_index_clean(myhtml_tree_t* tree, myhtml_tag_t* tags)
-{
-    if(tree->indexes == NULL)
-        return;
-    
-    myhtml_tag_index_clean(tags, tree->indexes->tags);
-}
-
-myhtml_tree_indexes_t * myhtml_tree_index_destroy(myhtml_tree_t* tree, myhtml_tag_t* tags)
-{
-    if(tree->indexes == NULL)
-        return NULL;
-    
-    tree->indexes->tags = myhtml_tag_index_destroy(tags, tree->indexes->tags);
-    myhtml_free(tree->indexes);
-    
-    return NULL;
-}
-
-void myhtml_tree_index_append(myhtml_tree_t* tree, myhtml_tree_node_t* node)
-{
-    if(tree->indexes == NULL)
-        return;
-    
-    myhtml_tag_index_add(tree->tags, tree->indexes->tags, node);
-}
-
-myhtml_tree_node_t * myhtml_tree_index_get(myhtml_tree_t* tree, myhtml_tag_id_t tag_id)
-{
-    if(tree->indexes == NULL)
-        return NULL;
-    
-    myhtml_tag_index_node_t *tag_index = myhtml_tag_index_first(tree->indexes->tags, tag_id);
-    
-    if(tag_index)
-        return tag_index->node;
-    
-    return NULL;
-}
-
 myhtml_t * myhtml_tree_get_myhtml(myhtml_tree_t* tree)
 {
     if(tree)
@@ -369,14 +313,6 @@ myhtml_tag_t * myhtml_tree_get_tag(myhtml_tree_t* tree)
 {
     if(tree)
         return tree->tags;
-    
-    return NULL;
-}
-
-myhtml_tag_index_t * myhtml_tree_get_tag_index(myhtml_tree_t* tree)
-{
-    if(tree && tree->indexes)
-        return tree->indexes->tags;
     
     return NULL;
 }
@@ -586,8 +522,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert_by_token(myhtml_tree_t* tree, myhtm
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     
     myhtml_tree_open_elements_append(tree, node);
-    myhtml_tree_index_append(tree, node);
-    
     return node;
 }
 
@@ -605,8 +539,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert(myhtml_tree_t* tree, myhtml_tag_id_
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     
     myhtml_tree_open_elements_append(tree, node);
-    myhtml_tree_index_append(tree, node);
-    
     return node;
 }
 
@@ -625,8 +557,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert_comment(myhtml_tree_t* tree, myhtml
     myhtml_tree_node_insert_by_mode(tree, parent, node, mode);
     node->ns = parent->ns;
     
-    myhtml_tree_index_append(tree, node);
-    
     return node;
 }
 
@@ -639,8 +569,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert_doctype(myhtml_tree_t* tree, myhtml
     node->tag_id       = MyHTML_TAG__DOCTYPE;
     
     myhtml_tree_node_add_child(tree, tree->document, node);
-    myhtml_tree_index_append(tree, node);
-    
     return node;
 }
 
@@ -658,10 +586,8 @@ myhtml_tree_node_t * myhtml_tree_node_insert_root(myhtml_tree_t* tree, myhtml_to
     
     myhtml_tree_node_add_child(tree, tree->document, node);
     myhtml_tree_open_elements_append(tree, node);
-    myhtml_tree_index_append(tree, node);
     
     tree->node_html = node;
-    
     return node;
 }
 
@@ -702,8 +628,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert_text(myhtml_tree_t* tree, myhtml_to
     node->ns     = adjusted_location->ns;
     
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
-    myhtml_tree_index_append(tree, node);
-    
     return node;
 }
 
@@ -714,8 +638,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert_by_node(myhtml_tree_t* tree, myhtml
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     
     myhtml_tree_open_elements_append(tree, node);
-    myhtml_tree_index_append(tree, node);
-    
     return node;
 }
 
@@ -732,8 +654,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert_foreign_element(myhtml_tree_t* tree
     
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_open_elements_append(tree, node);
-    myhtml_tree_index_append(tree, node);
-    
     return node;
 }
 
@@ -750,8 +670,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert_html_element(myhtml_tree_t* tree, m
     
     myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, mode);
     myhtml_tree_open_elements_append(tree, node);
-    myhtml_tree_index_append(tree, node);
-    
     return node;
 }
 
@@ -2568,7 +2486,7 @@ myhtml_status_t myhtml_tree_temp_tag_name_append_one(myhtml_tree_temp_tag_name_t
 
 myhtml_status_t myhtml_tree_temp_tag_name_append(myhtml_tree_temp_tag_name_t* temp_tag_name, const char* name, size_t name_len)
 {
-    if(name_len == 0)
+    if(temp_tag_name->data == NULL || name_len == 0)
         return MyHTML_STATUS_OK;
     
     if((temp_tag_name->length + name_len) >= temp_tag_name->size) {

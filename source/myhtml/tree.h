@@ -120,10 +120,6 @@ struct myhtml_tree_doctype {
     char* attr_system;
 };
 
-struct myhtml_tree_indexes {
-    myhtml_tag_index_t* tags;
-};
-
 struct myhtml_tree_list {
     myhtml_tree_node_t** list;
     volatile size_t length;
@@ -196,8 +192,6 @@ struct myhtml_tree {
     myhtml_incoming_buffer_t*  incoming_buf;
     myhtml_incoming_buffer_t*  incoming_buf_first;
     
-    myhtml_tree_indexes_t* indexes;
-    
     // ref for nodes
     myhtml_tree_node_t*   document;
     myhtml_tree_node_t*   fragment;
@@ -262,7 +256,6 @@ void myhtml_tree_parse_flags_set(myhtml_tree_t* tree, myhtml_tree_parse_flags_t 
 
 myhtml_t * myhtml_tree_get_myhtml(myhtml_tree_t* tree);
 myhtml_tag_t * myhtml_tree_get_tag(myhtml_tree_t* tree);
-myhtml_tag_index_t * myhtml_tree_get_tag_index(myhtml_tree_t* tree);
 myhtml_tree_node_t * myhtml_tree_get_document(myhtml_tree_t* tree);
 myhtml_tree_node_t * myhtml_tree_get_node_html(myhtml_tree_t* tree);
 myhtml_tree_node_t * myhtml_tree_get_node_head(myhtml_tree_t* tree);
@@ -378,14 +371,6 @@ myhtml_tree_node_t * myhtml_tree_node_insert_doctype(myhtml_tree_t* tree, myhtml
 myhtml_tree_node_t * myhtml_tree_node_insert_root(myhtml_tree_t* tree, myhtml_token_node_t* token, enum myhtml_namespace ns);
 myhtml_tree_node_t * myhtml_tree_node_insert_text(myhtml_tree_t* tree, myhtml_token_node_t* token);
 myhtml_tree_node_t * myhtml_tree_node_find_parent_by_tag_id(myhtml_tree_node_t* node, myhtml_tag_id_t tag_id);
-
-// indexes
-myhtml_tree_indexes_t * myhtml_tree_index_create(myhtml_tree_t* tree, myhtml_tag_t* tags);
-void myhtml_tree_index_clean(myhtml_tree_t* tree, myhtml_tag_t* tags);
-myhtml_tree_indexes_t * myhtml_tree_index_destroy(myhtml_tree_t* tree, myhtml_tag_t* tags);
-
-void myhtml_tree_index_append(myhtml_tree_t* tree, myhtml_tree_node_t* node);
-myhtml_tree_node_t * myhtml_tree_index_get(myhtml_tree_t* tree, myhtml_tag_id_t tag_id);
 
 // other
 void myhtml_tree_wait_for_last_done_token(myhtml_tree_t* tree, myhtml_token_node_t* token_for_wait);

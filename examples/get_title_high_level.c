@@ -35,9 +35,22 @@ struct res_html load_html_file(const char* filename)
         exit(EXIT_FAILURE);
     }
     
-    fseek(fh, 0L, SEEK_END);
+    if(fseek(fh, 0L, SEEK_END) != 0) {
+        fprintf(stderr, "Can't set position (fseek) in file: %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+    
     long size = ftell(fh);
-    fseek(fh, 0L, SEEK_SET);
+    
+    if(fseek(fh, 0L, SEEK_SET) != 0) {
+        fprintf(stderr, "Can't set position (fseek) in file: %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+    
+    if(size <= 0) {
+        fprintf(stderr, "Can't get file size or file is empty: %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
     
     char *html = (char*)malloc(size + 1);
     if(html == NULL) {
@@ -52,11 +65,7 @@ struct res_html load_html_file(const char* filename)
     }
 
     fclose(fh);
-    
-    if(size < 0) {
-        size = 0;
-    }
-    
+
     struct res_html res = {html, (size_t)size};
     return res;
 }

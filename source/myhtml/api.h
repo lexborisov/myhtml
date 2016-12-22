@@ -34,20 +34,20 @@
  *
  */
 
-#define MyHTML_VERSION_MAJOR 1
+#define MyHTML_VERSION_MAJOR 2
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 5
+#define MyHTML_VERSION_PATCH 0
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 
 #if defined(_MSC_VER)
-#  define MyHTML_DEPRECATED(func, message) __declspec(deprecated(message)) func
+#  define MyHTML_DEPRECATED(func) __declspec(deprecated) func
 #elif defined(__GNUC__) || defined(__INTEL_COMPILER)
-#  define MyHTML_DEPRECATED(func, message) func __attribute__((deprecated(message)))
+#  define MyHTML_DEPRECATED(func) func __attribute__((deprecated))
 #else
-#  define MyHTML_DEPRECATED(func, message) func
+#  define MyHTML_DEPRECATED(func) func
 #endif
 
 #ifdef __cplusplus
@@ -500,11 +500,6 @@ typedef struct myhtml_tree_node myhtml_tree_node_t;
  *
  */
 typedef size_t myhtml_tag_id_t;
-
-typedef struct myhtml_tag_index_node myhtml_tag_index_node_t;
-typedef struct myhtml_tag_index_entry myhtml_tag_index_entry_t;
-typedef struct myhtml_tag_index myhtml_tag_index_t;
-
 typedef struct myhtml_tag myhtml_tag_t;
 
 /**
@@ -882,16 +877,6 @@ myhtml_tree_get_myhtml(myhtml_tree_t* tree);
  */
 myhtml_tag_t*
 myhtml_tree_get_tag(myhtml_tree_t* tree);
-
-/**
- * Get myhtml_tag_index_t* from a myhtml_tree_t*
- *
- * @param[in] myhtml_tree_t*
- *
- * @return myhtml_tag_index_t* if exists, otherwise a NULL value
- */
-myhtml_tag_index_t*
-myhtml_tree_get_tag_index(myhtml_tree_t* tree);
 
 /**
  * Get Tree Document (Root of Tree)
@@ -1888,138 +1873,6 @@ myhtml_tag_name_by_id(myhtml_tree_t* tree,
 myhtml_tag_id_t
 myhtml_tag_id_by_name(myhtml_tree_t* tree,
                       const char *tag_name, size_t length);
-
-/***********************************************************************************
- *
- * MyHTML_TAG_INDEX
- *
- ***********************************************************************************/
-
-/**
- * Create tag index structure
- *
- * @return myhtml_tag_index_t* if successful, otherwise a NULL value
- */
-myhtml_tag_index_t*
-myhtml_tag_index_create(void);
-
-/**
- * Allocating and Initialization resources for a tag index structure
- *
- * @param[in] myhtml_tag_t*
- * @param[in] myhtml_tag_index_t*
- *
- * @return MyHTML_STATUS_OK if successful, otherwise an error status.
- */
-myhtml_status_t
-myhtml_tag_index_init(myhtml_tag_t* tag, myhtml_tag_index_t* tag_index);
-
-/**
- * Clears tag index
- *
- * @param[in] myhtml_tag_t*
- * @param[in] myhtml_tag_index_t*
- *
- */
-void
-myhtml_tag_index_clean(myhtml_tag_t* tag, myhtml_tag_index_t* tag_index);
-
-/**
- * Free allocated resources
- *
- * @param[in] myhtml_tag_t*
- * @param[in] myhtml_tag_index_t*
- *
- * @return NULL if successful, otherwise an myhtml_tag_index_t* structure
- */
-myhtml_tag_index_t*
-myhtml_tag_index_destroy(myhtml_tag_t* tag, myhtml_tag_index_t* tag_index);
-
-/**
- * Adds myhtml_tree_node_t* to tag index
- *
- * @param[in] myhtml_tag_t*
- * @param[in] myhtml_tag_index_t*
- * @param[in] myhtml_tree_node_t*
- *
- * @return MyHTML_STATUS_OK if successful, otherwise an error status.
- */
-myhtml_status_t
-myhtml_tag_index_add(myhtml_tag_t* tag, myhtml_tag_index_t* tag_index, myhtml_tree_node_t* node);
-
-/**
- * Get root tag index. Is the initial entry for a tag. It contains statistics and other items by tag
- *
- * @param[in] myhtml_tag_index_t*
- * @param[in] myhtml_tag_id_t
- *
- * @return myhtml_tag_index_entry_t* if successful, otherwise a NULL value.
- */
-myhtml_tag_index_entry_t*
-myhtml_tag_index_entry(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
-
-/**
- * Get first index node for tag
- *
- * @param[in] myhtml_tag_index_t*
- * @param[in] myhtml_tag_id_t
- *
- * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
- */
-myhtml_tag_index_node_t*
-myhtml_tag_index_first(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
-
-/**
- * Get last index node for tag
- *
- * @param[in] myhtml_tag_index_t*
- * @param[in] myhtml_tag_id_t
- *
- * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
- */
-myhtml_tag_index_node_t*
-myhtml_tag_index_last(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
-
-/**
- * Get next index node for tag, by index node
- *
- * @param[in] myhtml_tag_index_node_t*
- *
- * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
- */
-myhtml_tag_index_node_t*
-myhtml_tag_index_next(myhtml_tag_index_node_t *index_node);
-
-/**
- * Get previous index node for tag, by index node
- *
- * @param[in] myhtml_tag_index_node_t*
- *
- * @return myhtml_tag_index_node_t* if exists, otherwise a NULL value.
- */
-myhtml_tag_index_node_t*
-myhtml_tag_index_prev(myhtml_tag_index_node_t *index_node);
-
-/**
- * Get myhtml_tree_node_t* by myhtml_tag_index_node_t*
- *
- * @param[in] myhtml_tag_index_node_t*
- *
- * @return myhtml_tree_node_t* if exists, otherwise a NULL value.
- */
-myhtml_tree_node_t*
-myhtml_tag_index_tree_node(myhtml_tag_index_node_t *index_node);
-
-/**
- * Get count of elements in index by tag id
- *
- * @param[in] myhtml_tag_index_t*
- * @param[in] tag id
- *
- * @return count of elements
- */
-size_t
-myhtml_tag_index_entry_count(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
 
 /***********************************************************************************
  *

@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <myhtml/myhtml.h>
+#include <myhtml/serialization.h>
 
 struct res_html {
     char  *html;
@@ -35,9 +36,22 @@ struct res_html load_html_file(const char* filename)
         exit(EXIT_FAILURE);
     }
     
-    fseek(fh, 0L, SEEK_END);
+    if(fseek(fh, 0L, SEEK_END) != 0) {
+        fprintf(stderr, "Can't set position (fseek) in file: %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+    
     long size = ftell(fh);
-    fseek(fh, 0L, SEEK_SET);
+    
+    if(fseek(fh, 0L, SEEK_SET) != 0) {
+        fprintf(stderr, "Can't set position (fseek) in file: %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+    
+    if(size <= 0) {
+        fprintf(stderr, "Can't get file size or file is empty: %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
     
     char *html = (char*)malloc(size + 1);
     if(html == NULL) {
@@ -52,10 +66,7 @@ struct res_html load_html_file(const char* filename)
     }
                
     fclose(fh);
-    
-    if(size < 0)
-        size = 0;
-    
+
     struct res_html res = {html, (size_t)size};
     return res;
 }
@@ -86,16 +97,19 @@ int main(int argc, const char * argv[])
     myhtml_parse(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
     
     // get title from index
-    if(tree->indexes)
-    {
-        myhtml_tag_index_node_t *node_index = myhtml_tag_index_first(tree->indexes->tags, MyHTML_TAG_TITLE);
+    myhtml_collection_t *titles_list = myhtml_get_nodes_by_tag_id(tree, NULL, MyHTML_TAG_TITLE, NULL);
+    
+    if(titles_list && titles_list->length != 0 && titles_list->list[0]->child) {
+        myhtml_string_raw_t str = {0};
+        myhtml_serialization_node(tree, titles_list->list[0]->child, &str);
         
-        if(node_index && node_index->node) {
-            myhtml_tree_print_by_node(tree, node_index->node, stdout, 0);
-        }
+        printf("%s\n", str.data);
+        
+        myhtml_string_raw_destroy(&str, false);
     }
     
     // release resources
+    myhtml_collection_destroy(titles_list);
     myhtml_tree_destroy(tree);
     myhtml_destroy(myhtml);
     

@@ -60,25 +60,6 @@ extern "C" {
 #define myhtml_tag_index_clean_node(index_node)             \
     memset(index_node, 0, sizeof(myhtml_tag_index_node_t));
 
-struct myhtml_tag_index_entry {
-    myhtml_tag_index_node_t *first;
-    myhtml_tag_index_node_t *last;
-    size_t count;
-};
-
-struct myhtml_tag_index_node {
-    myhtml_tag_index_node_t *next;
-    myhtml_tag_index_node_t *prev;
-    
-    myhtml_tree_node_t* node;
-};
-
-struct myhtml_tag_index {
-    myhtml_tag_index_entry_t* tags;
-    size_t tags_length;
-    size_t tags_size;
-};
-
 struct myhtml_tag_context {
     myhtml_tag_id_t id;
     
@@ -104,8 +85,7 @@ struct myhtml_tag {
     size_t tags_count;
     size_t mchar_node;
     
-    mchar_async_t       *mchar;
-    mcobject_t          *mcobject_tag_index;
+    mchar_async_t *mchar;
 };
 
 myhtml_tag_t * myhtml_tag_create(void);
@@ -118,21 +98,6 @@ myhtml_tag_id_t myhtml_tag_add(myhtml_tag_t* tags, const char* key, size_t key_s
 
 void myhtml_tag_set_category(myhtml_tag_t* tags, myhtml_tag_id_t tag_idx,
                          enum myhtml_namespace ns, enum myhtml_tag_categories cats);
-
-myhtml_tag_index_t * myhtml_tag_index_create(void);
-myhtml_status_t myhtml_tag_index_init(myhtml_tag_t* tags, myhtml_tag_index_t* tag_index);
-void myhtml_tag_index_clean(myhtml_tag_t* tags, myhtml_tag_index_t* tag_index);
-myhtml_tag_index_t * myhtml_tag_index_destroy(myhtml_tag_t* tags, myhtml_tag_index_t* tag_index);
-
-myhtml_status_t myhtml_tag_index_add(myhtml_tag_t* tags, myhtml_tag_index_t* tag_index, myhtml_tree_node_t* node);
-myhtml_tag_index_entry_t * myhtml_tag_index_entry(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
-myhtml_tag_index_node_t * myhtml_tag_index_first(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
-myhtml_tag_index_node_t * myhtml_tag_index_last(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
-myhtml_tag_index_node_t * myhtml_tag_index_next(myhtml_tag_index_node_t *index_node);
-myhtml_tag_index_node_t * myhtml_tag_index_prev(myhtml_tag_index_node_t *index_node);
-myhtml_tree_node_t * myhtml_tag_index_tree_node(myhtml_tag_index_node_t *index_node);
-
-size_t myhtml_tag_index_entry_count(myhtml_tag_index_t* tag_index, myhtml_tag_id_t tag_id);
 
 const myhtml_tag_context_t * myhtml_tag_get_by_id(myhtml_tag_t* tags, myhtml_tag_id_t tag_id);
 const myhtml_tag_context_t * myhtml_tag_get_by_name(myhtml_tag_t* tags, const char* name, size_t length);

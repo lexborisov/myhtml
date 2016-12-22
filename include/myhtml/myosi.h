@@ -29,9 +29,9 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-#define MyHTML_VERSION_MAJOR 1
+#define MyHTML_VERSION_MAJOR 2
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 5
+#define MyHTML_VERSION_PATCH 0
 
 #if (defined(_WIN32) || defined(_WIN64)) && !defined(__WINPTHREADS_VERSION)
 #define IS_OS_WINDOWS
@@ -39,11 +39,11 @@
 #endif
 
 #if defined(_MSC_VER)
-#  define MyHTML_DEPRECATED(func, message) __declspec(deprecated(message)) func
+#  define MyHTML_DEPRECATED(func) __declspec(deprecated) func
 #elif defined(__GNUC__) || defined(__INTEL_COMPILER)
-#  define MyHTML_DEPRECATED(func, message) func __attribute__((deprecated(message)))
+#  define MyHTML_DEPRECATED(func) func __attribute__((deprecated))
 #else
-#  define MyHTML_DEPRECATED(func, message) func
+#  define MyHTML_DEPRECATED(func) func
 #endif
 
 #ifdef __cplusplus
@@ -215,7 +215,6 @@ typedef struct myhtml_tree_temp_tag_name myhtml_tree_temp_tag_name_t;
 typedef struct myhtml_tree_insertion_list myhtml_tree_insertion_list_t;
 typedef struct myhtml_tree_token_list myhtml_tree_token_list_t;
 typedef struct myhtml_tree_list myhtml_tree_list_t;
-typedef struct myhtml_tree_indexes myhtml_tree_indexes_t;
 typedef struct myhtml_tree_doctype myhtml_tree_doctype_t;
 typedef struct myhtml_async_args myhtml_async_args_t;
 

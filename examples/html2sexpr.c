@@ -90,13 +90,25 @@ struct res_html load_html_file(const char* filename)
 {
     FILE *fh = fopen(filename, "rb");
     if(fh == NULL) {
-        fprintf(stderr, "Can't open html file: %s\n", filename);
-        exit(EXIT_FAILURE);
+        DIE("Can't open html file: %s\n", filename);
     }
     
-    fseek(fh, 0L, SEEK_END);
+    if(fseek(fh, 0L, SEEK_END) != 0) {
+        DIE("Can't set position (fseek) in file: %s\n", filename);
+    }
+    
     long size = ftell(fh);
-    fseek(fh, 0L, SEEK_SET);
+    
+    if(fseek(fh, 0L, SEEK_SET) != 0) {
+        DIE("Can't set position (fseek) in file: %s\n", filename);
+    }
+    
+    if(size <= 0) {
+        fclose(fh);
+        
+        struct res_html res = {NULL, 0};
+        return res;
+    }
     
     char *html = (char*)malloc(size + 1);
     if(html == NULL) {
@@ -109,10 +121,6 @@ struct res_html load_html_file(const char* filename)
     }
 
     fclose(fh);
-    
-    if(size < 0) {
-        size = 0;
-    }
     
     struct res_html res = {html, (size_t)size};
     return res;
