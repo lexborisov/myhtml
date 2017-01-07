@@ -10,9 +10,13 @@ OBJS := $(patsubst %.c,%.o,$(SRCS))
 SUBDIRS := examples
 LIBNAME := myhtml
 
-all: create
-	$(MAKE) -C $(SRCDIR) $@
+all: lib examples
+
+lib: create
+	$(MAKE) -C $(SRCDIR)
 	cp $(SRCDIR)/*lib$(LIBNAME)*.* lib/
+
+examples: lib
 	for f in $(SUBDIRS); do $(MAKE) -C $$f all; done
 
 clean:
@@ -34,4 +38,4 @@ create:
 build_test:
 	$(MAKE) -C test
 
-.PHONY:all clean
+.PHONY: all lib examples clean
