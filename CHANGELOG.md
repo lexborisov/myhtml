@@ -1,3 +1,9 @@
+2.0.1
+===========
+Now()
+
+* Fixed very serious problem with MyHTML::Collection in function ```myhtml_collection_check_size``` https://github.com/lexborisov/myhtml/issues/84
+
 2.0.0
 ===========
 December 22, 2016
