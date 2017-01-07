@@ -1391,9 +1391,8 @@ myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, si
         myhtml_tree_node_t **tmp = (myhtml_tree_node_t **)myhtml_realloc(collection->list, sizeof(myhtml_tree_node_t*) * tmp_size);
         
         if(tmp) {
-            collection->length  = upto_length;
-            collection->size    = tmp_size;
-            collection->list    = tmp;
+            collection->size = tmp_size;
+            collection->list = tmp;
         }
         else
             return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
