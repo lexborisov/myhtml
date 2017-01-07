@@ -253,11 +253,13 @@ myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_toke
     myhtml_token_node_t* new_node = mcobject_async_malloc(token->nodes_obj, token_thread_idx, NULL);
     
     new_node->tag_id = node->tag_id;
-    new_node->type        = node->type;
-    new_node->attr_first  = NULL;
-    new_node->attr_last   = NULL;
-    new_node->raw_begin   = node->raw_begin;
-    new_node->raw_length  = node->raw_length;
+    new_node->type           = node->type;
+    new_node->attr_first     = NULL;
+    new_node->attr_last      = NULL;
+    new_node->raw_begin      = node->raw_begin;
+    new_node->raw_length     = node->raw_length;
+    new_node->element_begin  = node->element_begin;
+    new_node->element_length = node->element_length;
     
     myhtml_string_init(tree->mchar, tree->mchar_node_id, &new_node->str, node->str.size);
     myhtml_token_node_attr_copy(token, node, new_node, attr_thread_idx);
