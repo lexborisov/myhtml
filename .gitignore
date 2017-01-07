@@ -8,3 +8,4 @@ bin/*
 source/mycss/*
 source/myselectors/*
 docs/*
+*.dylib
