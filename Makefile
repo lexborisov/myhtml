@@ -13,7 +13,7 @@ LIBNAME := myhtml
 all: lib examples
 
 lib: create
-	$(MAKE) -C $(SRCDIR)
+	$(MAKE) -C $(SRCDIR) all
 	cp $(SRCDIR)/*lib$(LIBNAME)*.* lib/
 
 examples: lib
