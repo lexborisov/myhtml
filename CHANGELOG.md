@@ -1,6 +1,6 @@
 2.0.1
 ===========
-Now()
+January 08, 2017
 
 * Fixed very serious problem with MyHTML::Collection in function ```myhtml_collection_check_size``` https://github.com/lexborisov/myhtml/issues/84
 
