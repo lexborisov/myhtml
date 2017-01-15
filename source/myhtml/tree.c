@@ -39,6 +39,7 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     tree->stream_buffer      = NULL;
     tree->parse_flags        = MyHTML_TREE_PARSE_FLAGS_CLEAN;
     tree->queue              = mythread_queue_create(9182, &status);
+    tree->context            = NULL;
     
     tree->callback_before_token     = NULL;
     tree->callback_after_token      = NULL;
@@ -1577,7 +1578,7 @@ void myhtml_tree_active_formatting_reconstruction(myhtml_tree_t* tree)
     }
 }
 
-bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t subject_tag_idx)
+bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_token_node_t* token, myhtml_tag_id_t subject_tag_idx)
 {
     if(tree->open_elements->length == 0)
         return false;
@@ -1647,14 +1648,25 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
         }
         
         // step 7
-        if(myhtml_tree_element_in_scope_by_node(tree, formatting_element, MyHTML_TAG_CATEGORIES_SCOPE) == false)
+        if(myhtml_tree_element_in_scope_by_node(tree, formatting_element, MyHTML_TAG_CATEGORIES_SCOPE) == false) {
+            /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:AAA_FORMATTING_ELEMENT_NOT_FOUND LEVEL:ERROR NODE:formatting_element */
             return false;
+        }
         
         // step 8
         //if(afe_last != list[i])
         //    fprintf(stderr, "oh");
         
         // step 9
+        myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+        if(current_node->ns != formatting_element->ns ||
+           current_node->tag_id != formatting_element->tag_id) {
+            // parse error
+            /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+            /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:formatting_element->token HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:formatting_element->tag_id NEED_NS:formatting_element->ns */
+        }
+        
+        // 10
         // Let furthest block be the topmost node in the stack of open elements
         // that is lower in the stack than formatting element, and is an element in the special category. T
         // here might not be one.
@@ -1670,7 +1682,7 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
             }
         }
         
-        // step 10
+        // step 11
         // If there is no furthest block, then the UA must first pop all the nodes from the bottom
         // of the stack of open elements, from the current node up to and including formatting element,
         // then remove formatting element from the list of active formatting elements, and finally abort these steps.
@@ -1686,13 +1698,15 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
             return false;
         }
         
+        /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:AAA_BEGIN LEVEL:INFO */
+        
 #ifdef DEBUG_MODE
         if(oel_format_el_idx == 0) {
             MyHTML_DEBUG_ERROR("Adoption agency algorithm; Step 11; oel_format_el_idx is 0; Bad!");
         }
 #endif
         
-        // step 11
+        // step 12
         myhtml_tree_node_t* common_ancestor = oel_list[oel_format_el_idx - 1];
         
 #ifdef DEBUG_MODE
@@ -1701,20 +1715,20 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
         }
 #endif
         
-        // step 12
+        // step 13
         size_t bookmark = afe_index + 1;
         
-        // step 13
+        // step 14
         myhtml_tree_node_t *node = furthest_block, *last = furthest_block;
         size_t index_oel_node = idx_furthest_block;
         
-        // step 13.1
+        // step 14.1
         for(int inner_loop = 0;;)
         {
-            // step 13.2
+            // step 14.2
             inner_loop++;
             
-            // step 13.3
+            // step 14.3
             size_t node_index;
             if(myhtml_tree_open_elements_find(tree, node, &node_index) == false) {
                 node_index = index_oel_node;
@@ -1736,11 +1750,11 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
                 MyHTML_DEBUG_ERROR("Adoption agency algorithm; Step 13.3; node is NULL");
             }
 #endif
-            // step 13.4
+            // step 14.4
             if(node == formatting_element)
                 break;
             
-            // step 13.5
+            // step 14.5
             size_t afe_node_index;
             bool is_exists = myhtml_tree_active_formatting_find(tree, node, &afe_node_index);
             if(inner_loop > 3 && is_exists) {
@@ -1754,13 +1768,13 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
                 continue;
             }
             
-            // step 13.6
+            // step 14.6
             if(is_exists == false) {
                 myhtml_tree_open_elements_remove(tree, node);
                 continue;
             }
             
-            // step 13.7
+            // step 14.7
             myhtml_tree_node_t* clone = myhtml_tree_node_clone(tree, node);
             
             clone->ns = MyHTML_NAMESPACE_HTML;
@@ -1770,7 +1784,7 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
             
             node = clone;
             
-            // step 13.8
+            // step 14.8
             if(last == furthest_block) {
                 bookmark = afe_node_index + 1;
                 
@@ -1781,30 +1795,30 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
 #endif
             }
             
-            // step 13.9
+            // step 14.9
             if(last->parent)
                 myhtml_tree_node_remove(tree, last);
             
             myhtml_tree_node_add_child(tree, node, last);
             
-            // step 13.10
+            // step 14.10
             last = node;
         }
         
         if(last->parent)
             myhtml_tree_node_remove(tree, last);
         
-        // step 14
+        // step 15
         enum myhtml_tree_insertion_mode insert_mode;
         common_ancestor = myhtml_tree_appropriate_place_inserting(tree, common_ancestor, &insert_mode);
         myhtml_tree_node_insert_by_mode(tree, common_ancestor, last, insert_mode);
         
-        // step 15
+        // step 16
         myhtml_tree_node_t* new_formatting_element = myhtml_tree_node_clone(tree, formatting_element);
         
         new_formatting_element->ns = MyHTML_NAMESPACE_HTML;
         
-        // step 16
+        // step 17
         myhtml_tree_node_t * furthest_block_child = furthest_block->child;
         
         while (furthest_block_child) {
@@ -1815,10 +1829,10 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
             furthest_block_child = next;
         }
         
-        // step 17
+        // step 18
         myhtml_tree_node_add_child(tree, furthest_block, new_formatting_element);
         
-        // step 18
+        // step 19
         if(myhtml_tree_active_formatting_find(tree, formatting_element, &afe_index) == false)
             return false;
         
@@ -1834,7 +1848,7 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t 
         myhtml_tree_active_formatting_remove_by_index(tree, afe_index);
         myhtml_tree_list_insert_by_index(tree->active_formatting, new_formatting_element, bookmark);
         
-        // step 19
+        // step 20
         myhtml_tree_open_elements_remove(tree, formatting_element);
         
         if(myhtml_tree_open_elements_find(tree, furthest_block, &idx_furthest_block)) {
@@ -2301,9 +2315,17 @@ myhtml_token_node_t * myhtml_tree_token_list_current_node(myhtml_tree_token_list
 }
 
 // other
-void myhtml_tree_tags_close_p(myhtml_tree_t* tree)
+void myhtml_tree_tags_close_p(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML);
+    
+    myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+    if(myhtml_is_html_node(current_node, MyHTML_TAG_P) == false) {
+        // parse error
+        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_P NEED_NS:MyHTML_NAMESPACE_HTML */
+    }
+    
     myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, false);
 }
 
@@ -2361,7 +2383,7 @@ void myhtml_tree_clear_stack_back_table_row_context(myhtml_tree_t* tree)
     }
 }
 
-void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_node)
+void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_node, myhtml_token_node_t* token)
 {
     // step 1
     myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
@@ -2373,6 +2395,9 @@ void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_no
        current_node->ns == MyHTML_NAMESPACE_HTML))
     {
         // parse error
+        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_OPEN_NOT_FOUND LEVEL:ERROR */
+        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TD NEED_NS:MyHTML_NAMESPACE_HTML */
+        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TH NEED_NS:MyHTML_NAMESPACE_HTML */
     }
     
     // step 3

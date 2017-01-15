@@ -30,9 +30,6 @@
 extern "C" {
 #endif
 
-// callback to be implemented by the user
-typedef void (*myhtml_callback_serialize_f)(const char* buffer, size_t size, void* ctx);
-
 // the serialization functions
 bool myhtml_serialization_tree_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
 bool myhtml_serialization_node_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* node, myhtml_string_raw_t* str);

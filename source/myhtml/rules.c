@@ -92,6 +92,7 @@ bool myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t* tok
         case MyHTML_TAG__TEXT:
         {
             if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:INFO */
                 return false;
             }
             
@@ -150,19 +151,27 @@ bool myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_node_t*
             case MyHTML_TAG_BODY:
             {
                 myhtml_tree_node_insert_root(tree, NULL, MyHTML_NAMESPACE_HTML);
+                
+                /* %EXTERNAL% VALIDATOR:RULES TAG STATUS:ELEMENT_MISSING_NEED LEVEL:INFO TAG_ID:MyHTML_TAG_HTML NS:MyHTML_NAMESPACE_HTML */
+                
                 tree->insert_mode = MyHTML_INSERTION_MODE_BEFORE_HEAD;
                 return true;
             }
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:WARNING */
                 break;
+            }
         }
     }
     else {
         switch (token->tag_id)
         {
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:WARNING */
                 break;
+            }
                 
             case MyHTML_TAG__COMMENT:
             {
@@ -173,6 +182,7 @@ bool myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_node_t*
             case MyHTML_TAG__TEXT:
             {
                 if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:INFO */
                     break;
                 }
                 
@@ -194,6 +204,8 @@ bool myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_node_t*
             default:
             {
                 myhtml_tree_node_insert_root(tree, NULL, MyHTML_NAMESPACE_HTML);
+                /* %EXTERNAL% VALIDATOR:RULES TAG STATUS:ELEMENT_MISSING_NEED LEVEL:INFO TAG_ID:MyHTML_TAG_HTML NS:MyHTML_NAMESPACE_HTML */
+                
                 tree->insert_mode = MyHTML_INSERTION_MODE_BEFORE_HEAD;
                 return true;
             }
@@ -214,12 +226,17 @@ bool myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_node_t*
             case MyHTML_TAG_BODY:
             {
                 tree->node_head = myhtml_tree_node_insert(tree, MyHTML_TAG_HEAD, MyHTML_NAMESPACE_HTML);
+                /* %EXTERNAL% VALIDATOR:RULES TAG STATUS:ELEMENT_MISSING_NEED LEVEL:INFO TAG_ID:MyHTML_TAG_HEAD NS:MyHTML_NAMESPACE_HTML */
+                
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
                 return true;
             }
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
         }
     }
     else {
@@ -228,6 +245,7 @@ bool myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_node_t*
             case MyHTML_TAG__TEXT:
             {
                 if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE) {
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:INFO */
                     break;
                 }
                 
@@ -245,8 +263,10 @@ bool myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_node_t*
                 break;
             }
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
                 
             case MyHTML_TAG_HTML:
             {
@@ -263,6 +283,8 @@ bool myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_node_t*
             default:
             {
                 tree->node_head = myhtml_tree_node_insert(tree, MyHTML_TAG_HEAD, MyHTML_NAMESPACE_HTML);
+                /* %EXTERNAL% VALIDATOR:RULES TAG STATUS:ELEMENT_MISSING_NEED LEVEL:INFO TAG_ID:MyHTML_TAG_HEAD NS:MyHTML_NAMESPACE_HTML */
+                
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
                 return true;
             }
@@ -296,10 +318,22 @@ bool myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_TEMPLATE:
             {
                 if(myhtml_tree_open_elements_find_by_tag_idx_reverse(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, NULL) == NULL)
+                {
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:WARNING */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_ANY NEED_TAG_ID:MyHTML_TAG_TEMPLATE NEED_NS:MyHTML_NAMESPACE_HTML */
+                    
                     break;
+                }
                 
                 // oh God...
                 myhtml_tree_generate_all_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
+                
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(current_node && current_node->tag_id != MyHTML_TAG_TEMPLATE) {
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED_CLOSE_BEFORE LEVEL:WARNING */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_TEMPLATE NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
+                
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
                 myhtml_tree_template_insertion_pop(tree);
@@ -308,8 +342,11 @@ bool myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 break;
             }
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:WARNING */
                 break;
+            }
         }
     }
     else {
@@ -339,8 +376,11 @@ bool myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 break;
             }
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
                 
             case MyHTML_TAG_HTML:
             {
@@ -443,8 +483,11 @@ bool myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 break;
             }
                 
-            case MyHTML_TAG_HEAD:
+            case MyHTML_TAG_HEAD: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY LEVEL:WARNING */
                 break;
+            }
                 
             default:
             {
@@ -478,15 +521,21 @@ bool myhtml_insertion_mode_in_head_noscript(myhtml_tree_t* tree, myhtml_token_no
                 return true;
             }
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
         }
     }
     else {
         switch (token->tag_id)
         {
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
                 
             case MyHTML_TAG_HTML:
             {
@@ -514,11 +563,17 @@ bool myhtml_insertion_mode_in_head_noscript(myhtml_tree_t* tree, myhtml_token_no
                 return myhtml_insertion_mode_in_head(tree, token);
                 
             case MyHTML_TAG_HEAD:
-            case MyHTML_TAG_NOSCRIPT:
+            case MyHTML_TAG_NOSCRIPT: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY LEVEL:WARNING */
                 break;
+            }
                 
             default:
             {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 myhtml_tree_open_elements_pop(tree);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_HEAD;
                 return true;
@@ -540,6 +595,8 @@ bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* 
             {
                 tree->node_body = myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
+                
+                /* %EXTERNAL% VALIDATOR:RULES TAG STATUS:ELEMENT_MISSING_NEED LEVEL:INFO TAG_ID:MyHTML_TAG_BODY NS:MyHTML_NAMESPACE_HTML */
                 return true;
             }
                 
@@ -548,8 +605,11 @@ bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* 
                 return myhtml_insertion_mode_in_head(tree, token);
             }
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
         }
     }
     else {
@@ -577,8 +637,11 @@ bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* 
                 myhtml_tree_node_insert_comment(tree, token, 0);
                 break;
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
                 
             case MyHTML_TAG_HTML:
                 return myhtml_insertion_mode_in_body(tree, token);
@@ -608,19 +671,25 @@ bool myhtml_insertion_mode_after_head(myhtml_tree_t* tree, myhtml_token_node_t* 
             case MyHTML_TAG_TEMPLATE:
             case MyHTML_TAG_TITLE:
             {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 myhtml_tree_open_elements_append(tree, tree->node_head);
                 myhtml_insertion_mode_in_head(tree, token);
                 myhtml_tree_open_elements_remove(tree, tree->node_head);
             }
                 
-            case MyHTML_TAG_HEAD:
-            {
+            case MyHTML_TAG_HEAD: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY LEVEL:WARNING */
                 break;
             }
                 
             default:
             {
                 tree->node_body = myhtml_tree_node_insert(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML);
+                /* %EXTERNAL% VALIDATOR:RULES TAG STATUS:ELEMENT_MISSING_NEED LEVEL:INFO TAG_ID:MyHTML_TAG_BODY NS:MyHTML_NAMESPACE_HTML */
+                
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return true;
             }
@@ -642,6 +711,14 @@ bool myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_tok
         // step 2
         if(node->tag_id == token->tag_id && node->ns == MyHTML_NAMESPACE_HTML) {
             myhtml_tree_generate_implied_end_tags(tree, token->tag_id, MyHTML_NAMESPACE_HTML);
+            
+            myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+            if(current_node->tag_id != node->tag_id) {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:node->tag_id NEED_NS:node->ns */
+            }
+            
             myhtml_tree_open_elements_pop_until_by_node(tree, node, false);
             
             return false;
@@ -649,6 +726,8 @@ bool myhtml_insertion_mode_in_body_other_end_tag(myhtml_tree_t* tree, myhtml_tok
         
         const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, node->tag_id);
         if(tag_ctx->cats[ node->ns ] & MyHTML_TAG_CATEGORIES_SPECIAL) {
+            // parse error
+            /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
             break;
         }
     }
@@ -670,8 +749,11 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 myhtml_tree_node_t* body_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE);
                 
-                if(body_node == NULL)
+                if(body_node == NULL) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 for (size_t i = 0; i < tree->open_elements->length; i++) {
                     switch (tree->open_elements->list[i]->tag_id) {
@@ -710,8 +792,11 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 myhtml_tree_node_t* body_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_BODY, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE);
                 
-                if(body_node == NULL)
+                if(body_node == NULL) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 for (size_t i = 0; i < tree->open_elements->length; i++) {
                     switch (tree->open_elements->list[i]->tag_id) {
@@ -773,16 +858,23 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_SUMMARY:
             case MyHTML_TAG_UL:
             {
-                if(myhtml_tree_element_in_scope(tree, token->tag_id, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE) == NULL)
+                if(myhtml_tree_element_in_scope(tree, token->tag_id, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE) == NULL) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
+                }
                 
                 // step 1
                 myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                 
                 // step 2
-                //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                //if(current_node->ns != MyHTML_NAMESPACE_HTML)
-                //    parse error
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(myhtml_is_html_node(current_node, token->tag_id) == false) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:token->tag_id NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 // step 3
                 myhtml_tree_open_elements_pop_until(tree, token->tag_id, MyHTML_NAMESPACE_HTML, false);
@@ -804,6 +896,8 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     // step 3
                     if(node == NULL || myhtml_tree_element_in_scope_by_node(tree, node, MyHTML_TAG_CATEGORIES_SCOPE) == false) {
                         // parse error
+                        /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                        
                         break;
                     }
                     
@@ -811,9 +905,12 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                     
                     // step 5
-                    //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                    //if(current_node != node)
-                    //    // parse error
+                    myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                    if(current_node != node) {
+                        // parse error
+                        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:node->tag_id NEED_NS:node->ns */
+                    }
                     
                     // step 6
                     myhtml_tree_open_elements_remove(tree, node);
@@ -822,17 +919,23 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     // step 1
                     myhtml_tree_node_t* form_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_FORM, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE);
                     
-                    if(form_node)
+                    if(form_node) {
                         // parse error
+                        /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                        
                         break;
+                    }
                     
                     // step 2
                     myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                     
                     // step 3
-                    //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                    //if(current_node != node)
-                    //    // parse error
+                    myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                    if(myhtml_is_html_node(current_node, MyHTML_TAG_FORM) == false) {
+                        // parse error
+                        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_FORM NEED_NS:MyHTML_NAMESPACE_HTML */
+                    }
                     
                     // step 4
                     myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_FORM, MyHTML_NAMESPACE_HTML, false);
@@ -848,7 +951,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     myhtml_tree_node_insert(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML);
                 }
                 
-                myhtml_tree_tags_close_p(tree);
+                myhtml_tree_tags_close_p(tree, token);
                 break;
             }
                 
@@ -856,6 +959,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_LIST_ITEM) == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
                 }
                 
@@ -863,9 +967,12 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML);
                 
                 // step 2
-                //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                //if(current_node->tag_id != MyHTML_TAG_LI)
-                //    // parse error
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_LI) == false) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_LI NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 // step 3
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML, false);
@@ -878,6 +985,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 if(myhtml_tree_element_in_scope(tree, token->tag_id, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE) == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
                 }
                 
@@ -885,9 +993,12 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_generate_implied_end_tags(tree, token->tag_id, MyHTML_NAMESPACE_HTML);
                 
                 // step 2
-                //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                //if(current_node->tag_id != token->tag_id)
-                //    // parse error
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(myhtml_is_html_node(current_node, token->tag_id) == false) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:token->tag_id NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 // step 3
                 myhtml_tree_open_elements_pop_until(tree, token->tag_id, MyHTML_NAMESPACE_HTML, false);
@@ -927,6 +1038,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 
                 if(node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
                 }
                 
@@ -934,9 +1046,12 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                 
                 // step 2
-                //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                //if(current_node->tag_id != token->tag_id)
-                //    // parse error
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(myhtml_is_html_node(current_node, token->tag_id) == false) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:token->tag_id NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 // step 3
                 while(tree->open_elements->length) {
@@ -972,7 +1087,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_TT:
             case MyHTML_TAG_U:
             {
-                myhtml_tree_adoption_agency_algorithm(tree, token->tag_id);
+                myhtml_tree_adoption_agency_algorithm(tree, token, token->tag_id);
                     //myhtml_insertion_mode_in_body_other_end_tag(tree, token);
                 
                 break;
@@ -984,6 +1099,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 if(myhtml_tree_element_in_scope(tree, token->tag_id, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE) == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
                 }
                 
@@ -991,9 +1107,12 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                 
                 // step 2
-                //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                //if(current_node->tag_id != token->tag_id)
-                //    // parse error
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(myhtml_is_html_node(current_node, token->tag_id) == false) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:token->tag_id NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 // step 3
                 myhtml_tree_open_elements_pop_until(tree, token->tag_id, MyHTML_NAMESPACE_HTML, false);
@@ -1006,6 +1125,9 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 
             case MyHTML_TAG_BR:
             {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES CONVERT STATUS:ELEMENT_BAD LEVEL:ERROR FROM_TAG_ID:MyHTML_TAG_BR FROM_NS:MyHTML_NAMESPACE_HTML FROM_TYPE:MyHTML_TOKEN_TYPE_CLOSE TO_TAG_ID:MyHTML_TAG_BR TO_NS:MyHTML_NAMESPACE_HTML TO_TYPE:MyHTML_TOKEN_TYPE_OPEN */
+                
                 if(token->attr_first) {
                     token->attr_first = NULL;
                 }
@@ -1037,6 +1159,9 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG__TEXT:
             {
                 if(token->type & MyHTML_TOKEN_TYPE_NULL) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:NULL_CHAR ACTION:IGNORE LEVEL:ERROR */
+                    
                     myhtml_insertion_fix_for_null_char_drop_all(tree, token);
                     
                     if(token->str.length) {
@@ -1062,13 +1187,22 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_node_insert_comment(tree, token, 0);
                 break;
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:WARNING */
                 break;
+            }
                 
             case MyHTML_TAG_HTML:
             {
-                if(myhtml_tree_open_elements_find_by_tag_idx(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, NULL))
+                if(myhtml_tree_open_elements_find_by_tag_idx(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, NULL)) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:WARNING */
                     break;
+                }
+                
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:WARNING */
                 
                 if(tree->open_elements->length > 0) {
                     myhtml_tree_node_t* top_node = tree->open_elements->list[0];
@@ -1102,12 +1236,20 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 
             case MyHTML_TAG_BODY:
             {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:WARNING */
+                
                 if(tree->open_elements->length > 1)
                 {
                     if(!(tree->open_elements->list[1]->tag_id == MyHTML_TAG_BODY &&
                          tree->open_elements->list[1]->ns == MyHTML_NAMESPACE_HTML) ||
                        myhtml_tree_open_elements_find_by_tag_idx(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, NULL))
+                    {
+                        // parse error
+                        /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:WARNING */
+                        
                         break;
+                    }
                 }
                 else
                     break;
@@ -1132,17 +1274,29 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 
             case MyHTML_TAG_FRAMESET:
             {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 if(tree->open_elements->length > 1)
                 {
                     if(!(tree->open_elements->list[1]->tag_id == MyHTML_TAG_BODY &&
                          tree->open_elements->list[1]->ns == MyHTML_NAMESPACE_HTML))
+                    {
+                        // parse error
+                        /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
+                        
                         break;
+                    }
                 }
                 else
                     break;
                 
-                if((tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK) == 0)
+                if((tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK) == 0) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
+                }
                 
                 myhtml_tree_node_t* node = tree->open_elements->list[1];
                 
@@ -1206,7 +1360,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_UL:
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_insert_html_element(tree, token);
@@ -1216,7 +1370,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_MENU:
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
@@ -1236,7 +1390,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_H6:
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
@@ -1249,8 +1403,11 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                         case MyHTML_TAG_H5:
                         case MyHTML_TAG_H6:
                         
-                        if(current_node->ns == MyHTML_NAMESPACE_HTML)
+                        if(current_node->ns == MyHTML_NAMESPACE_HTML) {
+                            // parse error
+                            /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:WARNING */
                             myhtml_tree_open_elements_pop(tree);
+                        }
                         
                         break;
                         
@@ -1266,7 +1423,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_LISTING:
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_insert_html_element(tree, token);
@@ -1283,11 +1440,14 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_FORM:
             {
                 myhtml_tree_node_t* is_in_node = myhtml_tree_open_elements_find_by_tag_idx(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, NULL);
-                if(tree->node_form && is_in_node == NULL)
+                if(tree->node_form && is_in_node == NULL) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_t* current = myhtml_tree_node_insert_html_element(tree, token);
@@ -1310,8 +1470,20 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     myhtml_tree_node_t* node = tree->open_elements->list[oel_index];
                     const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, node->tag_id);
                     
+                    /* 3 */
                     if(myhtml_is_html_node(node, MyHTML_TAG_LI)) {
+                        /* 3.1 */
                         myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML);
+                        
+                        /* 3.2 */
+                        myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                        if(myhtml_is_html_node(current_node, MyHTML_TAG_LI) == false) {
+                            // parse error
+                            /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                            /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_LI NEED_NS:MyHTML_NAMESPACE_HTML */
+                        }
+                        
+                        /* 3.3 */
                         myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_LI, MyHTML_NAMESPACE_HTML, false);
                         break;
                     }
@@ -1324,7 +1496,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 }
                 
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_insert_html_element(tree, token);
@@ -1347,11 +1519,29 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     
                     if(myhtml_is_html_node(node, MyHTML_TAG_DD)) {
                         myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_DD, MyHTML_NAMESPACE_HTML);
+                        
+                        /* 3.2 */
+                        myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                        if(myhtml_is_html_node(current_node, MyHTML_TAG_DD)) {
+                            // parse error
+                            /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                            /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_DD NEED_NS:MyHTML_NAMESPACE_HTML */
+                        }
+                        
                         myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_DD, MyHTML_NAMESPACE_HTML, false);
                         break;
                     }
                     else if(myhtml_is_html_node(node, MyHTML_TAG_DT)) {
                         myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_DT, MyHTML_NAMESPACE_HTML);
+                        
+                        /* 3.2 */
+                        myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                        if(myhtml_is_html_node(current_node, MyHTML_TAG_DT)) {
+                            // parse error
+                            /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                            /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_DT NEED_NS:MyHTML_NAMESPACE_HTML */
+                        }
+                        
                         myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_DT, MyHTML_NAMESPACE_HTML, false);
                         break;
                     }
@@ -1364,7 +1554,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 }
                 
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_insert_html_element(tree, token);
@@ -1374,7 +1564,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_PLAINTEXT:
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_insert_html_element(tree, token);
@@ -1386,6 +1576,9 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_BUTTON:
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_BUTTON, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE)) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                    
                     myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                     myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_BUTTON, MyHTML_NAMESPACE_HTML, false);
                 }
@@ -1402,7 +1595,10 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_node_t* node = myhtml_tree_active_formatting_between_last_marker(tree, MyHTML_TAG_A, NULL);
                 
                 if(node) {
-                    myhtml_tree_adoption_agency_algorithm(tree, MyHTML_TAG_A);
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                    
+                    myhtml_tree_adoption_agency_algorithm(tree, token, MyHTML_TAG_A);
                     node = myhtml_tree_active_formatting_between_last_marker(tree, MyHTML_TAG_A, NULL);
                     
                     if(node) {
@@ -1443,7 +1639,10 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_active_formatting_reconstruction(tree);
                 
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_NOBR, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE)) {
-                    myhtml_tree_adoption_agency_algorithm(tree, MyHTML_TAG_NOBR);
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                    
+                    myhtml_tree_adoption_agency_algorithm(tree, token, MyHTML_TAG_NOBR);
                     myhtml_tree_active_formatting_reconstruction(tree);
                 }
                 
@@ -1470,7 +1669,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 if((tree->compat_mode & MyHTML_TREE_COMPAT_MODE_QUIRKS) == 0 &&
                    myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON))
                 {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_insert_html_element(tree, token);
@@ -1523,7 +1722,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_HR:
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
@@ -1540,6 +1739,9 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 
             case MyHTML_TAG_IMAGE:
             {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES CONVERT STATUS:ELEMENT_CONVERT LEVEL:ERROR FROM_TAG_ID:MyHTML_TAG_IMAGE FROM_NS:MyHTML_NAMESPACE_ANY FROM_TYPE:MyHTML_TOKEN_TYPE_OPEN TO_TAG_ID:MyHTML_TAG_IMG TO_NS:MyHTML_NAMESPACE_ANY TO_TYPE:MyHTML_TOKEN_TYPE_OPEN */
+                
                 token->tag_id = MyHTML_TAG_IMG;
                 return true;
             }
@@ -1565,7 +1767,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_XMP:
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_BUTTON)) {
-                    myhtml_tree_tags_close_p(tree);
+                    myhtml_tree_tags_close_p(tree, token);
                 }
                 
                 myhtml_tree_active_formatting_reconstruction(tree);
@@ -1654,6 +1856,8 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 if(myhtml_is_html_node(current_node, MyHTML_TAG_MENUITEM))
                     myhtml_tree_open_elements_pop(tree);
                 
+                myhtml_tree_active_formatting_reconstruction(tree);
+                
                 myhtml_tree_node_insert_html_element(tree, token);
                 break;
             }
@@ -1665,8 +1869,12 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                 }
                 
-                // myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                // if(current_node->tag_id != MyHTML_TAG_RUBY) PARSE_ERROR
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(current_node->tag_id != MyHTML_TAG_RUBY) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_RUBY NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 myhtml_tree_node_insert_html_element(tree, token);
                 break;
@@ -1679,9 +1887,13 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     myhtml_tree_generate_implied_end_tags(tree, MyHTML_TAG_RTC, MyHTML_NAMESPACE_HTML);
                 }
                 
-                // myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                // if(current_node->tag_id != MyHTML_TAG_RTC ||
-                //    current_node->tag_id != MyHTML_TAG_RUBY) PARSE_ERROR
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(current_node->tag_id != MyHTML_TAG_RTC || current_node->tag_id != MyHTML_TAG_RUBY) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_RTC NEED_NS:MyHTML_NAMESPACE_HTML */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_RUBY NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 myhtml_tree_node_insert_html_element(tree, token);
                 break;
@@ -1735,7 +1947,8 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_THEAD:
             case MyHTML_TAG_TR:
             {
-                // Ignore this token.
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
             }
                 
@@ -1776,6 +1989,9 @@ bool myhtml_insertion_mode_text(myhtml_tree_t* tree, myhtml_token_node_t* token)
     else {
         if(token->tag_id == MyHTML_TAG__END_OF_FILE)
         {
+            // parse error
+            /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:PREMATURE_TERMINATION LEVEL:ERROR */
+            
             myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
             
             if(current_node->tag_id == MyHTML_TAG_SCRIPT)
@@ -1802,9 +2018,11 @@ bool myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* to
             {
                 myhtml_tree_node_t* table_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TABLE, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(table_node == NULL)
+                if(table_node == NULL) {
                      // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 myhtml_tree_open_elements_pop_until_by_node(tree, table_node, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
@@ -1825,6 +2043,7 @@ bool myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* to
             case MyHTML_TAG_TR:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
             }
                 
@@ -1877,8 +2096,10 @@ bool myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* to
                 myhtml_tree_node_insert_comment(tree, token, 0);
                 break;
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:WARNING */
                 break;
+            }
                 
             case MyHTML_TAG_CAPTION:
             {
@@ -1936,10 +2157,16 @@ bool myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* to
             case MyHTML_TAG_TABLE:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 myhtml_tree_node_t* table_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TABLE, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(table_node == NULL)
+                if(table_node == NULL) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
+                }
                 
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_TABLE, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
@@ -1966,6 +2193,8 @@ bool myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* to
                 }
                 
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 myhtml_tree_node_insert_html_element(tree, token);
                 myhtml_tree_open_elements_pop(tree);
                 
@@ -1976,6 +2205,7 @@ bool myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* to
             case MyHTML_TAG_FORM:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
                 
                 myhtml_tree_node_t* template = myhtml_tree_open_elements_find_by_tag_idx(tree, MyHTML_TAG_TEMPLATE, MyHTML_NAMESPACE_HTML, NULL);
                 if(tree->node_form || template)
@@ -1992,6 +2222,8 @@ bool myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* to
             default:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 tree->foster_parenting = true;
                 myhtml_insertion_mode_in_body(tree, token);
                 tree->foster_parenting = false;
@@ -2010,6 +2242,9 @@ bool myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_node_
     if(token->tag_id == MyHTML_TAG__TEXT)
     {
         if(token->type & MyHTML_TOKEN_TYPE_NULL) {
+            // parse error
+            /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:NULL_CHAR ACTION:IGNORE LEVEL:ERROR */
+            
             myhtml_insertion_fix_for_null_char_drop_all(tree, token);
             
             if(token->str.length)
@@ -2031,6 +2266,8 @@ bool myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_node_
         
         if(is_not_ws)
         {
+            /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+            
             for(size_t i = 0; i < token_list->length; i++) {
                 tree->foster_parenting = true;
                 myhtml_insertion_mode_in_body(tree, token_list->list[i]);
@@ -2059,15 +2296,18 @@ bool myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node_t* 
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE) == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
                 }
                 
                 myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                 
-                //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                //if(current_node->tag_id != MyHTML_TAG_CAPTION) {
-                //    // parse error
-                //}
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_CAPTION) == false) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_CAPTION NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
@@ -2080,15 +2320,18 @@ bool myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node_t* 
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE) == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
                 }
                 
                 myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                 
-                //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                //if(current_node->tag_id != MyHTML_TAG_CAPTION) {
-                //    // parse error
-                //}
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_CAPTION) == false) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_CAPTION NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
@@ -2108,6 +2351,7 @@ bool myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node_t* 
             case MyHTML_TAG_THEAD:
             case MyHTML_TAG_TR:
             {
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
             }
                 
@@ -2130,15 +2374,18 @@ bool myhtml_insertion_mode_in_caption(myhtml_tree_t* tree, myhtml_token_node_t* 
             {
                 if(myhtml_tree_element_in_scope(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE) == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
                 }
                 
                 myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                 
-                //myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                //if(current_node->tag_id != MyHTML_TAG_CAPTION) {
-                //    // parse error
-                //}
+                myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_CAPTION) == false) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_CAPTION NEED_NS:MyHTML_NAMESPACE_HTML */
+                }
                 
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_CAPTION, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
@@ -2164,20 +2411,21 @@ bool myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token_nod
             {
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
-                if(current_node == NULL || !(current_node->tag_id == MyHTML_TAG_COLGROUP &&
-                   current_node->ns == MyHTML_NAMESPACE_HTML))
-                {
-                    break;
+                if(current_node && myhtml_is_html_node(current_node, MyHTML_TAG_COLGROUP)) {
+                    myhtml_tree_open_elements_pop(tree);
+                    
+                    tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
+                    return false;
                 }
                 
-                myhtml_tree_open_elements_pop(tree);
-                
-                tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                 break;
             }
                 
             case MyHTML_TAG_COL:
             {
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
             }
                 
@@ -2189,15 +2437,15 @@ bool myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token_nod
             default: {
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
-                if(current_node && current_node->tag_id == MyHTML_TAG_COLGROUP &&
-                   current_node->ns == MyHTML_NAMESPACE_HTML)
-                {
+                if(current_node && myhtml_is_html_node(current_node, MyHTML_TAG_COLGROUP)) {
                     myhtml_tree_open_elements_pop(tree);
                     
                     tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
                     return true;
                 }
                 
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                 break;
             }
         }
@@ -2216,10 +2464,10 @@ bool myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token_nod
                 if(new_token)
                     myhtml_tree_node_insert_text(tree, new_token);
                 
+                /* default: */
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
-                if(current_node && current_node->tag_id == MyHTML_TAG_COLGROUP)
-                {
+                if(current_node && myhtml_is_html_node(current_node, MyHTML_TAG_COLGROUP)) {
                     myhtml_tree_open_elements_pop(tree);
                     
                     tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
@@ -2227,6 +2475,7 @@ bool myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token_nod
                 }
                 
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                 break;
             }
                 
@@ -2236,9 +2485,10 @@ bool myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token_nod
                 break;
             }
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
                 break;
-                
+            }
             case MyHTML_TAG_HTML:
             {
                 return myhtml_insertion_mode_in_body(tree, token);
@@ -2263,9 +2513,7 @@ bool myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token_nod
             {
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
-                if(current_node && current_node->tag_id == MyHTML_TAG_COLGROUP &&
-                   current_node->ns == MyHTML_NAMESPACE_HTML)
-                {
+                if(current_node && myhtml_is_html_node(current_node, MyHTML_TAG_COLGROUP)) {
                     myhtml_tree_open_elements_pop(tree);
                     
                     tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE;
@@ -2273,6 +2521,7 @@ bool myhtml_insertion_mode_in_column_group(myhtml_tree_t* tree, myhtml_token_nod
                 }
                 
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                 break;
             }
         }
@@ -2292,9 +2541,11 @@ bool myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_node_
             {
                 myhtml_tree_node_t* node = myhtml_tree_element_in_scope(tree, token->tag_id, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(node == NULL)
+                if(node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 myhtml_tree_clear_stack_back_table_body_context(tree);
                 myhtml_tree_open_elements_pop(tree);
@@ -2309,9 +2560,14 @@ bool myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_node_
                 myhtml_tree_node_t* tfoot_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TFOOT, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 myhtml_tree_node_t* thead_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_THEAD, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(tbody_node == NULL && tfoot_node == NULL && thead_node == NULL)
+                if(tbody_node == NULL && tfoot_node == NULL && thead_node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_THEAD NEED_NS:MyHTML_NAMESPACE_HTML */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TBODY NEED_NS:MyHTML_NAMESPACE_HTML */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TFOOT NEED_NS:MyHTML_NAMESPACE_HTML */
                     break;
+                }
                 
                 myhtml_tree_clear_stack_back_table_body_context(tree);
                 myhtml_tree_open_elements_pop(tree);
@@ -2330,6 +2586,7 @@ bool myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_node_
             case MyHTML_TAG_TR:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
             }
                 
@@ -2354,6 +2611,8 @@ bool myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_node_
             case MyHTML_TAG_TD:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 myhtml_tree_clear_stack_back_table_body_context(tree);
                 
                 myhtml_tree_node_insert(tree, MyHTML_TAG_TR, MyHTML_NAMESPACE_HTML);
@@ -2373,9 +2632,14 @@ bool myhtml_insertion_mode_in_table_body(myhtml_tree_t* tree, myhtml_token_node_
                 myhtml_tree_node_t* tfoot_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TFOOT, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 myhtml_tree_node_t* thead_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_THEAD, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(tbody_node == NULL && tfoot_node == NULL && thead_node == NULL)
+                if(tbody_node == NULL && tfoot_node == NULL && thead_node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_THEAD NEED_NS:MyHTML_NAMESPACE_HTML */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TBODY NEED_NS:MyHTML_NAMESPACE_HTML */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TFOOT NEED_NS:MyHTML_NAMESPACE_HTML */
                     break;
+                }
                 
                 myhtml_tree_clear_stack_back_table_body_context(tree);
                 myhtml_tree_open_elements_pop(tree);
@@ -2401,9 +2665,11 @@ bool myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* toke
             {
                 myhtml_tree_node_t* tr_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TR, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(tr_node == NULL)
+                if(tr_node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 myhtml_tree_clear_stack_back_table_row_context(tree);
                 
@@ -2417,9 +2683,12 @@ bool myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* toke
             {
                 myhtml_tree_node_t* tr_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TR, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(tr_node == NULL)
+                if(tr_node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TR NEED_NS:MyHTML_NAMESPACE_HTML */
                     break;
+                }
                 
                 myhtml_tree_clear_stack_back_table_row_context(tree);
                 myhtml_tree_open_elements_pop(tree);
@@ -2433,9 +2702,11 @@ bool myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* toke
             case MyHTML_TAG_THEAD:
             {
                 myhtml_tree_node_t* node = myhtml_tree_element_in_scope(tree, token->tag_id, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
-                if(node == NULL)
+                if(node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 myhtml_tree_node_t* tr_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TR, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 if(tr_node == NULL)
@@ -2446,6 +2717,19 @@ bool myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* toke
                 
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_TABLE_BODY;
                 return true;
+            }
+                
+            case MyHTML_TAG_BODY:
+            case MyHTML_TAG_CAPTION:
+            case MyHTML_TAG_COL:
+            case MyHTML_TAG_COLGROUP:
+            case MyHTML_TAG_HTML:
+            case MyHTML_TAG_TD:
+            case MyHTML_TAG_TH:
+            {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
+                break;
             }
                 
             default:
@@ -2476,9 +2760,12 @@ bool myhtml_insertion_mode_in_row(myhtml_tree_t* tree, myhtml_token_node_t* toke
             {
                 myhtml_tree_node_t* tr_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TR, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(tr_node == NULL)
+                if(tr_node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TR NEED_NS:MyHTML_NAMESPACE_HTML */
                     break;
+                }
                 
                 myhtml_tree_clear_stack_back_table_row_context(tree);
                 myhtml_tree_open_elements_pop(tree);
@@ -2505,18 +2792,21 @@ bool myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 myhtml_tree_node_t* node = myhtml_tree_element_in_scope(tree, token->tag_id, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(node == NULL)
+                if(node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 myhtml_tree_generate_implied_end_tags(tree, 0, MyHTML_NAMESPACE_UNDEF);
                 
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
-                if(!(current_node->ns = MyHTML_NAMESPACE_HTML &&
-                   current_node->tag_id == token->tag_id))
+                if(myhtml_is_html_node(current_node, token->tag_id) == false)
                 {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:token->tag_id NEED_NS:MyHTML_NAMESPACE_HTML */
                 }
                 
                 myhtml_tree_open_elements_pop_until(tree, token->tag_id, MyHTML_NAMESPACE_HTML, false);
@@ -2532,7 +2822,12 @@ bool myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t* tok
             case MyHTML_TAG_COL:
             case MyHTML_TAG_COLGROUP:
             case MyHTML_TAG_HTML:
+            {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
+                
                 
             case MyHTML_TAG_TABLE:
             case MyHTML_TAG_TBODY:
@@ -2542,18 +2837,20 @@ bool myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 myhtml_tree_node_t* node = myhtml_tree_element_in_scope(tree, token->tag_id, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(node == NULL)
+                if(node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TD, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 if(node) {
-                    myhtml_tree_close_cell(tree, node);
+                    myhtml_tree_close_cell(tree, node, token);
                 }
                 else {
                     node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TH, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                     if(node)
-                        myhtml_tree_close_cell(tree, node);
+                        myhtml_tree_close_cell(tree, node, token);
                 }
                 
                 return true;
@@ -2579,11 +2876,16 @@ bool myhtml_insertion_mode_in_cell(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_node_t* td_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TD, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 myhtml_tree_node_t* th_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_TH, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(td_node == NULL && th_node == NULL)
+                if(td_node == NULL && th_node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TD NEED_NS:MyHTML_NAMESPACE_HTML */
+                    /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:NULL NEED:NULL HAVE_TAG_ID:MyHTML_TAG__UNDEF HAVE_NS:MyHTML_NAMESPACE_UNDEF NEED_TAG_ID:MyHTML_TAG_TH NEED_NS:MyHTML_NAMESPACE_HTML */
+                    
                     break;
+                }
                 
-                myhtml_tree_close_cell(tree, (td_node == NULL ? th_node : td_node));
+                myhtml_tree_close_cell(tree, (td_node == NULL ? th_node : td_node), token);
                 
                 return true;
             }
@@ -2605,31 +2907,28 @@ bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* t
             {
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
-                if(current_node->tag_id == MyHTML_TAG_OPTION &&
-                   current_node->ns == MyHTML_NAMESPACE_HTML)
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_OPTION))
                 {
                     if(tree->open_elements->length > 1) {
                         myhtml_tree_node_t *optgrp_node = tree->open_elements->list[ tree->open_elements->length - 2 ];
                         
-                        if(optgrp_node->tag_id == MyHTML_TAG_OPTGROUP &&
-                           optgrp_node->ns == MyHTML_NAMESPACE_HTML)
+                        if(myhtml_is_html_node(optgrp_node, MyHTML_TAG_OPTGROUP))
                         {
                             myhtml_tree_open_elements_pop(tree);
                         }
-                    }
-                    else {
-                        MyHTML_DEBUG_ERROR("in select state; open elements length < 2");
                     }
                 }
                 
                 current_node = myhtml_tree_current_node(tree);
                 
-                if(current_node->tag_id == MyHTML_TAG_OPTGROUP &&
-                   current_node->ns == MyHTML_NAMESPACE_HTML)
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_OPTGROUP))
                     myhtml_tree_open_elements_pop(tree);
-                else
+                else {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
+                }
                 
                 break;
             }
@@ -2638,24 +2937,27 @@ bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* t
             {
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
-                if(current_node->tag_id == MyHTML_TAG_OPTION &&
-                   current_node->ns == MyHTML_NAMESPACE_HTML)
+                if(myhtml_is_html_node(current_node, MyHTML_TAG_OPTION))
                     myhtml_tree_open_elements_pop(tree);
-                else
+                else {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
+                }
                 
                 break;
             }
                 
             case MyHTML_TAG_SELECT:
             {
-                // parse error
                 myhtml_tree_node_t* select_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_SELECT, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_SELECT);
                 
-                if(select_node == NULL)
+                if(select_node == NULL) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                     break;
+                }
                 
                 myhtml_tree_open_elements_pop_until_by_node(tree, select_node, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
@@ -2666,9 +2968,12 @@ bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* t
             case MyHTML_TAG_TEMPLATE:
                 return myhtml_insertion_mode_in_head(tree, token);
                 
-            default:
+            default: {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
+            }
         }
     }
     else {
@@ -2676,6 +2981,9 @@ bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* t
         {
             case MyHTML_TAG__TEXT: {
                 if(token->type & MyHTML_TOKEN_TYPE_NULL) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:NULL_CHAR ACTION:IGNORE LEVEL:ERROR */
+                    
                     myhtml_insertion_fix_for_null_char_drop_all(tree, token);
                     
                     if(token->str.length)
@@ -2691,8 +2999,11 @@ bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* t
                 myhtml_tree_node_insert_comment(tree, token, NULL);
                 break;
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
+            }
                 
             case MyHTML_TAG_HTML:
                 return myhtml_insertion_mode_in_body(tree, token);
@@ -2729,10 +3040,15 @@ bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* t
             case MyHTML_TAG_SELECT:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 myhtml_tree_node_t* select_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_SELECT, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_SELECT);
                 
-                if(select_node == NULL)
+                if(select_node == NULL) {
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
+                }
                 
                 myhtml_tree_open_elements_pop_until_by_node(tree, select_node, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
@@ -2745,10 +3061,15 @@ bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* t
             case MyHTML_TAG_TEXTAREA:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 myhtml_tree_node_t* select_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_SELECT, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_SELECT);
                 
-                if(select_node == NULL)
+                if(select_node == NULL) {
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
+                }
                 
                 myhtml_tree_open_elements_pop_until_by_node(tree, select_node, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
@@ -2763,9 +3084,11 @@ bool myhtml_insertion_mode_in_select(myhtml_tree_t* tree, myhtml_token_node_t* t
             case MyHTML_TAG__END_OF_FILE:
                 return myhtml_insertion_mode_in_body(tree, token);
                 
-            default:
+            default: {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
         }
     }
     
@@ -2787,10 +3110,15 @@ bool myhtml_insertion_mode_in_select_in_table(myhtml_tree_t* tree, myhtml_token_
             case MyHTML_TAG_TH:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 myhtml_tree_node_t* some_node = myhtml_tree_element_in_scope(tree, token->tag_id, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE_TABLE);
                 
-                if(some_node == NULL)
+                if(some_node == NULL) {
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
+                }
                 
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_SELECT, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
@@ -2815,6 +3143,8 @@ bool myhtml_insertion_mode_in_select_in_table(myhtml_tree_t* tree, myhtml_token_
             case MyHTML_TAG_TH:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION LEVEL:ERROR */
+                
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_SELECT, MyHTML_NAMESPACE_HTML, false);
                 myhtml_tree_reset_insertion_mode_appropriately(tree);
                 
@@ -2837,8 +3167,12 @@ bool myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_node_t*
             case MyHTML_TAG_TEMPLATE:
                 return myhtml_insertion_mode_in_body(tree, token);
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
+            }
         }
     }
     else {
@@ -2904,6 +3238,8 @@ bool myhtml_insertion_mode_in_template(myhtml_tree_t* tree, myhtml_token_node_t*
                 }
                 
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TAG STATUS:ELEMENT_NOT_CLOSED LEVEL:ERROR TAG_ID:MyHTML_TAG_TEMPLATE NS:MyHTML_NAMESPACE_HTML */
+                
                 myhtml_tree_open_elements_pop_until_by_node(tree, node, false);
                 myhtml_tree_active_formatting_up_to_last_marker(tree);
                 myhtml_tree_template_insertion_pop(tree);
@@ -2933,6 +3269,8 @@ bool myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node_t* 
             {
                 if(tree->fragment) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
                 }
                 
@@ -2940,9 +3278,13 @@ bool myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node_t* 
                 break;
             }
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY LEVEL:ERROR */
+                
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return true;
+            }
         }
     }
     else {
@@ -2978,10 +3320,12 @@ bool myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node_t* 
                 break;
             }
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
                 // parse error
-                break;
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
                 
+                break;
+            }
             case MyHTML_TAG_HTML:
                 return myhtml_insertion_mode_in_body(tree, token);
                 
@@ -2989,9 +3333,13 @@ bool myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node_t* 
                 myhtml_rules_stop_parsing(tree);
                 break;
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY LEVEL:ERROR */
+                
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return true;
+            }
         }
     }
     
@@ -3007,9 +3355,12 @@ bool myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_node_t*
             {
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
                 
-                if(current_node == tree->document->child)
+                if(current_node == tree->document->child) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED ACTION:IGNORE LEVEL:ERROR */
+                    
                     break;
+                }
                 
                 myhtml_tree_open_elements_pop(tree);
                 
@@ -3025,8 +3376,12 @@ bool myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_node_t*
                 break;
             }
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
+            }
         }
     }
     else {
@@ -3040,6 +3395,8 @@ bool myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_node_t*
                 }
                 
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
+                
                 myhtml_token_node_wait_for_done(token);
                 myhtml_string_stay_only_whitespace(&token->str);
                 
@@ -3055,9 +3412,12 @@ bool myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_node_t*
                 break;
             }
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
+            }
                 
             case MyHTML_TAG_HTML:
                 return myhtml_insertion_mode_in_body(tree, token);
@@ -3080,14 +3440,19 @@ bool myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_node_t*
                 
                 if(current_node == tree->document->child) {
                     // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
                 }
                 
                 myhtml_rules_stop_parsing(tree);
                 break;
             }
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
+            }
         }
     }
     
@@ -3103,8 +3468,12 @@ bool myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_node
                 tree->insert_mode = MyHTML_INSERTION_MODE_AFTER_AFTER_FRAMESET;
                 break;
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
+            }
         }
     }
     else {
@@ -3118,6 +3487,8 @@ bool myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_node
                 }
                 
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
+                
                 myhtml_token_node_wait_for_done(token);
                 myhtml_string_stay_only_whitespace(&token->str);
                 
@@ -3133,9 +3504,11 @@ bool myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_node
                 break;
             }
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
                 break;
+            }
                 
             case MyHTML_TAG_HTML:
                 return myhtml_insertion_mode_in_body(tree, token);
@@ -3147,8 +3520,12 @@ bool myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_node
                 myhtml_rules_stop_parsing(tree);
                 break;
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
+            }
         }
     }
     
@@ -3183,6 +3560,9 @@ bool myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_token_no
                 if(token->type & MyHTML_TOKEN_TYPE_WHITESPACE)
                     return myhtml_insertion_mode_in_body(tree, token);
                 
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return true;
             }
@@ -3195,9 +3575,13 @@ bool myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_token_no
                 myhtml_rules_stop_parsing(tree);
                 break;
                 
-            default:
+            default: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                
                 tree->insert_mode = MyHTML_INSERTION_MODE_IN_BODY;
                 return true;
+            }
         }
     }
     
@@ -3207,6 +3591,9 @@ bool myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_token_no
 bool myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     if(token->type & MyHTML_TOKEN_TYPE_CLOSE) {
+        // parse error
+        /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY LEVEL:ERROR */
+        
         return false;
     }
     else {
@@ -3235,6 +3622,8 @@ bool myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_toke
                     return myhtml_insertion_mode_in_body(tree, new_token);
                 
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY LEVEL:ERROR */
+                
                 break;
             }
                 
@@ -3249,9 +3638,11 @@ bool myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_toke
             case MyHTML_TAG_NOFRAMES:
                 return myhtml_insertion_mode_in_head(tree, token);
                 
-            default:
+            default: {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY LEVEL:ERROR */
                 break;
+            }
         }
     }
     
@@ -3262,6 +3653,8 @@ bool myhtml_insertion_mode_in_foreign_content_end_other(myhtml_tree_t* tree, myh
 {
     if(current_node->tag_id != token->tag_id) {
         // parse error
+        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+        /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:token HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:token->tag_id NEED_NS:MyHTML_NAMESPACE_HTML */
     }
     
     if(tree->open_elements->length)
@@ -3343,6 +3736,9 @@ bool myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_
             case MyHTML_TAG__TEXT:
             {
                 if(token->type & MyHTML_TOKEN_TYPE_NULL) {
+                    // parse error
+                    /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:NULL_CHAR LEVEL:ERROR */
+                    
                     myhtml_token_node_wait_for_done(token);
                     myhtml_token_set_replacement_character_for_null_token(tree, token);
                 }
@@ -3359,8 +3755,12 @@ bool myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_
                 myhtml_tree_node_insert_comment(tree, token, NULL);
                 break;
                 
-            case MyHTML_TAG__DOCTYPE:
+            case MyHTML_TAG__DOCTYPE: {
+                // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_WRONG_LOCATION ACTION:IGNORE LEVEL:ERROR */
+                
                 break;
+            }
                 
             case MyHTML_TAG_B:
             case MyHTML_TAG_BIG:
@@ -3409,6 +3809,8 @@ bool myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_
             case MyHTML_TAG_FONT:
             {
                 // parse error
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
+                
                 if(token->tag_id == MyHTML_TAG_FONT)
                 {
                     myhtml_token_node_wait_for_done(token);

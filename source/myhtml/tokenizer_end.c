@@ -178,6 +178,16 @@ size_t myhtml_tokenizer_end_state_attribute_value_unquoted(myhtml_tree_t* tree, 
     return html_offset;
 }
 
+size_t myhtml_tokenizer_end_state_after_attribute_value_quoted(myhtml_tree_t* tree, myhtml_token_node_t* token_node, const char* html, size_t html_offset, size_t html_size)
+{
+    token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
+    
+    token_node->raw_length = ((html_offset + tree->global_offset) - token_node->raw_begin);
+    myhtml_queue_add(tree, html_offset, token_node);
+    
+    return html_offset;
+}
+
 size_t myhtml_tokenizer_end_state_comment_start(myhtml_tree_t* tree, myhtml_token_node_t* token_node, const char* html, size_t html_offset, size_t html_size)
 {
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;

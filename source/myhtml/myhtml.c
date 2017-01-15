@@ -662,15 +662,15 @@ const char * myhtml_tag_name_by_id(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, 
     if(tree == NULL || tree->tags == NULL)
         return NULL;
     
-    const myhtml_tag_context_t *ctx = myhtml_tag_get_by_id(tree->tags, tag_id);
+    const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_id(tree->tags, tag_id);
     
-    if(ctx == NULL)
+    if(tag_ctx == NULL)
         return NULL;
     
     if(length)
-        *length = ctx->name_length;
+        *length = tag_ctx->name_length;
     
-    return ctx->name;
+    return tag_ctx->name;
 }
 
 myhtml_tag_id_t myhtml_tag_id_by_name(myhtml_tree_t* tree, const char *tag_name, size_t length)

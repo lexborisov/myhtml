@@ -1,3 +1,10 @@
+2.0.2
+===========
+NOW()
+
+* Sync with Specification (https://html.spec.whatwg.org/multipage/)
+* Added ```extra comments``` for a ```parse error``` validation
+
 2.0.1
 ===========
 January 08, 2017

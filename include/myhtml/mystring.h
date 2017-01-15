@@ -97,7 +97,7 @@ myhtml_string_t * myhtml_string_destroy(myhtml_string_t* str, bool destroy_obj);
 void myhtml_string_raw_clean(myhtml_string_raw_t* str_raw);
 void myhtml_string_raw_clean_all(myhtml_string_raw_t* str_raw);
 myhtml_string_raw_t * myhtml_string_raw_destroy(myhtml_string_raw_t* str_raw, bool destroy_obj);
-    
+
 /* basic api */
 char * myhtml_string_data_alloc(mchar_async_t *mchar, size_t node_id, size_t size);
 char * myhtml_string_data_realloc(mchar_async_t *mchar, size_t node_id, char *data,  size_t len_to_copy, size_t size);

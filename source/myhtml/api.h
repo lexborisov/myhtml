@@ -36,7 +36,7 @@
 
 #define MyHTML_VERSION_MAJOR 2
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 1
+#define MyHTML_VERSION_PATCH 2
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -474,7 +474,7 @@ enum myhtml_tree_parse_flags {
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE      = 0x001,
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN   = 0x003,
     MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004, /* skip ws token, but not for RCDATA, RAWTEXT, CDATA and PLAINTEXT */
-    MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE = 0x008,
+    MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE = 0x008
 }
 typedef myhtml_tree_parse_flags_t;
 

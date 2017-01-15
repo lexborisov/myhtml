@@ -177,6 +177,7 @@ struct myhtml_tree {
     mythread_queue_t*            queue;
     myhtml_tag_t*                tags;
     void*                        modest;
+    void*                        context;
     
     // init id's
     size_t                  mcasync_token_id;
@@ -340,7 +341,7 @@ void myhtml_tree_template_insertion_pop(myhtml_tree_t* tree);
 
 void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree);
 
-bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_tag_id_t subject_tag_idx);
+bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_token_node_t* token, myhtml_tag_id_t subject_tag_idx);
 size_t myhtml_tree_template_insertion_length(myhtml_tree_t* tree);
 
 // other for a tree
@@ -375,12 +376,12 @@ myhtml_tree_node_t * myhtml_tree_node_find_parent_by_tag_id(myhtml_tree_node_t* 
 // other
 void myhtml_tree_wait_for_last_done_token(myhtml_tree_t* tree, myhtml_token_node_t* token_for_wait);
 
-void myhtml_tree_tags_close_p(myhtml_tree_t* tree);
+void myhtml_tree_tags_close_p(myhtml_tree_t* tree, myhtml_token_node_t* token);
 myhtml_tree_node_t * myhtml_tree_generic_raw_text_element_parsing_algorithm(myhtml_tree_t* tree, myhtml_token_node_t* token_node);
 void myhtml_tree_clear_stack_back_table_context(myhtml_tree_t* tree);
 void myhtml_tree_clear_stack_back_table_body_context(myhtml_tree_t* tree);
 void myhtml_tree_clear_stack_back_table_row_context(myhtml_tree_t* tree);
-void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_node);
+void myhtml_tree_close_cell(myhtml_tree_t* tree, myhtml_tree_node_t* tr_or_th_node, myhtml_token_node_t* token);
 
 bool myhtml_tree_is_mathml_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node);
 bool myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_node_t* node);

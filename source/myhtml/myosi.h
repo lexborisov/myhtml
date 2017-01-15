@@ -31,7 +31,7 @@
 
 #define MyHTML_VERSION_MAJOR 2
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 1
+#define MyHTML_VERSION_PATCH 2
 
 #if (defined(_WIN32) || defined(_WIN64)) && !defined(__WINPTHREADS_VERSION)
 #define IS_OS_WINDOWS
@@ -207,7 +207,7 @@ enum myhtml_tree_parse_flags {
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_BUILD_TREE      = 0x001,
     MyHTML_TREE_PARSE_FLAGS_WITHOUT_PROCESS_TOKEN   = 0x003,
     MyHTML_TREE_PARSE_FLAGS_SKIP_WHITESPACE_TOKEN   = 0x004, /* skip ws token, but not for RCDATA, RAWTEXT, CDATA and PLAINTEXT */
-    MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE = 0x008,
+    MyHTML_TREE_PARSE_FLAGS_WITHOUT_DOCTYPE_IN_TREE = 0x008
 }
 typedef myhtml_tree_parse_flags_t;
 
@@ -315,7 +315,7 @@ enum myhtml_tokenizer_state {
     MyHTML_TOKENIZER_STATE_ATTRIBUTE_VALUE_SINGLE_QUOTED                 = 0x026,
     MyHTML_TOKENIZER_STATE_ATTRIBUTE_VALUE_UNQUOTED                      = 0x027,
     MyHTML_TOKENIZER_STATE_CHARACTER_REFERENCE_IN_ATTRIBUTE_VALUE        = 0x028,
-    MyHTML_TOKENIZER_STATE_AFTER_ATTRIBUTE_VALUE__QUOTED                 = 0x029,
+    MyHTML_TOKENIZER_STATE_AFTER_ATTRIBUTE_VALUE_QUOTED                  = 0x029,
     MyHTML_TOKENIZER_STATE_SELF_CLOSING_START_TAG                        = 0x02a,
     MyHTML_TOKENIZER_STATE_BOGUS_COMMENT                                 = 0x02b,
     MyHTML_TOKENIZER_STATE_MARKUP_DECLARATION_OPEN                       = 0x02c,
@@ -498,6 +498,8 @@ typedef void (*myhtml_callback_tree_node_f)(myhtml_tree_t* tree, myhtml_tree_nod
 // find attribute value functions
 typedef bool (*myhtml_attribute_value_find_f)(myhtml_string_t* str_key, const char* value, size_t value_len);
 
+// callback to be implemented by the user
+typedef void (*myhtml_callback_serialize_f)(const char* buffer, size_t size, void* ctx);
 
 void * myhtml_mem_malloc(size_t size);
 void * myhtml_mem_realloc(void* dst, size_t size);
