@@ -412,7 +412,7 @@ bool myhtml_encoding_algorithm_extracting_character_encoding_from_meta_element(c
     *encoding = MyHTML_ENCODING_NOT_DETERMINED;
     
     /* 1 */
-    size_t length = 0, charset_pos = 0;
+    size_t length = 0;
     size_t charset_length = strlen("charset");
     
     bool is_get_pos = false;
@@ -438,7 +438,6 @@ bool myhtml_encoding_algorithm_extracting_character_encoding_from_meta_element(c
             /* 4 */
             if(udata[length] == 0x3D) { /* EQUALS SIGN (=) */
                 is_get_pos = true;
-                charset_pos = length;
                 
                 length++;
                 break;
