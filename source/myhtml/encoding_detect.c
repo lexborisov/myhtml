@@ -448,7 +448,7 @@ bool myhtml_encoding_algorithm_extracting_character_encoding_from_meta_element(c
         length++;
     }
     
-    if(charset_pos == false || length >= data_size)
+    if(is_get_pos == false || length >= data_size)
         return false;
     
     /* 5 */
