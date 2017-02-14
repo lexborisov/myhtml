@@ -38,7 +38,10 @@ size_t myhtml_tokenizer_end_state_tag_open(myhtml_tree_t* tree, myhtml_token_nod
             token_node->raw_length = (html_offset + tree->global_offset) - token_node->raw_begin;
             myhtml_check_tag_parser(tree, token_node, html, html_offset);
             
-            myhtml_queue_add(tree, html_offset, token_node);
+            if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
         }
         else {
             token_node->type ^= (token_node->type & MyHTML_TOKEN_TYPE_WHITESPACE);
@@ -99,7 +102,10 @@ size_t myhtml_tokenizer_end_state_markup_declaration_open(myhtml_tree_t* tree, m
                 
                 token_node->raw_length = (html_size + tree->global_offset) - token_node->raw_begin;
                 
-                myhtml_queue_add(tree, html_offset, token_node);
+                if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
             }
         }
         else {
@@ -109,7 +115,10 @@ size_t myhtml_tokenizer_end_state_markup_declaration_open(myhtml_tree_t* tree, m
             
             token_node->raw_length = (html_size + tree->global_offset) - token_node->raw_begin;
             
-            myhtml_queue_add(tree, html_offset, token_node);
+            if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
         }
     }
     
@@ -120,7 +129,11 @@ size_t myhtml_tokenizer_end_state_before_attribute_name(myhtml_tree_t* tree, myh
 {
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
+    
     return html_offset;
 }
 
@@ -129,7 +142,11 @@ size_t myhtml_tokenizer_end_state_attribute_name(myhtml_tree_t* tree, myhtml_tok
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     tree->attr_current->raw_key_length = (html_offset + tree->global_offset) - tree->attr_current->raw_key_begin;
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -138,7 +155,11 @@ size_t myhtml_tokenizer_end_state_after_attribute_name(myhtml_tree_t* tree, myht
 {
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
+    
     return html_offset;
 }
 
@@ -146,8 +167,16 @@ size_t myhtml_tokenizer_end_state_before_attribute_value(myhtml_tree_t* tree, my
 {
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
-    myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
+    
+    tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+    if(tree->attr_current == NULL) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -172,8 +201,16 @@ size_t myhtml_tokenizer_end_state_attribute_value_unquoted(myhtml_tree_t* tree, 
     
     tree->attr_current->raw_value_length = (html_offset + tree->global_offset) - tree->attr_current->raw_value_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
-    myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
+    
+    tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+    if(tree->attr_current == NULL) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -183,7 +220,11 @@ size_t myhtml_tokenizer_end_state_after_attribute_value_quoted(myhtml_tree_t* tr
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     token_node->raw_length = ((html_offset + tree->global_offset) - token_node->raw_begin);
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -193,7 +234,11 @@ size_t myhtml_tokenizer_end_state_comment_start(myhtml_tree_t* tree, myhtml_toke
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     token_node->raw_length = ((html_offset + tree->global_offset) - token_node->raw_begin);
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -203,7 +248,11 @@ size_t myhtml_tokenizer_end_state_comment_start_dash(myhtml_tree_t* tree, myhtml
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     token_node->raw_length = ((html_offset + tree->global_offset) - token_node->raw_begin);
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -213,7 +262,11 @@ size_t myhtml_tokenizer_end_state_comment(myhtml_tree_t* tree, myhtml_token_node
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     token_node->raw_length = ((html_offset + tree->global_offset) - token_node->raw_begin);
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -226,7 +279,11 @@ size_t myhtml_tokenizer_end_state_comment_end(myhtml_tree_t* tree, myhtml_token_
     
     if(token_node->raw_length > 2) {
         token_node->raw_length -= 2;
-        myhtml_queue_add(tree, html_offset, token_node);
+        
+        if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
     }
     
     return html_offset;
@@ -237,7 +294,11 @@ size_t myhtml_tokenizer_end_state_comment_end_dash(myhtml_tree_t* tree, myhtml_t
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     token_node->raw_length = ((html_offset + tree->global_offset) - token_node->raw_begin);
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -247,7 +308,11 @@ size_t myhtml_tokenizer_end_state_comment_end_bang(myhtml_tree_t* tree, myhtml_t
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     token_node->raw_length = ((html_offset + tree->global_offset) - token_node->raw_begin);
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -257,7 +322,11 @@ size_t myhtml_tokenizer_end_state_bogus_comment(myhtml_tree_t* tree, myhtml_toke
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     token_node->raw_length = ((html_offset + tree->global_offset) - token_node->raw_begin);
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -269,7 +338,10 @@ size_t myhtml_tokenizer_end_state_cdata_section(myhtml_tree_t* tree, myhtml_toke
     token_node->raw_length = ((html_offset + tree->global_offset) - token_node->raw_begin);
     
     if(token_node->raw_length) {
-        myhtml_queue_add(tree, html_offset, token_node);
+        if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
     }
     
     return html_offset;
@@ -284,7 +356,10 @@ size_t myhtml_tokenizer_end_state_rcdata(myhtml_tree_t* tree, myhtml_token_node_
         token_node->tag_id = MyHTML_TAG__TEXT;
         token_node->raw_length = (html_size + tree->global_offset) - token_node->raw_begin;
         
-        myhtml_queue_add(tree, 0, token_node);
+        if(myhtml_queue_add(tree, 0, token_node) != MyHTML_STATUS_OK) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
     }
     
     return html_offset;
@@ -367,7 +442,11 @@ size_t myhtml_tokenizer_end_state_before_doctype_name(myhtml_tree_t* tree, myhtm
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -378,7 +457,10 @@ size_t myhtml_tokenizer_end_state_doctype_name(myhtml_tree_t* tree, myhtml_token
     
     tree->attr_current->raw_key_length = (html_offset + tree->global_offset) - tree->attr_current->raw_key_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -387,7 +469,11 @@ size_t myhtml_tokenizer_end_state_after_doctype_name(myhtml_tree_t* tree, myhtml
 {
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
+    
     return html_offset;
 }
 
@@ -395,7 +481,11 @@ size_t myhtml_tokenizer_end_state_custom_after_doctype_name_a_z(myhtml_tree_t* t
 {
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
+    
     return html_offset;
 }
 
@@ -404,7 +494,11 @@ size_t myhtml_tokenizer_end_state_before_doctype_public_identifier(myhtml_tree_t
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
     tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
-    myhtml_queue_add(tree, html_offset, token_node);
+    
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -419,7 +513,10 @@ size_t myhtml_tokenizer_end_state_doctype_public_identifier_double_quoted(myhtml
         tree->attr_current->raw_key_length = (html_offset + tree->global_offset) - tree->attr_current->raw_key_begin;
     }
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -436,7 +533,11 @@ size_t myhtml_tokenizer_end_state_after_doctype_public_identifier(myhtml_tree_t*
 {
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
+    
     return html_offset;
 }
 
@@ -450,7 +551,10 @@ size_t myhtml_tokenizer_end_state_doctype_system_identifier_double_quoted(myhtml
         tree->attr_current->raw_key_length = (html_offset + tree->global_offset) - tree->attr_current->raw_key_begin;
     }
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
     
     return html_offset;
 }
@@ -467,7 +571,11 @@ size_t myhtml_tokenizer_end_state_after_doctype_system_identifier(myhtml_tree_t*
 {
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
+    
     return html_offset;
 }
 
@@ -475,7 +583,11 @@ size_t myhtml_tokenizer_end_state_bogus_doctype(myhtml_tree_t* tree, myhtml_toke
 {
     token_node->element_length = (tree->global_offset + html_size) - token_node->element_begin;
     
-    myhtml_queue_add(tree, html_offset, token_node);
+    if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+        myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+        return 0;
+    }
+    
     return html_offset;
 }
 
@@ -623,3 +735,9 @@ size_t myhtml_tokenizer_end_state_script_data_double_escape_end(myhtml_tree_t* t
     return html_offset;
 }
 
+size_t myhtml_tokenizer_end_state_parse_error_stop(myhtml_tree_t* tree, myhtml_token_node_t* token_node, const char* html, size_t html_offset, size_t html_size)
+{
+    
+    
+    return html_size;
+}

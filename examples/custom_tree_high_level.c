@@ -41,7 +41,7 @@ int main(int argc, const char * argv[])
     // create nodes
     printf("Create DIV element\n");
     myhtml_tree_node_t* base_node = myhtml_node_create(tree, MyHTML_TAG_DIV, MyHTML_NAMESPACE_HTML);
-    myhtml_node_insert_to_appropriate_place(tree, myhtml_tree_get_document(tree), base_node);
+    myhtml_node_insert_to_appropriate_place(myhtml_tree_get_document(tree), base_node);
     
     printf("Create and append to DIV element 100 000 P elements\n");
     char tmp_buf_key[128];
@@ -50,20 +50,18 @@ int main(int argc, const char * argv[])
     
     for (size_t i = 1; i < 100001; i++) {
         myhtml_tree_node_t* new_p_node = myhtml_node_create(tree, MyHTML_TAG_P, MyHTML_NAMESPACE_HTML);
-        myhtml_node_append_child(tree, base_node, new_p_node);
+        myhtml_node_append_child(base_node, new_p_node);
         
         myhtml_tree_node_t* new_text_node = myhtml_node_create(tree, MyHTML_TAG__TEXT, MyHTML_NAMESPACE_HTML);
-        myhtml_node_append_child(tree, new_p_node, new_text_node);
+        myhtml_node_append_child(new_p_node, new_text_node);
         
         sprintf(tmp_buf_key, "best_key_for_%zu", i);
         sprintf(tmp_buf_value, "for best value %zu", i);
         sprintf(tmp_buf_text, "Text! Entity &#x26;#%zu = &#%zu", i, i);
         
-        myhtml_node_text_set_with_charef(tree, new_text_node,
-                             tmp_buf_text, strlen(tmp_buf_text), MyHTML_ENCODING_UTF_8);
+        myhtml_node_text_set_with_charef(new_text_node, tmp_buf_text, strlen(tmp_buf_text), MyHTML_ENCODING_UTF_8);
         
-        myhtml_attribute_add(tree, new_p_node,
-                             tmp_buf_key, strlen(tmp_buf_key),
+        myhtml_attribute_add(new_p_node, tmp_buf_key, strlen(tmp_buf_key),
                              tmp_buf_value, strlen(tmp_buf_value), MyHTML_ENCODING_UTF_8);
     }
     

@@ -34,10 +34,6 @@ extern "C" {
 #include <myhtml/tokenizer_doctype.h>
 #include <myhtml/tokenizer_script.h>
 #include <myhtml/tokenizer_end.h>
-
-#define MyHTML_TOKENIZER_CHAR_OTHER        '\000'
-#define MyHTML_TOKENIZER_CHAR_A_Z_a_z      '\001'
-#define MyHTML_TOKENIZER_CHAR_WHITESPACE   '\002'
     
 #define myhtml_tokenizer_inc_html_offset(offset, size)   \
     offset++;                                            \

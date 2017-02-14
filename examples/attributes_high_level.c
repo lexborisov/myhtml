@@ -49,12 +49,12 @@ int main(int argc, const char * argv[])
     
     printf("For a test; Create and delete 100000 attrs...\n");
     for(size_t j = 0; j < 100000; j++) {
-        myhtml_tree_attr_t *attr = myhtml_attribute_add(tree, node, "key", 3, "value", 5, MyHTML_ENCODING_UTF_8);
+        myhtml_tree_attr_t *attr = myhtml_attribute_add(node, "key", 3, "value", 5, MyHTML_ENCODING_UTF_8);
         myhtml_attribute_delete(tree, node, attr);
     }
     
     // add first attr in first div in tree
-    myhtml_attribute_add(tree, node, "key", 3, "value", 5, MyHTML_ENCODING_UTF_8);
+    myhtml_attribute_add(node, "key", 3, "value", 5, MyHTML_ENCODING_UTF_8);
     
     printf("Modified tree:\n");
     myhtml_tree_print_node_children(tree, myhtml_tree_get_document(tree), stdout, 0);

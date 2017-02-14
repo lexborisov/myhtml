@@ -970,6 +970,31 @@ void myhtml_encoding_result_clean(myhtml_encoding_result_t *res)
     memset(res, 0, sizeof(myhtml_encoding_result_t));
 }
 
+size_t myhtml_encoding_codepoint_ascii_length(size_t codepoint)
+{
+    if (codepoint <= 0x0000007F) {
+        return 1;
+    }
+    else if (codepoint <= 0x000007FF) {
+        return 2;
+    }
+    else if (codepoint <= 0x0000FFFF) {
+        return 3;
+    }
+    else if (codepoint <= 0x001FFFFF) {
+        return 4;
+    }
+    /* not uses in unicode */
+    else if (codepoint <= 0x03FFFFFF) {
+        return 5;
+    }
+    else if (codepoint <= 0x7FFFFFFF) {
+        return 6;
+    }
+    
+    return 0;
+}
+
 size_t myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data)
 {
     /* 0x80 -- 10xxxxxx */
@@ -1155,6 +1180,43 @@ size_t myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data)
     return 2;
 }
 
-
+size_t myhtml_encoding_convert_to_ascii_utf_8(myhtml_string_raw_t* raw_str, const char* buff, size_t length, myhtml_encoding_t encoding)
+{
+    if(raw_str->data == NULL) {
+        raw_str->size   = length + 1;
+        raw_str->length = 0;
+        raw_str->data   = myhtml_malloc(sizeof(char) * raw_str->size);
+        
+        if(raw_str->data == NULL)
+            return 0;
+    }
+    
+    myhtml_encoding_result_t res = {0};
+    
+    unsigned const char* u_buff = (unsigned const char*)buff;
+    const myhtml_encoding_custom_f func = myhtml_encoding_get_function_by_id(encoding);
+    
+    size_t i;
+    for (i = 0; i < length; i++)
+    {
+        if(func(u_buff[i], &res) == MyHTML_ENCODING_STATUS_OK) {
+            if((raw_str->length + 6) >= raw_str->size) {
+                size_t new_size = raw_str->length + 6 + (length / 2);
+                char *new_data  = myhtml_realloc(raw_str->data, sizeof(char) * new_size);
+                
+                if(new_data == NULL) {
+                    return 0;
+                }
+                
+                raw_str->data = new_data;
+                raw_str->size = new_size;
+            }
+            
+            raw_str->length += myhtml_encoding_codepoint_to_ascii_utf_8(res.result, &raw_str->data[raw_str->length]);
+        }
+    }
+    
+    return i;
+}
 
 

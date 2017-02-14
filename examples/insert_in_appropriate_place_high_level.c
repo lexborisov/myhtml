@@ -47,7 +47,7 @@ int main(int argc, const char * argv[])
         myhtml_tree_node_t *table = collection->list[0];
         
         myhtml_tree_node_t* node_a = myhtml_node_create(tree, MyHTML_TAG_A, MyHTML_NAMESPACE_HTML);
-        myhtml_node_insert_to_appropriate_place(tree, table, node_a);
+        myhtml_node_insert_to_appropriate_place(table, node_a);
     }
     
     // print fragment

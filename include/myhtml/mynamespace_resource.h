@@ -46,11 +46,12 @@ static const myhtml_namespace_detect_name_entry_t myhtml_namespace_detect_name_e
     {"XLINK", 5, MyHTML_NAMESPACE_XLINK, 0, 19},
 };
 
-static const char myhtml_namespace_resource_names_map[][8] = {
+static const char myhtml_namespace_resource_names_map[(MyHTML_NAMESPACE_LAST_ENTRY + 1)][8] = {
     "", "HTML", "MathML", "SVG", "XLink", "XML", "XMLNS", "*"
 };
 
-static const myhtml_namespace_detect_url_entry_t myhtml_namespace_detect_url_entry_static_list_index[] = {
+static const myhtml_namespace_detect_url_entry_t myhtml_namespace_detect_url_entry_static_list_index[(MyHTML_NAMESPACE_LAST_ENTRY + 1)] = {
+    {"undef", 5, MyHTML_NAMESPACE_UNDEF},
     {"http://www.w3.org/1999/xhtml", 28, MyHTML_NAMESPACE_HTML},
     {"http://www.w3.org/1998/Math/MathML", 34, MyHTML_NAMESPACE_MATHML},
     {"http://www.w3.org/2000/svg", 26, MyHTML_NAMESPACE_SVG},

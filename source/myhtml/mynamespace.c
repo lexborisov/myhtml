@@ -82,6 +82,24 @@ const char * myhtml_namespace_name_by_id(myhtml_namespace_t ns, size_t *length)
     return name_ns;
 }
 
+const char * myhtml_namespace_url_by_id(myhtml_namespace_t ns, size_t *length)
+{
+    if(ns > MyHTML_NAMESPACE_LAST_ENTRY) {
+        if(length)
+            *length = 0;
+        
+        return NULL;
+    }
+    
+    const myhtml_namespace_detect_url_entry_t *url_entry = &myhtml_namespace_detect_url_entry_static_list_index[ns];
+    
+    if(length) {
+        *length = url_entry->url_length;
+    }
+    
+    return url_entry->url;
+}
+
 myhtml_namespace_t myhtml_namespace_id_by_url(const char *url, size_t length)
 {
     size_t i = 0;

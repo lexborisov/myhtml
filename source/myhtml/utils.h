@@ -40,6 +40,7 @@ size_t myhtml_strcasecmp(const char* str1, const char* str2);
 size_t myhtml_strncmp(const char* str1, const char* str2, size_t size);
 size_t myhtml_strcmp(const char* str1, const char* str2);
 size_t myhtml_strcmp_ws(const char* str1, const char* str2);
+bool myhtml_ustrcasecmp_without_checks_by_secondary(const unsigned char* ustr1, const unsigned char* ustr2);
 
 #ifdef __cplusplus
 } /* extern "C" */

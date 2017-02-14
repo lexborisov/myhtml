@@ -116,6 +116,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
             if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
+                if(token_node == NULL) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
                 
                 token_node->raw_begin     = tmp_size;
                 token_node->raw_length    = 6;
@@ -145,6 +149,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
             if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
+                if(token_node == NULL) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
                 
                 token_node->raw_begin   = tmp_size;
                 token_node->raw_length  = 6;
@@ -174,6 +182,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
             if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
+                if(token_node == NULL) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
                 
                 token_node->raw_begin   = tmp_size;
                 token_node->raw_length  = 6;
@@ -183,7 +195,11 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
                 html_offset++;
                 
                 token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-                myhtml_queue_add(tree, html_offset, token_node);
+                
+                if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
                 
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             }
@@ -276,6 +292,10 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
             if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
+                if(token_node == NULL) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
                 
                 token_node->raw_begin   = tmp_size;
                 token_node->raw_length  = 6;
@@ -305,6 +325,10 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
             if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
+                if(token_node == NULL) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
                 
                 token_node->raw_begin   = tmp_size;
                 token_node->raw_length  = 6;
@@ -334,6 +358,10 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
             if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
+                if(token_node == NULL) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
                 
                 token_node->raw_begin   = tmp_size;
                 token_node->raw_length  = 6;
@@ -345,7 +373,11 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                 html_offset++;
                 
                 token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-                myhtml_queue_add(tree, html_offset, token_node);
+                
+                if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
             }
             else {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;

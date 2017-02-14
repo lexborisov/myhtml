@@ -28,6 +28,7 @@ extern "C" {
 
 #include "myhtml/myosi.h"
 #include "myhtml/utils.h"
+#include "myhtml/mystring.h"
 
 enum myhtml_encoding_status {
     MyHTML_ENCODING_STATUS_OK       = 0x00,
@@ -44,27 +45,23 @@ struct myhtml_encoding_result {
     unsigned long result;
     unsigned long result_aux;
     unsigned long flag;
-}
-typedef myhtml_encoding_result_t;
+};
 
 struct myhtml_encoding_trigram {
     const unsigned char trigram[3];
     size_t value;
-}
-typedef myhtml_encoding_trigram_t;
+};
 
 struct myhtml_encoding_trigram_result {
     size_t count;
     size_t value;
-}
-typedef myhtml_encoding_trigram_result_t;
+};
 
 struct myhtml_encoding_unicode_result {
     size_t count_ascii;
     size_t count_good;
     size_t count_bad;
-}
-typedef myhtml_encoding_unicode_result_t;
+};
 
 struct myhtml_encoding_detect_name_entry {
     const char* name;
@@ -76,8 +73,21 @@ struct myhtml_encoding_detect_name_entry {
     
     size_t next;
     size_t curr;
-}
-typedef myhtml_encoding_detect_name_entry_t;
+};
+
+struct myhtml_encoding_detect_attr {
+    size_t key_begin;
+    size_t key_length;
+    size_t value_begin;
+    size_t value_length;
+    
+    myhtml_encoding_detect_attr_t *next;
+};
+    
+struct myhtml_encoding_entry_name_index {
+    const char *name;
+    size_t length;
+};
 
 typedef myhtml_encoding_status_t (*myhtml_encoding_custom_f)(unsigned const char data, myhtml_encoding_result_t *res);
 
@@ -124,6 +134,7 @@ enum myhtml_encoding_status myhtml_encoding_decode_utf_16be(unsigned const char 
 enum myhtml_encoding_status myhtml_encoding_decode_utf_16le(unsigned const char data, myhtml_encoding_result_t *res);
 enum myhtml_encoding_status myhtml_encoding_decode_x_user_defined(unsigned const char data, myhtml_encoding_result_t *res);
 
+size_t myhtml_encoding_codepoint_ascii_length(size_t codepoint);
 size_t myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data);
 size_t myhtml_encoding_codepoint_to_lowercase_ascii_utf_8(size_t codepoint, char *data);
 size_t myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data);
@@ -137,8 +148,13 @@ bool myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_enco
 bool myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding);
 bool myhtml_encoding_detect_and_cut_bom(const char *text, size_t length, myhtml_encoding_t *encoding, const char **new_text, size_t *new_size);
 
+size_t myhtml_encoding_convert_to_ascii_utf_8(myhtml_string_raw_t* raw_str, const char* buff, size_t length, myhtml_encoding_t encoding);
+
 const myhtml_encoding_detect_name_entry_t * myhtml_encoding_name_entry_by_name(const char* name, size_t length);
 bool myhtml_encoding_by_name(const char *name, size_t length, myhtml_encoding_t *encoding);
+const char * myhtml_encoding_name_by_id(myhtml_encoding_t encoding, size_t *length);
+
+myhtml_encoding_t myhtml_encoding_prescan_stream_to_determine_encoding(const char *data, size_t data_size);
 
 #ifdef __cplusplus
 } /* extern "C" */

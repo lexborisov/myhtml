@@ -36,7 +36,7 @@ myhtml_status_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags)
     mcsimple_init(tags->mcsimple_context, 128, 1024, sizeof(myhtml_tag_context_t));
     
     tags->mchar_node         = mchar_async_node_add(tree->mchar);
-    tags->tree               = mctree_create(32);
+    tags->tree               = mctree_create(2);
     tags->mchar              = tree->mchar;
     tags->tags_count         = MyHTML_TAG_LAST_ENTRY;
     

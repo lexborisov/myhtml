@@ -26,7 +26,7 @@ mctree_t * mctree_create(size_t start_size)
 {
     mctree_t* mctree = (mctree_t*)myhtml_malloc(sizeof(mctree_t));
     
-    mctree->nodes_size = start_size + 4096;
+    mctree->nodes_size = start_size + 512;
     mctree->nodes_length = start_size + 1;
     mctree->nodes = (mctree_node_t*)myhtml_calloc(mctree->nodes_size, sizeof(mctree_node_t));
     

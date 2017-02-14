@@ -388,6 +388,7 @@ mythread_id_t _myhread_create_stream_raw(mythread_t *mythread, mythread_work_f w
     thr->data.id       = mythread->pth_list_length;
     thr->data.t_count  = total_count;
     thr->data.opt      = opt;
+    thr->data.status   = 0;
     
     myhtml_status_t m_status = myhtml_hread_mutex_create(mythread, &thr->data, 0);
     
@@ -976,6 +977,17 @@ void mythread_suspend_all(mythread_t *mythread)
             myhtml_thread_nanosleep(&tomeout);
         }
     }
+}
+
+unsigned int mythread_check_status(mythread_t *mythread)
+{
+    for (size_t idx = mythread->pth_list_root; idx < mythread->pth_list_size; idx++) {
+        if(mythread->pth_list[idx].data.status) {
+            return mythread->pth_list[idx].data.status;
+        }
+    }
+    
+    return MyHTML_STATUS_OK;
 }
 
 bool mythread_function_see_for_all_done(mythread_queue_list_t *queue_list, size_t thread_id)

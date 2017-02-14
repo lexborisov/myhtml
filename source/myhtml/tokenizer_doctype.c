@@ -51,8 +51,17 @@ size_t myhtml_tokenizer_state_before_doctype_name(myhtml_tree_t* tree, myhtml_to
         html_offset++;
         
         token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-        myhtml_queue_add(tree, html_offset, token_node);
-        myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+        
+        if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
+        
+        tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+        if(tree->attr_current == NULL) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
         
         myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
     }
@@ -81,8 +90,17 @@ size_t myhtml_tokenizer_state_doctype_name(myhtml_tree_t* tree, myhtml_token_nod
             html_offset++;
             
             token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-            myhtml_queue_add(tree, html_offset, token_node);
-            myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+            
+            if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
+            
+            tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+            if(tree->attr_current == NULL) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
             
             myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             
@@ -92,7 +110,11 @@ size_t myhtml_tokenizer_state_doctype_name(myhtml_tree_t* tree, myhtml_token_nod
         {
             tree->attr_current->raw_key_length = (html_offset + tree->global_offset) - tree->attr_current->raw_key_begin;
             
-            myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+            tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+            if(tree->attr_current == NULL) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
             
             myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_AFTER_DOCTYPE_NAME;
             
@@ -122,7 +144,11 @@ size_t myhtml_tokenizer_state_after_doctype_name(myhtml_tree_t* tree, myhtml_tok
         html_offset++;
         
         token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-        myhtml_queue_add(tree, html_offset, token_node);
+        
+        if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
         
         myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
         return html_offset;
@@ -149,7 +175,11 @@ size_t myhtml_tokenizer_state_custom_after_doctype_name_a_z(myhtml_tree_t* tree,
         tree->attr_current->raw_value_begin  = token_node->str.length;
         tree->attr_current->raw_value_length = 6;
         
-        myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+        tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+        if(tree->attr_current == NULL) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
         
         myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_DOCTYPE_PUBLIC_IDENTIFIER;
         
@@ -161,7 +191,11 @@ size_t myhtml_tokenizer_state_custom_after_doctype_name_a_z(myhtml_tree_t* tree,
         tree->attr_current->raw_value_begin  = token_node->str.length;
         tree->attr_current->raw_value_length = 6;
         
-        myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+        tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+        if(tree->attr_current == NULL) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
         
         myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_AFTER_DOCTYPE_PUBLIC_IDENTIFIER;
         
@@ -205,7 +239,11 @@ size_t myhtml_tokenizer_state_before_doctype_public_identifier(myhtml_tree_t* tr
         html_offset++;
         
         token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-        myhtml_queue_add(tree, html_offset, token_node);
+        
+        if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
         
         myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
         return html_offset;
@@ -231,7 +269,12 @@ size_t myhtml_tokenizer_doctype_public_identifier_dsq(myhtml_tree_t* tree, myhtm
             tree->attr_current->raw_value_length = (html_offset + tree->global_offset) - tree->attr_current->raw_value_begin;
             
             myhtml_parser_queue_set_attr(tree, token_node);
-            myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+            
+            tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+            if(tree->attr_current == NULL) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
             
             myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_AFTER_DOCTYPE_PUBLIC_IDENTIFIER;
             
@@ -246,13 +289,22 @@ size_t myhtml_tokenizer_doctype_public_identifier_dsq(myhtml_tree_t* tree, myhtm
                 tree->attr_current->raw_value_length = (html_offset + tree->global_offset) - tree->attr_current->raw_value_begin;
                 
                 myhtml_parser_queue_set_attr(tree, token_node);
-                myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+                
+                tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+                if(tree->attr_current == NULL) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
             }
             
             html_offset++;
             
             token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-            myhtml_queue_add(tree, html_offset, token_node);
+            
+            if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
             
             myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             break;
@@ -304,7 +356,11 @@ size_t myhtml_tokenizer_state_after_doctype_public_identifier(myhtml_tree_t* tre
         html_offset++;
         
         token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-        myhtml_queue_add(tree, html_offset, token_node);
+        
+        if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
         
         myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
         return html_offset;
@@ -334,7 +390,12 @@ size_t myhtml_tokenizer_doctype_system_identifier_dsq(myhtml_tree_t* tree, myhtm
             tree->attr_current->raw_value_length = (html_offset + tree->global_offset) - tree->attr_current->raw_value_begin;
             
             myhtml_parser_queue_set_attr(tree, token_node);
-            myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+            
+            tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+            if(tree->attr_current == NULL) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
             
             myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_AFTER_DOCTYPE_SYSTEM_IDENTIFIER;
             
@@ -349,13 +410,22 @@ size_t myhtml_tokenizer_doctype_system_identifier_dsq(myhtml_tree_t* tree, myhtm
                 tree->attr_current->raw_value_length = (html_offset + tree->global_offset) - tree->attr_current->raw_value_begin;
                 
                 myhtml_parser_queue_set_attr(tree, token_node);
-                myhtml_token_attr_malloc(tree->token, tree->attr_current, tree->token->mcasync_attr_id);
+                
+                tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
+                if(tree->attr_current == NULL) {
+                    myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                    return 0;
+                }
             }
             
             html_offset++;
             
             token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-            myhtml_queue_add(tree, html_offset, token_node);
+            
+            if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
             
             myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             break;
@@ -393,7 +463,11 @@ size_t myhtml_tokenizer_state_after_doctype_system_identifier(myhtml_tree_t* tre
         html_offset++;
         
         token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-        myhtml_queue_add(tree, html_offset, token_node);
+        
+        if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+            myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+            return 0;
+        }
         
         myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
     }
@@ -417,7 +491,11 @@ size_t myhtml_tokenizer_state_bogus_doctype(myhtml_tree_t* tree, myhtml_token_no
             html_offset++;
             
             token_node->element_length = (tree->global_offset + html_offset) - token_node->element_begin;
-            myhtml_queue_add(tree, html_offset, token_node);
+            
+            if(myhtml_queue_add(tree, html_offset, token_node) != MyHTML_STATUS_OK) {
+                myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP;
+                return 0;
+            }
             
             myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
             break;

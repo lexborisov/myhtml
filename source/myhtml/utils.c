@@ -185,4 +185,17 @@ size_t myhtml_strcmp_ws(const char* str1, const char* str2)
     }
 }
 
+bool myhtml_ustrcasecmp_without_checks_by_secondary(const unsigned char* ustr1, const unsigned char* ustr2)
+{
+    while (*ustr1 != '\0') {
+        if(myhtml_utils_chars_map[*ustr1] != myhtml_utils_chars_map[*ustr2])
+            return false;
+        
+        ustr1++;
+        ustr2++;
+    }
+    
+    return true;
+}
+
 

@@ -34,9 +34,9 @@
  *
  */
 
-#define MyHTML_VERSION_MAJOR 2
+#define MyHTML_VERSION_MAJOR 3
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 2
+#define MyHTML_VERSION_PATCH 0
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -58,49 +58,49 @@ extern "C" {
  * encodings type
  */
 enum myhtml_encoding_list {
-    MyHTML_ENCODING_DEFAULT          = 0x00,
-//  MyHTML_ENCODING_AUTO             = 0x01, // future
-//  MyHTML_ENCODING_CUSTOM           = 0x02, // future
-    MyHTML_ENCODING_UTF_8            = 0x00, // default encoding
-    MyHTML_ENCODING_UTF_16LE         = 0x04,
-    MyHTML_ENCODING_UTF_16BE         = 0x05,
-    MyHTML_ENCODING_X_USER_DEFINED   = 0x06,
-    MyHTML_ENCODING_BIG5             = 0x07,
-    MyHTML_ENCODING_EUC_KR           = 0x08,
-    MyHTML_ENCODING_GB18030          = 0x09,
-    MyHTML_ENCODING_IBM866           = 0x0a,
-    MyHTML_ENCODING_ISO_8859_10      = 0x0b,
-    MyHTML_ENCODING_ISO_8859_13      = 0x0c,
-    MyHTML_ENCODING_ISO_8859_14      = 0x0d,
-    MyHTML_ENCODING_ISO_8859_15      = 0x0e,
-    MyHTML_ENCODING_ISO_8859_16      = 0x0f,
-    MyHTML_ENCODING_ISO_8859_2       = 0x10,
-    MyHTML_ENCODING_ISO_8859_3       = 0x11,
-    MyHTML_ENCODING_ISO_8859_4       = 0x12,
-    MyHTML_ENCODING_ISO_8859_5       = 0x13,
-    MyHTML_ENCODING_ISO_8859_6       = 0x14,
-    MyHTML_ENCODING_ISO_8859_7       = 0x15,
-    MyHTML_ENCODING_ISO_8859_8       = 0x16,
-    MyHTML_ENCODING_KOI8_R           = 0x17,
-    MyHTML_ENCODING_KOI8_U           = 0x18,
-    MyHTML_ENCODING_MACINTOSH        = 0x19,
-    MyHTML_ENCODING_WINDOWS_1250     = 0x1a,
-    MyHTML_ENCODING_WINDOWS_1251     = 0x1b,
-    MyHTML_ENCODING_WINDOWS_1252     = 0x1c,
-    MyHTML_ENCODING_WINDOWS_1253     = 0x1d,
-    MyHTML_ENCODING_WINDOWS_1254     = 0x1e,
-    MyHTML_ENCODING_WINDOWS_1255     = 0x1f,
-    MyHTML_ENCODING_WINDOWS_1256     = 0x20,
-    MyHTML_ENCODING_WINDOWS_1257     = 0x21,
-    MyHTML_ENCODING_WINDOWS_1258     = 0x22,
-    MyHTML_ENCODING_WINDOWS_874      = 0x23,
-    MyHTML_ENCODING_X_MAC_CYRILLIC   = 0x24,
-    MyHTML_ENCODING_ISO_2022_JP      = 0x25,
-    MyHTML_ENCODING_GBK              = 0x26,
-    MyHTML_ENCODING_SHIFT_JIS        = 0x27,
-    MyHTML_ENCODING_EUC_JP           = 0x28,
-    MyHTML_ENCODING_ISO_8859_8_I     = 0x29,
-    MyHTML_ENCODING_LAST_ENTRY       = 0x2a
+    MyHTML_ENCODING_DEFAULT        = 0x00,
+//  MyHTML_ENCODING_AUTO           = 0x01, // future
+    MyHTML_ENCODING_NOT_DETERMINED = 0x02,
+    MyHTML_ENCODING_UTF_8          = 0x00, // default encoding
+    MyHTML_ENCODING_UTF_16LE       = 0x04,
+    MyHTML_ENCODING_UTF_16BE       = 0x05,
+    MyHTML_ENCODING_X_USER_DEFINED = 0x06,
+    MyHTML_ENCODING_BIG5           = 0x07,
+    MyHTML_ENCODING_EUC_JP         = 0x08,
+    MyHTML_ENCODING_EUC_KR         = 0x09,
+    MyHTML_ENCODING_GB18030        = 0x0a,
+    MyHTML_ENCODING_GBK            = 0x0b,
+    MyHTML_ENCODING_IBM866         = 0x0c,
+    MyHTML_ENCODING_ISO_2022_JP    = 0x0d,
+    MyHTML_ENCODING_ISO_8859_10    = 0x0e,
+    MyHTML_ENCODING_ISO_8859_13    = 0x0f,
+    MyHTML_ENCODING_ISO_8859_14    = 0x10,
+    MyHTML_ENCODING_ISO_8859_15    = 0x11,
+    MyHTML_ENCODING_ISO_8859_16    = 0x12,
+    MyHTML_ENCODING_ISO_8859_2     = 0x13,
+    MyHTML_ENCODING_ISO_8859_3     = 0x14,
+    MyHTML_ENCODING_ISO_8859_4     = 0x15,
+    MyHTML_ENCODING_ISO_8859_5     = 0x16,
+    MyHTML_ENCODING_ISO_8859_6     = 0x17,
+    MyHTML_ENCODING_ISO_8859_7     = 0x18,
+    MyHTML_ENCODING_ISO_8859_8     = 0x19,
+    MyHTML_ENCODING_ISO_8859_8_I   = 0x1a,
+    MyHTML_ENCODING_KOI8_R         = 0x1b,
+    MyHTML_ENCODING_KOI8_U         = 0x1c,
+    MyHTML_ENCODING_MACINTOSH      = 0x1d,
+    MyHTML_ENCODING_SHIFT_JIS      = 0x1e,
+    MyHTML_ENCODING_WINDOWS_1250   = 0x1f,
+    MyHTML_ENCODING_WINDOWS_1251   = 0x20,
+    MyHTML_ENCODING_WINDOWS_1252   = 0x21,
+    MyHTML_ENCODING_WINDOWS_1253   = 0x22,
+    MyHTML_ENCODING_WINDOWS_1254   = 0x23,
+    MyHTML_ENCODING_WINDOWS_1255   = 0x24,
+    MyHTML_ENCODING_WINDOWS_1256   = 0x25,
+    MyHTML_ENCODING_WINDOWS_1257   = 0x26,
+    MyHTML_ENCODING_WINDOWS_1258   = 0x27,
+    MyHTML_ENCODING_WINDOWS_874    = 0x28,
+    MyHTML_ENCODING_X_MAC_CYRILLIC = 0x29,
+    MyHTML_ENCODING_LAST_ENTRY     = 0x2a
 }
 typedef myhtml_encoding_t;
 
@@ -821,32 +821,29 @@ myhtml_tree_clean(myhtml_tree_t* tree);
 /**
  * Add child node to node. If children already exists it will be added to the last
  *
- * @param[in] myhtml_tree_t*
  * @param[in] myhtml_tree_node_t* The node to which we add child node
  * @param[in] myhtml_tree_node_t* The node which adds
  */
 void
-myhtml_tree_node_add_child(myhtml_tree_t* tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
+myhtml_tree_node_add_child(myhtml_tree_node_t* root, myhtml_tree_node_t* node);
 
 /**
  * Add a node immediately before the existing node
  *
- * @param[in] myhtml_tree_t*
  * @param[in] myhtml_tree_node_t* add for this node
  * @param[in] myhtml_tree_node_t* add this node
  */
 void
-myhtml_tree_node_insert_before(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
+myhtml_tree_node_insert_before(myhtml_tree_node_t* root, myhtml_tree_node_t* node);
 
 /**
  * Add a node immediately after the existing node
  *
- * @param[in] myhtml_tree_t*
  * @param[in] myhtml_tree_node_t* add for this node
  * @param[in] myhtml_tree_node_t* add this node
  */
 void
-myhtml_tree_node_insert_after(myhtml_tree_t* myhtml_tree, myhtml_tree_node_t* root, myhtml_tree_node_t* node);
+myhtml_tree_node_insert_after(myhtml_tree_node_t* root, myhtml_tree_node_t* node);
 
 /**
  * Destroy of a MyHTML_TREE structure
@@ -1297,16 +1294,14 @@ myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id,
 /**
  * Release allocated resources
  *
- * @param[in] myhtml_tree_t*
  * @param[in] myhtml_tree_node_t*
  */
 void
-myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node);
+myhtml_node_free(myhtml_tree_node_t *node);
 
 /**
  * Remove node of tree
  *
- * @param[in] myhtml_tree_t*
  * @param[in] myhtml_tree_node_t*
  *
  * @return myhtml_tree_node_t* if successful, otherwise a NULL value
@@ -1317,78 +1312,67 @@ myhtml_node_remove(myhtml_tree_node_t *node);
 /**
  * Remove node of tree and release allocated resources
  *
- * @param[in] myhtml_tree_t*
  * @param[in] myhtml_tree_node_t*
  */
 void
-myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node);
+myhtml_node_delete(myhtml_tree_node_t *node);
 
 /**
  * Remove nodes of tree recursively and release allocated resources
  *
- * @param[in] myhtml_tree_t*
  * @param[in] myhtml_tree_node_t*
  */
 void
-myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node);
+myhtml_node_delete_recursive(myhtml_tree_node_t *node);
 
 /**
  * The appropriate place for inserting a node. Insertion with validation.
  * If try insert <a> node to <table> node, then <a> node inserted before <table> node
  *
- * @param[in] myhtml_tree_t*
  * @param[in] target node
  * @param[in] insertion node
  *
  * @return insertion node if successful, otherwise a NULL value
  */
 myhtml_tree_node_t*
-myhtml_node_insert_to_appropriate_place(myhtml_tree_t* tree, myhtml_tree_node_t *target,
-                                        myhtml_tree_node_t *node);
+myhtml_node_insert_to_appropriate_place(myhtml_tree_node_t *target, myhtml_tree_node_t *node);
 
 /**
  * Append to target node as last child. Insertion without validation.
  *
- * @param[in] myhtml_tree_t*
  * @param[in] target node
  * @param[in] insertion node
  *
  * @return insertion node if successful, otherwise a NULL value
  */
 myhtml_tree_node_t*
-myhtml_node_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target,
-                         myhtml_tree_node_t *node);
+myhtml_node_append_child(myhtml_tree_node_t *target, myhtml_tree_node_t *node);
 
 /**
  * Append sibling node after target node. Insertion without validation.
  *
- * @param[in] myhtml_tree_t*
  * @param[in] target node
  * @param[in] insertion node
  *
  * @return insertion node if successful, otherwise a NULL value
  */
 myhtml_tree_node_t*
-myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t *target,
-                         myhtml_tree_node_t *node);
+myhtml_node_insert_after(myhtml_tree_node_t *target, myhtml_tree_node_t *node);
 
 /**
  * Append sibling node before target node. Insertion without validation.
  *
- * @param[in] myhtml_tree_t*
  * @param[in] target node
  * @param[in] insertion node
  *
  * @return insertion node if successful, otherwise a NULL value
  */
 myhtml_tree_node_t*
-myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target,
-                          myhtml_tree_node_t *node);
+myhtml_node_insert_before(myhtml_tree_node_t *target, myhtml_tree_node_t *node);
 
 /**
  * Add text for a node with convert character encoding.
  *
- * @param[in] myhtml_tree_t*
  * @param[in] target node
  * @param[in] text
  * @param[in] text length
@@ -1397,13 +1381,12 @@ myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target,
  * @return myhtml_string_t* if successful, otherwise a NULL value
  */
 myhtml_string_t*
-myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node,
-                     const char* text, size_t length, myhtml_encoding_t encoding);
+myhtml_node_text_set(myhtml_tree_node_t *node, const char* text, size_t length,
+                     myhtml_encoding_t encoding);
 
 /**
  * Add text for a node with convert character encoding.
  *
- * @param[in] myhtml_tree_t*
  * @param[in] target node
  * @param[in] text
  * @param[in] text length
@@ -1412,8 +1395,8 @@ myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node,
  * @return myhtml_string_t* if successful, otherwise a NULL value
  */
 myhtml_string_t*
-myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_tree_node_t *node,
-                                 const char* text, size_t length, myhtml_encoding_t encoding);
+myhtml_node_text_set_with_charef(myhtml_tree_node_t *node, const char* text, size_t length,
+                                 myhtml_encoding_t encoding);
 
 /**
  * Get token node
@@ -1651,7 +1634,6 @@ myhtml_attribute_by_key(myhtml_tree_node_t *node,
 /**
  * Added attribute to tree node
  *
- * @param[in] myhtml_tree_t*
  * @param[in] myhtml_tree_node_t*
  * @param[in] attr key name
  * @param[in] attr key name length
@@ -1662,7 +1644,7 @@ myhtml_attribute_by_key(myhtml_tree_node_t *node,
  * @return created myhtml_tree_attr_t* if successful, otherwise a NULL value
  */
 myhtml_tree_attr_t*
-myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node,
+myhtml_attribute_add(myhtml_tree_node_t *node,
                      const char *key, size_t key_len,
                      const char *value, size_t value_len,
                      myhtml_encoding_t encoding);
@@ -2064,6 +2046,30 @@ myhtml_encoding_detect_and_cut_bom(const char *text, size_t length, myhtml_encod
  */
 bool
 myhtml_encoding_by_name(const char *name, size_t length, myhtml_encoding_t *encoding);
+
+/**
+ * Get Encoding name by myhtml_encoding_t (by id)
+ *
+ * @param[in]  myhtml_encoding_t, encoding id
+ * @param[out] return name length
+ *
+ * @return encoding name, otherwise NULL value
+ */
+const char*
+myhtml_encoding_name_by_id(myhtml_encoding_t encoding, size_t *length);
+
+/**
+ * Detect encoding in meta tag (<meta ...>) before start parsing
+ *
+ * See https://html.spec.whatwg.org/multipage/syntax.html#prescan-a-byte-stream-to-determine-its-encoding
+ *
+ * @param[in]  html data bytes
+ * @param[in]  html data length
+ *
+ * @return detected encoding if encoding found, otherwise MyHTML_ENCODING_NOT_DETERMINED
+ */
+myhtml_encoding_t
+myhtml_encoding_prescan_stream_to_determine_encoding(const char *data, size_t data_size);
 
 /***********************************************************************************
  *
@@ -2572,16 +2578,14 @@ myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
  * The same as myhtml_serialization_tree_buffer function
  */
 bool
-myhtml_serialization(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node,
-                     myhtml_string_raw_t* str);
+myhtml_serialization(myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
 
 /**
  * Only one tree node serialization
  * The same as myhtml_serialization_node_buffer function
  */
 bool
-myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node,
-                          myhtml_string_raw_t* str);
+myhtml_serialization_node(myhtml_tree_node_t* node, myhtml_string_raw_t* str);
 
 /**
  * Serialize tree to an output string
@@ -2593,8 +2597,7 @@ myhtml_serialization_node(myhtml_tree_t* tree, myhtml_tree_node_t* node,
  * @return true if successful, otherwise false
  */
 bool
-myhtml_serialization_tree_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node,
-                                 myhtml_string_raw_t* str);
+myhtml_serialization_tree_buffer(myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
 
 /**
  * Serialize node to an output string
@@ -2606,8 +2609,7 @@ myhtml_serialization_tree_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* scope_
  * @return true if successful, otherwise false
  */
 bool
-myhtml_serialization_node_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* node,
-                                 myhtml_string_raw_t* str);
+myhtml_serialization_node_buffer(myhtml_tree_node_t* node, myhtml_string_raw_t* str);
 
 /**
  * The serialize function for an entire tree
@@ -2620,7 +2622,7 @@ myhtml_serialization_node_buffer(myhtml_tree_t* tree, myhtml_tree_node_t* node,
  * @return true if successful, otherwise false
  */
 bool
-myhtml_serialization_tree_callback(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node,
+myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node,
                                    myhtml_callback_serialize_f callback, void* ptr);
 
 /**
@@ -2634,7 +2636,7 @@ myhtml_serialization_tree_callback(myhtml_tree_t* tree, myhtml_tree_node_t* scop
  * @return true if successful, otherwise false
  */
 bool
-myhtml_serialization_node_callback(myhtml_tree_t* tree, myhtml_tree_node_t* node,
+myhtml_serialization_node_callback(myhtml_tree_node_t* node,
                                    myhtml_callback_serialize_f callback, void* ptr);
 
 /***********************************************************************************

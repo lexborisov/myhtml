@@ -24,6 +24,10 @@
 
 #include <stddef.h>
 
+#define MyHTML_TOKENIZER_CHAR_OTHER        '\000'
+#define MyHTML_TOKENIZER_CHAR_A_Z_a_z      '\001'
+#define MyHTML_TOKENIZER_CHAR_WHITESPACE   '\002'
+
 static const unsigned char myhtml_string_chars_num_map[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,

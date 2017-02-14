@@ -37,15 +37,7 @@ extern "C" {
 #include "myhtml/utils/mchar_async.h"
 #include "myhtml/utils/mcsync.h"
 
-#define myhtml_token_attr_malloc(token, attr_node, thread_idx)                  \
-    attr_node = mcobject_async_malloc(token->attr_obj, thread_idx, NULL);       \
-    myhtml_token_attr_clean(attr_node)
-
 #define myhtml_token_node_set_done(token_node) token_node->type |= MyHTML_TOKEN_TYPE_DONE
-
-#define myhtml_token_node_malloc(token, token_node, thread_idx)                                    \
-    token_node = (myhtml_token_node_t*)mcobject_async_malloc(token->nodes_obj, thread_idx, NULL);  \
-    myhtml_token_node_clean(token_node)
 
 struct myhtml_token_replacement_entry {
     char* from;
@@ -128,11 +120,15 @@ myhtml_string_t * myhtml_token_node_string(myhtml_token_node_t *token_node);
 bool myhtml_token_node_is_close(myhtml_token_node_t *token_node);
 bool myhtml_token_node_is_close_self(myhtml_token_node_t *token_node);
 
+myhtml_token_node_t * myhtml_token_node_create(myhtml_token_t* token, size_t async_node_id);
 void myhtml_token_node_clean(myhtml_token_node_t* node);
+
+myhtml_token_attr_t * myhtml_token_attr_create(myhtml_token_t* token, size_t async_node_id);
 void myhtml_token_attr_clean(myhtml_token_attr_t* attr);
 myhtml_token_attr_t * myhtml_token_attr_remove(myhtml_token_node_t* node, myhtml_token_attr_t* attr);
 myhtml_token_attr_t * myhtml_token_attr_remove_by_name(myhtml_token_node_t* node, const char* name, size_t name_length);
 void myhtml_token_attr_delete_all(myhtml_token_t* token, myhtml_token_node_t* node);
+
 void myhtml_token_delete(myhtml_token_t* token, myhtml_token_node_t* node);
 void myhtml_token_node_wait_for_done(myhtml_token_node_t* node);
 void myhtml_token_set_done(myhtml_token_node_t* node);

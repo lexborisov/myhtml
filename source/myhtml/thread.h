@@ -84,6 +84,7 @@ struct mythread_context {
     volatile mythread_thread_opt_t opt;
     
     mythread_t *mythread;
+    unsigned int status;
 };
 
 struct mythread_list {
@@ -147,6 +148,7 @@ void mythread_stop_all(mythread_t *mythread);
 void mythread_queue_wait_all_for_done(mythread_t *mythread);
 void mythread_resume_all(mythread_t *mythread);
 void mythread_suspend_all(mythread_t *mythread);
+unsigned int mythread_check_status(mythread_t *mythread);
 
 // queue
 struct mythread_queue_node {

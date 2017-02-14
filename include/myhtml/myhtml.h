@@ -153,16 +153,16 @@ myhtml_tree_node_t * myhtml_node_parent(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_child(myhtml_tree_node_t *node);
 myhtml_tree_node_t * myhtml_node_last_child(myhtml_tree_node_t *node);
 
-myhtml_tree_node_t * myhtml_node_insert_to_appropriate_place(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
-myhtml_tree_node_t * myhtml_node_append_child(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
-myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
-myhtml_tree_node_t * myhtml_node_insert_before(myhtml_tree_t* tree, myhtml_tree_node_t *target, myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_insert_to_appropriate_place(myhtml_tree_node_t *target, myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_append_child(myhtml_tree_node_t *target, myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_insert_after(myhtml_tree_node_t *target, myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_insert_before(myhtml_tree_node_t *target, myhtml_tree_node_t *node);
 
 myhtml_tree_node_t * myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
-myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_t* tree, myhtml_tree_node_t *node);
-void myhtml_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t *node);
-void myhtml_node_delete_recursive(myhtml_tree_t* tree, myhtml_tree_node_t *node);
-void myhtml_node_free(myhtml_tree_t* tree, myhtml_tree_node_t *node);
+myhtml_tree_node_t * myhtml_node_remove(myhtml_tree_node_t *node);
+void myhtml_node_delete(myhtml_tree_node_t *node);
+void myhtml_node_delete_recursive(myhtml_tree_node_t *node);
+void myhtml_node_free(myhtml_tree_node_t *node);
 
 myhtml_token_node_t* myhtml_node_token(myhtml_tree_node_t *node);
 myhtml_namespace_t myhtml_node_namespace(myhtml_tree_node_t *node);
@@ -191,7 +191,7 @@ const char * myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length);
 myhtml_string_t * myhtml_attribute_key_string(myhtml_tree_attr_t* attr);
 myhtml_string_t * myhtml_attribute_value_string(myhtml_tree_attr_t* attr);
 myhtml_tree_attr_t * myhtml_attribute_by_key(myhtml_tree_node_t *node, const char *key, size_t key_len);
-myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_t *tree, myhtml_tree_node_t *node, const char *key, size_t key_len, const char *value, size_t value_len, myhtml_encoding_t encoding);
+myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_node_t *node, const char *key, size_t key_len, const char *value, size_t value_len, myhtml_encoding_t encoding);
 myhtml_tree_attr_t * myhtml_attribute_remove(myhtml_tree_node_t *node, myhtml_tree_attr_t *attr);
 myhtml_tree_attr_t * myhtml_attribute_remove_by_key(myhtml_tree_node_t *node, const char *key, size_t key_len);
 void myhtml_attribute_delete(myhtml_tree_t *tree, myhtml_tree_node_t *node, myhtml_tree_attr_t *attr);
@@ -206,14 +206,14 @@ myhtml_collection_t * myhtml_collection_destroy(myhtml_collection_t *collection)
 myhtml_status_t myhtml_collection_check_size(myhtml_collection_t *collection, size_t need, size_t upto_length);
 
 // strings
-myhtml_string_t * myhtml_node_text_set(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
-myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_t* tree, myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
+myhtml_string_t * myhtml_node_text_set(myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
+myhtml_string_t * myhtml_node_text_set_with_charef(myhtml_tree_node_t *node, const char* text, size_t length, myhtml_encoding_t encoding);
 
 bool myhtml_utils_strcmp(const char* ab, const char* to_lowercase, size_t size);
 bool myhtml_is_html_node(myhtml_tree_node_t *node, myhtml_tag_id_t tag_id);
 
 // queue
-void myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* token);
+myhtml_status_t myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node_t* token);
 
 /** 
  * Platform-specific hdef performance clock queries.

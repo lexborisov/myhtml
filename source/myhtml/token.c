@@ -162,12 +162,32 @@ myhtml_token_t * myhtml_token_destroy(myhtml_token_t* token)
     return NULL;
 }
 
+myhtml_token_node_t * myhtml_token_node_create(myhtml_token_t* token, size_t async_node_id)
+{
+    myhtml_token_node_t *token_node = (myhtml_token_node_t*)mcobject_async_malloc(token->nodes_obj, async_node_id, NULL);
+    if(token_node == NULL)
+        return NULL;
+    
+    myhtml_token_node_clean(token_node);
+    return token_node;
+}
+
 void myhtml_token_node_clean(myhtml_token_node_t* node)
 {
     memset(node, 0, sizeof(myhtml_token_node_t));
     node->type = MyHTML_TOKEN_TYPE_OPEN|MyHTML_TOKEN_TYPE_WHITESPACE;
     
     myhtml_string_clean_all(&node->str);
+}
+
+myhtml_token_attr_t * myhtml_token_attr_create(myhtml_token_t* token, size_t async_node_id)
+{
+    myhtml_token_attr_t *attr_node = mcobject_async_malloc(token->attr_obj, async_node_id, NULL);
+    if(attr_node == NULL)
+        return NULL;
+    
+    myhtml_token_attr_clean(attr_node);
+    return attr_node;
 }
 
 void myhtml_token_attr_clean(myhtml_token_attr_t* attr)
@@ -249,10 +269,12 @@ myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_toke
         return NULL;
     
     myhtml_tree_t* tree = token->tree;
+    myhtml_token_node_t* new_node = myhtml_token_node_create(token, token_thread_idx);
     
-    myhtml_token_node_t* new_node = mcobject_async_malloc(token->nodes_obj, token_thread_idx, NULL);
+    if(new_node == NULL)
+        return NULL;
     
-    new_node->tag_id = node->tag_id;
+    new_node->tag_id         = node->tag_id;
     new_node->type           = node->type;
     new_node->attr_first     = NULL;
     new_node->attr_last      = NULL;

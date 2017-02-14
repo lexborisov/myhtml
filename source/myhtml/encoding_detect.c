@@ -379,7 +379,571 @@ bool myhtml_encoding_by_name(const char *name, size_t length, myhtml_encoding_t 
     return false;
 }
 
+const char * myhtml_encoding_name_by_id(myhtml_encoding_t encoding, size_t *length)
+{
+    if(encoding >= MyHTML_ENCODING_LAST_ENTRY) {
+        if(length) {
+            *length = 0;
+        }
+        
+        return NULL;
+    }
+    
+    const myhtml_encoding_entry_name_index_t *entry = &myhtml_encoding_entry_name_index_static_list_index[encoding];
+    
+    if(length) {
+        *length = entry->length;
+    }
+    
+    return entry->name;
+}
 
+/*
+  When an algorithm requires a user agent to prescan a byte stream to determine its encoding, 
+  given some defined end condition, then it must run the following steps.
+  These steps either abort unsuccessfully or return a character encoding. 
+  If at any point during these steps (including during instances of the get an attribute algorithm invoked by this one) 
+  the user agent either runs out of bytes (meaning the position pointer created in the first step below goes beyond the end of the byte stream obtained so far) 
+  or reaches its end condition, then abort the prescan a byte stream to determine its encoding algorithm unsuccessfully.
+*/
 
+bool myhtml_encoding_algorithm_extracting_character_encoding_from_meta_element(const char *data, size_t data_size, myhtml_encoding_t *encoding)
+{
+    *encoding = MyHTML_ENCODING_NOT_DETERMINED;
+    
+    /* 1 */
+    size_t length = 0, charset_pos = 0;
+    size_t charset_length = strlen("charset");
+    
+    bool is_get_pos = false;
+    const unsigned char *udata = (const unsigned char *)data;
+    
+    /* 2 */
+    while((length + charset_length) < data_size) {
+        if(myhtml_ustrcasecmp_without_checks_by_secondary((const unsigned char*)"charset", &udata[length]))
+        {
+            length += charset_length;
+            
+            /* 2 */
+            while(length < data_size) {
+                if(udata[length] != 0x09 && udata[length] != 0x0A && udata[length] != 0x0C &&
+                   udata[length] != 0x0D && udata[length] != 0x20)
+                {
+                    break;
+                }
+                
+                length++;
+            }
+            
+            /* 4 */
+            if(udata[length] == 0x3D) { /* EQUALS SIGN (=) */
+                is_get_pos = true;
+                charset_pos = length;
+                
+                length++;
+                break;
+            }
+        }
+        
+        length++;
+    }
+    
+    if(charset_pos == false || length >= data_size)
+        return false;
+    
+    /* 5 */
+    while(length < data_size) {
+        if(udata[length] != 0x09 && udata[length] != 0x0A && udata[length] != 0x0C &&
+           udata[length] != 0x0D && udata[length] != 0x20)
+        {
+            break;
+        }
+        
+        length++;
+    }
+    
+    if(length >= data_size)
+        return false;
+    
+    /* 6 */
+    /* " */
+    if(udata[length] == 0x22)
+    {
+        length++;
+        size_t begin = length;
+        
+        while(length < data_size) {
+            if(udata[length] == 0x22)
+                return myhtml_encoding_by_name(&data[begin], (length - begin), encoding);
+            
+            length++;
+        }
+        
+        return false;
+    }
+    
+    /* ' */
+    if(udata[length] == 0x27)
+    {
+        length++;
+        size_t begin = length;
+        
+        while(length < data_size) {
+            if(udata[length] == 0x27)
+                return myhtml_encoding_by_name(&data[begin], (length - begin), encoding);
+            
+            length++;
+        }
+        
+        return false;
+    }
+    
+    /* other */
+    while(length < data_size) {
+        if(udata[length] != 0x09 && udata[length] != 0x0A && udata[length] != 0x0C &&
+           udata[length] != 0x0D && udata[length] != 0x20)
+        {
+            size_t begin = length;
+            
+            while(length < data_size) {
+                /* SEMICOLON character (;) */
+                if(udata[length] == 0x3B) {
+                    return myhtml_encoding_by_name(&data[begin], (length - begin), encoding);
+                }
+                
+                length++;
+            }
+            
+            return myhtml_encoding_by_name(&data[begin], (length - begin), encoding);
+        }
+        
+        length++;
+    }
+    
+    return false;
+}
+
+bool myhtml_encoding_prescan_stream_to_determine_encoding_get_attr_spaces(const unsigned char *udata, size_t *data_length, size_t data_size, myhtml_encoding_detect_attr_t *attr)
+{
+    size_t length = *data_length;
+    
+    /* set position */
+    attr->key_length = length - attr->key_begin;
+    
+    /* 6 */
+    while(length < data_size) {
+        if(udata[length] != 0x09 && udata[length] != 0x0A && udata[length] != 0x0C &&
+           udata[length] != 0x0D && udata[length] != 0x20 && udata[length] != 0x2F)
+        {
+            break;
+        }
+        
+        length++;
+    }
+    
+    if(length >= data_size) {
+        *data_length = length;
+        return false;
+    }
+    
+    /* 7 */
+    if(udata[length] != 0x3D) {
+        *data_length = length;
+        return false;
+    }
+    
+    /* 8 */
+    *data_length = (length + 1);
+    return true;
+}
+
+size_t myhtml_encoding_prescan_stream_to_determine_encoding_get_attr_value(const unsigned char *udata, size_t length, size_t data_size, myhtml_encoding_detect_attr_t *attr, bool *it_last)
+{
+    /* 9 */
+    while(length < data_size) {
+        if(udata[length] != 0x09 && udata[length] != 0x0A && udata[length] != 0x0C &&
+           udata[length] != 0x0D && udata[length] != 0x20)
+        {
+            break;
+        }
+        
+        length++;
+    }
+    
+    if(length >= data_size) {
+        *it_last = true;
+        return length;
+    }
+    
+    /* 10 */
+    switch (udata[length]) {
+        case 0x22: /* (ASCII ") */
+            length++;
+            attr->value_begin = length;
+            
+            while(length < data_size) {
+                if(udata[length] == 0x22)
+                {
+                    attr->value_length = length - attr->value_begin;
+                    return (length + 1);
+                }
+                
+                length++;
+            }
+            
+            break;
+            
+        case 0x27: /* (ASCII ') */
+            length++;
+            attr->value_begin = length;
+            
+            while(length < data_size) {
+                if(udata[length] == 0x27)
+                {
+                    attr->value_length = length - attr->value_begin;
+                    return (length + 1);
+                }
+                
+                length++;
+            }
+            
+            break;
+            
+        case 0x3E: /* (ASCII >) */
+            *it_last = true;
+            return (length + 1);
+            
+        default:
+            attr->value_begin = length;
+            
+            while(length < data_size) {
+                if(udata[length] == 0x09 || udata[length] == 0x0A || udata[length] == 0x0C ||
+                   udata[length] == 0x0D || udata[length] == 0x20 || udata[length] == 0x3E)
+                {
+                    attr->value_length = length - attr->value_begin;
+                    return (length + 1);
+                }
+                
+                length++;
+            }
+            
+            break;
+    }
+    
+    attr->value_length = length - attr->value_begin;
+    return length;
+}
+
+size_t myhtml_encoding_prescan_stream_to_determine_encoding_get_attr(const unsigned char *udata, size_t length, size_t data_size, myhtml_encoding_detect_attr_t *attr, bool *it_last)
+{
+    memset(attr, 0, sizeof(myhtml_encoding_detect_attr_t));
+    
+    /*
+     If the byte at position is one of 0x09 (ASCII TAB), 0x0A (ASCII LF), 0x0C (ASCII FF), 0x0D (ASCII CR),
+     0x20 (ASCII space), or 0x2F (ASCII /) then advance position to the next byte and redo this step.
+     */
+    /* 1 */
+    while(length < data_size) {
+        if(udata[length] != 0x09 && udata[length] != 0x0A && udata[length] != 0x0C &&
+           udata[length] != 0x0D && udata[length] != 0x20 && udata[length] != 0x2F)
+        {
+            break;
+        }
+        
+        length++;
+    }
+    
+    if(length >= data_size) {
+        *it_last = true;
+        return length;
+    }
+    
+    /* 2 */
+    if(udata[length] == 0x3E) { /* (ASCII >) */
+        *it_last = true;
+        return (length + 1);
+    }
+    
+    attr->key_begin = length;
+    
+    /* 3, 4 */
+    while(length < data_size) {
+        switch (udata[length]) {
+            case 0x3D: /* (ASCII =) */
+                if(attr->key_begin != (length - 1)) {
+                    attr->key_length = length - attr->key_begin;
+                    
+                    length++;
+                    return myhtml_encoding_prescan_stream_to_determine_encoding_get_attr_value(udata, length, data_size, attr, it_last);
+                }
+            
+            /* fall through */
+                
+            case 0x09: /* (ASCII TAB)   */
+            case 0x0A: /* (ASCII LF)    */
+            case 0x0C: /* (ASCII FF)    */
+            case 0x0D: /* (ASCII CR)    */
+            case 0x20: /* (ASCII space) */
+                length++;
+                
+                if(myhtml_encoding_prescan_stream_to_determine_encoding_get_attr_spaces(udata, &length, data_size, attr) == false) {
+                    *it_last = true;
+                    return length;
+                }
+                
+                return myhtml_encoding_prescan_stream_to_determine_encoding_get_attr_value(udata, length, data_size, attr, it_last);
+                
+            case 0x2F: /* (ASCII /)     */
+            case 0x3E: /* (ASCII >)     */
+                *it_last = true;
+                attr->key_length = length - attr->key_begin;
+                
+                return (length + 1);
+                
+            default:
+                break;
+        }
+        
+        length++;
+    }
+    
+    if(myhtml_encoding_prescan_stream_to_determine_encoding_get_attr_spaces(udata, &length, data_size, attr) == false) {
+        *it_last = true;
+        return length;
+    }
+    
+    return myhtml_encoding_prescan_stream_to_determine_encoding_get_attr_value(udata, length, data_size, attr, it_last);
+}
+
+bool myhtml_encoding_prescan_stream_to_determine_encoding_check_meta(const unsigned char *udata, size_t *length, size_t data_size, myhtml_encoding_t *encoding)
+{
+    myhtml_encoding_detect_attr_t attr;
+    
+    bool got_pragma = false;
+    bool it_last = false;
+    
+    unsigned int need_pragma = 0; /* 0 = NULL, 1 = false, 2 = true */
+    
+    /*
+      http-equiv = 1
+      content = 2
+      charset = 4
+     */
+    /* If the attribute's name is already in attribute list, then return to the step labeled attributes. */
+    size_t is_exists = 0;
+    
+    while(*length < data_size) {
+        *length = myhtml_encoding_prescan_stream_to_determine_encoding_get_attr(udata, *length, data_size, &attr, &it_last);
+        
+        /* 9 */
+        if(attr.key_length == strlen("http-equiv") &&
+           myhtml_ustrcasecmp_without_checks_by_secondary((const unsigned char*)"http-equiv", &udata[ attr.key_begin ]))
+        {
+            if((is_exists & 1) == 0) {
+                is_exists |= 1;
+                
+                if(attr.value_length == strlen("content-type") &&
+                   myhtml_ustrcasecmp_without_checks_by_secondary((const unsigned char*)"content-type", &udata[ attr.value_begin ]))
+                {
+                    got_pragma = true;
+                }
+            }
+        }
+        else if(attr.key_length == strlen("content") &&
+                myhtml_ustrcasecmp_without_checks_by_secondary((const unsigned char*)"content", &udata[ attr.key_begin ]))
+        {
+            if((is_exists & 2) == 0) {
+                is_exists |= 2;
+                
+                if(myhtml_encoding_algorithm_extracting_character_encoding_from_meta_element((const char*)(&udata[ attr.value_begin ]), attr.value_length, encoding)) {
+                    need_pragma = 2;
+                }
+            }
+        }
+        else if(attr.key_length == strlen("charset") &&
+                myhtml_ustrcasecmp_without_checks_by_secondary((const unsigned char*)"charset", &udata[ attr.key_begin ]))
+        {
+            if((is_exists & 4) == 0) {
+                is_exists |= 4;
+                
+                myhtml_encoding_by_name((const char*)(&udata[ attr.value_begin ]), attr.value_length, encoding);
+                need_pragma = 1;
+            }
+        }
+        
+        if(it_last)
+            break;
+    }
+    
+    /* 11, 12, 13 */
+    if(need_pragma == 0 || (need_pragma == 2 && got_pragma == false)) {
+        *encoding = MyHTML_ENCODING_NOT_DETERMINED;
+        return false;
+    }
+    
+    /* 14 */
+    if(*encoding == MyHTML_ENCODING_UTF_16BE || *encoding == MyHTML_ENCODING_UTF_16LE) {
+        *encoding = MyHTML_ENCODING_UTF_8;
+    }
+    
+    /* 15 */
+    if(*encoding == MyHTML_ENCODING_X_USER_DEFINED) {
+        *encoding = MyHTML_ENCODING_WINDOWS_1252;
+    }
+    
+    /* 16 */
+    return true;
+}
+
+size_t myhtml_encoding_prescan_stream_to_determine_encoding_skip_name(const unsigned char *udata, size_t length, size_t data_size)
+{
+    while(length < data_size) {
+        if(udata[length] != 0x09 && udata[length] != 0x0A && udata[length] != 0x0C &&
+           udata[length] != 0x0D && udata[length] != 0x20)
+        {
+            break;
+        }
+        
+        length++;
+    }
+    
+    if(length >= data_size)
+        return length;
+    
+    if(udata[length] == 0x3E) {
+        return (length + 1);
+    }
+    
+    myhtml_encoding_detect_attr_t attr;
+    bool it_last = false;
+    
+    while(length < data_size) {
+        length = myhtml_encoding_prescan_stream_to_determine_encoding_get_attr(udata, length, data_size, &attr, &it_last);
+        
+        if(it_last) {
+            return length;
+        }
+    }
+    
+    return length;
+}
+
+size_t myhtml_encoding_prescan_stream_to_determine_encoding_skip_other(const unsigned char *udata, size_t length, size_t data_size)
+{
+    if(udata[length] == 0x2F) { /* / */
+        length++;
+        
+        if(length >= data_size)
+            return length;
+        
+        if(myhtml_tokenizer_chars_map[ udata[length] ] == MyHTML_TOKENIZER_CHAR_A_Z_a_z) {
+            return myhtml_encoding_prescan_stream_to_determine_encoding_skip_name(udata, length, data_size);
+        }
+        
+        while(length < data_size) {
+            if(udata[length] != 0x3E) {
+                return (length + 1);
+            }
+            
+            length++;
+        }
+        
+        return length;
+    }
+    else if(udata[length] == 0x21) { /* ! */
+        length++;
+        
+        if((length + 2) < data_size && udata[length] == 0x2D && udata[(length+1)] == 0x2D) {
+            while(length < data_size) {
+                if(udata[length] != 0x3E) {
+                    if(udata[(length - 1)] == 0x2D && udata[(length - 2)] == 0x2D)
+                        return (length + 1);
+                    
+                    length++;
+                }
+            }
+            
+            return length;
+        }
+        
+        while(length < data_size) {
+            if(udata[length] != 0x3E) {
+                return (length + 1);
+            }
+            
+            length++;
+        }
+        
+        return length;
+    }
+    else if(udata[length] == 0x3F) { /* ? */
+        length++;
+        
+        while(length < data_size) {
+            if(udata[length] != 0x3E) {
+                return (length + 1);
+            }
+            
+            length++;
+        }
+        
+        return length;
+    }
+    
+    
+    return myhtml_encoding_prescan_stream_to_determine_encoding_skip_name(udata, length, data_size);
+}
+
+myhtml_encoding_t myhtml_encoding_prescan_stream_to_determine_encoding(const char *data, size_t data_size)
+{
+    const unsigned char* udata = (const unsigned char*)data;
+    myhtml_encoding_t encoding = MyHTML_ENCODING_NOT_DETERMINED;
+    
+    size_t i = 0;
+    while(i < data_size) {
+        /* 0x3C = '<' */
+        if(data[i] == 0x3C)
+        {
+            if((i + 5) >= data_size)
+                return encoding;
+            
+            i++;
+            
+            switch (data[i]) {
+                /*
+                  A sequence of bytes starting with:
+                  0x3C, 0x4D or 0x6D, 0x45 or 0x65, 0x54 or 0x74, 0x41 or 0x61, 
+                  and one of 0x09, 0x0A, 0x0C, 0x0D, 0x20, 0x2F 
+                  (case-insensitive ASCII '<meta' followed by a space or slash)
+                */
+                case 0x4D:
+                case 0x6D:
+                    if(myhtml_ustrcasecmp_without_checks_by_secondary((const unsigned char*)"meta", &udata[i])) {
+                        i += 4;
+                        
+                        if(udata[i] == 0x09 || udata[i] == 0x0A || udata[i] == 0x0C ||
+                           udata[i] == 0x0D || udata[i] == 0x20 || udata[i] == 0x2F)
+                        {
+                            i++;
+                            
+                            if(myhtml_encoding_prescan_stream_to_determine_encoding_check_meta(udata, &i, data_size, &encoding))
+                                return encoding;
+                        }
+                    }
+                    
+                    break;
+                    
+                default:
+                    i = myhtml_encoding_prescan_stream_to_determine_encoding_skip_other(udata, i, data_size);
+                    break;
+            }
+        }
+        else {
+            i++;
+        }
+    }
+    
+    return encoding;
+}
 
 

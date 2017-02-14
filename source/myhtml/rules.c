@@ -35,13 +35,10 @@ myhtml_token_node_t * myhtml_insertion_fix_split_for_text_begin_ws(myhtml_tree_t
         return NULL;
     
     // create new ws token and insert
-    mcobject_async_status_t mcstatus;
-    myhtml_token_node_t* new_token = (myhtml_token_node_t*)mcobject_async_malloc(tree->token->nodes_obj, tree->mcasync_token_id, &mcstatus);
+    myhtml_token_node_t* new_token = myhtml_token_node_create(tree->token, tree->mcasync_rules_token_id);
     
-    if(mcstatus)
+    if(new_token == NULL)
         return NULL;
-    
-    myhtml_token_node_clean(new_token);
     
     myhtml_string_init(tree->mchar, tree->mchar_node_id, &new_token->str, (len + 2));
     
@@ -460,7 +457,7 @@ bool myhtml_insertion_mode_in_head(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 node->ns = MyHTML_NAMESPACE_HTML;
                 node->flags        = MyHTML_TREE_NODE_PARSER_INSERTED|MyHTML_TREE_NODE_BLOCKING;
                 
-                myhtml_tree_node_insert_by_mode(tree, adjusted_location, node, insert_mode);
+                myhtml_tree_node_insert_by_mode(adjusted_location, node, insert_mode);
                 myhtml_tree_open_elements_append(tree, node);
                 
                 tree->orig_insert_mode = tree->insert_mode;
@@ -894,7 +891,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     tree->node_form = NULL;
                     
                     // step 3
-                    if(node == NULL || myhtml_tree_element_in_scope_by_node(tree, node, MyHTML_TAG_CATEGORIES_SCOPE) == false) {
+                    if(node == NULL || myhtml_tree_element_in_scope_by_node(node, MyHTML_TAG_CATEGORIES_SCOPE) == false) {
                         // parse error
                         /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                         
@@ -1144,6 +1141,8 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_open_elements_pop(tree);
                 
                 tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
+                
+                break;
             }
                 
             default:
@@ -1210,7 +1209,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     if(top_node->token) {
                         myhtml_token_node_wait_for_done(token);
                         myhtml_token_node_wait_for_done(top_node->token);
-                        myhtml_token_node_attr_copy_with_check(tree->token, token, top_node->token, tree->mcasync_attr_id);
+                        myhtml_token_node_attr_copy_with_check(tree->token, token, top_node->token, tree->mcasync_rules_attr_id);
                     }
                     else {
                         top_node->token = token;
@@ -1262,7 +1261,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     if(top_node->token) {
                         myhtml_token_node_wait_for_done(token);
                         myhtml_token_node_wait_for_done(top_node->token);
-                        myhtml_token_node_attr_copy_with_check(tree->token, token, top_node->token, tree->mcasync_attr_id);
+                        myhtml_token_node_attr_copy_with_check(tree->token, token, top_node->token, tree->mcasync_rules_attr_id);
                     }
                     else {
                         top_node->token = token;
@@ -1300,7 +1299,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 
                 myhtml_tree_node_t* node = tree->open_elements->list[1];
                 
-                myhtml_tree_node_remove(tree, node);
+                myhtml_tree_node_remove(node);
                 myhtml_tree_open_elements_pop_until(tree, MyHTML_TAG_HTML, MyHTML_NAMESPACE_HTML, true);
                 
                 myhtml_tree_node_insert_html_element(tree, token);
@@ -2266,9 +2265,9 @@ bool myhtml_insertion_mode_in_table_text(myhtml_tree_t* tree, myhtml_token_node_
         
         if(is_not_ws)
         {
-            /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
-            
             for(size_t i = 0; i < token_list->length; i++) {
+                /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR TOKEN:token_list->list[i] */
+                
                 tree->foster_parenting = true;
                 myhtml_insertion_mode_in_body(tree, token_list->list[i]);
                 tree->foster_parenting = false;
@@ -3315,7 +3314,7 @@ bool myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node_t* 
                 node->token        = token;
                 node->ns = adjusted_location->ns;
                 
-                myhtml_tree_node_add_child(tree, adjusted_location, node);
+                myhtml_tree_node_add_child(adjusted_location, node);
                 
                 break;
             }
@@ -3551,7 +3550,7 @@ bool myhtml_insertion_mode_after_after_body(myhtml_tree_t* tree, myhtml_token_no
                 node->token        = token;
                 node->ns = adjusted_location->ns;
                 
-                myhtml_tree_node_add_child(tree, adjusted_location, node);
+                myhtml_tree_node_add_child(adjusted_location, node);
                 break;
             }
                 
@@ -3608,7 +3607,7 @@ bool myhtml_insertion_mode_after_after_frameset(myhtml_tree_t* tree, myhtml_toke
                 node->token        = token;
                 node->ns = adjusted_location->ns;
                 
-                myhtml_tree_node_add_child(tree, adjusted_location, node);
+                myhtml_tree_node_add_child(adjusted_location, node);
                 break;
             }
                 

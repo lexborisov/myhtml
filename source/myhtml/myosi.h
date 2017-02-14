@@ -29,9 +29,9 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-#define MyHTML_VERSION_MAJOR 2
+#define MyHTML_VERSION_MAJOR 3
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 2
+#define MyHTML_VERSION_PATCH 0
 
 #if (defined(_WIN32) || defined(_WIN64)) && !defined(__WINPTHREADS_VERSION)
 #define IS_OS_WINDOWS
@@ -114,51 +114,59 @@ extern "C" {
 // https://encoding.spec.whatwg.org/#legacy-miscellaneous-encodings
 
 enum myhtml_encoding_list {
-    MyHTML_ENCODING_DEFAULT          = 0x00,
-//  MyHTML_ENCODING_AUTO             = 0x01, // future
-//  MyHTML_ENCODING_CUSTOM           = 0x02, // future
-    MyHTML_ENCODING_UTF_8            = 0x00, // default encoding
-    MyHTML_ENCODING_UTF_16LE         = 0x04,
-    MyHTML_ENCODING_UTF_16BE         = 0x05,
-    MyHTML_ENCODING_X_USER_DEFINED   = 0x06,
-    MyHTML_ENCODING_BIG5             = 0x07,
-    MyHTML_ENCODING_EUC_KR           = 0x08,
-    MyHTML_ENCODING_GB18030          = 0x09,
-    MyHTML_ENCODING_IBM866           = 0x0a,
-    MyHTML_ENCODING_ISO_8859_10      = 0x0b,
-    MyHTML_ENCODING_ISO_8859_13      = 0x0c,
-    MyHTML_ENCODING_ISO_8859_14      = 0x0d,
-    MyHTML_ENCODING_ISO_8859_15      = 0x0e,
-    MyHTML_ENCODING_ISO_8859_16      = 0x0f,
-    MyHTML_ENCODING_ISO_8859_2       = 0x10,
-    MyHTML_ENCODING_ISO_8859_3       = 0x11,
-    MyHTML_ENCODING_ISO_8859_4       = 0x12,
-    MyHTML_ENCODING_ISO_8859_5       = 0x13,
-    MyHTML_ENCODING_ISO_8859_6       = 0x14,
-    MyHTML_ENCODING_ISO_8859_7       = 0x15,
-    MyHTML_ENCODING_ISO_8859_8       = 0x16,
-    MyHTML_ENCODING_KOI8_R           = 0x17,
-    MyHTML_ENCODING_KOI8_U           = 0x18,
-    MyHTML_ENCODING_MACINTOSH        = 0x19,
-    MyHTML_ENCODING_WINDOWS_1250     = 0x1a,
-    MyHTML_ENCODING_WINDOWS_1251     = 0x1b,
-    MyHTML_ENCODING_WINDOWS_1252     = 0x1c,
-    MyHTML_ENCODING_WINDOWS_1253     = 0x1d,
-    MyHTML_ENCODING_WINDOWS_1254     = 0x1e,
-    MyHTML_ENCODING_WINDOWS_1255     = 0x1f,
-    MyHTML_ENCODING_WINDOWS_1256     = 0x20,
-    MyHTML_ENCODING_WINDOWS_1257     = 0x21,
-    MyHTML_ENCODING_WINDOWS_1258     = 0x22,
-    MyHTML_ENCODING_WINDOWS_874      = 0x23,
-    MyHTML_ENCODING_X_MAC_CYRILLIC   = 0x24,
-    MyHTML_ENCODING_ISO_2022_JP      = 0x25,
-    MyHTML_ENCODING_GBK              = 0x26,
-    MyHTML_ENCODING_SHIFT_JIS        = 0x27,
-    MyHTML_ENCODING_EUC_JP           = 0x28,
-    MyHTML_ENCODING_ISO_8859_8_I     = 0x29,
-    MyHTML_ENCODING_LAST_ENTRY       = 0x2a
+    MyHTML_ENCODING_DEFAULT        = 0x00,
+//  MyHTML_ENCODING_AUTO           = 0x01,  // future
+    MyHTML_ENCODING_NOT_DETERMINED = 0x02,
+    MyHTML_ENCODING_UTF_8          = 0x00,  // default encoding
+    MyHTML_ENCODING_UTF_16LE       = 0x04,
+    MyHTML_ENCODING_UTF_16BE       = 0x05,
+    MyHTML_ENCODING_X_USER_DEFINED = 0x06,
+    MyHTML_ENCODING_BIG5           = 0x07,
+    MyHTML_ENCODING_EUC_JP         = 0x08,
+    MyHTML_ENCODING_EUC_KR         = 0x09,
+    MyHTML_ENCODING_GB18030        = 0x0a,
+    MyHTML_ENCODING_GBK            = 0x0b,
+    MyHTML_ENCODING_IBM866         = 0x0c,
+    MyHTML_ENCODING_ISO_2022_JP    = 0x0d,
+    MyHTML_ENCODING_ISO_8859_10    = 0x0e,
+    MyHTML_ENCODING_ISO_8859_13    = 0x0f,
+    MyHTML_ENCODING_ISO_8859_14    = 0x10,
+    MyHTML_ENCODING_ISO_8859_15    = 0x11,
+    MyHTML_ENCODING_ISO_8859_16    = 0x12,
+    MyHTML_ENCODING_ISO_8859_2     = 0x13,
+    MyHTML_ENCODING_ISO_8859_3     = 0x14,
+    MyHTML_ENCODING_ISO_8859_4     = 0x15,
+    MyHTML_ENCODING_ISO_8859_5     = 0x16,
+    MyHTML_ENCODING_ISO_8859_6     = 0x17,
+    MyHTML_ENCODING_ISO_8859_7     = 0x18,
+    MyHTML_ENCODING_ISO_8859_8     = 0x19,
+    MyHTML_ENCODING_ISO_8859_8_I   = 0x1a,
+    MyHTML_ENCODING_KOI8_R         = 0x1b,
+    MyHTML_ENCODING_KOI8_U         = 0x1c,
+    MyHTML_ENCODING_MACINTOSH      = 0x1d,
+    MyHTML_ENCODING_SHIFT_JIS      = 0x1e,
+    MyHTML_ENCODING_WINDOWS_1250   = 0x1f,
+    MyHTML_ENCODING_WINDOWS_1251   = 0x20,
+    MyHTML_ENCODING_WINDOWS_1252   = 0x21,
+    MyHTML_ENCODING_WINDOWS_1253   = 0x22,
+    MyHTML_ENCODING_WINDOWS_1254   = 0x23,
+    MyHTML_ENCODING_WINDOWS_1255   = 0x24,
+    MyHTML_ENCODING_WINDOWS_1256   = 0x25,
+    MyHTML_ENCODING_WINDOWS_1257   = 0x26,
+    MyHTML_ENCODING_WINDOWS_1258   = 0x27,
+    MyHTML_ENCODING_WINDOWS_874    = 0x28,
+    MyHTML_ENCODING_X_MAC_CYRILLIC = 0x29,
+    MyHTML_ENCODING_LAST_ENTRY     = 0x2a
 }
 typedef myhtml_encoding_t;
+
+typedef struct myhtml_encoding_result myhtml_encoding_result_t;
+typedef struct myhtml_encoding_trigram myhtml_encoding_trigram_t;
+typedef struct myhtml_encoding_trigram_result myhtml_encoding_trigram_result_t;
+typedef struct myhtml_encoding_unicode_result myhtml_encoding_unicode_result_t;
+typedef struct myhtml_encoding_detect_name_entry myhtml_encoding_detect_name_entry_t;
+typedef struct myhtml_encoding_detect_attr myhtml_encoding_detect_attr_t;
+typedef struct myhtml_encoding_entry_name_index myhtml_encoding_entry_name_index_t;
 
 // char references
 typedef struct myhtml_data_process_entry myhtml_data_process_entry_t;
@@ -343,8 +351,9 @@ enum myhtml_tokenizer_state {
     MyHTML_TOKENIZER_STATE_BOGUS_DOCTYPE                                 = 0x042,
     MyHTML_TOKENIZER_STATE_CDATA_SECTION                                 = 0x043,
     MyHTML_TOKENIZER_STATE_CUSTOM_AFTER_DOCTYPE_NAME_A_Z                 = 0x044,
+    MyHTML_TOKENIZER_STATE_PARSE_ERROR_STOP                              = 0x045,
     MyHTML_TOKENIZER_STATE_FIRST_ENTRY                                   = MyHTML_TOKENIZER_STATE_DATA,
-    MyHTML_TOKENIZER_STATE_LAST_ENTRY                                    = 0x045
+    MyHTML_TOKENIZER_STATE_LAST_ENTRY                                    = 0x046
 };
 
 enum myhtml_insertion_mode {

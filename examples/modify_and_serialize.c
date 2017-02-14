@@ -54,34 +54,13 @@ int main()
     for (size_t i = 0; i < collection->length; ++i)
     {
         // add attribute
-        myhtml_attribute_add(tree, collection->list[i], "title", 5, "my value", 8, MyHTML_ENCODING_UTF_8);
+        myhtml_attribute_add(collection->list[i], "title", 5, "my value", 8, MyHTML_ENCODING_UTF_8);
     }
     
 
     // write the document again
-    myhtml_serialization_tree_callback(tree, myhtml_tree_get_document(tree), write_output, NULL);
-
-    /*
+    myhtml_serialization_tree_callback(myhtml_tree_get_document(tree), write_output, NULL);
     
-    // parse html
-    myhtml_collection_t *collection = myhtml_get_nodes_by_tag_id(tree, NULL, MyHTML_TAG_TITLE, NULL);
-    
-    if(collection && collection->list && collection->length) {
-        myhtml_tree_node_t *text_node = myhtml_node_child(collection->list[0]);
-        
-        if(text_node) {
-            const char* text = myhtml_node_text(text_node, NULL);
-            
-            if(text)
-                printf("Title: %s\n", text);
-        }
-    }
-    
-    // release resources
-    myhtml_collection_destroy(collection);
-    * 
-    * 
-    */
     myhtml_collection_destroy(collection);
     myhtml_tree_destroy(tree);
     myhtml_destroy(myhtml);

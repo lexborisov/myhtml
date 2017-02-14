@@ -38,7 +38,7 @@ Flags that can be passed to CMake:
 - `CMAKE_INSTALL_LIBDIR=lib` set path to install created library. Default: lib
 - `MyHTML_BUILD_SHARED=ON` build shared library. Default: ON
 - `MyHTML_BUILD_STATIC=ON` build static library. Default: ON
-- `MyHTML_INSTALL_HEADER=OFF` install header files. Default OFF
+- `MyHTML_INSTALL_HEADER=OFF` install header files. Default ON
 - `MyHTML_BUILD_WITHOUT_THREADS=YES` build without POSIX Threads. Default: NO
 - `MyHTML_EXTERN_MALLOC=my_malloc_func` set extern malloc function. Default: UNDEFINED
 - `MyHTML_EXTERN_REALLOC=my_realloc_func` set extern realloc function. Default: UNDEFINED

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <myhtml/myhtml.h>
-#include <myhtml/serialization.h>
+#include <myhtml/api.h>
 
 struct res_html {
     char  *html;
@@ -64,7 +63,7 @@ struct res_html load_html_file(const char* filename)
         fprintf(stderr, "could not read %ld bytes (%zu bytes done)\n", size, nread);
         exit(EXIT_FAILURE);
     }
-               
+
     fclose(fh);
 
     struct res_html res = {html, (size_t)size};
@@ -73,45 +72,22 @@ struct res_html load_html_file(const char* filename)
 
 int main(int argc, const char * argv[])
 {
-    const char* path;
-
-    if (argc == 2) {
-        path = argv[1];
-    }
-    else {
-        printf("Bad ARGV!\nUse: get_title_low_level <path_to_html_file>\n");
+    if (argc != 2) {
+        printf("Bad ARGV!\nUse: detect_encoding_in_meta_high_level <path_to_html_file>\n");
         exit(EXIT_FAILURE);
     }
     
-    struct res_html res = load_html_file(path);
+    struct res_html res = load_html_file(argv[1]);
     
-    // basic init
-    myhtml_t* myhtml = myhtml_create();
-    myhtml_init(myhtml, MyHTML_OPTIONS_DEFAULT, 1, 0);
+    myhtml_encoding_t encoding = myhtml_encoding_prescan_stream_to_determine_encoding(res.html, res.size);
     
-    // init tree
-    myhtml_tree_t* tree = myhtml_tree_create();
-    myhtml_tree_init(tree, myhtml);
-    
-    // parse html
-    myhtml_parse(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
-    
-    // get title from index
-    myhtml_collection_t *titles_list = myhtml_get_nodes_by_tag_id(tree, NULL, MyHTML_TAG_TITLE, NULL);
-    
-    if(titles_list && titles_list->length != 0 && titles_list->list[0]->child) {
-        myhtml_string_raw_t str = {0};
-        myhtml_serialization_node(titles_list->list[0]->child, &str);
-        
-        printf("%s\n", str.data);
-        
-        myhtml_string_raw_destroy(&str, false);
+    if(encoding == MyHTML_ENCODING_NOT_DETERMINED) {
+        printf("Can't detect encoding\n");
     }
-    
-    // release resources
-    myhtml_collection_destroy(titles_list);
-    myhtml_tree_destroy(tree);
-    myhtml_destroy(myhtml);
+    else {
+        const char *encoding_name = myhtml_encoding_name_by_id(encoding, NULL);
+        printf("Encoding: %s\n", encoding_name);
+    }
     
     free(res.html);
     

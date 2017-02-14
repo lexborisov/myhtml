@@ -37,6 +37,7 @@
 		0EB293881D8C3587007F1D9A /* serialization.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EB293861D8C3587007F1D9A /* serialization.c */; };
 		0EBC8AED1D17EEE100592890 /* callback.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EBC8AEB1D17EEE100592890 /* callback.c */; };
 		0EBC8AF01D1855A300592890 /* stream.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EBC8AEE1D1855A300592890 /* stream.c */; };
+		0EDAF81E1E34D5A600D55D8B /* mhash.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EDAF81C1E34D5A600D55D8B /* mhash.c */; };
 		0EEADE9E1C5550690086B3D6 /* charef.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEADE9C1C5550690086B3D6 /* charef.c */; };
 		0EEC1B601CC0E692000D7AD3 /* incoming.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEC1B5E1CC0E691000D7AD3 /* incoming.c */; };
 		0EEF775A1C425D20006DB566 /* tokenizer_end.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EEF77581C425D20006DB566 /* tokenizer_end.c */; };
@@ -120,6 +121,8 @@
 		0EBC8AEC1D17EEE100592890 /* callback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = callback.h; sourceTree = "<group>"; };
 		0EBC8AEE1D1855A300592890 /* stream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = stream.c; sourceTree = "<group>"; };
 		0EBC8AEF1D1855A300592890 /* stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stream.h; sourceTree = "<group>"; };
+		0EDAF81C1E34D5A600D55D8B /* mhash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mhash.c; sourceTree = "<group>"; };
+		0EDAF81D1E34D5A600D55D8B /* mhash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mhash.h; sourceTree = "<group>"; };
 		0EEADE9C1C5550690086B3D6 /* charef.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = charef.c; sourceTree = "<group>"; };
 		0EEADE9D1C5550690086B3D6 /* charef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = charef.h; sourceTree = "<group>"; };
 		0EEC1B5E1CC0E691000D7AD3 /* incoming.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = incoming.c; sourceTree = "<group>"; };
@@ -234,6 +237,8 @@
 		0E770BF71C3E87BA00F68C82 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				0EDAF81D1E34D5A600D55D8B /* mhash.h */,
+				0EDAF81C1E34D5A600D55D8B /* mhash.c */,
 				0E993FC31DE25C1A00CC7E30 /* avl_tree.h */,
 				0E993FC21DE25C1A00CC7E30 /* avl_tree.c */,
 				0E8499811D1B0C3E0027A80B /* mcobject.h */,
@@ -279,7 +284,7 @@
 		0E770BB11C3A7FBF00F68C82 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = "Alexander Borisov";
 				TargetAttributes = {
 					0E770BB81C3A7FBF00F68C82 = {
@@ -334,6 +339,7 @@
 				0E770C0D1C3E87BA00F68C82 /* tokenizer_script.c in Sources */,
 				0E7362DC1C568BFE00FF6A0E /* encoding.c in Sources */,
 				0E7E16631CA31449006310B5 /* mcsimple.c in Sources */,
+				0EDAF81E1E34D5A600D55D8B /* mhash.c in Sources */,
 				0E770C0F1C3E87BA00F68C82 /* mchar_async.c in Sources */,
 				0E770C091C3E87BA00F68C82 /* thread.c in Sources */,
 				0E770C101C3E87BA00F68C82 /* mcobject_async.c in Sources */,
@@ -361,8 +367,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -404,8 +412,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
