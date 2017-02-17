@@ -1,6 +1,6 @@
 3.0.0
 ===========
-February 16, 2017
+February 17, 2017
 
 * API breaking changes!!! See [api_breaking_changes.md](https://github.com/lexborisov/myhtml/blob/master/api_breaking_changes.md) file
 * Sync with Specification (https://html.spec.whatwg.org/multipage/)
@@ -8,6 +8,7 @@ February 16, 2017
 * Fix problem with detect SHIFT_JIS encoding
 * Added function ```myhtml_encoding_prescan_stream_to_determine_encoding``` to prescan a byte stream to determine its encoding. In other words, detect encoding in ```meta``` tag before start HTML parsing. See [exapmle](https://github.com/lexborisov/myhtml/blob/master/examples/detect_encoding_in_meta_high_level.c)
 * Added function ```myhtml_encoding_name_by_id``` for get encoding name by id
+* Added function ```myhtml_encoding_extracting_character_encoding_from_charset```
 * Added ```utils/mhash.*``` for create a hash table
 * Added function ```myhtml_node_tree``` for get current Tree from a node
 * Сonsumes less memory when initializing, 3MB => 1MB with no negative impact on performance. In the future, the memory will be consumed even less.

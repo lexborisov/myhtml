@@ -406,8 +406,7 @@ const char * myhtml_encoding_name_by_id(myhtml_encoding_t encoding, size_t *leng
   the user agent either runs out of bytes (meaning the position pointer created in the first step below goes beyond the end of the byte stream obtained so far) 
   or reaches its end condition, then abort the prescan a byte stream to determine its encoding algorithm unsuccessfully.
 */
-
-bool myhtml_encoding_algorithm_extracting_character_encoding_from_meta_element(const char *data, size_t data_size, myhtml_encoding_t *encoding)
+bool myhtml_encoding_extracting_character_encoding_from_charset(const char *data, size_t data_size, myhtml_encoding_t *encoding)
 {
     *encoding = MyHTML_ENCODING_NOT_DETERMINED;
     
@@ -754,7 +753,7 @@ bool myhtml_encoding_prescan_stream_to_determine_encoding_check_meta(const unsig
             if((is_exists & 2) == 0) {
                 is_exists |= 2;
                 
-                if(myhtml_encoding_algorithm_extracting_character_encoding_from_meta_element((const char*)(&udata[ attr.value_begin ]), attr.value_length, encoding)) {
+                if(myhtml_encoding_extracting_character_encoding_from_charset((const char*)(&udata[ attr.value_begin ]), attr.value_length, encoding)) {
                     need_pragma = 2;
                 }
             }

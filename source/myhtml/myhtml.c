@@ -758,6 +758,11 @@ void * myhtml_node_get_data(myhtml_tree_node_t *node)
     return node->data;
 }
 
+myhtml_tree_t * myhtml_node_tree(myhtml_tree_node_t *node)
+{
+    return node->tree;
+}
+
 myhtml_status_t myhtml_get_nodes_by_attribute_key_recursion(myhtml_tree_node_t* node, myhtml_collection_t* collection, const char* key, size_t key_len)
 {
     while(node)

@@ -154,6 +154,7 @@ const myhtml_encoding_detect_name_entry_t * myhtml_encoding_name_entry_by_name(c
 bool myhtml_encoding_by_name(const char *name, size_t length, myhtml_encoding_t *encoding);
 const char * myhtml_encoding_name_by_id(myhtml_encoding_t encoding, size_t *length);
 
+bool myhtml_encoding_extracting_character_encoding_from_charset(const char *data, size_t data_size, myhtml_encoding_t *encoding);
 myhtml_encoding_t myhtml_encoding_prescan_stream_to_determine_encoding(const char *data, size_t data_size);
 
 #ifdef __cplusplus

@@ -47,7 +47,7 @@ myhtml_status_t myhtml_utils_mhash_init(myhtml_utils_mhash_t* mhash, size_t tabl
 {
     mhash->mchar_obj = mchar_async_create(128, 4096);
     if(mhash->mchar_obj == NULL)
-        return MyHTML_STATUS_ATTR_ERROR_ALLOCATION;
+        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
     
     mhash->mchar_node = mchar_async_node_add(mhash->mchar_obj);
     
@@ -56,7 +56,7 @@ myhtml_status_t myhtml_utils_mhash_init(myhtml_utils_mhash_t* mhash, size_t tabl
     
     mhash->table = myhtml_calloc(table_size, sizeof(myhtml_utils_mhash_entry_t*));
     if(mhash->table == NULL)
-        return MyHTML_STATUS_ATTR_ERROR_ALLOCATION;
+        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
     
     if(max_depth < 1)
         max_depth = 1;
