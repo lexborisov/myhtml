@@ -1,4 +1,4 @@
-3.0.0
+3.0.1
 ===========
 February 17, 2017
 
@@ -13,6 +13,12 @@ February 17, 2017
 * Added function ```myhtml_node_tree``` for get current Tree from a node
 * Сonsumes less memory when initializing, 3MB => 1MB with no negative impact on performance. In the future, the memory will be consumed even less.
 * Now ```MyHTML_INSTALL_HEADER``` in cmake options set ```ON``` by default
+* Fixed broken mapping for convert encoding functions after release 3.0.0
+
+~~3.0.0~~
+~~===========~~
+~~February 17, 2017~~
+~~...~~
 
 2.0.1
 ===========

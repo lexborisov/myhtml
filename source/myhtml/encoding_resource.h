@@ -9302,21 +9302,68 @@ static const unsigned long myhtml_encoding_map_x_mac_cyrillic[] = {
 	1096, 1097, 1098, 1099, 1100, 1101, 1102, 8364, 
 };
 
-static const myhtml_encoding_custom_f myhtml_encoding_function_index[] = {
-    myhtml_encoding_decode_utf_8, NULL, NULL, myhtml_encoding_decode_utf_8, myhtml_encoding_decode_utf_16le,
-    myhtml_encoding_decode_utf_16be, myhtml_encoding_decode_x_user_defined,
-    myhtml_encoding_decode_big5, myhtml_encoding_decode_euc_kr, myhtml_encoding_decode_gb18030,
-    myhtml_encoding_decode_ibm866, myhtml_encoding_decode_iso_8859_10, myhtml_encoding_decode_iso_8859_13,
-    myhtml_encoding_decode_iso_8859_14, myhtml_encoding_decode_iso_8859_15, myhtml_encoding_decode_iso_8859_16,
-    myhtml_encoding_decode_iso_8859_2, myhtml_encoding_decode_iso_8859_3, myhtml_encoding_decode_iso_8859_4,
-    myhtml_encoding_decode_iso_8859_5, myhtml_encoding_decode_iso_8859_6, myhtml_encoding_decode_iso_8859_7,
-    myhtml_encoding_decode_iso_8859_8, myhtml_encoding_decode_koi8_r, myhtml_encoding_decode_koi8_u,
-    myhtml_encoding_decode_macintosh, myhtml_encoding_decode_windows_1250, myhtml_encoding_decode_windows_1251,
-    myhtml_encoding_decode_windows_1252, myhtml_encoding_decode_windows_1253, myhtml_encoding_decode_windows_1254,
-    myhtml_encoding_decode_windows_1255, myhtml_encoding_decode_windows_1256, myhtml_encoding_decode_windows_1257,
-    myhtml_encoding_decode_windows_1258, myhtml_encoding_decode_windows_874, myhtml_encoding_decode_x_mac_cyrillic,
-    myhtml_encoding_decode_iso_2022_jp, myhtml_encoding_decode_gbk, myhtml_encoding_decode_shift_jis,
-    myhtml_encoding_decode_euc_jp, myhtml_encoding_decode_iso_8859_8_i
+//static const myhtml_encoding_custom_f myhtml_encoding_function_index[] = {
+//    myhtml_encoding_decode_utf_8, NULL, NULL, myhtml_encoding_decode_utf_8, myhtml_encoding_decode_utf_16le,
+//    myhtml_encoding_decode_utf_16be, myhtml_encoding_decode_x_user_defined,
+//    myhtml_encoding_decode_big5, myhtml_encoding_decode_euc_kr, myhtml_encoding_decode_gb18030,
+//    myhtml_encoding_decode_ibm866, myhtml_encoding_decode_iso_8859_10, myhtml_encoding_decode_iso_8859_13,
+//    myhtml_encoding_decode_iso_8859_14, myhtml_encoding_decode_iso_8859_15, myhtml_encoding_decode_iso_8859_16,
+//    myhtml_encoding_decode_iso_8859_2, myhtml_encoding_decode_iso_8859_3, myhtml_encoding_decode_iso_8859_4,
+//    myhtml_encoding_decode_iso_8859_5, myhtml_encoding_decode_iso_8859_6, myhtml_encoding_decode_iso_8859_7,
+//    myhtml_encoding_decode_iso_8859_8, myhtml_encoding_decode_koi8_r, myhtml_encoding_decode_koi8_u,
+//    myhtml_encoding_decode_macintosh, myhtml_encoding_decode_windows_1250, myhtml_encoding_decode_windows_1251,
+//    myhtml_encoding_decode_windows_1252, myhtml_encoding_decode_windows_1253, myhtml_encoding_decode_windows_1254,
+//    myhtml_encoding_decode_windows_1255, myhtml_encoding_decode_windows_1256, myhtml_encoding_decode_windows_1257,
+//    myhtml_encoding_decode_windows_1258, myhtml_encoding_decode_windows_874, myhtml_encoding_decode_x_mac_cyrillic,
+//    myhtml_encoding_decode_iso_2022_jp, myhtml_encoding_decode_gbk, myhtml_encoding_decode_shift_jis,
+//    myhtml_encoding_decode_euc_jp, myhtml_encoding_decode_iso_8859_8_i
+//};
+
+static const myhtml_encoding_custom_f myhtml_encoding_function_index[] =
+{
+    myhtml_encoding_decode_utf_8,	        // MyHTML_ENCODING_DEFAULT
+    NULL,
+    NULL,
+    myhtml_encoding_decode_utf_8,	        // MyHTML_ENCODING_UTF_8
+    myhtml_encoding_decode_utf_16le,	    // MyHTML_ENCODING_UTF_16LE
+    myhtml_encoding_decode_utf_16be,	    // MyHTML_ENCODING_UTF_16BE
+    myhtml_encoding_decode_x_user_defined,	// MyHTML_ENCODING_X_USER_DEFINED
+    myhtml_encoding_decode_big5,	        // MyHTML_ENCODING_BIG5
+    myhtml_encoding_decode_euc_jp,	        // MyHTML_ENCODING_EUC_JP
+    myhtml_encoding_decode_euc_kr,	        // MyHTML_ENCODING_EUC_KR
+    myhtml_encoding_decode_gb18030,	        // MyHTML_ENCODING_GB18030
+    myhtml_encoding_decode_gbk,	            // MyHTML_ENCODING_GBK
+    myhtml_encoding_decode_ibm866,	        // MyHTML_ENCODING_IBM866
+    myhtml_encoding_decode_iso_2022_jp,	    // MyHTML_ENCODING_ISO_2022_JP
+    myhtml_encoding_decode_iso_8859_10,	    // MyHTML_ENCODING_ISO_8859_10
+    myhtml_encoding_decode_iso_8859_13,	    // MyHTML_ENCODING_ISO_8859_13
+    myhtml_encoding_decode_iso_8859_14,	    // MyHTML_ENCODING_ISO_8859_14
+    myhtml_encoding_decode_iso_8859_15,	    // MyHTML_ENCODING_ISO_8859_15
+    myhtml_encoding_decode_iso_8859_16,	    // MyHTML_ENCODING_ISO_8859_16
+    myhtml_encoding_decode_iso_8859_2,	    // MyHTML_ENCODING_ISO_8859_2
+    myhtml_encoding_decode_iso_8859_3,	    // MyHTML_ENCODING_ISO_8859_3
+    myhtml_encoding_decode_iso_8859_4,	    // MyHTML_ENCODING_ISO_8859_4
+    myhtml_encoding_decode_iso_8859_5,	    // MyHTML_ENCODING_ISO_8859_5
+    myhtml_encoding_decode_iso_8859_6,	    // MyHTML_ENCODING_ISO_8859_6
+    myhtml_encoding_decode_iso_8859_7,	    // MyHTML_ENCODING_ISO_8859_7
+    myhtml_encoding_decode_iso_8859_8,	    // MyHTML_ENCODING_ISO_8859_8
+    myhtml_encoding_decode_iso_8859_8_i,	// MyHTML_ENCODING_ISO_8859_8_I
+    myhtml_encoding_decode_koi8_r,	        // MyHTML_ENCODING_KOI8_R
+    myhtml_encoding_decode_koi8_u,	        // MyHTML_ENCODING_KOI8_U
+    myhtml_encoding_decode_macintosh,	    // MyHTML_ENCODING_MACINTOSH
+    myhtml_encoding_decode_shift_jis,	    // MyHTML_ENCODING_SHIFT_JIS
+    myhtml_encoding_decode_windows_1250,	// MyHTML_ENCODING_WINDOWS_1250
+    myhtml_encoding_decode_windows_1251,	// MyHTML_ENCODING_WINDOWS_1251
+    myhtml_encoding_decode_windows_1252,	// MyHTML_ENCODING_WINDOWS_1252
+    myhtml_encoding_decode_windows_1253,	// MyHTML_ENCODING_WINDOWS_1253
+    myhtml_encoding_decode_windows_1254,	// MyHTML_ENCODING_WINDOWS_1254
+    myhtml_encoding_decode_windows_1255,	// MyHTML_ENCODING_WINDOWS_1255
+    myhtml_encoding_decode_windows_1256,	// MyHTML_ENCODING_WINDOWS_1256
+    myhtml_encoding_decode_windows_1257,	// MyHTML_ENCODING_WINDOWS_1257
+    myhtml_encoding_decode_windows_1258,	// MyHTML_ENCODING_WINDOWS_1258
+    myhtml_encoding_decode_windows_874,	    // MyHTML_ENCODING_WINDOWS_874
+    myhtml_encoding_decode_x_mac_cyrillic,	// MyHTML_ENCODING_X_MAC_CYRILLIC
+    NULL,
 };
 
 #ifdef __cplusplus
