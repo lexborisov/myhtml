@@ -13,9 +13,7 @@ This is one of module of the [Modest] project.
 
 ## Now
 
-```text
 The current version is 3.0.0. [Last stable version](https://github.com/lexborisov/myhtml/releases/latest) is 3.0.0
-```
 
 See [Releases](https://github.com/lexborisov/myhtml/releases)
 
