@@ -236,6 +236,10 @@ size_t myhtml_string_append_with_preprocessing(myhtml_string_t* str, const char*
             }
             else {
                 str->length++;
+                
+                MyHTML_STRING_REALLOC_IF_NEED(str, 0, 2);
+                str->data[str->length] = '\0';
+                
                 return str->length;
             }
         }
@@ -278,6 +282,10 @@ size_t myhtml_string_append_lowercase_with_preprocessing(myhtml_string_t* str, c
             }
             else {
                 str->length++;
+                
+                MyHTML_STRING_REALLOC_IF_NEED(str, 0, 2);
+                str->data[str->length] = '\0';
+                
                 return str->length;
             }
         }
@@ -350,6 +358,10 @@ size_t myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(myhtm
                     }
                     else {
                         str->length++;
+                        
+                        MyHTML_STRING_REALLOC_IF_NEED(str, 0, 2);
+                        str->data[str->length] = '\0';
+                        
                         return str->length;
                     }
                 }
@@ -405,6 +417,10 @@ size_t myhtml_string_append_lowercase_chunk_with_convert_encoding_with_preproces
                     }
                     else {
                         str->length++;
+                        
+                        MyHTML_STRING_REALLOC_IF_NEED(str, 0, 2);
+                        str->data[str->length] = '\0';
+                        
                         return str->length;
                     }
                 }

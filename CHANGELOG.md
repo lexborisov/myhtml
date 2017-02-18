@@ -1,3 +1,9 @@
+3.0.2
+===========
+now()
+
+* Added forgot '\0' if text node ends with '\r' [#91](https://github.com/lexborisov/myhtml/issues/91)
+
 3.0.1
 ===========
 February 17, 2017
