@@ -79,6 +79,13 @@ extern "C" {
     #define myhtml_free myhtml_mem_free
 #endif
 
+/* Format */
+#ifdef IS_OS_WINDOWS
+    #define MyHTML_FMT_Z "%Iu"
+#else
+    #define MyHTML_FMT_Z "%zu"
+#endif
+
 /* Debug */
 #ifdef DEBUG_MODE
     #define MyHTML_DEBUG(format, ...)      \
