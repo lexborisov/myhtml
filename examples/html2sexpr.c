@@ -28,6 +28,8 @@
 
 #include <myhtml/api.h>
 
+#include "example.h"
+
 #define DIE(msg, ...) do { fprintf(stderr, msg, ##__VA_ARGS__); exit(EXIT_FAILURE); } while(0)
 
 static bool filter_node(myhtml_tree_node_t* node) 
@@ -117,7 +119,7 @@ struct res_html load_html_file(const char* filename)
     
     size_t nread = fread(html, 1, size, fh);
     if (nread != size) {
-        DIE("could not read %ld bytes (%zu bytes done)\n", size, nread);
+        DIE("could not read %ld bytes (" MyHTML_FMT_Z " bytes done)\n", size, nread);
     }
 
     fclose(fh);
