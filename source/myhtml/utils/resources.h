@@ -246,7 +246,7 @@ static const unsigned char myhtml_string_hex_to_char_map[] = {
     0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x00
 };
 
-static const char * myhtml_string_char_to_two_hex_value[257] = {
+const char * myhtml_string_char_to_two_hex_value[257] = {
     "00", "01", "02", "03", "04", "05", "06", "07",
     "08", "09", "0A", "0B", "0C", "0D", "0E", "0F",
     "10", "11", "12", "13", "14", "15", "16", "17",
