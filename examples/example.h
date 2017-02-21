@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2016-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -15,7 +15,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  
- Author: lex.borisov@gmail.com (Alexander Borisov)
+ Author: vincent.torri@gmail.com (Vincent Torri)
 */
 
 #ifndef MyHTML_EXAMPLE_EXAMPLE_H
@@ -29,4 +29,4 @@
     #define MyHTML_FMT_Z "%zu"
 #endif
 
-#endif /* example.h */
+#endif /* MyHTML_EXAMPLE_EXAMPLE_H */

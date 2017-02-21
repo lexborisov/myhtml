@@ -20,6 +20,19 @@
 
 #include "myhtml/utils.h"
 
+size_t myhtml_power(size_t t, size_t k)
+{
+    size_t res = 1;
+    
+    while (k) {
+        if(k & 1) res *= t;
+        t *= t;
+        k >>= 1;
+    }
+    
+    return res;
+}
+
 static const unsigned char myhtml_utils_chars_map[] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
     0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11,

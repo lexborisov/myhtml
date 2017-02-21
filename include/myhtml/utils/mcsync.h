@@ -68,10 +68,30 @@ mcsync_status_t mcsync_mutex_lock(mcsync_t* mclock);
 mcsync_status_t mcsync_mutex_unlock(mcsync_t* mclock);
 
 #if !defined(MyHTML_BUILD_WITHOUT_THREADS) && defined(IS_OS_WINDOWS)
-    static int pthread_mutex_lock(pthread_mutex_t *mutex);
-    static int pthread_mutex_unlock(pthread_mutex_t *mutex);
-    static int pthread_mutex_init(pthread_mutex_t *m, pthread_mutexattr_t *a);
-    static int pthread_mutex_destroy(pthread_mutex_t *m);
+static __inline int pthread_mutex_lock(pthread_mutex_t *mutex)
+{
+    EnterCriticalSection(mutex);
+    return 0;
+}
+
+static __inline int pthread_mutex_unlock(pthread_mutex_t *mutex)
+{
+    LeaveCriticalSection(mutex);
+    return 0;
+}
+
+static __inline int pthread_mutex_init(pthread_mutex_t *mutex, pthread_mutexattr_t *a)
+{
+    (void)a;
+    InitializeCriticalSection(mutex);
+    return 0;
+}
+
+static __inline int pthread_mutex_destroy(pthread_mutex_t *mutex)
+{
+    DeleteCriticalSection(mutex);
+    return 0;
+}
 #endif
 
 #ifdef __cplusplus

@@ -35,6 +35,7 @@ extern "C" {
      onechar action '\f' logic                              \
      onechar action '\r')
 
+size_t myhtml_power(size_t t, size_t k);
 size_t myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
 size_t myhtml_strcasecmp(const char* str1, const char* str2);
 size_t myhtml_strncmp(const char* str1, const char* str2, size_t size);

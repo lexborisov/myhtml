@@ -995,6 +995,30 @@ size_t myhtml_encoding_codepoint_ascii_length(size_t codepoint)
     return 0;
 }
 
+size_t myhtml_encoding_ascii_utf_8_length(const unsigned char data)
+{
+    if (data < 0x80){
+        return 1;
+    }
+    else if ((data & 0xe0) == 0xc0) {
+        return 2;
+    }
+    else if ((data & 0xf0) == 0xe0) {
+        return 3;
+    }
+    else if ((data & 0xf8) == 0xf0) {
+        return 4;
+    }
+    else if ((data & 0xfc) == 0xf8) {
+        return 5;
+    }
+    else if ((data & 0xff) == 0xfc) {
+        return 6;
+    }
+    
+    return 0;
+}
+
 size_t myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data)
 {
     /* 0x80 -- 10xxxxxx */

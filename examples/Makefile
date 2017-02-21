@@ -40,6 +40,6 @@ $(TARGET): $(OBJS)
 	cp -r $(OBJS) ../bin/
 
 clean:
-	rm -f `ls | grep -v '\\.c\|Makefile$\'`
+	rm -f `ls | grep -v '\\.c\|\\.h\|Makefile$\'`
 	rm -fr ../bin/*
 .PHONY: all clean
