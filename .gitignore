@@ -9,3 +9,5 @@ source/mycss/*
 source/myselectors/*
 docs/*
 *.dylib
+*.exe
+*~
