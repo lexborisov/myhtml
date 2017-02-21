@@ -8,7 +8,11 @@ LDLIBS := $(LIBS)
 MyHTML_OPTIMIZATION_LEVEL ?= -O2
 
 CFLAGS ?= -Wall -Werror
-CFLAGS += $(MyHTML_OPTIMIZATION_LEVEL) -fPIC --std=c99 -I../include
+CFLAGS += $(MyHTML_OPTIMIZATION_LEVEL) --std=c99 -I.. -I../source
+
+ifneq ($(OS),Windows_NT)
+    CFLAGS += -fPIC
+endif
 
 MyHTML_BUILD_WITHOUT_THREADS ?= NO
 ifeq ($(MyHTML_BUILD_WITHOUT_THREADS),YES)

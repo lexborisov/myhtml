@@ -23,6 +23,8 @@
 
 #include <myhtml/api.h>
 
+#include "example.h"
+
 struct res_html {
     char  *html;
     size_t size;
@@ -61,7 +63,7 @@ struct res_html load_html_file(const char* filename)
     
     size_t nread = fread(html, 1, size, fh);
     if (nread != size) {
-        fprintf(stderr, "could not read %ld bytes (%zu bytes done)\n", size, nread);
+        fprintf(stderr, "could not read %ld bytes (" MyHTML_FMT_Z " bytes done)\n", size, nread);
         exit(EXIT_FAILURE);
     }
     

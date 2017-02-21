@@ -26,6 +26,8 @@
 
 #include <myhtml/api.h>
 
+#include "example.h"
+
 struct res_html {
     char  *html;
     size_t size;
@@ -73,7 +75,7 @@ struct res_html load_html_file(const char* filename)
     
     size_t nread = fread(html, 1, size, fh);
     if (nread != size) {
-        fprintf(stderr, "could not read %ld bytes (%zu bytes done)\n", size, nread);
+        fprintf(stderr, "could not read %ld bytes (" MyHTML_FMT_Z " bytes done)\n", size, nread);
         exit(EXIT_FAILURE);
     }
     
@@ -230,7 +232,7 @@ int main(int argc, const char * argv[])
         for(size_t i = 0; i < collection->length; i++)
             myhtml_tree_print_node(tree, collection->list[i], stdout);
         
-        printf("Total found: %zu\n", collection->length);
+        printf("Total found: " MyHTML_FMT_Z "\n", collection->length);
     }
     
     myhtml_collection_destroy(collection);
