@@ -879,9 +879,9 @@ void myhtml_token_print_param_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_no
         fprintf(out, "<");
     }
     
-    fprintf(out, "tag_id=%zu; body_begin=%zu; body_length=%zu; attr_first=%zu; attr_last=%zu",
+    fprintf(out, "tag_id=" MyHTML_FMT_Z "; body_begin=" MyHTML_FMT_Z "; body_length=" MyHTML_FMT_Z "; attr_first=0x%p; attr_last=0x%p",
             node->tag_id, node->raw_begin, node->raw_length,
-            (size_t)node->attr_first, (size_t)node->attr_last);
+            node->attr_first, node->attr_last);
     
     if(node->type & MyHTML_TOKEN_TYPE_CLOSE_SELF) {
         fprintf(out, " />\n");
@@ -915,7 +915,7 @@ void myhtml_token_print_by_idx(myhtml_tree_t* tree, myhtml_token_node_t* node, F
             fprintf(out, "<");
         }
         
-        fprintf(out, "%.*s tagid=\"%zu\"", (int)ctx->name_length, ctx->name, node->tag_id);
+        fprintf(out, "%.*s tagid=\"" MyHTML_FMT_Z "\"", (int)ctx->name_length, ctx->name, node->tag_id);
         
         myhtml_token_print_attr(tree, node, out);
         
