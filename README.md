@@ -7,13 +7,12 @@ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library wit
 
 * Mailing List: [https://groups.google.com/forum/#!forum/modest-engine](https://groups.google.com/forum/#!forum/modest-engine)
 * IRC: [#modest-engine on `irc.freenode.net <http://freenode.net>`](http://webchat.freenode.net?channels=%23modest-engine)
-* Or you can ask questions on [stackoverflow.com](https://stackoverflow.com/questions/ask?tags=myhtml) by myhtml tag
 
 This is one of module of the [Modest] project.
 
 ## Now
 
-The current version is 3.0.2. [Last stable version](https://github.com/lexborisov/myhtml/releases/latest) is 3.0.1
+The current version is 4.0.0. [Last stable version](https://github.com/lexborisov/myhtml/releases/latest)
 
 See [Releases](https://github.com/lexborisov/myhtml/releases)
 
@@ -61,6 +60,10 @@ WINDOWS_1257, WINDOWS_1258, WINDOWS_874, X_MAC_CYRILLIC, ISO_2022_JP, GBK, SHIFT
 
 Now it UTF-8, UTF-16LE, UTF16BE and russian windows-1251,  koi8-r, iso-8859-5, x-mac-cyrillic, ibm866
 
+## Installation
+
+See [INSTALL.md](https://github.com/lexborisov/myhtml/blob/master/INSTALL.md)
+
 ## Introduction
 
 [Introduction]
@@ -74,10 +77,6 @@ Now it UTF-8, UTF-16LE, UTF16BE and russian windows-1251,  koi8-r, iso-8859-5, x
 ## Dependencies
 
 None
-
-## Installation
-
-See [INSTALL.md](https://github.com/lexborisov/myhtml/blob/master/INSTALL.md)
 
 ## External Bindings and Wrappers
 
@@ -127,7 +126,7 @@ Alexander Borisov <lex.borisov@gmail.com>
 
 ## COPYRIGHT AND LICENSE
 
-Copyright (C) 2015-2016 Alexander Borisov
+Copyright (C) 2015-2017 Alexander Borisov
 
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
 
