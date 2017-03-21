@@ -32,7 +32,7 @@ See [Releases](https://github.com/lexborisov/myhtml/releases)
 - No outside dependencies
 - C99 support
 - Passes all tree construction tests from [html5lib-tests]
-- Tested by 1 billion HTML pages (by [commoncrawl.org], see [test file])
+- Tested by 1 billion HTML pages (by [commoncrawl.org])
 
 ## Changes
 Please, see [CHANGELOG.md] file
@@ -142,11 +142,10 @@ See the [LICENSE] file.
 [high]: https://github.com/lexborisov/myhtml/blob/master/include/myhtml/api.h
 [low]: https://github.com/lexborisov/myhtml/tree/master/include/myhtml
 [examples]: https://github.com/lexborisov/myhtml/tree/master/examples
-[parsing by chunks]: https://github.com/lexborisov/myhtml/blob/master/examples/chunks_high_level.c
+[parsing by chunks]: https://github.com/lexborisov/myhtml/blob/master/examples/myhtml/chunks_high_level.c
 [encoding.spec.whatwg.org]: https://encoding.spec.whatwg.org/
 [html5lib-tests]: https://github.com/html5lib/html5lib-tests
 [commoncrawl.org]: http://commoncrawl.org/
-[test file]: https://github.com/lexborisov/myhtml/blob/master/test/commoncrawl.c
 [MyCSS]: https://github.com/lexborisov/mycss
 [CHANGELOG.md]: https://github.com/lexborisov/myhtml/blob/master/CHANGELOG.md
 [Perl 5]: https://metacpan.org/release/HTML-MyHTML
