@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #include "myhtml/myosi.h"
-#include "myhtml/utils.h"
+#include "mycore/utils.h"
 #include "myhtml/myhtml.h"
 
 size_t myhtml_tokenizer_state_doctype(myhtml_tree_t* tree, myhtml_token_node_t* token_node, const char* html, size_t html_offset, size_t html_size);

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -23,11 +23,13 @@
 
 myhtml_tag_t * myhtml_tag_create(void)
 {
-    return (myhtml_tag_t*)myhtml_malloc(sizeof(myhtml_tag_t));
+    return (myhtml_tag_t*)mycore_malloc(sizeof(myhtml_tag_t));
 }
 
-myhtml_status_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags)
+mystatus_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags)
 {
+    mystatus_t status;
+    
     tags->mcsimple_context = mcsimple_create();
     
     if(tags->mcsimple_context == NULL)
@@ -35,10 +37,16 @@ myhtml_status_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags)
     
     mcsimple_init(tags->mcsimple_context, 128, 1024, sizeof(myhtml_tag_context_t));
     
-    tags->mchar_node         = mchar_async_node_add(tree->mchar);
-    tags->tree               = mctree_create(2);
-    tags->mchar              = tree->mchar;
-    tags->tags_count         = MyHTML_TAG_LAST_ENTRY;
+    tags->mchar_node = mchar_async_node_add(tree->mchar, &status);
+    tags->tree       = mctree_create(2);
+    tags->mchar      = tree->mchar;
+    tags->tags_count = MyHTML_TAG_LAST_ENTRY;
+    
+    if(status)
+        return status;
+    
+    if(tags->tree == NULL)
+        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
     
     myhtml_tag_clean(tags);
     
@@ -64,7 +72,7 @@ myhtml_tag_t * myhtml_tag_destroy(myhtml_tag_t* tags)
     
     mchar_async_node_delete(tags->mchar, tags->mchar_node);
     
-    myhtml_free(tags);
+    mycore_free(tags);
     
     return NULL;
 }
@@ -134,24 +142,3 @@ const myhtml_tag_context_t * myhtml_tag_get_by_name(myhtml_tag_t* tags, const ch
     
     return (myhtml_tag_context_t*)tags->tree->nodes[idx].value;
 }
-
-void myhtml_tag_print(myhtml_tag_t* tags, FILE* fh)
-{
-    size_t i;
-    for(i = MyHTML_TAG_FIRST_ENTRY; i < MyHTML_TAG_LAST_ENTRY; i++)
-    {
-        const myhtml_tag_context_t *ctx = myhtml_tag_get_by_id(tags, i);
-        
-        fprintf(fh, "<%s id=\"" MyHTML_FMT_Z "\">\n", ctx->name, i);
-    }
-    
-    for(i = (MyHTML_TAG_LAST_ENTRY + 1); i < tags->tags_count; i++)
-    {
-        const myhtml_tag_context_t *ctx = myhtml_tag_get_by_id(tags, i);
-        
-        fprintf(fh, "<%s id=\"" MyHTML_FMT_Z "\">\n", ctx->name, i);
-    }
-}
-
-
-

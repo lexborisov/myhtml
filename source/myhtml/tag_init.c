@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,8 @@
  Author: lex.borisov@gmail.com (Alexander Borisov)
 */
 
-#include "myhtml/utils/resources.h"
-#include "tag.h"
+#include "mycore/utils/resources.h"
+#include "myhtml/tag.h"
 
 static const myhtml_tag_context_t myhtml_tag_base_list[MyHTML_TAG_LAST_ENTRY] = 
 {
@@ -2591,15 +2591,15 @@ static const myhtml_tag_static_list_t myhtml_tag_static_list_index[] =
 
 const myhtml_tag_context_t * myhtml_tag_static_search(const char* name, size_t length)
 {
-    size_t idx = ((myhtml_string_chars_lowercase_map[ (const unsigned char)name[0] ] *
-                   myhtml_string_chars_lowercase_map[ (const unsigned char)name[(length - 1)] ] *
+    size_t idx = ((mycore_string_chars_lowercase_map[ (const unsigned char)name[0] ] *
+                   mycore_string_chars_lowercase_map[ (const unsigned char)name[(length - 1)] ] *
                    length)
                   % MyHTML_BASE_STATIC_SIZE) + 1;
 
     while (myhtml_tag_static_list_index[idx].ctx)
     {
         if(myhtml_tag_static_list_index[idx].ctx->name_length == length) {
-            if(myhtml_strncasecmp(myhtml_tag_static_list_index[idx].ctx->name, name, length) == 0)
+            if(mycore_strncasecmp(myhtml_tag_static_list_index[idx].ctx->name, name, length) == 0)
                 return myhtml_tag_static_list_index[idx].ctx;
 
             if(myhtml_tag_static_list_index[idx].next)

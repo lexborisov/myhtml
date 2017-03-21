@@ -1,0 +1,1 @@
+All test files are [located](https://github.com/lexborisov/Modest/tree/master/test) in [Modest](https://github.com/lexborisov/Modest) project

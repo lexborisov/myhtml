@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -169,7 +169,7 @@ size_t myhtml_tokenizer_state_custom_after_doctype_name_a_z(myhtml_tree_t* tree,
     
     const char *param = myhtml_tree_incomming_buffer_make_data(tree, token_node->str.length, 6);
     
-    if(myhtml_strncasecmp(param, "PUBLIC", 6) == 0) {
+    if(mycore_strncasecmp(param, "PUBLIC", 6) == 0) {
         myhtml_parser_queue_set_attr(tree, token_node);
         
         tree->attr_current->raw_value_begin  = token_node->str.length;
@@ -185,7 +185,7 @@ size_t myhtml_tokenizer_state_custom_after_doctype_name_a_z(myhtml_tree_t* tree,
         
         html_offset = (token_node->str.length + 6) - tree->incoming_buf->offset;
     }
-    else if(myhtml_strncasecmp(param, "SYSTEM", 6) == 0) {
+    else if(mycore_strncasecmp(param, "SYSTEM", 6) == 0) {
         myhtml_parser_queue_set_attr(tree, token_node);
         
         tree->attr_current->raw_value_begin  = token_node->str.length;

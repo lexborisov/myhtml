@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -35,8 +35,8 @@ struct myhtml_data_process_entry {
     myhtml_data_process_state_f state;
     
     /* for encodings */
-    myhtml_encoding_t encoding;
-    myhtml_encoding_result_t res;
+    myencoding_t encoding;
+    myencoding_result_t res;
     
     /* temp */
     size_t tmp_str_pos_proc;
@@ -53,16 +53,16 @@ struct myhtml_data_process_entry {
 
 void myhtml_data_process_entry_clean(myhtml_data_process_entry_t* proc_entry);
 
-void myhtml_data_process(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t size);
-void myhtml_data_process_end(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str);
+void myhtml_data_process(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t size);
+void myhtml_data_process_end(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str);
 
-size_t myhtml_data_process_state_data(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size);
-size_t myhtml_data_process_state_ampersand(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size);
-size_t myhtml_data_process_state_ampersand_data(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size);
-size_t myhtml_data_process_state_ampersand_hash(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size);
-size_t myhtml_data_process_state_ampersand_hash_data(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char *data, size_t offset, size_t size);
-size_t myhtml_data_process_state_ampersand_hash_x_data(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size);
-void   myhtml_data_process_state_end(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str);
+size_t myhtml_data_process_state_data(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size);
+size_t myhtml_data_process_state_ampersand(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size);
+size_t myhtml_data_process_state_ampersand_data(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size);
+size_t myhtml_data_process_state_ampersand_hash(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size);
+size_t myhtml_data_process_state_ampersand_hash_data(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char *data, size_t offset, size_t size);
+size_t myhtml_data_process_state_ampersand_hash_x_data(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size);
+void   myhtml_data_process_state_end(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2016 Alexander Borisov
+ Copyright (C) 2016-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -19,22 +19,21 @@
  Author: https://github.com/EmielBruijntjes (Emiel Bruijntjes)
 */
 
-#include <setjmp.h>
 #include "myhtml/serialization.h"
 
 /**
  *  Forward declaration of all the functions that are used inside this module
  */
-static void myhtml_serialization_append(const char* str, size_t size, myhtml_callback_serialize_f callback, void *ptr);
-static void myhtml_serialization_append_attr(const char* str, size_t length, myhtml_callback_serialize_f callback, void *ptr);
-static void myhtml_serialization_attributes(myhtml_tree_t* tree, myhtml_tree_attr_t* attr, myhtml_callback_serialize_f callback, void *ptr);
-static void myhtml_serialization_node_append_text_node(myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void *ptr);
-static void myhtml_serialization_node_append_close(myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void *ptr);
+static mystatus_t myhtml_serialization_append(const char* str, size_t size, mycore_callback_serialize_f callback, void *ptr);
+static mystatus_t myhtml_serialization_append_attr(const char* str, size_t length, mycore_callback_serialize_f callback, void *ptr);
+static mystatus_t myhtml_serialization_attributes(myhtml_tree_t* tree, myhtml_tree_attr_t* attr, mycore_callback_serialize_f callback, void *ptr);
+static mystatus_t myhtml_serialization_node_append_text_node(myhtml_tree_node_t* node, mycore_callback_serialize_f callback, void *ptr);
+static mystatus_t myhtml_serialization_node_append_close(myhtml_tree_node_t* node, mycore_callback_serialize_f callback, void *ptr);
 
 /**
  *  See the function myhtml_serialization_tree_buffer
  */
-bool myhtml_serialization(myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str)
+mystatus_t myhtml_serialization(myhtml_tree_node_t* scope_node, mycore_string_raw_t* str)
 {
     return myhtml_serialization_tree_buffer(scope_node, str);
 }
@@ -42,7 +41,7 @@ bool myhtml_serialization(myhtml_tree_node_t* scope_node, myhtml_string_raw_t* s
 /**
  *  See the function myhtml_serialization_node_buffer
  */
-bool myhtml_serialization_node(myhtml_tree_node_t* node, myhtml_string_raw_t* str)
+mystatus_t myhtml_serialization_node(myhtml_tree_node_t* node, mycore_string_raw_t* str)
 {
     return myhtml_serialization_node_buffer(node, str);
 }
@@ -55,32 +54,41 @@ bool myhtml_serialization_node(myhtml_tree_node_t* node, myhtml_string_raw_t* st
  *  @param  ptr         user-supplied pointer
  *  @return bool
  */
-bool myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node, myhtml_callback_serialize_f callback, void *ptr)
+mystatus_t myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node, mycore_callback_serialize_f callback, void *ptr)
 {
     myhtml_tree_node_t* node = scope_node;
     
     while(node) {
-        if(!myhtml_serialization_node_callback(node, callback, ptr)) return false;
+        if(myhtml_serialization_node_callback(node, callback, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
         
         if(node->child)
             node = node->child;
         else {
             while(node != scope_node && node->next == NULL) {
-                myhtml_serialization_node_append_close(node, callback, ptr);
+                if(myhtml_serialization_node_append_close(node, callback, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                
                 node = node->parent;
             }
             
             if(node == scope_node) {
-                if(node != node->tree->document) myhtml_serialization_node_append_close(node, callback, ptr);
+                if(node != node->tree->document) {
+                    if(myhtml_serialization_node_append_close(node, callback, ptr))
+                        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                }
+                
                 break;
             }
             
-            myhtml_serialization_node_append_close(node, callback, ptr);
+            if(myhtml_serialization_node_append_close(node, callback, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             node = node->next;
         }
     }
     
-    return true;
+    return MyCORE_STATUS_OK;
 }
 
 /**
@@ -91,46 +99,73 @@ bool myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node, myhtml_c
  *  @param  ptr         user-supplied pointer
  *  @return bool
  */
-bool myhtml_serialization_node_callback(myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void *ptr)
+mystatus_t myhtml_serialization_node_callback(myhtml_tree_node_t* node, mycore_callback_serialize_f callback, void *ptr)
 {
     switch (node->tag_id) {
         case MyHTML_TAG__TEXT: {
-            myhtml_serialization_node_append_text_node(node, callback, ptr);
+            if(myhtml_serialization_node_append_text_node(node, callback, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             break;
         }
         case MyHTML_TAG__COMMENT: {
-            callback("<!--", 4, ptr);
-            if(node->token && node->token->str.data) callback(node->token->str.data, node->token->str.length, ptr);
-            callback("-->", 3, ptr);
+            if(callback("<!--", 4, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
+            if(node->token && node->token->str.data) {
+                if(callback(node->token->str.data, node->token->str.length, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+            
+            if(callback("-->", 3, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             break;
         }
         case MyHTML_TAG__DOCTYPE: {
-            callback("<!DOCTYPE", 9, ptr);
+            if(callback("<!DOCTYPE", 9, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
             
             if(node->token) {
                 myhtml_tree_attr_t* attr = node->token->attr_first;
                 
                 if(attr->key.data && attr->key.length) {
-                    callback(" ", 1, ptr);
-                    callback(attr->key.data, attr->key.length, ptr);
+                    if(callback(" ", 1, ptr))
+                        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                    
+                    if(callback(attr->key.data, attr->key.length, ptr))
+                        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
                 }
             }
-            callback(">", 1, ptr);
+            
+            if(callback(">", 1, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             break;
         }
         default: {
             size_t length;
             const char *tag = myhtml_tag_name_by_id(node->tree, node->tag_id, &length);
 
-            callback("<", 1, ptr);
-            callback(tag, length, ptr);
-            if(node->token) myhtml_serialization_attributes(node->tree, node->token->attr_first, callback, ptr);
-            callback(">", 1, ptr);
+            if(callback("<", 1, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
+            if(callback(tag, length, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
+            if(node->token) {
+                if(myhtml_serialization_attributes(node->tree, node->token->attr_first, callback, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+            
+            if(callback(">", 1, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             break;
         }
     }
     
-    return true;
+    return MyCORE_STATUS_OK;
 }
 
 /**
@@ -140,28 +175,33 @@ bool myhtml_serialization_node_callback(myhtml_tree_node_t* node, myhtml_callbac
  *  @param  callback
  *  @param  ptr
  */
-void myhtml_serialization_attributes(myhtml_tree_t* tree, myhtml_tree_attr_t* attr, myhtml_callback_serialize_f callback, void* ptr)
+mystatus_t myhtml_serialization_attributes(myhtml_tree_t* tree, myhtml_tree_attr_t* attr, mycore_callback_serialize_f callback, void* ptr)
 {
     while(attr) {
-        callback(" ", 1, ptr);
+        if(callback(" ", 1, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
         
         switch (attr->ns) {
             case MyHTML_NAMESPACE_XML:
-                callback("xml:", 4, ptr);
+                if(callback("xml:", 4, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                
                 break;
             case MyHTML_NAMESPACE_XMLNS: {
                 /*
                     If the attribute is in the XMLNS namespace and the attribute's local name is not xmlns
                     The attribute's serialized name is the string "xmlns:" followed by the attribute's local name.
                  */
-                if(attr->key.data && attr->key.length == 5 && myhtml_strcmp(attr->key.data, "xmlns")) {
-                    callback("xmlns:", 6, ptr);
+                if(attr->key.data && attr->key.length == 5 && mycore_strcmp(attr->key.data, "xmlns")) {
+                    if(callback("xmlns:", 6, ptr))
+                        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
                 }
                 
                 break;
             }
             case MyHTML_NAMESPACE_XLINK: {
-                callback("xlink:", 6, ptr);
+                if(callback("xlink:", 6, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
                 
                 break;
             }
@@ -172,14 +212,25 @@ void myhtml_serialization_attributes(myhtml_tree_t* tree, myhtml_tree_attr_t* at
         
         size_t length;
         const char *data = myhtml_attribute_key(attr, &length);
-        if(data) callback(data, length, ptr);
-        callback("=\"", 2, ptr);
+        if(data) {
+            if(callback(data, length, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+        }
+        if(callback("=\"", 2, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
         
         data = myhtml_attribute_value(attr, &length);
-        if(data) myhtml_serialization_append_attr(data, length, callback, ptr);
-        callback("\"", 1, ptr);
+        if(data) {
+            if(myhtml_serialization_append_attr(data, length, callback, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+        }
+        if(callback("\"", 1, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+        
         attr = attr->next;
     }
+    
+    return MyCORE_STATUS_OK;
 }
 
 /**
@@ -189,7 +240,7 @@ void myhtml_serialization_attributes(myhtml_tree_t* tree, myhtml_tree_attr_t* at
  *  @param  callback
  *  @param  ptr
  */
-void myhtml_serialization_node_append_close(myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void* ptr)
+mystatus_t myhtml_serialization_node_append_close(myhtml_tree_node_t* node, mycore_callback_serialize_f callback, void* ptr)
 {
     if(node->tag_id != MyHTML_TAG__TEXT &&
        node->tag_id != MyHTML_TAG__COMMENT &&
@@ -198,10 +249,17 @@ void myhtml_serialization_node_append_close(myhtml_tree_node_t* node, myhtml_cal
         size_t length;
         const char *tag = myhtml_tag_name_by_id(node->tree, node->tag_id, &length);
         
-        callback("</", 2, ptr);
-        callback(tag, length, ptr);
-        callback(">", 1, ptr);
+        if(callback("</", 2, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+        
+        if(callback(tag, length, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+        
+        if(callback(">", 1, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
     }
+    
+    return MyCORE_STATUS_OK;
 }
 
 /**
@@ -211,11 +269,16 @@ void myhtml_serialization_node_append_close(myhtml_tree_node_t* node, myhtml_cal
  *  @param  callback
  *  @param  ptr
  */
-void myhtml_serialization_node_append_text_node(myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void* ptr)
+mystatus_t myhtml_serialization_node_append_text_node(myhtml_tree_node_t* node, mycore_callback_serialize_f callback, void* ptr)
 {
-    if(node->token == NULL || node->token->str.data == NULL) return;
+    if(node->token == NULL || node->token->str.data == NULL) return MyCORE_STATUS_OK;
     
-    if(node->parent == NULL) return myhtml_serialization_append(node->token->str.data, node->token->str.length, callback, ptr);
+    if(node->parent == NULL) {
+        if(myhtml_serialization_append(node->token->str.data, node->token->str.length, callback, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+        
+        return MyCORE_STATUS_OK;
+    }
     
     switch (node->parent->tag_id) {
         case MyHTML_TAG_STYLE:
@@ -225,12 +288,17 @@ void myhtml_serialization_node_append_text_node(myhtml_tree_node_t* node, myhtml
         case MyHTML_TAG_NOEMBED:
         case MyHTML_TAG_NOFRAMES:
         case MyHTML_TAG_PLAINTEXT:
-            callback(node->token->str.data, node->token->str.length, ptr);
+            if(callback(node->token->str.data, node->token->str.length, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
             break;
         default:
-            myhtml_serialization_append(node->token->str.data, node->token->str.length, callback, ptr);
+            if(myhtml_serialization_append(node->token->str.data, node->token->str.length, callback, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             break;
     }
+    
+    return MyCORE_STATUS_OK;
 }
 
 /**
@@ -240,7 +308,7 @@ void myhtml_serialization_node_append_text_node(myhtml_tree_node_t* node, myhtml
  *  @param  callback
  *  @param  ptr
  */
-void myhtml_serialization_append(const char *data, size_t size, myhtml_callback_serialize_f callback, void* ptr)
+mystatus_t myhtml_serialization_append(const char *data, size_t size, mycore_callback_serialize_f callback, void* ptr)
 {
     // number of chars not yet displayed
     size_t notwritten = 0;
@@ -249,24 +317,48 @@ void myhtml_serialization_append(const char *data, size_t size, myhtml_callback_
     for (size_t i = 0; i < size; ++i) {
         switch ((unsigned char)data[i]) {
         case '&':
-            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
-            callback("&amp;", 5, ptr);
+            if(notwritten) {
+                if(callback(data + i - notwritten, notwritten, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+            
+            if(callback("&amp;", 5, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             notwritten = 0;
             break;
         case '<':
-            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
-            callback("&lt;", 4, ptr);
+            if(notwritten) {
+                if(callback(data + i - notwritten, notwritten, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+            
+            if(callback("&lt;", 4, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             notwritten = 0;
             break;
         case '>':
-            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
-            callback("&gt;", 4, ptr);
+            if(notwritten) {
+                if(callback(data + i - notwritten, notwritten, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+            
+            if(callback("&gt;", 4, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             notwritten = 0;
             break;
         case 0xA0:
             if(i > 0 && (unsigned char)(data[(i - 1)]) == 0xC2) {
-                if (notwritten) callback(data + i - notwritten, (notwritten - 1), ptr);
-                callback("&nbsp;", 6, ptr);
+                if(notwritten) {
+                    if(callback(data + i - notwritten, (notwritten - 1), ptr))
+                        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                }
+                
+                if(callback("&nbsp;", 6, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                
                 notwritten = 0;
             }
             else {
@@ -280,7 +372,11 @@ void myhtml_serialization_append(const char *data, size_t size, myhtml_callback_
         }
     }
     
-    if (notwritten) callback(data + size - notwritten, notwritten, ptr);
+    if(notwritten)
+        if(callback(data + size - notwritten, notwritten, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+    
+    return MyCORE_STATUS_OK;
 }
 
 /**
@@ -290,7 +386,7 @@ void myhtml_serialization_append(const char *data, size_t size, myhtml_callback_
  *  @param  callback
  *  @param  ptr
  */
-void myhtml_serialization_append_attr(const char* data, size_t size, myhtml_callback_serialize_f callback, void* ptr)
+mystatus_t myhtml_serialization_append_attr(const char* data, size_t size, mycore_callback_serialize_f callback, void* ptr)
 {
     // number of chars not yet displayed
     size_t notwritten = 0;
@@ -299,19 +395,37 @@ void myhtml_serialization_append_attr(const char* data, size_t size, myhtml_call
     for (size_t i = 0; i < size; ++i) {
         switch ((unsigned char)data[i]) {
         case '&':
-            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
-            callback("&amp;", 5, ptr);
+            if(notwritten) {
+                if(callback(data + i - notwritten, notwritten, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+            
+            if(callback("&amp;", 5, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             notwritten = 0;
             break;
         case '"':
-            if (notwritten) callback(data + i - notwritten, notwritten, ptr);
-            callback("&quot;", 6, ptr);
+            if(notwritten) {
+                if(callback(data + i - notwritten, notwritten, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+            
+            if(callback("&quot;", 6, ptr))
+                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+            
             notwritten = 0;
             break;
         case 0xA0:
             if(i > 0 && (unsigned char)(data[(i - 1)]) == 0xC2) {
-                if (notwritten) callback(data + i - notwritten, (notwritten - 1), ptr);
-                callback("&nbsp;", 6, ptr);
+                if(notwritten) {
+                    if(callback(data + i - notwritten, (notwritten - 1), ptr))
+                        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                }
+                
+                if(callback("&nbsp;", 6, ptr))
+                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                
                 notwritten = 0;
             }
             else {
@@ -325,57 +439,53 @@ void myhtml_serialization_append_attr(const char* data, size_t size, myhtml_call
         }
     }
     
-    if (notwritten) callback(data + size - notwritten, notwritten, ptr);
+    if(notwritten) {
+        if(callback(data + size - notwritten, notwritten, ptr))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+    }
+    
+    return MyCORE_STATUS_OK;
 }
-
-/**
- *  Because we want to leap out of the algorithm if we're halfway through
- *  serializing, we use a longjmp() call to jump back to the public APP
- *  @var jmp_buf
- */
-static jmp_buf leap;
 
 /**
  *  Reallocate the buffer
  *  @param  str         the buffer to reallocate
  *  @param  size        new size
  */
-void myhtml_serialization_reallocate(myhtml_string_raw_t *str, size_t size)
+mystatus_t myhtml_serialization_reallocate(mycore_string_raw_t *str, size_t size)
 {
     // construct a buffer
-    char *data = (char*)myhtml_realloc(str->data, size * sizeof(char));
+    char *data = (char*)mycore_realloc(str->data, size * sizeof(char));
 
     // was it ok?
-    if (data == NULL) {
-        
-        // allocation failed, reset the string object
-        myhtml_free(str->data);
-        memset(str, 0, sizeof(myhtml_string_raw_t));
-        
-        // leap back to the source of the serialization algorithm
-        longjmp(leap, 1);
+    if(data == NULL) {
+        memset(str, 0, sizeof(mycore_string_raw_t));
+        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
     }
     else {
-        
         // reallocation succeeded
         str->data = data;
         str->size = size;
     }
+    
+    return MyCORE_STATUS_OK;
 }
 
 /**
- *  Implementation of the myhtml_callback_serialize_f function for internal
+ *  Implementation of the mycore_callback_serialize_f function for internal
  *  use that concatenats everything to a string
  *  @param  data
  *  @param  size
  */
-void myhtml_serialization_concatenate(const char* data, size_t length, void *ptr)
+mystatus_t myhtml_serialization_concatenate(const char* data, size_t length, void *ptr)
 {
-    // get the string back
-    myhtml_string_raw_t* str = (myhtml_string_raw_t *)ptr;
+    mycore_string_raw_t *str = (mycore_string_raw_t*)ptr;
     
     // do we still have enough size in the output buffer?
-    if ((length + str->length) >= str->size) myhtml_serialization_reallocate(str, length + str->length + 4096);
+    if ((length + str->length) >= str->size) {
+        if(myhtml_serialization_reallocate(str, length + str->length + 4096))
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+    }
     
     // copy data
     strncpy(&str->data[ str->length ], data, length);
@@ -383,6 +493,8 @@ void myhtml_serialization_concatenate(const char* data, size_t length, void *ptr
     // update counters
     str->length += length;
     str->data[ str->length ] = '\0';
+    
+    return MyCORE_STATUS_OK;
 }
 
 /**
@@ -392,7 +504,7 @@ void myhtml_serialization_concatenate(const char* data, size_t length, void *ptr
  *  @param  str
  *  @return bool
  */
-bool myhtml_serialization_tree_buffer(myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str) {
+mystatus_t myhtml_serialization_tree_buffer(myhtml_tree_node_t* scope_node, mycore_string_raw_t* str) {
 
     // we need an output variable
     if(str == NULL) return false;
@@ -401,25 +513,15 @@ bool myhtml_serialization_tree_buffer(myhtml_tree_node_t* scope_node, myhtml_str
     if(str->data == NULL) {
         str->size   = 4098 * 5;
         str->length = 0;
-        str->data   = (char*)myhtml_malloc(str->size * sizeof(char));
+        str->data   = (char*)mycore_malloc(str->size * sizeof(char));
         
         if(str->data == NULL) {
             str->size = 0;
-            return false;
+            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
         }
     }
     
-    // if allocation halfway the algorithm fails, we want to leap back
-    if (setjmp(leap) == 0)
-    {
-        // serialize the entire tree
-        return myhtml_serialization_tree_callback(scope_node, myhtml_serialization_concatenate, str);
-    }
-    else
-    {
-        // the serialization algorithm failed because of a memory-allocation failure
-        return false;
-    }
+    return myhtml_serialization_tree_callback(scope_node, myhtml_serialization_concatenate, str);
 }
 
 /**
@@ -429,7 +531,7 @@ bool myhtml_serialization_tree_buffer(myhtml_tree_node_t* scope_node, myhtml_str
  *  @param  str
  *  @return bool
  */
-bool myhtml_serialization_node_buffer(myhtml_tree_node_t* node, myhtml_string_raw_t* str) {
+mystatus_t myhtml_serialization_node_buffer(myhtml_tree_node_t* node, mycore_string_raw_t* str) {
 
     // we need an output variable
     if(str == NULL) return false;
@@ -438,24 +540,14 @@ bool myhtml_serialization_node_buffer(myhtml_tree_node_t* node, myhtml_string_ra
     if(str->data == NULL) {
         str->size   = 2048;
         str->length = 0;
-        str->data   = (char*)myhtml_malloc(str->size * sizeof(char));
+        str->data   = (char*)mycore_malloc(str->size * sizeof(char));
         
         if(str->data == NULL) {
             str->size = 0;
             return false;
         }
     }
-
-    // if allocation halfway the algorithm fails, we want to leap back
-    if (setjmp(leap) == 0)
-    {
-        // pass on
-        return myhtml_serialization_node_callback(node, myhtml_serialization_concatenate, str);
-    }
-    else
-    {
-        // the serialization algorithm failed because of a memory-allocation failure
-        return false;
-    }
+    
+    return myhtml_serialization_node_callback(node, myhtml_serialization_concatenate, str);
 }
 

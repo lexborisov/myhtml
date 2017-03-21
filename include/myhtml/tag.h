@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -31,12 +31,12 @@ extern "C" {
 #include <myhtml/tag_const.h>
 #include <myhtml/tokenizer.h>
 #include <myhtml/tree.h>
-#include <myhtml/utils.h>
-#include <myhtml/utils/mctree.h>
-#include <myhtml/utils/mchar_async.h>
-#include <myhtml/utils/mcobject.h>
-#include <myhtml/utils/mcobject_async.h>
-#include <myhtml/utils/mcsimple.h>
+#include <mycore/utils.h>
+#include <mycore/utils/mctree.h>
+#include <mycore/utils/mchar_async.h>
+#include <mycore/utils/mcobject.h>
+#include <mycore/utils/mcobject_async.h>
+#include <mycore/utils/mcsimple.h>
 
 #define myhtml_tag_get(tags, idx, attr) tags->context[idx].attr
 
@@ -52,7 +52,7 @@ extern "C" {
     tags->context_length++;                                                  \
     if(tags->context_length == tags->context_size) {                         \
         tags->context_size += 4096;                                          \
-        tags->context = (myhtml_tag_context_t*)myhtml_realloc(tags->context,      \
+        tags->context = (myhtml_tag_context_t*)mycore_realloc(tags->context,      \
             sizeof(myhtml_tag_context_t) * tags->context_size);              \
     }                                                                        \
     myhtml_tag_context_clean(tags, tags->context_length)
@@ -89,7 +89,7 @@ struct myhtml_tag {
 };
 
 myhtml_tag_t * myhtml_tag_create(void);
-myhtml_status_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags);
+mystatus_t myhtml_tag_init(myhtml_tree_t *tree, myhtml_tag_t *tags);
 void myhtml_tag_clean(myhtml_tag_t* tags);
 myhtml_tag_t * myhtml_tag_destroy(myhtml_tag_t* tags);
 
@@ -104,8 +104,6 @@ const myhtml_tag_context_t * myhtml_tag_get_by_name(myhtml_tag_t* tags, const ch
 
 const myhtml_tag_context_t * myhtml_tag_static_get_by_id(size_t idx);
 const myhtml_tag_context_t * myhtml_tag_static_search(const char* name, size_t length);
-
-void myhtml_tag_print(myhtml_tag_t* tags, FILE* fh);
 
 #ifdef __cplusplus
 } /* extern "C" */

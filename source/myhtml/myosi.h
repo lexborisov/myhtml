@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -22,187 +22,22 @@
 #define MyHTML_MYOSI_H
 #pragma once
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <memory.h>
-#include <stdint.h>
-#include <stdarg.h>
+#include "mycore/myosi.h"
 
-#define MyHTML_VERSION_MAJOR 3
+#define MyHTML_VERSION_MAJOR 4
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 2
+#define MyHTML_VERSION_PATCH 0
 
-#if (defined(_WIN32) || defined(_WIN64)) && !defined(__WINPTHREADS_VERSION)
-#define IS_OS_WINDOWS
-#include <windows.h>
-#endif
-
-#if defined(_MSC_VER)
-#  define MyHTML_DEPRECATED(func) __declspec(deprecated) func
-#elif defined(__GNUC__) || defined(__INTEL_COMPILER)
-#  define MyHTML_DEPRECATED(func) func __attribute__((deprecated))
-#else
-#  define MyHTML_DEPRECATED(func) func
-#endif
+#define MyHTML_VERSION_STRING MyCORE_STR(MyHTML_VERSION_MAJOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_MINOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_PATCH)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Mem */
-#ifdef MyHTML_EXTERN_MALLOC
-    extern void * MyHTML_EXTERN_MALLOC(size_t size);
-    #define myhtml_malloc MyHTML_EXTERN_MALLOC
-#else
-    #define myhtml_malloc myhtml_mem_malloc
-#endif
-
-#ifdef MyHTML_EXTERN_REALLOC
-    extern void * MyHTML_EXTERN_REALLOC(void* dst, size_t size);
-    #define myhtml_realloc MyHTML_EXTERN_REALLOC
-#else
-    #define myhtml_realloc myhtml_mem_realloc
-#endif
-
-#ifdef MyHTML_EXTERN_CALLOC
-    extern void * MyHTML_EXTERN_CALLOC(size_t num, size_t size);
-    #define myhtml_calloc MyHTML_EXTERN_CALLOC
-#else
-    #define myhtml_calloc myhtml_mem_calloc
-#endif
-
-#ifdef MyHTML_EXTERN_FREE
-    extern void MyHTML_EXTERN_FREE(void* dst);
-    #define myhtml_free MyHTML_EXTERN_FREE
-#else
-    #define myhtml_free myhtml_mem_free
-#endif
-
-/* Format */
-#ifdef IS_OS_WINDOWS
-    #define MyHTML_FMT_Z "%Iu"
-#else
-    #define MyHTML_FMT_Z "%zu"
-#endif
-
-/* Debug */
-#ifdef DEBUG_MODE
-    #define MyHTML_DEBUG(format, ...)      \
-        myhtml_print(stderr, "DEBUG: "format"\n", ##__VA_ARGS__)
-#else
-    #define MyHTML_DEBUG(format, ...)
-#endif
-
-#ifdef DEBUG_MODE
-    #define MyHTML_DEBUG_ERROR(format, ...)      \
-        myhtml_print(stderr, "DEBUG ERROR: "format"\n", ##__VA_ARGS__)
-#else
-    #define MyHTML_DEBUG_ERROR(format, ...)
-#endif
-
-#define myhtml_base_add(myhtml, point, lenn, sizen, strcn, size)    \
-    myhtml->Lenn++;                                                 \
-    if(myhtml->lenn == myhtml->sizen) {                             \
-        myhtml->sizen += size;                                      \
-        myhtml->point = (strcn*)myhtml_realloc(myhtml->point,            \
-            sizeof(strcn) * myhtml->sizen);                         \
-    }
-
 #define MyHTML_FAILED(_status_) ((_status_) != MyHTML_STATUS_OK)
-
-// encoding
-// https://encoding.spec.whatwg.org/#the-encoding
-// https://encoding.spec.whatwg.org/#legacy-single-byte-encodings
-// https://encoding.spec.whatwg.org/#legacy-multi-byte-chinese-(simplified)-encodings
-// https://encoding.spec.whatwg.org/#legacy-multi-byte-chinese-(traditional)-encodings
-// https://encoding.spec.whatwg.org/#legacy-multi-byte-japanese-encodings
-// https://encoding.spec.whatwg.org/#legacy-multi-byte-korean-encodings
-// https://encoding.spec.whatwg.org/#legacy-miscellaneous-encodings
-
-enum myhtml_encoding_list {
-    MyHTML_ENCODING_DEFAULT        = 0x00,
-//  MyHTML_ENCODING_AUTO           = 0x01,  // future
-    MyHTML_ENCODING_NOT_DETERMINED = 0x02,
-    MyHTML_ENCODING_UTF_8          = 0x00,  // default encoding
-    MyHTML_ENCODING_UTF_16LE       = 0x04,
-    MyHTML_ENCODING_UTF_16BE       = 0x05,
-    MyHTML_ENCODING_X_USER_DEFINED = 0x06,
-    MyHTML_ENCODING_BIG5           = 0x07,
-    MyHTML_ENCODING_EUC_JP         = 0x08,
-    MyHTML_ENCODING_EUC_KR         = 0x09,
-    MyHTML_ENCODING_GB18030        = 0x0a,
-    MyHTML_ENCODING_GBK            = 0x0b,
-    MyHTML_ENCODING_IBM866         = 0x0c,
-    MyHTML_ENCODING_ISO_2022_JP    = 0x0d,
-    MyHTML_ENCODING_ISO_8859_10    = 0x0e,
-    MyHTML_ENCODING_ISO_8859_13    = 0x0f,
-    MyHTML_ENCODING_ISO_8859_14    = 0x10,
-    MyHTML_ENCODING_ISO_8859_15    = 0x11,
-    MyHTML_ENCODING_ISO_8859_16    = 0x12,
-    MyHTML_ENCODING_ISO_8859_2     = 0x13,
-    MyHTML_ENCODING_ISO_8859_3     = 0x14,
-    MyHTML_ENCODING_ISO_8859_4     = 0x15,
-    MyHTML_ENCODING_ISO_8859_5     = 0x16,
-    MyHTML_ENCODING_ISO_8859_6     = 0x17,
-    MyHTML_ENCODING_ISO_8859_7     = 0x18,
-    MyHTML_ENCODING_ISO_8859_8     = 0x19,
-    MyHTML_ENCODING_ISO_8859_8_I   = 0x1a,
-    MyHTML_ENCODING_KOI8_R         = 0x1b,
-    MyHTML_ENCODING_KOI8_U         = 0x1c,
-    MyHTML_ENCODING_MACINTOSH      = 0x1d,
-    MyHTML_ENCODING_SHIFT_JIS      = 0x1e,
-    MyHTML_ENCODING_WINDOWS_1250   = 0x1f,
-    MyHTML_ENCODING_WINDOWS_1251   = 0x20,
-    MyHTML_ENCODING_WINDOWS_1252   = 0x21,
-    MyHTML_ENCODING_WINDOWS_1253   = 0x22,
-    MyHTML_ENCODING_WINDOWS_1254   = 0x23,
-    MyHTML_ENCODING_WINDOWS_1255   = 0x24,
-    MyHTML_ENCODING_WINDOWS_1256   = 0x25,
-    MyHTML_ENCODING_WINDOWS_1257   = 0x26,
-    MyHTML_ENCODING_WINDOWS_1258   = 0x27,
-    MyHTML_ENCODING_WINDOWS_874    = 0x28,
-    MyHTML_ENCODING_X_MAC_CYRILLIC = 0x29,
-    MyHTML_ENCODING_LAST_ENTRY     = 0x2a
-}
-typedef myhtml_encoding_t;
-
-typedef struct myhtml_encoding_result myhtml_encoding_result_t;
-typedef struct myhtml_encoding_trigram myhtml_encoding_trigram_t;
-typedef struct myhtml_encoding_trigram_result myhtml_encoding_trigram_result_t;
-typedef struct myhtml_encoding_unicode_result myhtml_encoding_unicode_result_t;
-typedef struct myhtml_encoding_detect_name_entry myhtml_encoding_detect_name_entry_t;
-typedef struct myhtml_encoding_detect_attr myhtml_encoding_detect_attr_t;
-typedef struct myhtml_encoding_entry_name_index myhtml_encoding_entry_name_index_t;
 
 // char references
 typedef struct myhtml_data_process_entry myhtml_data_process_entry_t;
-
-// strings
-typedef struct myhtml_string_raw myhtml_string_raw_t;
-typedef struct myhtml_string myhtml_string_t;
-
-// thread
-enum mythread_thread_opt {
-    MyTHREAD_OPT_UNDEF = 0x00,
-    MyTHREAD_OPT_WAIT  = 0x01,
-    MyTHREAD_OPT_QUIT  = 0x02,
-    MyTHREAD_OPT_STOP  = 0x04,
-    MyTHREAD_OPT_DONE  = 0x08
-}
-typedef mythread_thread_opt_t;
-
-typedef struct mythread_queue_list_entry mythread_queue_list_entry_t;
-typedef struct mythread_queue_thread_param mythread_queue_thread_param_t;
-typedef struct mythread_queue_list mythread_queue_list_t;
-typedef struct mythread_queue_node mythread_queue_node_t;
-typedef struct mythread_queue mythread_queue_t;
-
-typedef size_t mythread_id_t;
-typedef struct mythread_workers_list mythread_workers_list_t;
-typedef struct mythread_context mythread_context_t;
-typedef struct mythread_list mythread_list_t;
-typedef struct mythread mythread_t;
 
 // tree
 enum myhtml_tree_flags {
@@ -393,68 +228,33 @@ enum myhtml_insertion_mode {
 // base
 /*
  Very important!!!
- 
- for myhtml             0..00ffff;      MyHTML_STATUS_OK    == 0x000000
- for mycss and modules  010000..01ffff; MyCSS_STATUS_OK     == 0x000000
- for modest             020000..02ffff; MODEST_STATUS_OK    == 0x000000
- for myrender           030000..03ffff; MyRENDER_STATUS_OK  == 0x000000
- for mydom              040000..04ffff; MyDOM_STATUS_OK     == 0x000000
- for mynetwork          050000..05ffff; MyNETWORK_STATUS_OK == 0x000000
- for myecma             060000..06ffff; MyECMA_STATUS_OK    == 0x000000
- not occupied           070000..
+ See mycore/myosi.h:mystatus_t
 */
 enum myhtml_status {
     MyHTML_STATUS_OK                                   = 0x0000,
     MyHTML_STATUS_ERROR                                = 0x0001,
     MyHTML_STATUS_ERROR_MEMORY_ALLOCATION              = 0x0002,
-    MyHTML_STATUS_THREAD_ERROR_MEMORY_ALLOCATION       = 0x0009,
-    MyHTML_STATUS_THREAD_ERROR_LIST_INIT               = 0x000a,
-    MyHTML_STATUS_THREAD_ERROR_ATTR_MALLOC             = 0x000b,
-    MyHTML_STATUS_THREAD_ERROR_ATTR_INIT               = 0x000c,
-    MyHTML_STATUS_THREAD_ERROR_ATTR_SET                = 0x000d,
-    MyHTML_STATUS_THREAD_ERROR_ATTR_DESTROY            = 0x000e,
-    MyHTML_STATUS_THREAD_ERROR_NO_SLOTS                = 0x000f,
-    MyHTML_STATUS_THREAD_ERROR_BATCH_INIT              = 0x0010,
-    MyHTML_STATUS_THREAD_ERROR_WORKER_MALLOC           = 0x0011,
-    MyHTML_STATUS_THREAD_ERROR_WORKER_SEM_CREATE       = 0x0012,
-    MyHTML_STATUS_THREAD_ERROR_WORKER_THREAD_CREATE    = 0x0013,
-    MyHTML_STATUS_THREAD_ERROR_MASTER_THREAD_CREATE    = 0x0014,
-    MyHTML_STATUS_THREAD_ERROR_SEM_PREFIX_MALLOC       = 0x0032,
-    MyHTML_STATUS_THREAD_ERROR_SEM_CREATE              = 0x0033,
-    MyHTML_STATUS_THREAD_ERROR_QUEUE_MALLOC            = 0x003c,
-    MyHTML_STATUS_THREAD_ERROR_QUEUE_NODES_MALLOC      = 0x003d,
-    MyHTML_STATUS_THREAD_ERROR_QUEUE_NODE_MALLOC       = 0x003e,
-    MyHTML_STATUS_THREAD_ERROR_MUTEX_MALLOC            = 0x0046,
-    MyHTML_STATUS_THREAD_ERROR_MUTEX_INIT              = 0x0047,
-    MyHTML_STATUS_THREAD_ERROR_MUTEX_LOCK              = 0x0048,
-    MyHTML_STATUS_THREAD_ERROR_MUTEX_UNLOCK            = 0x0049,
-    MyHTML_STATUS_RULES_ERROR_MEMORY_ALLOCATION        = 0x0064,
-    MyHTML_STATUS_PERF_ERROR_COMPILED_WITHOUT_PERF     = 0x00c8,
-    MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK            = 0x00c9,
-    MyHTML_STATUS_TOKENIZER_ERROR_MEMORY_ALLOCATION    = 0x012c,
-    MyHTML_STATUS_TOKENIZER_ERROR_FRAGMENT_INIT        = 0x012d,
-    MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION         = 0x0190,
-    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE           = 0x0191,
-    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_MALLOC           = 0x0192,
-    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE_NODE      = 0x0193,
-    MyHTML_STATUS_TAGS_ERROR_CACHE_MEMORY_ALLOCATION   = 0x0194,
-    MyHTML_STATUS_TAGS_ERROR_INDEX_MEMORY_ALLOCATION   = 0x0195,
-    MyHTML_STATUS_TREE_ERROR_MEMORY_ALLOCATION         = 0x01f4,
-    MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE           = 0x01f5,
-    MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT             = 0x01f6,
-    MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE      = 0x01f7,
-    MyHTML_STATUS_TREE_ERROR_INCOMING_BUFFER_CREATE    = 0x01f8,
-    MyHTML_STATUS_ATTR_ERROR_ALLOCATION                = 0x0258,
-    MyHTML_STATUS_ATTR_ERROR_CREATE                    = 0x0259,
-    MyHTML_STATUS_STREAM_BUFFER_ERROR_CREATE           = 0x0300,
-    MyHTML_STATUS_STREAM_BUFFER_ERROR_INIT             = 0x0301,
-    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_CREATE     = 0x0302,
-    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_INIT       = 0x0303,
-    MyHTML_STATUS_STREAM_BUFFER_ERROR_ADD_ENTRY        = 0x0304,
-    MyHTML_STATUS_MCOBJECT_ERROR_CACHE_CREATE          = 0x0340,
-    MyHTML_STATUS_MCOBJECT_ERROR_CHUNK_CREATE          = 0x0341,
-    MyHTML_STATUS_MCOBJECT_ERROR_CHUNK_INIT            = 0x0342,
-    MyHTML_STATUS_MCOBJECT_ERROR_CACHE_REALLOC         = 0x0343
+    MyHTML_STATUS_RULES_ERROR_MEMORY_ALLOCATION        = 0x9064,
+    MyHTML_STATUS_TOKENIZER_ERROR_MEMORY_ALLOCATION    = 0x912c,
+    MyHTML_STATUS_TOKENIZER_ERROR_FRAGMENT_INIT        = 0x912d,
+    MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION         = 0x9190,
+    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE           = 0x9191,
+    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_MALLOC           = 0x9192,
+    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE_NODE      = 0x9193,
+    MyHTML_STATUS_TAGS_ERROR_CACHE_MEMORY_ALLOCATION   = 0x9194,
+    MyHTML_STATUS_TAGS_ERROR_INDEX_MEMORY_ALLOCATION   = 0x9195,
+    MyHTML_STATUS_TREE_ERROR_MEMORY_ALLOCATION         = 0x91f4,
+    MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE           = 0x91f5,
+    MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT             = 0x91f6,
+    MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE      = 0x91f7,
+    MyHTML_STATUS_TREE_ERROR_INCOMING_BUFFER_CREATE    = 0x91f8,
+    MyHTML_STATUS_ATTR_ERROR_ALLOCATION                = 0x9258,
+    MyHTML_STATUS_ATTR_ERROR_CREATE                    = 0x9259,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_CREATE           = 0x9300,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_INIT             = 0x9301,
+    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_CREATE     = 0x9302,
+    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_INIT       = 0x9303,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_ADD_ENTRY        = 0x9304
 }
 typedef myhtml_status_t;
 
@@ -493,7 +293,6 @@ struct myhtml_version {
 }
 typedef myhtml_version_t;
 
-typedef struct myhtml_incoming_buffer myhtml_incoming_buffer_t;
 typedef myhtml_token_attr_t myhtml_tree_attr_t;
 typedef struct myhtml_collection myhtml_collection_t;
 typedef struct myhtml myhtml_t;
@@ -505,24 +304,14 @@ typedef size_t (*myhtml_tokenizer_state_f)(myhtml_tree_t* tree, myhtml_token_nod
 typedef bool (*myhtml_insertion_f)(myhtml_tree_t* tree, myhtml_token_node_t* token);
 
 // char references state
-typedef size_t (*myhtml_data_process_state_f)(myhtml_data_process_entry_t* charef, myhtml_string_t* str, const char* data, size_t offset, size_t size);
+typedef size_t (*myhtml_data_process_state_f)(myhtml_data_process_entry_t* charef, mycore_string_t* str, const char* data, size_t offset, size_t size);
 
 // callback functions
 typedef void* (*myhtml_callback_token_f)(myhtml_tree_t* tree, myhtml_token_node_t* token, void* ctx);
 typedef void (*myhtml_callback_tree_node_f)(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx);
 
 // find attribute value functions
-typedef bool (*myhtml_attribute_value_find_f)(myhtml_string_t* str_key, const char* value, size_t value_len);
-
-// callback to be implemented by the user
-typedef void (*myhtml_callback_serialize_f)(const char* buffer, size_t size, void* ctx);
-
-void * myhtml_mem_malloc(size_t size);
-void * myhtml_mem_realloc(void* dst, size_t size);
-void * myhtml_mem_calloc(size_t num, size_t size);
-void   myhtml_mem_free(void* dst);
-
-void myhtml_print(FILE* out, const char* format, ...);
+typedef bool (*myhtml_attribute_value_find_f)(mycore_string_t* str_key, const char* value, size_t value_len);
 
 #ifdef __cplusplus
 } /* extern "C" */

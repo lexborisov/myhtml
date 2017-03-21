@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -20,16 +20,16 @@
 
 #include "myhtml/rules.h"
 
-void myhtml_insertion_fix_emit_for_text_begin_ws(myhtml_token_node_t* token)
+void myhtml_insertion_fix_emit_for_text_begin_ws(myhtml_token_t* token, myhtml_token_node_t* node)
 {
-    myhtml_token_node_wait_for_done(token);
-    myhtml_string_crop_whitespace_from_begin(&token->str);
+    myhtml_token_node_wait_for_done(token, node);
+    mycore_string_crop_whitespace_from_begin(&node->str);
 }
 
 myhtml_token_node_t * myhtml_insertion_fix_split_for_text_begin_ws(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
-    myhtml_token_node_wait_for_done(token);
-    size_t len = myhtml_string_whitespace_from_begin(&token->str);
+    myhtml_token_node_wait_for_done(tree->token, token);
+    size_t len = mycore_string_whitespace_from_begin(&token->str);
     
     if(len == 0)
         return NULL;
@@ -40,9 +40,9 @@ myhtml_token_node_t * myhtml_insertion_fix_split_for_text_begin_ws(myhtml_tree_t
     if(new_token == NULL)
         return NULL;
     
-    myhtml_string_init(tree->mchar, tree->mchar_node_id, &new_token->str, (len + 2));
+    mycore_string_init(tree->mchar, tree->mchar_node_id, &new_token->str, (len + 2));
     
-    myhtml_string_append(&new_token->str, token->str.data, len);
+    mycore_string_append(&new_token->str, token->str.data, len);
     
     new_token->type |= MyHTML_TOKEN_TYPE_DONE;
     
@@ -55,9 +55,9 @@ myhtml_token_node_t * myhtml_insertion_fix_split_for_text_begin_ws(myhtml_tree_t
 
 void myhtml_insertion_fix_for_null_char_drop_all(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
-    myhtml_token_node_wait_for_done(token);
+    myhtml_token_node_wait_for_done(tree->token, token);
     
-    myhtml_string_t *str = &token->str;
+    mycore_string_t *str = &token->str;
     size_t len = str->length;
     size_t offset = 0;
     
@@ -93,7 +93,7 @@ bool myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 return false;
             }
             
-            myhtml_insertion_fix_emit_for_text_begin_ws(token);
+            myhtml_insertion_fix_emit_for_text_begin_ws(tree->token, token);
             
             // default, other token
             tree->compat_mode = MyHTML_TREE_COMPAT_MODE_QUIRKS;
@@ -109,7 +109,7 @@ bool myhtml_insertion_mode_initial(myhtml_tree_t* tree, myhtml_token_node_t* tok
             
         case MyHTML_TAG__DOCTYPE:
         {
-            myhtml_token_node_wait_for_done(token);
+            myhtml_token_node_wait_for_done(tree->token, token);
             
             myhtml_token_release_and_check_doctype_attributes(tree->token, token, &tree->doctype);
             
@@ -183,7 +183,7 @@ bool myhtml_insertion_mode_before_html(myhtml_tree_t* tree, myhtml_token_node_t*
                     break;
                 }
                 
-                myhtml_insertion_fix_emit_for_text_begin_ws(token);
+                myhtml_insertion_fix_emit_for_text_begin_ws(tree->token, token);
                 
                 // default, other token
                 myhtml_tree_node_insert_root(tree, NULL, MyHTML_NAMESPACE_HTML);
@@ -246,7 +246,7 @@ bool myhtml_insertion_mode_before_head(myhtml_tree_t* tree, myhtml_token_node_t*
                     break;
                 }
                 
-                myhtml_insertion_fix_emit_for_text_begin_ws(token);
+                myhtml_insertion_fix_emit_for_text_begin_ws(tree->token, token);
                 
                 // default, other token
                 tree->node_head = myhtml_tree_node_insert(tree, MyHTML_TAG_HEAD, MyHTML_NAMESPACE_HTML);
@@ -1207,8 +1207,8 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     myhtml_tree_node_t* top_node = tree->open_elements->list[0];
                     
                     if(top_node->token) {
-                        myhtml_token_node_wait_for_done(token);
-                        myhtml_token_node_wait_for_done(top_node->token);
+                        myhtml_token_node_wait_for_done(tree->token, token);
+                        myhtml_token_node_wait_for_done(tree->token, top_node->token);
                         myhtml_token_node_attr_copy_with_check(tree->token, token, top_node->token, tree->mcasync_rules_attr_id);
                     }
                     else {
@@ -1259,8 +1259,8 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     myhtml_tree_node_t* top_node = tree->open_elements->list[1];
                     
                     if(top_node->token) {
-                        myhtml_token_node_wait_for_done(token);
-                        myhtml_token_node_wait_for_done(top_node->token);
+                        myhtml_token_node_wait_for_done(tree->token, token);
+                        myhtml_token_node_wait_for_done(tree->token, top_node->token);
                         myhtml_token_node_attr_copy_with_check(tree->token, token, top_node->token, tree->mcasync_rules_attr_id);
                     }
                     else {
@@ -1701,7 +1701,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 myhtml_tree_node_insert_html_element(tree, token);
                 myhtml_tree_open_elements_pop(tree);
                 
-                myhtml_token_node_wait_for_done(token);
+                myhtml_token_node_wait_for_done(tree->token, token);
                 if(myhtml_token_attr_match_case(tree->token, token, "type", 4, "hidden", 6) == NULL) {
                     tree->flags ^= (tree->flags & MyHTML_TREE_FLAGS_FRAMESET_OK);
                 }
@@ -1902,7 +1902,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 myhtml_tree_active_formatting_reconstruction(tree);
                 
-                myhtml_token_node_wait_for_done(token);
+                myhtml_token_node_wait_for_done(tree->token, token);
                 
                 myhtml_token_adjust_mathml_attributes(token);
                 myhtml_token_adjust_foreign_attributes(token);
@@ -1920,7 +1920,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
             {
                 myhtml_tree_active_formatting_reconstruction(tree);
                 
-                myhtml_token_node_wait_for_done(token);
+                myhtml_token_node_wait_for_done(tree->token, token);
                 
                 myhtml_token_adjust_svg_attributes(token);
                 myhtml_token_adjust_foreign_attributes(token);
@@ -2182,7 +2182,8 @@ bool myhtml_insertion_mode_in_table(myhtml_tree_t* tree, myhtml_token_node_t* to
                 
             case MyHTML_TAG_INPUT:
             {
-                myhtml_token_node_wait_for_done(token);
+                myhtml_token_node_wait_for_done(tree->token, token);
+                
                 if(myhtml_token_attr_match_case(tree->token, token, "type", 4, "hidden", 6) == NULL) {
                     tree->foster_parenting = true;
                     myhtml_insertion_mode_in_body(tree, token);
@@ -3301,7 +3302,7 @@ bool myhtml_insertion_mode_after_body(myhtml_tree_t* tree, myhtml_token_node_t* 
             case MyHTML_TAG__COMMENT:
             {
                 if(tree->open_elements->length == 0) {
-                    MyHTML_DEBUG_ERROR("after body state; open_elements length < 1");
+                    MyCORE_DEBUG_ERROR("after body state; open_elements length < 1");
                     break;
                 }
                 
@@ -3396,8 +3397,8 @@ bool myhtml_insertion_mode_in_frameset(myhtml_tree_t* tree, myhtml_token_node_t*
                 // parse error
                 /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 
-                myhtml_token_node_wait_for_done(token);
-                myhtml_string_stay_only_whitespace(&token->str);
+                myhtml_token_node_wait_for_done(tree->token, token);
+                mycore_string_stay_only_whitespace(&token->str);
                 
                 if(token->str.length)
                     myhtml_tree_node_insert_text(tree, token);
@@ -3488,8 +3489,8 @@ bool myhtml_insertion_mode_after_frameset(myhtml_tree_t* tree, myhtml_token_node
                 // parse error
                 /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_UNNECESSARY ACTION:IGNORE LEVEL:ERROR */
                 
-                myhtml_token_node_wait_for_done(token);
-                myhtml_string_stay_only_whitespace(&token->str);
+                myhtml_token_node_wait_for_done(tree->token, token);
+                mycore_string_stay_only_whitespace(&token->str);
                 
                 if(token->str.length)
                     myhtml_tree_node_insert_text(tree, token);
@@ -3684,7 +3685,7 @@ bool myhtml_insertion_mode_in_foreign_content_start_other(myhtml_tree_t* tree, m
 {
     myhtml_tree_node_t* adjusted_node = myhtml_tree_adjusted_current_node(tree);
     
-    myhtml_token_node_wait_for_done(token);
+    myhtml_token_node_wait_for_done(tree->token, token);
     
     if(adjusted_node->ns == MyHTML_NAMESPACE_MATHML) {
         myhtml_token_adjust_mathml_attributes(token);
@@ -3738,7 +3739,7 @@ bool myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_
                     // parse error
                     /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:NULL_CHAR LEVEL:ERROR */
                     
-                    myhtml_token_node_wait_for_done(token);
+                    myhtml_token_node_wait_for_done(tree->token, token);
                     myhtml_token_set_replacement_character_for_null_token(tree, token);
                 }
                 
@@ -3812,12 +3813,14 @@ bool myhtml_insertion_mode_in_foreign_content(myhtml_tree_t* tree, myhtml_token_
                 
                 if(token->tag_id == MyHTML_TAG_FONT)
                 {
-                    myhtml_token_node_wait_for_done(token);
+                    myhtml_token_node_wait_for_done(tree->token, token);
                     
                     if(myhtml_token_attr_by_name(token, "color", 5) == NULL &&
                        myhtml_token_attr_by_name(token, "face" , 4) == NULL &&
                        myhtml_token_attr_by_name(token, "size" , 4) == NULL)
+                    {
                         return myhtml_insertion_mode_in_foreign_content_start_other(tree, token);
+                    }
                 }
                 
                 if(tree->fragment == NULL) {
@@ -3854,7 +3857,7 @@ bool myhtml_rules_check_for_first_newline(myhtml_tree_t* tree, myhtml_token_node
         if(tree->flags &MyHTML_TREE_FLAGS_PARSE_FLAG_EMIT_NEWLINE)
         {
             if(token->tag_id == MyHTML_TAG__TEXT) {
-                myhtml_token_node_wait_for_done(token);
+                myhtml_token_node_wait_for_done(tree->token, token);
                 
                 if(token->str.length > 0) {
                     if(token->str.data[0] == '\n') {
@@ -3924,9 +3927,9 @@ bool myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* toke
     return reprocess;
 }
 
-myhtml_status_t myhtml_rules_init(myhtml_t* myhtml)
+mystatus_t myhtml_rules_init(myhtml_t* myhtml)
 {
-    myhtml->insertion_func = (myhtml_insertion_f*)myhtml_malloc(sizeof(myhtml_insertion_f) * MyHTML_INSERTION_MODE_LAST_ENTRY);
+    myhtml->insertion_func = (myhtml_insertion_f*)mycore_malloc(sizeof(myhtml_insertion_f) * MyHTML_INSERTION_MODE_LAST_ENTRY);
     
     if(myhtml->insertion_func == NULL)
         return MyHTML_STATUS_RULES_ERROR_MEMORY_ALLOCATION;

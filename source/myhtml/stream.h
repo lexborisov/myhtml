@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -41,17 +41,17 @@ struct myhtml_stream_buffer {
     size_t length;
     size_t size;
     
-    myhtml_encoding_result_t res;
+    myencoding_result_t res;
 };
 
 myhtml_stream_buffer_t * myhtml_stream_buffer_create(void);
-myhtml_status_t myhtml_stream_buffer_init(myhtml_stream_buffer_t* stream_buffer, size_t entries_size);
+mystatus_t myhtml_stream_buffer_init(myhtml_stream_buffer_t* stream_buffer, size_t entries_size);
 void myhtml_stream_buffer_clean(myhtml_stream_buffer_t* stream_buffer);
 myhtml_stream_buffer_t * myhtml_stream_buffer_destroy(myhtml_stream_buffer_t* stream_buffer, bool self_destroy);
 myhtml_stream_buffer_entry_t * myhtml_stream_buffer_add_entry(myhtml_stream_buffer_t* stream_buffer, size_t entry_data_size);
 myhtml_stream_buffer_entry_t * myhtml_stream_buffer_current_entry(myhtml_stream_buffer_t* stream_buffer);
 
-myhtml_status_t myhtml_stream_buffer_entry_init(myhtml_stream_buffer_entry_t* stream_buffer_entry, size_t size);
+mystatus_t myhtml_stream_buffer_entry_init(myhtml_stream_buffer_entry_t* stream_buffer_entry, size_t size);
 void myhtml_stream_buffer_entry_clean(myhtml_stream_buffer_entry_t* stream_buffer_entry);
 myhtml_stream_buffer_entry_t * myhtml_stream_buffer_entry_destroy(myhtml_stream_buffer_entry_t* stream_buffer_entry, bool self_destroy);
 

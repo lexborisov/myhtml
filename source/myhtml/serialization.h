@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2016 Alexander Borisov
+ Copyright (C) 2016-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -31,15 +31,15 @@ extern "C" {
 #endif
 
 // the serialization functions
-bool myhtml_serialization_tree_buffer(myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
-bool myhtml_serialization_node_buffer(myhtml_tree_node_t* node, myhtml_string_raw_t* str);
-bool myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node, myhtml_callback_serialize_f callback, void* ptr);
-bool myhtml_serialization_node_callback(myhtml_tree_node_t* node, myhtml_callback_serialize_f callback, void* ptr);
+mystatus_t myhtml_serialization_tree_buffer(myhtml_tree_node_t* scope_node, mycore_string_raw_t* str);
+mystatus_t myhtml_serialization_node_buffer(myhtml_tree_node_t* node, mycore_string_raw_t* str);
+mystatus_t myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node, mycore_callback_serialize_f callback, void* ptr);
+mystatus_t myhtml_serialization_node_callback(myhtml_tree_node_t* node, mycore_callback_serialize_f callback, void* ptr);
 
 // in versuon 1.0.3 this is in public api.
 // Need to set deprecated?
-bool myhtml_serialization(myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
-bool myhtml_serialization_node(myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+mystatus_t myhtml_serialization(myhtml_tree_node_t* scope_node, mycore_string_raw_t* str);
+mystatus_t myhtml_serialization_node(myhtml_tree_node_t* node, mycore_string_raw_t* str);
 
 #ifdef __cplusplus
 } /* extern "C" */

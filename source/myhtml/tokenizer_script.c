@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -113,7 +113,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
             size_t tmp_size = token_node->str.length;
             const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, tmp_size, 6);
             
-            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
+            if(mycore_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 if(token_node == NULL) {
@@ -146,7 +146,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
             size_t tmp_size = token_node->str.length;
             const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, tmp_size, 6);
             
-            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
+            if(mycore_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 if(token_node == NULL) {
@@ -179,7 +179,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
             size_t tmp_size = token_node->str.length;
             const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, tmp_size, 6);
             
-            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
+            if(mycore_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 if(token_node == NULL) {
@@ -289,7 +289,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
             size_t tmp_size = token_node->str.length;
             const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, tmp_size, 6);
             
-            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
+            if(mycore_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 if(token_node == NULL) {
@@ -322,7 +322,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
             size_t tmp_size = token_node->str.length;
             const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, tmp_size, 6);
             
-            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
+            if(mycore_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 if(token_node == NULL) {
@@ -355,7 +355,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
             size_t tmp_size = token_node->str.length;
             const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, tmp_size, 6);
             
-            if(myhtml_strncasecmp(tem_name, "script", 6) == 0)
+            if(mycore_strncasecmp(tem_name, "script", 6) == 0)
             {
                 token_node = myhtml_tokenizer_queue_create_text_node_if_need(tree, token_node, html, ((html_offset + tree->global_offset) - 8), MyHTML_TOKEN_TYPE_SCRIPT);
                 if(token_node == NULL) {
@@ -455,7 +455,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tre
             size_t tmp_size = token_node->str.length;
             const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, tmp_size, 6);
             
-            if(myhtml_strncasecmp(tem_name, "script", 6) == 0) {
+            if(mycore_strncasecmp(tem_name, "script", 6) == 0) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
             }
             else {
@@ -573,7 +573,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree,
             size_t tmp_size = token_node->str.length;
             const char *tem_name = myhtml_tree_incomming_buffer_make_data(tree, tmp_size, 6);
             
-            if(myhtml_strncasecmp(tem_name, "script", 6) == 0) {
+            if(mycore_strncasecmp(tem_name, "script", 6) == 0) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
             }
             else {

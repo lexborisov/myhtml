@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,14 @@
 
 myhtml_stream_buffer_t * myhtml_stream_buffer_create(void)
 {
-    return myhtml_calloc(1, sizeof(myhtml_stream_buffer_t));
+    return mycore_calloc(1, sizeof(myhtml_stream_buffer_t));
 }
 
-myhtml_status_t myhtml_stream_buffer_init(myhtml_stream_buffer_t* stream_buffer, size_t entries_size)
+mystatus_t myhtml_stream_buffer_init(myhtml_stream_buffer_t* stream_buffer, size_t entries_size)
 {
     stream_buffer->length = 0;
     stream_buffer->size = entries_size;
-    stream_buffer->entries = myhtml_calloc(entries_size, sizeof(myhtml_stream_buffer_entry_t));
+    stream_buffer->entries = mycore_calloc(entries_size, sizeof(myhtml_stream_buffer_entry_t));
     
     if(stream_buffer->entries == NULL)
         return MyHTML_STATUS_STREAM_BUFFER_ERROR_INIT;
@@ -37,18 +37,18 @@ myhtml_status_t myhtml_stream_buffer_init(myhtml_stream_buffer_t* stream_buffer,
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_stream_buffer_entry_init(myhtml_stream_buffer_entry_t* stream_buffer_entry, size_t size)
+mystatus_t myhtml_stream_buffer_entry_init(myhtml_stream_buffer_entry_t* stream_buffer_entry, size_t size)
 {
     if(stream_buffer_entry->data) {
         if(size <= stream_buffer_entry->size)
             return MyHTML_STATUS_OK;
         else
-            myhtml_free(stream_buffer_entry->data);
+            mycore_free(stream_buffer_entry->data);
     }
     
     stream_buffer_entry->length = 0;
     stream_buffer_entry->size = size;
-    stream_buffer_entry->data = myhtml_malloc(size * sizeof(char));
+    stream_buffer_entry->data = mycore_malloc(size * sizeof(char));
     
     if(stream_buffer_entry->data == NULL)
         return MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_INIT;
@@ -68,10 +68,10 @@ myhtml_stream_buffer_entry_t * myhtml_stream_buffer_entry_destroy(myhtml_stream_
         return NULL;
     
     if(stream_buffer_entry->data)
-        myhtml_free(stream_buffer_entry->data);
+        mycore_free(stream_buffer_entry->data);
     
     if(self_destroy) {
-        myhtml_free(stream_buffer_entry);
+        mycore_free(stream_buffer_entry);
         return NULL;
     }
     
@@ -93,11 +93,11 @@ myhtml_stream_buffer_t * myhtml_stream_buffer_destroy(myhtml_stream_buffer_t* st
         for(size_t i = 0; i < stream_buffer->length; i++)
             myhtml_stream_buffer_entry_destroy(&stream_buffer->entries[i], false);
         
-        myhtml_free(stream_buffer->entries);
+        mycore_free(stream_buffer->entries);
     }
     
     if(self_destroy) {
-        myhtml_free(stream_buffer);
+        mycore_free(stream_buffer);
         return NULL;
     }
     
@@ -109,7 +109,7 @@ myhtml_stream_buffer_entry_t * myhtml_stream_buffer_add_entry(myhtml_stream_buff
     if(stream_buffer->length >= stream_buffer->size) {
         size_t new_size = stream_buffer->size << 1;
         
-        myhtml_stream_buffer_entry_t *entries = myhtml_realloc(stream_buffer, sizeof(myhtml_stream_buffer_entry_t) * new_size);
+        myhtml_stream_buffer_entry_t *entries = mycore_realloc(stream_buffer, sizeof(myhtml_stream_buffer_entry_t) * new_size);
         
         if(entries) {
             memset(&entries[stream_buffer->size], 0, (new_size - stream_buffer->size));
@@ -122,7 +122,7 @@ myhtml_stream_buffer_entry_t * myhtml_stream_buffer_add_entry(myhtml_stream_buff
     }
     
     myhtml_stream_buffer_entry_t *entry = &stream_buffer->entries[ stream_buffer->length ];
-    myhtml_status_t status = myhtml_stream_buffer_entry_init(entry, entry_data_size);
+    mystatus_t status = myhtml_stream_buffer_entry_init(entry, entry_data_size);
     
     if(status != MyHTML_STATUS_OK)
         return NULL;

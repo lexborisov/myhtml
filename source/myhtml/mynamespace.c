@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -20,19 +20,19 @@
 
 #include "myhtml/mynamespace.h"
 #include "myhtml/mynamespace_resource.h"
-#include "myhtml/utils/resources.h"
+#include "mycore/utils/resources.h"
 
 const myhtml_namespace_detect_name_entry_t * myhtml_namespace_name_entry_by_name(const char* name, size_t length)
 {
-    size_t idx = ((myhtml_string_chars_lowercase_map[ (const unsigned char)name[0] ] *
-                   myhtml_string_chars_lowercase_map[ (const unsigned char)name[(length - 1)] ] *
+    size_t idx = ((mycore_string_chars_lowercase_map[ (const unsigned char)name[0] ] *
+                   mycore_string_chars_lowercase_map[ (const unsigned char)name[(length - 1)] ] *
                    length)
                   % MyHTML_NAMESPACE_DETECT_NAME_STATIC_SIZE) + 1;
     
     while (myhtml_namespace_detect_name_entry_static_list_index[idx].name)
     {
         if(myhtml_namespace_detect_name_entry_static_list_index[idx].name_length == length) {
-            if(myhtml_strncasecmp(myhtml_namespace_detect_name_entry_static_list_index[idx].name, name, length) == 0)
+            if(mycore_strncasecmp(myhtml_namespace_detect_name_entry_static_list_index[idx].name, name, length) == 0)
                 return &myhtml_namespace_detect_name_entry_static_list_index[idx];
             
             if(myhtml_namespace_detect_name_entry_static_list_index[idx].next)

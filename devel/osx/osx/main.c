@@ -26,6 +26,23 @@
 #include <stdbool.h>
 
 
+void callback_node_insert(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx)
+{
+    printf("Insert: ");
+}
+
+void callback_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx)
+{
+    printf("Delete: ");
+}
+
+mystatus_t serialization_callback(const char* data, size_t len, void* ctx)
+{
+    printf("%.*s", (int)len, data);
+    
+    return MyHTML_STATUS_OK;
+}
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -216,7 +233,7 @@ void html_parser(const char* html, size_t html_length, size_t count)
         printf("\t%zu\n", count);
     }
     
-    myhtml_encoding_t encoding = 0;
+    myencoding_t encoding = 0;
     //myhtml_encoding_detect(html, html_length, &encoding);
     
     // parse html
@@ -338,7 +355,7 @@ struct res_html load_html(const char* filename)
     long l = ftell(f);
     fseek(f, 0L, SEEK_SET);
     
-    char *html = (char*)myhtml_malloc(l);
+    char *html = (char*)mycore_malloc(l);
     fread(html, 1, l, f);
     
     fclose(f);
@@ -358,7 +375,7 @@ void chunk_test(void)
     myhtml_tree_t* tree = myhtml_tree_create();
     myhtml_tree_init(tree, myhtml);
     
-    myhtml_encoding_set(tree, MyHTML_ENCODING_UTF_8);
+    myhtml_encoding_set(tree, MyENCODING_UTF_8);
     
     size_t begin = 0, i = 0;
     while (i < res.size)
@@ -388,7 +405,7 @@ void chunk_test(void)
     }
     printf("\n");
     
-    myhtml_tree_print_node_children(tree, tree->document, stdout, 0);
+    myhtml_serialization_tree_callback(tree->node_html, serialization_callback, NULL);
     
     myhtml_tree_destroy(tree);
     myhtml_destroy(myhtml);
@@ -720,11 +737,11 @@ void chunk_process(struct chunk_res_test *res_test, struct chunk_res_result *res
     //printf("%.*s\n", res_test->data.len, res_test->data.html);
     
     if(result->is_fragment == false) {
-        myhtml_parse_single(result->tree, MyHTML_ENCODING_UTF_8, res_test->data.html, res_test->data.len);
+        myhtml_parse_single(result->tree, MyENCODING_UTF_8, res_test->data.html, res_test->data.len);
         print_tree(result->tree, result->tree->document->child, &data, 0);
     }
     else {
-        myhtml_parse_fragment_single(result->tree, MyHTML_ENCODING_UTF_8, res_test->data.html, res_test->data.len, result->tag_id, result->ns);
+        myhtml_parse_fragment_single(result->tree, MyENCODING_UTF_8, res_test->data.html, res_test->data.len, result->tag_id, result->ns);
         print_tree(result->tree, result->tree->document->child->child, &data, 0);
     }
     
@@ -749,7 +766,8 @@ void chunk_process(struct chunk_res_test *res_test, struct chunk_res_result *res
     }
     
     myhtml_tree_clean(result->tree);
-    mythread_clean(result->tree->myhtml->thread);
+    mythread_clean(result->tree->myhtml->thread_batch);
+    mythread_clean(result->tree->myhtml->thread_stream);
     
     free(data.html);
 }
@@ -926,8 +944,10 @@ void read_dir(const char* from_dir)
 
 void test_mchar_async(void)
 {
-    mchar_async_t *mchar = mchar_async_create(2, 128);
-    size_t node_id = mchar_async_node_add(mchar);
+    mchar_async_t *mchar = mchar_async_create();
+    mchar_async_init(mchar, 2, 128);
+    
+    size_t node_id = mchar_async_node_add(mchar, NULL);
     
     for (size_t i = 0; i < 10000; i++) {
         char *data = mchar_async_malloc(mchar, node_id, 132);
@@ -1009,7 +1029,7 @@ int maindfdf()
     res = myhtml_tree_init(tree, myhtml);
     
     // parse html
-    myhtml_parse(tree, MyHTML_ENCODING_UTF_8, data.html, data.size);
+    myhtml_parse(tree, MyENCODING_UTF_8, data.html, data.size);
     
     walk_subtree(tree, myhtml_tree_get_node_html(tree), 0);
     printf("\n");
@@ -1060,7 +1080,7 @@ void test_all(void)
                 myhtml_tree_t* tree = myhtml_tree_create();
                 myhtml_tree_init(tree, myhtml);
                 
-                myhtml_parse(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
+                myhtml_parse(tree, MyENCODING_UTF_8, res.html, res.size);
                 
                 myhtml_tree_destroy(tree);
                 
@@ -1083,36 +1103,6 @@ void test_all(void)
     
     
     myhtml_destroy(myhtml);
-}
-
-void callback_node_insert(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx)
-{
-    printf("Insert: ");
-    myhtml_tree_print_node(tree, node, stdout);
-}
-
-void callback_node_delete(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx)
-{
-    printf("Delete: ");
-    myhtml_tree_print_node(tree, node, stdout);
-}
-
-void serialization_callback(const char* data, size_t len, void* ctx)
-{
-    printf("%.*s", (int)len, data);
-}
-
-void myhtml_print_text_with_recursion(myhtml_tree_t* tree, myhtml_tree_node_t* scope_node)
-{
-    if(scope_node->tag_id == MyHTML_TAG__TEXT) {
-        const char* text = myhtml_node_text(scope_node, NULL);
-        printf("%s", text);
-    }
-    
-    if(scope_node->child)
-        myhtml_print_text_with_recursion(tree, scope_node->child);
-    if(scope_node->next)
-        myhtml_print_text_with_recursion(tree, scope_node->next);
 }
 
 int main(int argc, const char * argv[])
@@ -1172,7 +1162,8 @@ int main(int argc, const char * argv[])
 //    const char* path = "/new/Test/html_files/http-5fan.ru_wievjob.php_id=16163.html";
 //    const char* path = "/new/Test/html_files/http-www.unodc.org_documents_scientific_MLD-06-58676_Vol_2_ebook.pdf.html";
 //    const char* path = "/new/C-git/broken.html";
-    const char* path = "/new/C-git/test_full.html";
+    const char* path = "/new/test.html";
+    //const char* path = "/Users/alexanderborisov/Downloads/7d7bcd3501287e32efb98db4ae3657bc-f97da05d0ebfb1b6574d8882e47a9fa3b0943bc9/2.html";
 //    const char* path = "/new/C-git/scribble/temp/http___1tulatv.ru_2016_08_09_55575-pogoda-v-tule-na-10-avgusta.html.html";
 //    const char* path = "/new/html_parsers/test_large_4.html";
     
@@ -1200,9 +1191,6 @@ int main(int argc, const char * argv[])
 //    mythread_run_all(myhtml->thread, MyTHREAD_OPT_UNDEF);
 //    mythread_stop_all(myhtml->thread);
     
-    uint64_t all_start = myhtml_hperf_clock(NULL);
-    uint64_t tree_init_start = myhtml_hperf_clock(NULL);
-    
     myhtml_tree_t* tree = myhtml_tree_create();
     myhtml_tree_init(tree, myhtml);
     
@@ -1215,13 +1203,10 @@ int main(int argc, const char * argv[])
 //    myhtml_encoding_t encoding;
 //    myhtml_encoding_detect(res.html, res.size, &encoding);
     
-    uint64_t tree_init_stop = myhtml_hperf_clock(NULL);
-    uint64_t parse_start = myhtml_hperf_clock(NULL);
-    
-    for(size_t i = 0; i < 1; i++)
+    for(size_t i = 0; i < 1000; i++)
     {
         //tree->flags |= MyHTML_TREE_FLAGS_SCRIPT;
-        myhtml_parse(tree, MyHTML_ENCODING_UTF_8, res.html, res.size);
+        myhtml_parse(tree, MyENCODING_UTF_8, res.html, res.size);
         
 //        myhtml_parse_fragment(tree, MyHTML_ENCODING_UTF_8, res.html, res.size, MyHTML_TAG_ANNOTATION_XML, MyHTML_NAMESPACE_MATHML);
         
@@ -1229,12 +1214,12 @@ int main(int argc, const char * argv[])
         
 //        myhtml_collection_t *collection = myhtml_get_nodes_by_tag_id(tree, NULL, MyHTML_TAG_CODE, NULL);
         
-//        myhtml_string_raw_t str_raw;
-//        if(myhtml_serialization(tree, tree->document, &str_raw)) {
+//        myhtml_string_raw_t str_raw = {0};
+//        if(myhtml_serialization(tree->node_html, &str_raw)) {
 //            printf("%s", str_raw.data);
 //        }
         
-//        myhtml_tree_print_node_children(tree, tree->document, stdout, 0);
+        //myhtml_serialization_tree_callback(tree->node_html, serialization_callback, NULL);
     }
     
 //    myhtml_collection_t *coll_p = myhtml_get_nodes_by_tag_id(tree, NULL, MyHTML_TAG_A, NULL);
@@ -1298,9 +1283,6 @@ int main(int argc, const char * argv[])
     
     //myhtml_serialization_tree_callback(tree, tree->node_html, serialization_callback, NULL);
     
-    uint64_t parse_stop = myhtml_hperf_clock(NULL);
-    uint64_t all_stop = myhtml_hperf_clock(NULL);
-    
 //    myhtml_tree_node_t *node = myhtml_tree_get_node_body(tree);
 //    
 //    printf("For a test; Create and delete 100000 attrs...\n");
@@ -1321,10 +1303,6 @@ int main(int argc, const char * argv[])
     
     
     printf("\n\nInformation:\n");
-    printf("Timer (%llu ticks/sec):\n", (unsigned long long) myhtml_hperf_res(NULL));
-    myhtml_hperf_print("\tFirst Tree init", tree_init_start, tree_init_stop, stdout);
-    myhtml_hperf_print("\tParse html", parse_start, parse_stop, stdout);
-    myhtml_hperf_print("\tTotal", all_start, all_stop, stdout);
     printf("\n");
     
 //    usleep(121212121212);

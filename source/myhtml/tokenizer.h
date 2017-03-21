@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -27,23 +27,23 @@ extern "C" {
 #endif
 
 #include "myhtml/myosi.h"
-#include "myhtml/utils.h"
+#include "mycore/utils.h"
+#include "mycore/mythread.h"
 #include "myhtml/myhtml.h"
 #include "myhtml/tag.h"
-#include "myhtml/thread.h"
 #include "myhtml/tokenizer_doctype.h"
 #include "myhtml/tokenizer_script.h"
 #include "myhtml/tokenizer_end.h"
-    
+
 #define myhtml_tokenizer_inc_html_offset(offset, size)   \
     offset++;                                            \
     if(offset >= size)                                   \
         return offset
 
-myhtml_status_t myhtml_tokenizer_begin(myhtml_tree_t* tree, const char* html, size_t html_length);
-myhtml_status_t myhtml_tokenizer_chunk(myhtml_tree_t* tree, const char* html, size_t html_length);
-myhtml_status_t myhtml_tokenizer_chunk_with_stream_buffer(myhtml_tree_t* tree, const char* html, size_t html_length);
-myhtml_status_t myhtml_tokenizer_end(myhtml_tree_t* tree);
+mystatus_t myhtml_tokenizer_begin(myhtml_tree_t* tree, const char* html, size_t html_length);
+mystatus_t myhtml_tokenizer_chunk(myhtml_tree_t* tree, const char* html, size_t html_length);
+mystatus_t myhtml_tokenizer_chunk_with_stream_buffer(myhtml_tree_t* tree, const char* html, size_t html_length);
+mystatus_t myhtml_tokenizer_end(myhtml_tree_t* tree);
 void myhtml_tokenizer_set_state(myhtml_tree_t* tree, myhtml_token_node_t* token_node);
 
 void myhtml_tokenizer_calc_current_namespace(myhtml_tree_t* tree, myhtml_token_node_t* token_node);
@@ -54,7 +54,7 @@ void myhtml_tokenizer_wait(myhtml_tree_t* tree);
 void myhtml_tokenizer_post(myhtml_tree_t* tree);
 void myhtml_tokenizer_pause(myhtml_tree_t* tree);
 
-myhtml_status_t myhtml_tokenizer_state_init(myhtml_t* myhtml);
+mystatus_t myhtml_tokenizer_state_init(myhtml_t* myhtml);
 void myhtml_tokenizer_state_destroy(myhtml_t* myhtml);
 
 myhtml_token_node_t * myhtml_tokenizer_queue_create_text_node_if_need(myhtml_tree_t* tree, myhtml_token_node_t* token_node, const char* html, size_t absolute_html_offset, enum myhtml_token_type type);

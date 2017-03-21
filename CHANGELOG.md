@@ -1,8 +1,21 @@
-3.0.2
+4.0.0
 ===========
-now()
+March 21, 2017
 
+* API breaking changes!!! 
+* MyHTML split to MyCORE, MyHTML, MyENCODING. MyCORE is a base module which include shared functions for all others modules.
+* Removed all io print functions to file: ```myhtml_tree_print_by_node```, ```myhtml_tree_print_node_children```, ```myhtml_tree_print_node```; Use serializations instead of their
+* If you use encoding enum, like ```MyHTML_ENCODING_UTF8```, now it ```MyENCODING_UTF_8```, i.e ```MyHTML_ENCODING_* => MyENCODING_*```
+* Functions migrated to MyCORE from MyHTML: ```myhtml_incoming_buffer_*``` => ```mycore_incoming_buffer_*```, ```myhtml_string*``` => ```mycore_string*```, ```myhtml_utils*``` => ```mycore_utils*```
+* Fully refactoring build system with GNU Make (Makefile), now it expects generally accepted parameters and rules, like ```install```, ```clean```, ```library``` and [other]()
+* Tested create a DLL library for Windows OS
+* Support [create ports](https://github.com/lexborisov/Modest/wiki/Add-new-port) for different OS or for simple change work with memory, io, threads (if build with threads, default)
+* Support [add self modules](https://github.com/lexborisov/Modest/wiki/Add-new-module) for build library
+* Now all return statuses, like a ```myhtml_status_t```, ```mycss_status_t``` changed to global `mystatus_t` (unsigned int)
 * Added forgot '\0' if text node ends with '\r' [#91](https://github.com/lexborisov/myhtml/issues/91)
+* Remove CMakeLists.txt
+* Added PKG-CONFIG *.pc after make command
+
 
 3.0.1
 ===========

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -34,13 +34,21 @@
  *
  */
 
-#define MyHTML_VERSION_MAJOR 3
+#define MyHTML_VERSION_MAJOR 4
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 2
+#define MyHTML_VERSION_PATCH 0
+
+#define MyHTML_VERSION_STRING MyCORE_STR(MyHTML_VERSION_MAJOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_MINOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_PATCH)
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+
+#include <mycore/myosi.h>
+#include <mycore/incoming.h>
+#include <mycore/mystring.h>
+#include <mycore/utils/mchar_async.h>
+#include <myencoding/myosi.h>
 
 #if defined(_MSC_VER)
 #  define MyHTML_DEPRECATED(func) __declspec(deprecated) func
@@ -53,56 +61,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * encodings type
- */
-enum myhtml_encoding_list {
-    MyHTML_ENCODING_DEFAULT        = 0x00,
-//  MyHTML_ENCODING_AUTO           = 0x01, // future
-    MyHTML_ENCODING_NOT_DETERMINED = 0x02,
-    MyHTML_ENCODING_UTF_8          = 0x00, // default encoding
-    MyHTML_ENCODING_UTF_16LE       = 0x04,
-    MyHTML_ENCODING_UTF_16BE       = 0x05,
-    MyHTML_ENCODING_X_USER_DEFINED = 0x06,
-    MyHTML_ENCODING_BIG5           = 0x07,
-    MyHTML_ENCODING_EUC_JP         = 0x08,
-    MyHTML_ENCODING_EUC_KR         = 0x09,
-    MyHTML_ENCODING_GB18030        = 0x0a,
-    MyHTML_ENCODING_GBK            = 0x0b,
-    MyHTML_ENCODING_IBM866         = 0x0c,
-    MyHTML_ENCODING_ISO_2022_JP    = 0x0d,
-    MyHTML_ENCODING_ISO_8859_10    = 0x0e,
-    MyHTML_ENCODING_ISO_8859_13    = 0x0f,
-    MyHTML_ENCODING_ISO_8859_14    = 0x10,
-    MyHTML_ENCODING_ISO_8859_15    = 0x11,
-    MyHTML_ENCODING_ISO_8859_16    = 0x12,
-    MyHTML_ENCODING_ISO_8859_2     = 0x13,
-    MyHTML_ENCODING_ISO_8859_3     = 0x14,
-    MyHTML_ENCODING_ISO_8859_4     = 0x15,
-    MyHTML_ENCODING_ISO_8859_5     = 0x16,
-    MyHTML_ENCODING_ISO_8859_6     = 0x17,
-    MyHTML_ENCODING_ISO_8859_7     = 0x18,
-    MyHTML_ENCODING_ISO_8859_8     = 0x19,
-    MyHTML_ENCODING_ISO_8859_8_I   = 0x1a,
-    MyHTML_ENCODING_KOI8_R         = 0x1b,
-    MyHTML_ENCODING_KOI8_U         = 0x1c,
-    MyHTML_ENCODING_MACINTOSH      = 0x1d,
-    MyHTML_ENCODING_SHIFT_JIS      = 0x1e,
-    MyHTML_ENCODING_WINDOWS_1250   = 0x1f,
-    MyHTML_ENCODING_WINDOWS_1251   = 0x20,
-    MyHTML_ENCODING_WINDOWS_1252   = 0x21,
-    MyHTML_ENCODING_WINDOWS_1253   = 0x22,
-    MyHTML_ENCODING_WINDOWS_1254   = 0x23,
-    MyHTML_ENCODING_WINDOWS_1255   = 0x24,
-    MyHTML_ENCODING_WINDOWS_1256   = 0x25,
-    MyHTML_ENCODING_WINDOWS_1257   = 0x26,
-    MyHTML_ENCODING_WINDOWS_1258   = 0x27,
-    MyHTML_ENCODING_WINDOWS_874    = 0x28,
-    MyHTML_ENCODING_X_MAC_CYRILLIC = 0x29,
-    MyHTML_ENCODING_LAST_ENTRY     = 0x2a
-}
-typedef myhtml_encoding_t;
 
 /**
  * @struct basic tag ids
@@ -384,54 +342,27 @@ enum myhtml_status {
     MyHTML_STATUS_OK                                   = 0x0000,
     MyHTML_STATUS_ERROR                                = 0x0001,
     MyHTML_STATUS_ERROR_MEMORY_ALLOCATION              = 0x0002,
-    MyHTML_STATUS_THREAD_ERROR_MEMORY_ALLOCATION       = 0x0009,
-    MyHTML_STATUS_THREAD_ERROR_LIST_INIT               = 0x000a,
-    MyHTML_STATUS_THREAD_ERROR_ATTR_MALLOC             = 0x000b,
-    MyHTML_STATUS_THREAD_ERROR_ATTR_INIT               = 0x000c,
-    MyHTML_STATUS_THREAD_ERROR_ATTR_SET                = 0x000d,
-    MyHTML_STATUS_THREAD_ERROR_ATTR_DESTROY            = 0x000e,
-    MyHTML_STATUS_THREAD_ERROR_NO_SLOTS                = 0x000f,
-    MyHTML_STATUS_THREAD_ERROR_BATCH_INIT              = 0x0010,
-    MyHTML_STATUS_THREAD_ERROR_WORKER_MALLOC           = 0x0011,
-    MyHTML_STATUS_THREAD_ERROR_WORKER_SEM_CREATE       = 0x0012,
-    MyHTML_STATUS_THREAD_ERROR_WORKER_THREAD_CREATE    = 0x0013,
-    MyHTML_STATUS_THREAD_ERROR_MASTER_THREAD_CREATE    = 0x0014,
-    MyHTML_STATUS_THREAD_ERROR_SEM_PREFIX_MALLOC       = 0x0032,
-    MyHTML_STATUS_THREAD_ERROR_SEM_CREATE              = 0x0033,
-    MyHTML_STATUS_THREAD_ERROR_QUEUE_MALLOC            = 0x003c,
-    MyHTML_STATUS_THREAD_ERROR_QUEUE_NODES_MALLOC      = 0x003d,
-    MyHTML_STATUS_THREAD_ERROR_QUEUE_NODE_MALLOC       = 0x003e,
-    MyHTML_STATUS_THREAD_ERROR_MUTEX_MALLOC            = 0x0046,
-    MyHTML_STATUS_THREAD_ERROR_MUTEX_INIT              = 0x0047,
-    MyHTML_STATUS_THREAD_ERROR_MUTEX_LOCK              = 0x0048,
-    MyHTML_STATUS_THREAD_ERROR_MUTEX_UNLOCK            = 0x0049,
-    MyHTML_STATUS_RULES_ERROR_MEMORY_ALLOCATION        = 0x0064,
-    MyHTML_STATUS_PERF_ERROR_COMPILED_WITHOUT_PERF     = 0x00c8,
-    MyHTML_STATUS_PERF_ERROR_FIND_CPU_CLOCK            = 0x00c9,
-    MyHTML_STATUS_TOKENIZER_ERROR_MEMORY_ALLOCATION    = 0x012c,
-    MyHTML_STATUS_TOKENIZER_ERROR_FRAGMENT_INIT        = 0x012d,
-    MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION         = 0x0190,
-    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE           = 0x0191,
-    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_MALLOC           = 0x0192,
-    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE_NODE      = 0x0193,
-    MyHTML_STATUS_TAGS_ERROR_CACHE_MEMORY_ALLOCATION   = 0x0194,
-    MyHTML_STATUS_TAGS_ERROR_INDEX_MEMORY_ALLOCATION   = 0x0195,
-    MyHTML_STATUS_TREE_ERROR_MEMORY_ALLOCATION         = 0x01f4,
-    MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE           = 0x01f5,
-    MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT             = 0x01f6,
-    MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE      = 0x01f7,
-    MyHTML_STATUS_TREE_ERROR_INCOMING_BUFFER_CREATE    = 0x01f8,
-    MyHTML_STATUS_ATTR_ERROR_ALLOCATION                = 0x0258,
-    MyHTML_STATUS_ATTR_ERROR_CREATE                    = 0x0259,
-    MyHTML_STATUS_STREAM_BUFFER_ERROR_CREATE           = 0x0300,
-    MyHTML_STATUS_STREAM_BUFFER_ERROR_INIT             = 0x0301,
-    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_CREATE     = 0x0302,
-    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_INIT       = 0x0303,
-    MyHTML_STATUS_STREAM_BUFFER_ERROR_ADD_ENTRY        = 0x0304,
-    MyHTML_STATUS_MCOBJECT_ERROR_CACHE_CREATE          = 0x0340,
-    MyHTML_STATUS_MCOBJECT_ERROR_CHUNK_CREATE          = 0x0341,
-    MyHTML_STATUS_MCOBJECT_ERROR_CHUNK_INIT            = 0x0342,
-    MyHTML_STATUS_MCOBJECT_ERROR_CACHE_REALLOC         = 0x0343
+    MyHTML_STATUS_RULES_ERROR_MEMORY_ALLOCATION        = 0x9064,
+    MyHTML_STATUS_TOKENIZER_ERROR_MEMORY_ALLOCATION    = 0x912c,
+    MyHTML_STATUS_TOKENIZER_ERROR_FRAGMENT_INIT        = 0x912d,
+    MyHTML_STATUS_TAGS_ERROR_MEMORY_ALLOCATION         = 0x9190,
+    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE           = 0x9191,
+    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_MALLOC           = 0x9192,
+    MyHTML_STATUS_TAGS_ERROR_MCOBJECT_CREATE_NODE      = 0x9193,
+    MyHTML_STATUS_TAGS_ERROR_CACHE_MEMORY_ALLOCATION   = 0x9194,
+    MyHTML_STATUS_TAGS_ERROR_INDEX_MEMORY_ALLOCATION   = 0x9195,
+    MyHTML_STATUS_TREE_ERROR_MEMORY_ALLOCATION         = 0x91f4,
+    MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE           = 0x91f5,
+    MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT             = 0x91f6,
+    MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE      = 0x91f7,
+    MyHTML_STATUS_TREE_ERROR_INCOMING_BUFFER_CREATE    = 0x91f8,
+    MyHTML_STATUS_ATTR_ERROR_ALLOCATION                = 0x9258,
+    MyHTML_STATUS_ATTR_ERROR_CREATE                    = 0x9259,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_CREATE           = 0x9300,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_INIT             = 0x9301,
+    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_CREATE     = 0x9302,
+    MyHTML_STATUS_STREAM_BUFFER_ENTRY_ERROR_INIT       = 0x9303,
+    MyHTML_STATUS_STREAM_BUFFER_ERROR_ADD_ENTRY        = 0x9304
 }
 typedef myhtml_status_t;
 
@@ -492,6 +423,11 @@ typedef struct myhtml myhtml_t;
  */
 typedef struct myhtml_tree myhtml_tree_t;
 
+/**
+ * @struct myhtml_token_t MyHTML_TOKEN
+ */
+typedef struct myhtml_token myhtml_token_t;
+
 typedef struct myhtml_token_attr myhtml_tree_attr_t;
 typedef struct myhtml_tree_node myhtml_tree_node_t;
 
@@ -501,39 +437,6 @@ typedef struct myhtml_tree_node myhtml_tree_node_t;
  */
 typedef size_t myhtml_tag_id_t;
 typedef struct myhtml_tag myhtml_tag_t;
-
-/**
- * MCHAR_ASYNC structures
- *
- */
-typedef struct mchar_async mchar_async_t;
-
-/**
- * MyHTML_INCOMING structures
- *
- */
-typedef struct myhtml_incoming_buffer myhtml_incoming_buffer_t;
-
-/**
- * MyHTML_STRING structures
- *
- */
-struct myhtml_string {
-    char*  data;
-    size_t size;
-    size_t length;
-    
-    mchar_async_t *mchar;
-    size_t node_idx;
-}
-typedef myhtml_string_t;
-
-struct myhtml_string_raw {
-    char*  data;
-    size_t size;
-    size_t length;
-}
-typedef myhtml_string_raw_t;
 
 /**
  * @struct myhtml_collection_t
@@ -572,7 +475,6 @@ typedef myhtml_version_t;
 // callback functions
 typedef void* (*myhtml_callback_token_f)(myhtml_tree_t* tree, myhtml_token_node_t* token, void* ctx);
 typedef void (*myhtml_callback_tree_node_f)(myhtml_tree_t* tree, myhtml_tree_node_t* node, void* ctx);
-typedef void (*myhtml_callback_serialize_f)(const char* buffer, size_t size, void* ctx);
 
 /***********************************************************************************
  *
@@ -602,7 +504,7 @@ myhtml_create(void);
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status value.
  */
-myhtml_status_t
+mystatus_t
 myhtml_init(myhtml_t* myhtml, enum myhtml_options opt,
             size_t thread_count, size_t queue_size);
 
@@ -627,7 +529,7 @@ myhtml_destroy(myhtml_t* myhtml);
  * Parsing HTML
  *
  * @param[in] previously created structure myhtml_tree_t*
- * @param[in] Input character encoding; Default: MyHTML_ENCODING_UTF_8 or MyHTML_ENCODING_DEFAULT or 0
+ * @param[in] Input character encoding; Default: MyENCODING_UTF_8 or MyENCODING_DEFAULT or 0
  * @param[in] HTML
  * @param[in] HTML size
  *
@@ -635,15 +537,15 @@ myhtml_destroy(myhtml_t* myhtml);
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
-myhtml_parse(myhtml_tree_t* tree, myhtml_encoding_t encoding,
+mystatus_t
+myhtml_parse(myhtml_tree_t* tree, myencoding_t encoding,
              const char* html, size_t html_size);
 
 /**
  * Parsing fragment of HTML
  *
  * @param[in] previously created structure myhtml_tree_t*
- * @param[in] Input character encoding; Default: MyHTML_ENCODING_UTF_8 or MyHTML_ENCODING_DEFAULT or 0
+ * @param[in] Input character encoding; Default: MyENCODING_UTF_8 or MyENCODING_DEFAULT or 0
  * @param[in] HTML
  * @param[in] HTML size
  * @param[in] fragment base (root) tag id. Default: MyHTML_TAG_DIV if set 0
@@ -653,8 +555,8 @@ myhtml_parse(myhtml_tree_t* tree, myhtml_encoding_t encoding,
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
-myhtml_parse_fragment(myhtml_tree_t* tree, myhtml_encoding_t encoding,
+mystatus_t
+myhtml_parse_fragment(myhtml_tree_t* tree, myencoding_t encoding,
                       const char* html, size_t html_size,
                       myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
@@ -663,7 +565,7 @@ myhtml_parse_fragment(myhtml_tree_t* tree, myhtml_encoding_t encoding,
  * No matter what was said during initialization MyHTML
  *
  * @param[in] previously created structure myhtml_tree_t*
- * @param[in] Input character encoding; Default: MyHTML_ENCODING_UTF_8 or MyHTML_ENCODING_DEFAULT or 0
+ * @param[in] Input character encoding; Default: MyENCODING_UTF_8 or MyENCODING_DEFAULT or 0
  * @param[in] HTML
  * @param[in] HTML size
  *
@@ -671,8 +573,8 @@ myhtml_parse_fragment(myhtml_tree_t* tree, myhtml_encoding_t encoding,
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
-myhtml_parse_single(myhtml_tree_t* tree, myhtml_encoding_t encoding,
+mystatus_t
+myhtml_parse_single(myhtml_tree_t* tree, myencoding_t encoding,
                     const char* html, size_t html_size);
 
 /**
@@ -680,7 +582,7 @@ myhtml_parse_single(myhtml_tree_t* tree, myhtml_encoding_t encoding,
  * No matter what was said during initialization MyHTML
  *
  * @param[in] previously created structure myhtml_tree_t*
- * @param[in] Input character encoding; Default: MyHTML_ENCODING_UTF_8 or MyHTML_ENCODING_DEFAULT or 0
+ * @param[in] Input character encoding; Default: MyENCODING_UTF_8 or MyENCODING_DEFAULT or 0
  * @param[in] HTML
  * @param[in] HTML size
  * @param[in] fragment base (root) tag id. Default: MyHTML_TAG_DIV if set 0
@@ -690,8 +592,8 @@ myhtml_parse_single(myhtml_tree_t* tree, myhtml_encoding_t encoding,
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
-myhtml_parse_fragment_single(myhtml_tree_t* tree, myhtml_encoding_t encoding,
+mystatus_t
+myhtml_parse_fragment_single(myhtml_tree_t* tree, myencoding_t encoding,
                              const char* html, size_t html_size,
                              myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
@@ -704,7 +606,7 @@ myhtml_parse_fragment_single(myhtml_tree_t* tree, myhtml_encoding_t encoding,
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
+mystatus_t
 myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t html_size);
 
 /**
@@ -718,7 +620,7 @@ myhtml_parse_chunk(myhtml_tree_t* tree, const char* html, size_t html_size);
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
+mystatus_t
 myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html,size_t html_size,
                             myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
@@ -732,7 +634,7 @@ myhtml_parse_chunk_fragment(myhtml_tree_t* tree, const char* html,size_t html_si
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
+mystatus_t
 myhtml_parse_chunk_single(myhtml_tree_t* tree, const char* html, size_t html_size);
 
 /**
@@ -747,7 +649,7 @@ myhtml_parse_chunk_single(myhtml_tree_t* tree, const char* html, size_t html_siz
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
+mystatus_t
 myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t html_size,
                                    myhtml_tag_id_t tag_id, enum myhtml_namespace ns);
 
@@ -758,7 +660,7 @@ myhtml_parse_chunk_fragment_single(myhtml_tree_t* tree, const char* html, size_t
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
+mystatus_t
 myhtml_parse_chunk_end(myhtml_tree_t* tree);
 
 /***********************************************************************************
@@ -783,7 +685,7 @@ myhtml_tree_create(void);
  *
  * @return MyHTML_STATUS_OK if successful, otherwise an error status
  */
-myhtml_status_t
+mystatus_t
 myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml);
 
 /**
@@ -936,47 +838,13 @@ size_t
 myhtml_tree_get_mchar_node_id(myhtml_tree_t* tree);
 
 /**
- * Print tree of a node. Print including current node
- *
- * @param[in] myhtml_tree_t*
- * @param[in] myhtml_tree_node_t*
- * @param[in] file handle, for example use stdout
- * @param[in] tab (\t) increment for pretty print, set 0
- */
-void
-myhtml_tree_print_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node,
-                          FILE* out, size_t inc);
-
-/**
- * Print tree of a node. Print excluding current node
- *
- * @param[in] myhtml_tree_t*
- * @param[in] myhtml_tree_node_t*
- * @param[in] file handle, for example use stdout
- * @param[in] tab (\t) increment for pretty print, set 0
- */
-void
-myhtml_tree_print_node_children(myhtml_tree_t* tree, myhtml_tree_node_t* node,
-                                FILE* out, size_t inc);
-
-/**
- * Print a node
- *
- * @param[in] myhtml_tree_t*
- * @param[in] myhtml_tree_node_t*
- * @param[in] file handle, for example use stdout
- */
-void
-myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out);
-
-/**
  * Get first Incoming Buffer
  *
  * @param[in] myhtml_tree_t*
  *
- * @return myhtml_incoming_buffer_t* if successful, otherwise a NULL value
+ * @return mycore_incoming_buffer_t* if successful, otherwise a NULL value
  */
-myhtml_incoming_buffer_t*
+mycore_incoming_buffer_t*
 myhtml_tree_incoming_buffer_first(myhtml_tree_t *tree);
 
 /***********************************************************************************
@@ -1007,7 +875,7 @@ myhtml_node_first(myhtml_tree_t* tree);
  */
 myhtml_collection_t*
 myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection,
-                           myhtml_tag_id_t tag_id, myhtml_status_t *status);
+                           myhtml_tag_id_t tag_id, mystatus_t *status);
 
 /**
  * Get nodes by tag name
@@ -1022,7 +890,7 @@ myhtml_get_nodes_by_tag_id(myhtml_tree_t* tree, myhtml_collection_t *collection,
  */
 myhtml_collection_t*
 myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection,
-                         const char* name, size_t length, myhtml_status_t *status);
+                         const char* name, size_t length, mystatus_t *status);
 
 /**
  * Get nodes by attribute key
@@ -1039,7 +907,7 @@ myhtml_get_nodes_by_name(myhtml_tree_t* tree, myhtml_collection_t *collection,
 myhtml_collection_t*
 myhtml_get_nodes_by_attribute_key(myhtml_tree_t *tree, myhtml_collection_t* collection,
                                   myhtml_tree_node_t* scope_node,
-                                  const char* key, size_t key_len, myhtml_status_t* status);
+                                  const char* key, size_t key_len, mystatus_t* status);
 
 /**
  * Get nodes by attribute value; exactly equal; like a [foo="bar"]
@@ -1063,7 +931,7 @@ myhtml_get_nodes_by_attribute_value(myhtml_tree_t *tree,
                                     bool case_insensitive,
                                     const char* key, size_t key_len,
                                     const char* value, size_t value_len,
-                                    myhtml_status_t* status);
+                                    mystatus_t* status);
 
 /**
  * Get nodes by attribute value; whitespace separated; like a [foo~="bar"]
@@ -1089,7 +957,7 @@ myhtml_get_nodes_by_attribute_value_whitespace_separated(myhtml_tree_t *tree,
                                                          bool case_insensitive,
                                                          const char* key, size_t key_len,
                                                          const char* value, size_t value_len,
-                                                         myhtml_status_t* status);
+                                                         mystatus_t* status);
 
 /**
  * Get nodes by attribute value; value begins exactly with the string; like a [foo^="bar"]
@@ -1115,7 +983,7 @@ myhtml_get_nodes_by_attribute_value_begin(myhtml_tree_t *tree,
                                           bool case_insensitive,
                                           const char* key, size_t key_len,
                                           const char* value, size_t value_len,
-                                          myhtml_status_t* status);
+                                          mystatus_t* status);
 
 
 /**
@@ -1142,7 +1010,7 @@ myhtml_get_nodes_by_attribute_value_end(myhtml_tree_t *tree,
                                         bool case_insensitive,
                                         const char* key, size_t key_len,
                                         const char* value, size_t value_len,
-                                        myhtml_status_t* status);
+                                        mystatus_t* status);
 
 /**
  * Get nodes by attribute value; value contains the substring; like a [foo*="bar"]
@@ -1168,7 +1036,7 @@ myhtml_get_nodes_by_attribute_value_contain(myhtml_tree_t *tree,
                                             bool case_insensitive,
                                             const char* key, size_t key_len,
                                             const char* value, size_t value_len,
-                                            myhtml_status_t* status);
+                                            mystatus_t* status);
 
 /**
  * Get nodes by attribute value; attribute value is a hyphen-separated list of values beginning; 
@@ -1193,7 +1061,7 @@ myhtml_get_nodes_by_attribute_value_hyphen_separated(myhtml_tree_t *tree,
                                                      bool case_insensitive,
                                                      const char* key, size_t key_len,
                                                      const char* value, size_t value_len,
-                                                     myhtml_status_t* status);
+                                                     mystatus_t* status);
 
 /**
  * Get nodes by tag id in node scope
@@ -1209,7 +1077,7 @@ myhtml_get_nodes_by_attribute_value_hyphen_separated(myhtml_tree_t *tree,
 myhtml_collection_t*
 myhtml_get_nodes_by_tag_id_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection,
                                     myhtml_tree_node_t *node, myhtml_tag_id_t tag_id,
-                                    myhtml_status_t *status);
+                                    mystatus_t *status);
 
 /**
  * Get nodes by tag name in node scope
@@ -1226,7 +1094,7 @@ myhtml_get_nodes_by_tag_id_in_scope(myhtml_tree_t* tree, myhtml_collection_t *co
 myhtml_collection_t*
 myhtml_get_nodes_by_name_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection,
                                   myhtml_tree_node_t *node, const char* html, size_t length,
-                                  myhtml_status_t *status);
+                                  mystatus_t *status);
 
 /**
  * Get next sibling node
@@ -1378,11 +1246,11 @@ myhtml_node_insert_before(myhtml_tree_node_t *target, myhtml_tree_node_t *node);
  * @param[in] text length
  * @param[in] character encoding
  *
- * @return myhtml_string_t* if successful, otherwise a NULL value
+ * @return mycore_string_t* if successful, otherwise a NULL value
  */
-myhtml_string_t*
+mycore_string_t*
 myhtml_node_text_set(myhtml_tree_node_t *node, const char* text, size_t length,
-                     myhtml_encoding_t encoding);
+                     myencoding_t encoding);
 
 /**
  * Add text for a node with convert character encoding.
@@ -1392,11 +1260,11 @@ myhtml_node_text_set(myhtml_tree_node_t *node, const char* text, size_t length,
  * @param[in] text length
  * @param[in] character encoding
  *
- * @return myhtml_string_t* if successful, otherwise a NULL value
+ * @return mycore_string_t* if successful, otherwise a NULL value
  */
-myhtml_string_t*
+mycore_string_t*
 myhtml_node_text_set_with_charef(myhtml_tree_node_t *node, const char* text, size_t length,
-                                 myhtml_encoding_t encoding);
+                                 myencoding_t encoding);
 
 /**
  * Get token node
@@ -1479,13 +1347,13 @@ const char*
 myhtml_node_text(myhtml_tree_node_t *node, size_t *length);
 
 /**
- * Get myhtml_string_t object by Tree node
+ * Get mycore_string_t object by Tree node
  *
  * @param[in] myhtml_tree_node_t*
  *
- * @return myhtml_string_t* if exists, otherwise an NULL value
+ * @return mycore_string_t* if exists, otherwise an NULL value
  */
-myhtml_string_t*
+mycore_string_t*
 myhtml_node_string(myhtml_tree_node_t *node);
 
 /**
@@ -1613,9 +1481,9 @@ myhtml_attribute_value(myhtml_tree_attr_t *attr, size_t *length);
  *
  * @param[in] myhtml_tree_attr_t*
  *
- * @return myhtml_string_t* if exists, otherwise an NULL value
+ * @return mycore_string_t* if exists, otherwise an NULL value
  */
-myhtml_string_t*
+mycore_string_t*
 myhtml_attribute_key_string(myhtml_tree_attr_t* attr);
 
 /**
@@ -1623,9 +1491,9 @@ myhtml_attribute_key_string(myhtml_tree_attr_t* attr);
  *
  * @param[in] myhtml_tree_attr_t*
  *
- * @return myhtml_string_t* if exists, otherwise an NULL value
+ * @return mycore_string_t* if exists, otherwise an NULL value
  */
-myhtml_string_t*
+mycore_string_t*
 myhtml_attribute_value_string(myhtml_tree_attr_t* attr);
 
 /**
@@ -1649,7 +1517,7 @@ myhtml_attribute_by_key(myhtml_tree_node_t *node,
  * @param[in] attr key name length
  * @param[in] attr value name
  * @param[in] attr value name length
- * @param[in] character encoding; Default: MyHTML_ENCODING_UTF_8 or MyHTML_ENCODING_DEFAULT or 0
+ * @param[in] character encoding; Default: MyENCODING_UTF_8 or MyENCODING_DEFAULT or 0
  *
  * @return created myhtml_tree_attr_t* if successful, otherwise a NULL value
  */
@@ -1657,7 +1525,7 @@ myhtml_tree_attr_t*
 myhtml_attribute_add(myhtml_tree_node_t *node,
                      const char *key, size_t key_len,
                      const char *value, size_t value_len,
-                     myhtml_encoding_t encoding);
+                     myencoding_t encoding);
 
 /**
  * Remove attribute reference. Not release the resources
@@ -1797,13 +1665,13 @@ const char*
 myhtml_token_node_text(myhtml_token_node_t *token_node, size_t *length);
 
 /**
- * Get myhtml_string_t object by token node
+ * Get mycore_string_t object by token node
  *
  * @param[in] myhtml_token_node_t*
  *
- * @return myhtml_string_t* if exists, otherwise an NULL value
+ * @return mycore_string_t* if exists, otherwise an NULL value
  */
-myhtml_string_t*
+mycore_string_t*
 myhtml_token_node_string(myhtml_token_node_t *token_node);
 
 /**
@@ -1829,10 +1697,11 @@ myhtml_token_node_is_close_self(myhtml_token_node_t *token_node);
 /**
  * Wait for process token all parsing stage. Need if you use thread mode
  *
+ * @param[in] myhtml_token_t*
  * @param[in] myhtml_token_node_t*
  */
 void
-myhtml_token_node_wait_for_done(myhtml_token_node_t* node);
+myhtml_token_node_wait_for_done(myhtml_token_t* token, myhtml_token_node_t* node);
 
 /***********************************************************************************
  *
@@ -1881,7 +1750,7 @@ myhtml_tag_id_by_name(myhtml_tree_t* tree,
  * @return myhtml_collection_t* if successful, otherwise an NULL value
  */
 myhtml_collection_t*
-myhtml_collection_create(size_t size, myhtml_status_t *status);
+myhtml_collection_create(size_t size, mystatus_t *status);
 
 /**
  * Clears collection
@@ -1911,7 +1780,7 @@ myhtml_collection_destroy(myhtml_collection_t *collection);
  *
  * @return NULL if successful, otherwise an myhtml_collection_t* structure
  */
-myhtml_status_t
+mystatus_t
 myhtml_collection_check_size(myhtml_collection_t *collection, size_t need, size_t upto_length);
 
 /***********************************************************************************
@@ -1928,16 +1797,16 @@ myhtml_collection_check_size(myhtml_collection_t *collection, size_t need, size_
  *
  */
 void
-myhtml_encoding_set(myhtml_tree_t* tree, myhtml_encoding_t encoding);
+myhtml_encoding_set(myhtml_tree_t* tree, myencoding_t encoding);
 
 /**
  * Get character encoding for current stream
  *
  * @param[in] myhtml_tree_t*
  *
- * @return myhtml_encoding_t
+ * @return myencoding_t
  */
-myhtml_encoding_t
+myencoding_t
 myhtml_encoding_get(myhtml_tree_t* tree);
 
 /**
@@ -1950,7 +1819,7 @@ myhtml_encoding_get(myhtml_tree_t* tree);
  * @return size character set
  */
 size_t
-myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data);
+myencoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data);
 
 /**
  * Convert Unicode Codepoint to UTF-16LE
@@ -1964,7 +1833,7 @@ myhtml_encoding_codepoint_to_ascii_utf_8(size_t codepoint, char *data);
  * @return size character set
  */
 size_t
-myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data);
+myencoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data);
 
 /**
  * Detect character encoding
@@ -1980,7 +1849,7 @@ myhtml_encoding_codepoint_to_ascii_utf_16(size_t codepoint, char *data);
  * @return true if encoding found, otherwise false
  */
 bool
-myhtml_encoding_detect(const char *text, size_t length, myhtml_encoding_t *encoding);
+myencoding_detect(const char *text, size_t length, myencoding_t *encoding);
 
 /**
  * Detect Russian character encoding
@@ -1994,7 +1863,7 @@ myhtml_encoding_detect(const char *text, size_t length, myhtml_encoding_t *encod
  * @return true if encoding found, otherwise false
  */
 bool
-myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_encoding_t *encoding);
+myencoding_detect_russian(const char *text, size_t length, myencoding_t *encoding);
 
 /**
  * Detect Unicode character encoding
@@ -2008,7 +1877,7 @@ myhtml_encoding_detect_russian(const char *text, size_t length, myhtml_encoding_
  * @return true if encoding found, otherwise false
  */
 bool
-myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_t *encoding);
+myencoding_detect_unicode(const char *text, size_t length, myencoding_t *encoding);
 
 /**
  * Detect Unicode character encoding by BOM
@@ -2022,7 +1891,7 @@ myhtml_encoding_detect_unicode(const char *text, size_t length, myhtml_encoding_
  * @return true if encoding found, otherwise false
  */
 bool
-myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *encoding);
+myencoding_detect_bom(const char *text, size_t length, myencoding_t *encoding);
 
 /**
  * Detect Unicode character encoding by BOM. Cut BOM if will be found
@@ -2038,13 +1907,13 @@ myhtml_encoding_detect_bom(const char *text, size_t length, myhtml_encoding_t *e
  * @return true if encoding found, otherwise false
  */
 bool
-myhtml_encoding_detect_and_cut_bom(const char *text, size_t length, myhtml_encoding_t *encoding,
+myencoding_detect_and_cut_bom(const char *text, size_t length, myencoding_t *encoding,
                                    const char **new_text, size_t *new_size);
 
 /**
  * Detect encoding by name
- * Names like: windows-1258 return MyHTML_ENCODING_WINDOWS_1258
- *             cp1251 or windows-1251 return MyHTML_ENCODING_WINDOWS_1251
+ * Names like: windows-1258 return MyENCODING_WINDOWS_1258
+ *             cp1251 or windows-1251 return MyENCODING_WINDOWS_1251
  *
  * See https://encoding.spec.whatwg.org/#names-and-labels
  *
@@ -2055,18 +1924,18 @@ myhtml_encoding_detect_and_cut_bom(const char *text, size_t length, myhtml_encod
  * @return true if encoding found, otherwise false
  */
 bool
-myhtml_encoding_by_name(const char *name, size_t length, myhtml_encoding_t *encoding);
+myencoding_by_name(const char *name, size_t length, myencoding_t *encoding);
 
 /**
- * Get Encoding name by myhtml_encoding_t (by id)
+ * Get Encoding name by myencoding_t (by id)
  *
- * @param[in]  myhtml_encoding_t, encoding id
+ * @param[in]  myencoding_t, encoding id
  * @param[out] return name length
  *
  * @return encoding name, otherwise NULL value
  */
 const char*
-myhtml_encoding_name_by_id(myhtml_encoding_t encoding, size_t *length);
+myencoding_name_by_id(myencoding_t encoding, size_t *length);
 
 /**
  * Detect encoding in meta tag (<meta ...>) before start parsing
@@ -2076,14 +1945,14 @@ myhtml_encoding_name_by_id(myhtml_encoding_t encoding, size_t *length);
  * @param[in]  html data bytes
  * @param[in]  html data length
  *
- * @return detected encoding if encoding found, otherwise MyHTML_ENCODING_NOT_DETERMINED
+ * @return detected encoding if encoding found, otherwise MyENCODING_NOT_DETERMINED
  */
-myhtml_encoding_t
-myhtml_encoding_prescan_stream_to_determine_encoding(const char *data, size_t data_size);
+myencoding_t
+myencoding_prescan_stream_to_determine_encoding(const char *data, size_t data_size);
 
 /**
  * Extracting character encoding from string. Find "charset=" and see encoding. 
- * For example: "text/html; charset=windows-1251". Return MyHTML_ENCODING_WINDOWS_1251
+ * For example: "text/html; charset=windows-1251". Return MyENCODING_WINDOWS_1251
  *
  *
  * See https://html.spec.whatwg.org/multipage/infrastructure.html#algorithm-for-extracting-a-character-encoding-from-a-meta-element
@@ -2095,8 +1964,8 @@ myhtml_encoding_prescan_stream_to_determine_encoding(const char *data, size_t da
  * @return true if encoding found
  */
 bool
-myhtml_encoding_extracting_character_encoding_from_charset(const char *data, size_t data_size,
-                                                           myhtml_encoding_t *encoding);
+myencoding_extracting_character_encoding_from_charset(const char *data, size_t data_size,
+                                                           myencoding_t *encoding);
 
 /***********************************************************************************
  *
@@ -2105,7 +1974,7 @@ myhtml_encoding_extracting_character_encoding_from_charset(const char *data, siz
  ***********************************************************************************/
 
 /**
- * Init myhtml_string_t structure
+ * Init mycore_string_t structure
  *
  * @param[in] mchar_async_t*. It can be obtained from myhtml_tree_t object
  *  (see myhtml_tree_get_mchar function) or create manualy
@@ -2115,7 +1984,7 @@ myhtml_encoding_extracting_character_encoding_from_charset(const char *data, siz
  *  if created mchar_async_t object manually you know it, if not then take from the Tree 
  *  (see myhtml_tree_get_mchar_node_id)
  *
- * @param[in] myhtml_string_t*. It can be obtained from myhtml_tree_node_t object
+ * @param[in] mycore_string_t*. It can be obtained from myhtml_tree_node_t object
  *  (see myhtml_node_string function) or create manualy
  *
  * @param[in] data size. Set the size you want for char*
@@ -2123,137 +1992,137 @@ myhtml_encoding_extracting_character_encoding_from_charset(const char *data, siz
  * @return char* of the size if successful, otherwise a NULL value
  */
 char*
-myhtml_string_init(mchar_async_t *mchar, size_t node_id,
-                   myhtml_string_t* str, size_t size);
+mycore_string_init(mchar_async_t *mchar, size_t node_id,
+                   mycore_string_t* str, size_t size);
 
 /**
- * Increase the current size for myhtml_string_t object
+ * Increase the current size for mycore_string_t object
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
- * @param[in] data size. Set the new size you want for myhtml_string_t object
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
+ * @param[in] data size. Set the new size you want for mycore_string_t object
  *
  * @return char* of the size if successful, otherwise a NULL value
  */
 char*
-myhtml_string_realloc(myhtml_string_t *str, size_t new_size);
+mycore_string_realloc(mycore_string_t *str, size_t new_size);
 
 /**
- * Clean myhtml_string_t object. In reality, data length set to 0
- * Equivalently: myhtml_string_length_set(str, 0);
+ * Clean mycore_string_t object. In reality, data length set to 0
+ * Equivalently: mycore_string_length_set(str, 0);
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
  */
 void
-myhtml_string_clean(myhtml_string_t* str);
+mycore_string_clean(mycore_string_t* str);
 
 /**
- * Clean myhtml_string_t object. Equivalently: memset(str, 0, sizeof(myhtml_string_t))
+ * Clean mycore_string_t object. Equivalently: memset(str, 0, sizeof(mycore_string_t))
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
  */
 void
-myhtml_string_clean_all(myhtml_string_t* str);
+mycore_string_clean_all(mycore_string_t* str);
 
 /**
- * Release all resources for myhtml_string_t object
+ * Release all resources for mycore_string_t object
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
  * @param[in] call free function for current object or not
  *
- * @return NULL if destroy_obj set true, otherwise a current myhtml_string_t object
+ * @return NULL if destroy_obj set true, otherwise a current mycore_string_t object
  */
-myhtml_string_t*
-myhtml_string_destroy(myhtml_string_t* str, bool destroy_obj);
+mycore_string_t*
+mycore_string_destroy(mycore_string_t* str, bool destroy_obj);
 
 /**
- * Get data (char*) from a myhtml_string_t object
+ * Get data (char*) from a mycore_string_t object
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
  *
  * @return char* if exists, otherwise a NULL value
  */
 char*
-myhtml_string_data(myhtml_string_t *str);
+mycore_string_data(mycore_string_t *str);
 
 /**
- * Get data length from a myhtml_string_t object
+ * Get data length from a mycore_string_t object
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
  *
  * @return data length
  */
 size_t
-myhtml_string_length(myhtml_string_t *str);
+mycore_string_length(mycore_string_t *str);
 
 /**
- * Get data size from a myhtml_string_t object
+ * Get data size from a mycore_string_t object
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
  *
  * @return data size
  */
 size_t
-myhtml_string_size(myhtml_string_t *str);
+mycore_string_size(mycore_string_t *str);
 
 /**
- * Set data (char *) for a myhtml_string_t object.
+ * Set data (char *) for a mycore_string_t object.
  *
  * Attention!!! Attention!!! Attention!!!
  *
  * You can assign only that it has been allocated from functions:
- * myhtml_string_data_alloc
- * myhtml_string_data_realloc
+ * mycore_string_data_alloc
+ * mycore_string_data_realloc
  * or obtained manually created from mchar_async_t object
  *
  * Attention!!! Do not try set chat* from allocated by malloc or realloc!!!
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
  * @param[in] you data to want assign
  *
  * @return assigned data if successful, otherwise a NULL value
  */
 char*
-myhtml_string_data_set(myhtml_string_t *str, char *data);
+mycore_string_data_set(mycore_string_t *str, char *data);
 
 /**
- * Set data size for a myhtml_string_t object.
+ * Set data size for a mycore_string_t object.
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
  * @param[in] you size to want assign
  *
  * @return assigned size
  */
 size_t
-myhtml_string_size_set(myhtml_string_t *str, size_t size);
+mycore_string_size_set(mycore_string_t *str, size_t size);
 
 /**
- * Set data length for a myhtml_string_t object.
+ * Set data length for a mycore_string_t object.
  *
- * @param[in] myhtml_string_t*. See description for myhtml_string_init function
+ * @param[in] mycore_string_t*. See description for mycore_string_init function
  * @param[in] you length to want assign
  *
  * @return assigned length
  */
 size_t
-myhtml_string_length_set(myhtml_string_t *str, size_t length);
+mycore_string_length_set(mycore_string_t *str, size_t length);
 
 /**
  * Allocate data (char*) from a mchar_async_t object
  *
- * @param[in] mchar_async_t*. See description for myhtml_string_init function
- * @param[in] node id. See description for myhtml_string_init function
+ * @param[in] mchar_async_t*. See description for mycore_string_init function
+ * @param[in] node id. See description for mycore_string_init function
  * @param[in] you size to want assign
  *
  * @return data if successful, otherwise a NULL value
  */
 char*
-myhtml_string_data_alloc(mchar_async_t *mchar, size_t node_id, size_t size);
+mycore_string_data_alloc(mchar_async_t *mchar, size_t node_id, size_t size);
 
 /**
  * Allocate data (char*) from a mchar_async_t object
  *
- * @param[in] mchar_async_t*. See description for myhtml_string_init function
- * @param[in] node id. See description for myhtml_string_init function
+ * @param[in] mchar_async_t*. See description for mycore_string_init function
+ * @param[in] node id. See description for mycore_string_init function
  * @param[in] old data
  * @param[in] how much data is copied from the old data to new data
  * @param[in] new size
@@ -2261,28 +2130,28 @@ myhtml_string_data_alloc(mchar_async_t *mchar, size_t node_id, size_t size);
  * @return data if successful, otherwise a NULL value
  */
 char*
-myhtml_string_data_realloc(mchar_async_t *mchar, size_t node_id,
+mycore_string_data_realloc(mchar_async_t *mchar, size_t node_id,
                            char *data,  size_t len_to_copy, size_t size);
 
 /**
  * Release allocated data
  *
- * @param[in] mchar_async_t*. See description for myhtml_string_init function
- * @param[in] node id. See description for myhtml_string_init function
+ * @param[in] mchar_async_t*. See description for mycore_string_init function
+ * @param[in] node id. See description for mycore_string_init function
  * @param[in] data to release
  *
  * @return data if successful, otherwise a NULL value
  */
 void
-myhtml_string_data_free(mchar_async_t *mchar, size_t node_id, char *data);
+mycore_string_data_free(mchar_async_t *mchar, size_t node_id, char *data);
 
 /***********************************************************************************
  *
  * MyHTML_STRING_RAW
  *
- * All work with myhtml_string_raw_t object occurs through 
- *    myhtml_malloc (standart malloc), myhtml_realloc (standart realloc),
- *    myhtml_free (standart free).
+ * All work with mycore_string_raw_t object occurs through 
+ *    mycore_malloc (standart malloc), mycore_realloc (standart realloc),
+ *    mycore_free (standart free).
  * 
  * You are free to change them on without fear that something will happen
  * You can call free for str_raw.data, or change str_raw.length = 0
@@ -2290,32 +2159,32 @@ myhtml_string_data_free(mchar_async_t *mchar, size_t node_id, char *data);
  ***********************************************************************************/
 
 /**
- * Clean myhtml_string_raw_t object. In reality, data length set to 0
+ * Clean mycore_string_raw_t object. In reality, data length set to 0
  *
- * @param[in] myhtml_string_raw_t*
+ * @param[in] mycore_string_raw_t*
  */
 void
-myhtml_string_raw_clean(myhtml_string_raw_t* str_raw);
+mycore_string_raw_clean(mycore_string_raw_t* str_raw);
 
 /**
- * Full clean myhtml_string_raw_t object.
- * Equivalently: memset(str_raw, 0, sizeof(myhtml_string_raw_t))
+ * Full clean mycore_string_raw_t object.
+ * Equivalently: memset(str_raw, 0, sizeof(mycore_string_raw_t))
  *
- * @param[in] myhtml_string_raw_t*
+ * @param[in] mycore_string_raw_t*
  */
 void
-myhtml_string_raw_clean_all(myhtml_string_raw_t* str_raw);
+mycore_string_raw_clean_all(mycore_string_raw_t* str_raw);
 
 /**
- * Free resources for myhtml_string_raw_t object
+ * Free resources for mycore_string_raw_t object
  *
- * @param[in] myhtml_string_raw_t*
+ * @param[in] mycore_string_raw_t*
  * @param[in] call free function for current object or not
  *
- * @return NULL if destroy_obj set true, otherwise a current myhtml_string_raw_t object
+ * @return NULL if destroy_obj set true, otherwise a current mycore_string_raw_t object
  */
-myhtml_string_raw_t*
-myhtml_string_raw_destroy(myhtml_string_raw_t* str_raw, bool destroy_obj);
+mycore_string_raw_t*
+mycore_string_raw_destroy(mycore_string_raw_t* str_raw, bool destroy_obj);
 
 
 /***********************************************************************************
@@ -2333,99 +2202,99 @@ myhtml_string_raw_destroy(myhtml_string_raw_t* str_raw, bool destroy_obj);
 /**
  * Get Incoming Buffer by position
  *
- * @param[in] current myhtml_incoming_buffer_t*
+ * @param[in] current mycore_incoming_buffer_t*
  * @param[in] begin position
  *
- * @return myhtml_incoming_buffer_t if successful, otherwise a NULL value
+ * @return mycore_incoming_buffer_t if successful, otherwise a NULL value
  */
-myhtml_incoming_buffer_t*
-myhtml_incoming_buffer_find_by_position(myhtml_incoming_buffer_t *inc_buf, size_t begin);
+mycore_incoming_buffer_t*
+mycore_incoming_buffer_find_by_position(mycore_incoming_buffer_t *inc_buf, size_t begin);
 
 /**
  * Get data of Incoming Buffer
  *
- * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] mycore_incoming_buffer_t*
  *
  * @return const char* if successful, otherwise a NULL value
  */
 const char*
-myhtml_incoming_buffer_data(myhtml_incoming_buffer_t *inc_buf);
+mycore_incoming_buffer_data(mycore_incoming_buffer_t *inc_buf);
 
 /**
  * Get data length of Incoming Buffer
  *
- * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] mycore_incoming_buffer_t*
  *
  * @return size_t
  */
 size_t
-myhtml_incoming_buffer_length(myhtml_incoming_buffer_t *inc_buf);
+mycore_incoming_buffer_length(mycore_incoming_buffer_t *inc_buf);
 
 /**
  * Get data size of Incoming Buffer
  *
- * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] mycore_incoming_buffer_t*
  *
  * @return size_t
  */
 size_t
-myhtml_incoming_buffer_size(myhtml_incoming_buffer_t *inc_buf);
+mycore_incoming_buffer_size(mycore_incoming_buffer_t *inc_buf);
 
 /**
  * Get data offset of Incoming Buffer. Global position of begin Incoming Buffer.
  * See description for MyHTML_INCOMING title
  *
- * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] mycore_incoming_buffer_t*
  *
  * @return size_t
  */
 size_t
-myhtml_incoming_buffer_offset(myhtml_incoming_buffer_t *inc_buf);
+mycore_incoming_buffer_offset(mycore_incoming_buffer_t *inc_buf);
 
 /**
  * Get Relative Position for Incoming Buffer.
- * Incoming Buffer should be prepared by myhtml_incoming_buffer_find_by_position
+ * Incoming Buffer should be prepared by mycore_incoming_buffer_find_by_position
  *
- * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] mycore_incoming_buffer_t*
  * @param[in] global begin
  *
  * @return size_t
  */
 size_t
-myhtml_incoming_buffer_relative_begin(myhtml_incoming_buffer_t *inc_buf, size_t begin);
+mycore_incoming_buffer_relative_begin(mycore_incoming_buffer_t *inc_buf, size_t begin);
 
 /**
  * This function returns number of available data by Incoming Buffer
- * Incoming buffer may be incomplete. See myhtml_incoming_buffer_next
+ * Incoming buffer may be incomplete. See mycore_incoming_buffer_next
  *
- * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] mycore_incoming_buffer_t*
  * @param[in] global begin
  *
  * @return size_t
  */
 size_t
-myhtml_incoming_buffer_available_length(myhtml_incoming_buffer_t *inc_buf,
+mycore_incoming_buffer_available_length(mycore_incoming_buffer_t *inc_buf,
                                         size_t relative_begin, size_t length);
 
 /**
  * Get next buffer
  *
- * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] mycore_incoming_buffer_t*
  *
- * @return myhtml_incoming_buffer_t*
+ * @return mycore_incoming_buffer_t*
  */
-myhtml_incoming_buffer_t*
-myhtml_incoming_buffer_next(myhtml_incoming_buffer_t *inc_buf);
+mycore_incoming_buffer_t*
+mycore_incoming_buffer_next(mycore_incoming_buffer_t *inc_buf);
 
 /**
  * Get prev buffer
  *
- * @param[in] myhtml_incoming_buffer_t*
+ * @param[in] mycore_incoming_buffer_t*
  *
- * @return myhtml_incoming_buffer_t*
+ * @return mycore_incoming_buffer_t*
  */
-myhtml_incoming_buffer_t*
-myhtml_incoming_buffer_prev(myhtml_incoming_buffer_t *inc_buf);
+mycore_incoming_buffer_t*
+mycore_incoming_buffer_prev(mycore_incoming_buffer_t *inc_buf);
 
 /***********************************************************************************
  *
@@ -2581,7 +2450,7 @@ myhtml_callback_tree_node_remove_set(myhtml_tree_t* tree, myhtml_callback_tree_n
  * @return 0 if match, otherwise index of break position
  */
 size_t
-myhtml_strcasecmp(const char* str1, const char* str2);
+mycore_strcasecmp(const char* str1, const char* str2);
 
 /**
  * Compare two strings ignoring case of the first n characters
@@ -2592,7 +2461,7 @@ myhtml_strcasecmp(const char* str1, const char* str2);
  * @return 0 if match, otherwise index of break position
  */
 size_t
-myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
+mycore_strncasecmp(const char* str1, const char* str2, size_t size);
 
 /***********************************************************************************
  *
@@ -2604,39 +2473,39 @@ myhtml_strncasecmp(const char* str1, const char* str2, size_t size);
  * Tree fragment serialization 
  * The same as myhtml_serialization_tree_buffer function
  */
-bool
-myhtml_serialization(myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
+mystatus_t
+myhtml_serialization(myhtml_tree_node_t* scope_node, mycore_string_raw_t* str);
 
 /**
  * Only one tree node serialization
  * The same as myhtml_serialization_node_buffer function
  */
-bool
-myhtml_serialization_node(myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+mystatus_t
+myhtml_serialization_node(myhtml_tree_node_t* node, mycore_string_raw_t* str);
 
 /**
  * Serialize tree to an output string
  *
  * @param[in] myhtml_tree_t*
  * @param[in] scope node
- * @param[in] myhtml_string_raw_t*
+ * @param[in] mycore_string_raw_t*
  *
  * @return true if successful, otherwise false
  */
-bool
-myhtml_serialization_tree_buffer(myhtml_tree_node_t* scope_node, myhtml_string_raw_t* str);
+mystatus_t
+myhtml_serialization_tree_buffer(myhtml_tree_node_t* scope_node, mycore_string_raw_t* str);
 
 /**
  * Serialize node to an output string
  *
  * @param[in] myhtml_tree_t*
  * @param[in] node
- * @param[in] myhtml_string_raw_t*
+ * @param[in] mycore_string_raw_t*
  *
  * @return true if successful, otherwise false
  */
-bool
-myhtml_serialization_node_buffer(myhtml_tree_node_t* node, myhtml_string_raw_t* str);
+mystatus_t
+myhtml_serialization_node_buffer(myhtml_tree_node_t* node, mycore_string_raw_t* str);
 
 /**
  * The serialize function for an entire tree
@@ -2648,9 +2517,9 @@ myhtml_serialization_node_buffer(myhtml_tree_node_t* node, myhtml_string_raw_t* 
  *
  * @return true if successful, otherwise false
  */
-bool
+mystatus_t
 myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node,
-                                   myhtml_callback_serialize_f callback, void* ptr);
+                                   mycore_callback_serialize_f callback, void* ptr);
 
 /**
  * The serialize function for a single node
@@ -2662,9 +2531,9 @@ myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node,
  *
  * @return true if successful, otherwise false
  */
-bool
+mystatus_t
 myhtml_serialization_node_callback(myhtml_tree_node_t* node,
-                                   myhtml_callback_serialize_f callback, void* ptr);
+                                   mycore_callback_serialize_f callback, void* ptr);
 
 /***********************************************************************************
  *

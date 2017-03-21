@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -37,9 +37,9 @@ void myhtml_parser_stream(mythread_id_t thread_id, void* ctx);
 void myhtml_parser_worker(mythread_id_t thread_id, void* ctx);
 void myhtml_parser_worker_stream(mythread_id_t thread_id, void* ctx);
 
-size_t myhtml_parser_token_data_to_string(myhtml_tree_t *tree, myhtml_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length);
-size_t myhtml_parser_token_data_to_string_lowercase(myhtml_tree_t *tree, myhtml_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length);
-size_t myhtml_parser_token_data_to_string_charef(myhtml_tree_t *tree, myhtml_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length);
+size_t myhtml_parser_token_data_to_string(myhtml_tree_t *tree, mycore_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length);
+size_t myhtml_parser_token_data_to_string_lowercase(myhtml_tree_t *tree, mycore_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length);
+size_t myhtml_parser_token_data_to_string_charef(myhtml_tree_t *tree, mycore_string_t* str, myhtml_data_process_entry_t* proc_entry, size_t begin, size_t length);
 
 #ifdef __cplusplus
 } /* extern "C" */

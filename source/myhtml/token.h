@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -29,13 +29,13 @@ extern "C" {
 #include <string.h>
 
 #include "myhtml/myosi.h"
-#include "myhtml/utils.h"
+#include "mycore/utils.h"
 #include "myhtml/tag.h"
 #include "myhtml/myhtml.h"
 #include "myhtml/mystring.h"
-#include "myhtml/utils/mcobject_async.h"
-#include "myhtml/utils/mchar_async.h"
-#include "myhtml/utils/mcsync.h"
+#include "mycore/utils/mcobject_async.h"
+#include "mycore/utils/mchar_async.h"
+#include "mycore/utils/mcsync.h"
 
 #define myhtml_token_node_set_done(token_node) token_node->type |= MyHTML_TOKEN_TYPE_DONE
 
@@ -61,8 +61,8 @@ struct myhtml_token_attr {
     myhtml_token_attr_t* next;
     myhtml_token_attr_t* prev;
     
-    myhtml_string_t key;
-    myhtml_string_t value;
+    mycore_string_t key;
+    mycore_string_t value;
     
     size_t raw_key_begin;
     size_t raw_key_length;
@@ -75,7 +75,7 @@ struct myhtml_token_attr {
 struct myhtml_token_node {
     myhtml_tag_id_t tag_id;
     
-    myhtml_string_t str;
+    mycore_string_t str;
     
     size_t raw_begin;
     size_t raw_length;
@@ -115,7 +115,7 @@ myhtml_tree_attr_t * myhtml_token_node_attribute_first(myhtml_token_node_t *toke
 myhtml_tree_attr_t * myhtml_token_node_attribute_last(myhtml_token_node_t *token_node);
 
 const char * myhtml_token_node_text(myhtml_token_node_t *token_node, size_t *length);
-myhtml_string_t * myhtml_token_node_string(myhtml_token_node_t *token_node);
+mycore_string_t * myhtml_token_node_string(myhtml_token_node_t *token_node);
 
 bool myhtml_token_node_is_close(myhtml_token_node_t *token_node);
 bool myhtml_token_node_is_close_self(myhtml_token_node_t *token_node);
@@ -130,7 +130,7 @@ myhtml_token_attr_t * myhtml_token_attr_remove_by_name(myhtml_token_node_t* node
 void myhtml_token_attr_delete_all(myhtml_token_t* token, myhtml_token_node_t* node);
 
 void myhtml_token_delete(myhtml_token_t* token, myhtml_token_node_t* node);
-void myhtml_token_node_wait_for_done(myhtml_token_node_t* node);
+void myhtml_token_node_wait_for_done(myhtml_token_t* token, myhtml_token_node_t* node);
 void myhtml_token_set_done(myhtml_token_node_t* node);
 
 myhtml_token_attr_t * myhtml_token_attr_match(myhtml_token_t* token, myhtml_token_node_t* target, const char* key, size_t key_size, const char* value, size_t value_size);
@@ -143,7 +143,7 @@ void myhtml_token_adjust_svg_attributes(myhtml_token_node_t* target);
 void myhtml_token_adjust_foreign_attributes(myhtml_token_node_t* target);
 
 myhtml_token_attr_t * myhtml_token_node_attr_append(myhtml_token_t* token, myhtml_token_node_t* dest, const char* key, size_t key_len, const char* value, size_t value_len, size_t thread_idx);
-myhtml_token_attr_t * myhtml_token_node_attr_append_with_convert_encoding(myhtml_token_t* token, myhtml_token_node_t* dest, const char* key, size_t key_len, const char* value, size_t value_len, size_t thread_idx, myhtml_encoding_t encoding);
+myhtml_token_attr_t * myhtml_token_node_attr_append_with_convert_encoding(myhtml_token_t* token, myhtml_token_node_t* dest, const char* key, size_t key_len, const char* value, size_t value_len, size_t thread_idx, myencoding_t encoding);
 void myhtml_token_node_text_append(myhtml_token_t* token, myhtml_token_node_t* dest, const char* text, size_t text_len);
 void myhtml_token_node_attr_copy(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx);
 void myhtml_token_node_attr_copy_with_check(myhtml_token_t* token, myhtml_token_node_t* target, myhtml_token_node_t* dest, size_t thread_idx);
@@ -153,10 +153,6 @@ myhtml_token_attr_t * myhtml_token_attr_by_name(myhtml_token_node_t* node, const
 bool myhtml_token_attr_compare(myhtml_token_node_t* target, myhtml_token_node_t* dest);
 myhtml_token_node_t * myhtml_token_merged_two_token_string(myhtml_tree_t* tree, myhtml_token_node_t* token_to, myhtml_token_node_t* token_from, bool cp_reverse);
 void myhtml_token_set_replacement_character_for_null_token(myhtml_tree_t* tree, myhtml_token_node_t* node);
-
-void myhtml_token_print_param_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out);
-void myhtml_token_print_by_idx(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out);
-void myhtml_token_print_attr(myhtml_tree_t* myhtml_tree, myhtml_token_node_t* node, FILE* out);
 
 #ifdef __cplusplus
 } /* extern "C" */

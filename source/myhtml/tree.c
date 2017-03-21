@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,12 @@
 
 myhtml_tree_t * myhtml_tree_create(void)
 {
-    return (myhtml_tree_t*)myhtml_calloc(1, sizeof(myhtml_tree_t));
+    return (myhtml_tree_t*)mycore_calloc(1, sizeof(myhtml_tree_t));
 }
 
-myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
+mystatus_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
 {
-    myhtml_status_t status = MyHTML_STATUS_OK;
+    mystatus_t status = MyHTML_STATUS_OK;
     
     tree->myhtml             = myhtml;
     tree->token              = myhtml_token_create(tree, 512);
@@ -38,7 +38,6 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     tree->temp_tag_name.data = NULL;
     tree->stream_buffer      = NULL;
     tree->parse_flags        = MyHTML_TREE_PARSE_FLAGS_CLEAN;
-    tree->queue              = mythread_queue_create(9182, &status);
     tree->context            = NULL;
     
     tree->callback_before_token     = NULL;
@@ -54,12 +53,21 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     if(status)
         return status;
     
-    /* init Incoming Buffer objects */
+    /* Thread Queue */
+    tree->queue = mythread_queue_create();
+    if(tree->queue == NULL)
+        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+    
+    status = mythread_queue_init(tree->queue, 9182);
+    if(status)
+        return status;
+    
+    /* Init Incoming Buffer objects */
     tree->mcobject_incoming_buf = mcobject_create();
     if(tree->mcobject_incoming_buf == NULL)
         return MyHTML_STATUS_TREE_ERROR_INCOMING_BUFFER_CREATE;
     
-    status = mcobject_init(tree->mcobject_incoming_buf, 256, sizeof(myhtml_incoming_buffer_t));
+    status = mcobject_init(tree->mcobject_incoming_buf, 256, sizeof(mycore_incoming_buffer_t));
     if(status)
         return status;
     
@@ -72,12 +80,18 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     if(mcstatus)
         return MyHTML_STATUS_TREE_ERROR_MCOBJECT_INIT;
     
-    tree->mchar              = mchar_async_create(128, (4096 * 5));
+    tree->mchar              = mchar_async_create();
     tree->active_formatting  = myhtml_tree_active_formatting_init(tree);
     tree->open_elements      = myhtml_tree_open_elements_init(tree);
     tree->other_elements     = myhtml_tree_list_init();
     tree->token_list         = myhtml_tree_token_list_init();
     tree->template_insertion = myhtml_tree_template_insertion_init(tree);
+    
+    if(tree->mchar == NULL)
+        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+    
+    if((status = mchar_async_init(tree->mchar, 128, (4096 * 5))))
+        return status;
     
     tree->mcasync_tree_id = mcobject_async_node_add(tree->tree_obj, &mcstatus);
     if(mcstatus)
@@ -91,36 +105,40 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
     if(mcstatus)
         return MyHTML_STATUS_TREE_ERROR_MCOBJECT_CREATE_NODE;
     
-    tree->mchar_node_id = mchar_async_node_add(tree->mchar);
-    
-#ifndef MyHTML_BUILD_WITHOUT_THREADS
-    
-    tree->async_args = (myhtml_async_args_t*)myhtml_calloc(myhtml->thread->pth_list_length, sizeof(myhtml_async_args_t));
-    
+#ifndef MyCORE_BUILD_WITHOUT_THREADS
+    tree->async_args = (myhtml_async_args_t*)mycore_calloc(myhtml->thread_total, sizeof(myhtml_async_args_t));
     if(tree->async_args == NULL)
-        return MyHTML_STATUS_TREE_ERROR_MEMORY_ALLOCATION;
-    
-    // for single mode in main thread
-    tree->async_args[0].mchar_node_id = tree->mchar_node_id;
+        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
     
     // for batch thread
-    for(size_t i = 0; i < myhtml->thread->batch_count; i++) {
-        tree->async_args[(myhtml->thread->batch_first_id + i)].mchar_node_id = mchar_async_node_add(tree->mchar);
+    for(size_t i = 0; i < myhtml->thread_total; i++) {
+        tree->async_args[i].mchar_node_id = mchar_async_node_add(tree->mchar, &status);
+        
+        if(status)
+            return status;
     }
-    
-#else /* MyHTML_BUILD_WITHOUT_THREADS */
-    
-    tree->async_args = (myhtml_async_args_t*)myhtml_calloc(1, sizeof(myhtml_async_args_t));
+#else /* MyCORE_BUILD_WITHOUT_THREADS */
+    tree->async_args = (myhtml_async_args_t*)mycore_calloc(1, sizeof(myhtml_async_args_t));
     
     if(tree->async_args == NULL)
         return MyHTML_STATUS_TREE_ERROR_MEMORY_ALLOCATION;
     
-    tree->async_args->mchar_node_id = tree->mchar_node_id;
+    tree->async_args->mchar_node_id = mchar_async_node_add(tree->mchar, &status);
     
-#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+    if(status)
+        return status;
+    
+#endif /* MyCORE_BUILD_WITHOUT_THREADS */
+    
+    /* for main thread only after parsing */
+    tree->mchar_node_id = tree->async_args->mchar_node_id;
     
     tree->sync = mcsync_create();
-    mcsync_init(tree->sync);
+    if(tree->sync == NULL)
+        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
+    
+    if(mcsync_init(tree->sync))
+        return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
     
     /* init Tags after create and init mchar */
     tree->tags = myhtml_tag_create();
@@ -133,22 +151,23 @@ myhtml_status_t myhtml_tree_init(myhtml_tree_t* tree, myhtml_t* myhtml)
 
 void myhtml_tree_clean(myhtml_tree_t* tree)
 {
-#ifndef MyHTML_BUILD_WITHOUT_THREADS
+#ifndef MyCORE_BUILD_WITHOUT_THREADS
     myhtml_t* myhtml = tree->myhtml;
     
-    for(size_t i = 0; i < myhtml->thread->batch_count; i++) {
-        mchar_async_node_clean(tree->mchar, tree->async_args[(myhtml->thread->batch_first_id + i)].mchar_node_id);
+    for(size_t i = 0; i < myhtml->thread_total; i++) {
+        mchar_async_node_clean(tree->mchar, tree->async_args[i].mchar_node_id);
     }
-#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+#else
+    mchar_async_node_clean(tree->mchar, tree->mchar_node_id);
+#endif
     
     mcobject_async_node_clean(tree->tree_obj, tree->mcasync_tree_id);
     mcobject_async_node_clean(tree->token->nodes_obj, tree->mcasync_rules_token_id);
     mcobject_async_node_clean(tree->token->attr_obj, tree->mcasync_rules_attr_id);
-    mchar_async_node_clean(tree->mchar, tree->mchar_node_id);
     
-#ifndef MyHTML_BUILD_WITHOUT_THREADS
-    mythread_queue_list_entry_clean(tree->myhtml->thread, tree->queue_entry);
-#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+#ifndef MyCORE_BUILD_WITHOUT_THREADS
+    mythread_queue_list_entry_clean(tree->queue_entry);
+#endif /* MyCORE_BUILD_WITHOUT_THREADS */
     
     myhtml_token_clean(tree->token);
     
@@ -184,8 +203,8 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     tree->token_last_done     = NULL;
     tree->tokenizer_status    = MyHTML_STATUS_OK;
     
-    tree->encoding            = MyHTML_ENCODING_UTF_8;
-    tree->encoding_usereq     = MyHTML_ENCODING_DEFAULT;
+    tree->encoding            = MyENCODING_UTF_8;
+    tree->encoding_usereq     = MyENCODING_DEFAULT;
     
     myhtml_stream_buffer_clean(tree->stream_buffer);
     
@@ -239,8 +258,8 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     tree->token_last_done     = NULL;
     tree->tokenizer_status    = MyHTML_STATUS_OK;
     
-    tree->encoding            = MyHTML_ENCODING_UTF_8;
-    tree->encoding_usereq     = MyHTML_ENCODING_DEFAULT;
+    tree->encoding            = MyENCODING_UTF_8;
+    tree->encoding_usereq     = MyENCODING_DEFAULT;
     
     myhtml_stream_buffer_clean(tree->stream_buffer);
     
@@ -252,9 +271,9 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     mcobject_clean(tree->mcobject_incoming_buf);
     myhtml_tag_clean(tree->tags);
     
-#ifndef MyHTML_BUILD_WITHOUT_THREADS
-    mythread_queue_list_entry_clean(tree->myhtml->thread, tree->queue_entry);
-#endif /* MyHTML_BUILD_WITHOUT_THREADS */
+#ifndef MyCORE_BUILD_WITHOUT_THREADS
+    mythread_queue_list_entry_clean(tree->queue_entry);
+#endif
     
     tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);
 }
@@ -281,8 +300,8 @@ myhtml_tree_t * myhtml_tree_destroy(myhtml_tree_t* tree)
     
     myhtml_tree_temp_tag_name_destroy(&tree->temp_tag_name, false);
     
-    myhtml_free(tree->async_args);
-    myhtml_free(tree);
+    mycore_free(tree->async_args);
+    mycore_free(tree);
     
     return NULL;
 }
@@ -493,7 +512,7 @@ myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_node_t* node)
 {
     myhtml_tree_node_t* new_node = myhtml_tree_node_create(node->tree);
     
-    myhtml_token_node_wait_for_done(node->token);
+    myhtml_token_node_wait_for_done(node->tree->token, node->token);
     
     new_node->token        = myhtml_token_node_clone(node->tree->token, node->token,
                                                      node->tree->mcasync_rules_token_id,
@@ -735,11 +754,11 @@ bool myhtml_tree_element_in_scope_by_node(myhtml_tree_node_t* node, enum myhtml_
 // list
 myhtml_tree_list_t * myhtml_tree_list_init(void)
 {
-    myhtml_tree_list_t* list = myhtml_malloc(sizeof(myhtml_tree_list_t));
+    myhtml_tree_list_t* list = mycore_malloc(sizeof(myhtml_tree_list_t));
     
     list->length = 0;
     list->size = 4096;
-    list->list = (myhtml_tree_node_t**)myhtml_malloc(sizeof(myhtml_tree_node_t*) * list->size);
+    list->list = (myhtml_tree_node_t**)mycore_malloc(sizeof(myhtml_tree_node_t*) * list->size);
     
     return list;
 }
@@ -755,10 +774,10 @@ myhtml_tree_list_t * myhtml_tree_list_destroy(myhtml_tree_list_t* list, bool des
         return NULL;
     
     if(list->list)
-        myhtml_free(list->list);
+        mycore_free(list->list);
     
     if(destroy_self && list) {
-        myhtml_free(list);
+        mycore_free(list);
         return NULL;
     }
     
@@ -770,7 +789,7 @@ void myhtml_tree_list_append(myhtml_tree_list_t* list, myhtml_tree_node_t* node)
     if(list->length >= list->size) {
         list->size <<= 1;
         
-        myhtml_tree_node_t** tmp = (myhtml_tree_node_t**)myhtml_realloc(list->list, sizeof(myhtml_tree_node_t*) * list->size);
+        myhtml_tree_node_t** tmp = (myhtml_tree_node_t**)mycore_realloc(list->list, sizeof(myhtml_tree_node_t*) * list->size);
         
         if(tmp)
             list->list = tmp;
@@ -790,7 +809,7 @@ void myhtml_tree_list_insert_by_index(myhtml_tree_list_t* list, myhtml_tree_node
     if(list->length >= list->size) {
         list->size <<= 1;
         
-        myhtml_tree_node_t** tmp = (myhtml_tree_node_t**)myhtml_realloc(list->list, sizeof(myhtml_tree_node_t*) * list->size);
+        myhtml_tree_node_t** tmp = (myhtml_tree_node_t**)mycore_realloc(list->list, sizeof(myhtml_tree_node_t*) * list->size);
         
         if(tmp)
             list->list = tmp;
@@ -831,7 +850,7 @@ myhtml_tree_list_t * myhtml_tree_open_elements_destroy(myhtml_tree_t* tree)
 myhtml_tree_node_t * myhtml_tree_current_node(myhtml_tree_t* tree)
 {
     if(tree->open_elements->length == 0) {
-        MyHTML_DEBUG("Current node; Open elements is 0");
+        MyCORE_DEBUG("Current node; Open elements is 0");
         return 0;
     }
     
@@ -861,9 +880,9 @@ void myhtml_tree_open_elements_pop(myhtml_tree_t* tree)
     if(tree->open_elements->length)
         tree->open_elements->length--;
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(tree->open_elements->length == 0) {
-        MyHTML_DEBUG("Pop open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
+        MyCORE_DEBUG("Pop open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
     }
 #endif
 }
@@ -886,9 +905,9 @@ void myhtml_tree_open_elements_remove(myhtml_tree_t* tree, myhtml_tree_node_t* n
         }
     }
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(tree->open_elements->length == 0) {
-        MyHTML_DEBUG("Remove open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
+        MyCORE_DEBUG("Remove open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
     }
 #endif
 }
@@ -913,9 +932,9 @@ void myhtml_tree_open_elements_pop_until(myhtml_tree_t* tree, myhtml_tag_id_t ta
         }
     }
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(tree->open_elements->length == 0) {
-        MyHTML_DEBUG("Until open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
+        MyCORE_DEBUG("Until open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
     }
 #endif
 }
@@ -936,9 +955,9 @@ void myhtml_tree_open_elements_pop_until_by_node(myhtml_tree_t* tree, myhtml_tre
         }
     }
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(tree->open_elements->length == 0) {
-        MyHTML_DEBUG("Until by node open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
+        MyCORE_DEBUG("Until by node open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
     }
 #endif
 }
@@ -957,9 +976,9 @@ void myhtml_tree_open_elements_pop_until_by_index(myhtml_tree_t* tree, size_t id
         }
     }
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(tree->open_elements->length == 0) {
-        MyHTML_DEBUG("Until by index open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
+        MyCORE_DEBUG("Until by index open elements; Now, Open Elements set 0; Good, if the end of parsing, otherwise is very bad");
     }
 #endif
 }
@@ -1045,7 +1064,7 @@ myhtml_tree_node_t * myhtml_tree_open_elements_find_by_tag_idx(myhtml_tree_t* tr
 void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx, myhtml_namespace_t mynamespace)
 {
     if(tree->open_elements->length == 0) {
-        MyHTML_DEBUG("Generate implied end tags; Open elements is 0");
+        MyCORE_DEBUG("Generate implied end tags; Open elements is 0");
         return;
     }
     
@@ -1053,9 +1072,9 @@ void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t 
     {
         myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(current_node == NULL) {
-            MyHTML_DEBUG_ERROR("Generate implied end tags; Current node is NULL! This is very bad");
+            MyCORE_DEBUG_ERROR("Generate implied end tags; Current node is NULL! This is very bad");
         }
 #endif
         
@@ -1087,7 +1106,7 @@ void myhtml_tree_generate_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t 
 void myhtml_tree_generate_all_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_id_t exclude_tag_idx, myhtml_namespace_t mynamespace)
 {
     if(tree->open_elements->length == 0) {
-        MyHTML_DEBUG("Generate all implied end tags; Open elements is 0");
+        MyCORE_DEBUG("Generate all implied end tags; Open elements is 0");
         return;
     }
     
@@ -1095,9 +1114,9 @@ void myhtml_tree_generate_all_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_i
     {
         myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(current_node == NULL) {
-            MyHTML_DEBUG_ERROR("Generate all implied end tags; Current node is NULL! This is very bad");
+            MyCORE_DEBUG_ERROR("Generate all implied end tags; Current node is NULL! This is very bad");
         }
 #endif
         
@@ -1136,7 +1155,7 @@ void myhtml_tree_generate_all_implied_end_tags(myhtml_tree_t* tree, myhtml_tag_i
 void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree)
 {
     if(tree->open_elements->length == 0) {
-        MyHTML_DEBUG("Reset insertion mode appropriately; Open elements is 0");
+        MyCORE_DEBUG("Reset insertion mode appropriately; Open elements is 0");
         return;
     }
     
@@ -1154,9 +1173,9 @@ void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree)
         // step 2
         myhtml_tree_node_t* node = list[i];
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(node == NULL) {
-            MyHTML_DEBUG_ERROR("Reset insertion mode appropriately; node is NULL! This is very bad");
+            MyCORE_DEBUG_ERROR("Reset insertion mode appropriately; node is NULL! This is very bad");
         }
 #endif
         
@@ -1197,9 +1216,9 @@ void myhtml_tree_reset_insertion_mode_appropriately(myhtml_tree_t* tree)
                     return;
                 }
                 
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
                 if(ancestor == 0) {
-                    MyHTML_DEBUG_ERROR("Reset insertion mode appropriately; Ancestor is 0! This is very, very bad");
+                    MyCORE_DEBUG_ERROR("Reset insertion mode appropriately; Ancestor is 0! This is very, very bad");
                 }
 #endif
                 
@@ -1315,9 +1334,9 @@ myhtml_tree_list_t * myhtml_tree_active_formatting_destroy(myhtml_tree_t* tree)
 
 bool myhtml_tree_active_formatting_is_marker(myhtml_tree_t* tree, myhtml_tree_node_t* node)
 {
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(node == NULL) {
-        MyHTML_DEBUG_ERROR("Active formatting is marker; node is NULL!");
+        MyCORE_DEBUG_ERROR("Active formatting is marker; node is NULL!");
     }
 #endif
     
@@ -1351,9 +1370,9 @@ void myhtml_tree_active_formatting_pop(myhtml_tree_t* tree)
     if(tree->active_formatting->length)
         tree->active_formatting->length--;
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(tree->active_formatting->length == 0) {
-        MyHTML_DEBUG("Pop active formatting; length is 0");
+        MyCORE_DEBUG("Pop active formatting; length is 0");
     }
 #endif
 }
@@ -1376,9 +1395,9 @@ void myhtml_tree_active_formatting_remove(myhtml_tree_t* tree, myhtml_tree_node_
         }
     }
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(tree->active_formatting->length == 0) {
-        // MyHTML_DEBUG("Remove active formatting; length is 0");
+        // MyCORE_DEBUG("Remove active formatting; length is 0");
     }
 #endif
 }
@@ -1390,9 +1409,9 @@ void myhtml_tree_active_formatting_remove_by_index(myhtml_tree_t* tree, size_t i
     memmove(&list[idx], &list[idx + 1], sizeof(myhtml_tree_node_t*) * (tree->active_formatting->length - idx));
     tree->active_formatting->length--;
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(tree->active_formatting->length == 0) {
-        MyHTML_DEBUG("Remove active formatting by index; length is 0");
+        MyCORE_DEBUG("Remove active formatting by index; length is 0");
     }
 #endif
 }
@@ -1413,9 +1432,9 @@ void myhtml_tree_active_formatting_append_with_check(myhtml_tree_t* tree, myhtml
     {
         i--;
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(list[i] == NULL) {
-            MyHTML_DEBUG("Appen active formatting with check; list[" MyHTML_FMT_Z "] is NULL", i);
+            MyCORE_DEBUG("Appen active formatting with check; list[" MyCORE_FORMAT_Z "] is NULL", i);
         }
 #endif
         
@@ -1424,8 +1443,8 @@ void myhtml_tree_active_formatting_append_with_check(myhtml_tree_t* tree, myhtml
         
         if(list[i]->token && node->token)
         {
-            myhtml_token_node_wait_for_done(list[i]->token);
-            myhtml_token_node_wait_for_done(node->token);
+            myhtml_token_node_wait_for_done(tree->token, list[i]->token);
+            myhtml_token_node_wait_for_done(tree->token, node->token);
             
             if(list[i]->ns == node->ns &&
                list[i]->tag_id == node->tag_id &&
@@ -1446,7 +1465,7 @@ void myhtml_tree_active_formatting_append_with_check(myhtml_tree_t* tree, myhtml
 myhtml_tree_node_t * myhtml_tree_active_formatting_current_node(myhtml_tree_t* tree)
 {
     if(tree->active_formatting->length == 0) {
-        MyHTML_DEBUG("Current node active formatting; length is 0");
+        MyCORE_DEBUG("Current node active formatting; length is 0");
         return 0;
     }
     
@@ -1482,9 +1501,9 @@ void myhtml_tree_active_formatting_up_to_last_marker(myhtml_tree_t* tree)
     if(tree->active_formatting->length == 0)
         return;
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(list[ tree->active_formatting->length ] == NULL) {
-        MyHTML_DEBUG("Up to last marker active formatting; list[" MyHTML_FMT_Z "] is NULL", tree->active_formatting->length);
+        MyCORE_DEBUG("Up to last marker active formatting; list[" MyCORE_FORMAT_Z "] is NULL", tree->active_formatting->length);
     }
 #endif
     
@@ -1492,9 +1511,9 @@ void myhtml_tree_active_formatting_up_to_last_marker(myhtml_tree_t* tree)
     {
         tree->active_formatting->length--;
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(list[ tree->active_formatting->length ] == NULL) {
-            MyHTML_DEBUG("Up to last marker active formatting; list[" MyHTML_FMT_Z "] is NULL", tree->active_formatting->length);
+            MyCORE_DEBUG("Up to last marker active formatting; list[" MyCORE_FORMAT_Z "] is NULL", tree->active_formatting->length);
         }
 #endif
         
@@ -1515,9 +1534,9 @@ myhtml_tree_node_t * myhtml_tree_active_formatting_between_last_marker(myhtml_tr
     {
         i--;
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(list[i] == NULL) {
-            MyHTML_DEBUG("Between last marker active formatting; list[" MyHTML_FMT_Z "] is NULL", i);
+            MyCORE_DEBUG("Between last marker active formatting; list[" MyCORE_FORMAT_Z "] is NULL", i);
         }
 #endif
         
@@ -1554,9 +1573,9 @@ void myhtml_tree_active_formatting_reconstruction(myhtml_tree_t* tree)
     {
         af_idx--;
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(list[af_idx] == NULL) {
-            MyHTML_DEBUG("Formatting reconstruction; Step 4--6; list[" MyHTML_FMT_Z "] is NULL", af_idx);
+            MyCORE_DEBUG("Formatting reconstruction; Step 4--6; list[" MyCORE_FORMAT_Z "] is NULL", af_idx);
         }
 #endif
         
@@ -1570,9 +1589,9 @@ void myhtml_tree_active_formatting_reconstruction(myhtml_tree_t* tree)
     
     while (af_idx < af->length)
     {
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(list[af_idx] == NULL) {
-            MyHTML_DEBUG("Formatting reconstruction; Next steps; list[" MyHTML_FMT_Z "] is NULL", af_idx);
+            MyCORE_DEBUG("Formatting reconstruction; Next steps; list[" MyCORE_FORMAT_Z "] is NULL", af_idx);
         }
 #endif
         
@@ -1596,9 +1615,9 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_token_nod
     myhtml_tree_node_t**  afe_list     = tree->active_formatting->list;
     myhtml_tree_node_t*   current_node = oel_list[oel_curr_index];
     
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(current_node == NULL) {
-        MyHTML_DEBUG_ERROR("Adoption agency algorithm; Current node is NULL");
+        MyCORE_DEBUG_ERROR("Adoption agency algorithm; Current node is NULL");
     }
 #endif
     
@@ -1707,18 +1726,18 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_token_nod
         
         /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:AAA_BEGIN LEVEL:INFO */
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(oel_format_el_idx == 0) {
-            MyHTML_DEBUG_ERROR("Adoption agency algorithm; Step 11; oel_format_el_idx is 0; Bad!");
+            MyCORE_DEBUG_ERROR("Adoption agency algorithm; Step 11; oel_format_el_idx is 0; Bad!");
         }
 #endif
         
         // step 12
         myhtml_tree_node_t* common_ancestor = oel_list[oel_format_el_idx - 1];
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(common_ancestor == NULL) {
-            MyHTML_DEBUG_ERROR("Adoption agency algorithm; Step 11; common_ancestor is NULL");
+            MyCORE_DEBUG_ERROR("Adoption agency algorithm; Step 11; common_ancestor is NULL");
         }
 #endif
         
@@ -1744,7 +1763,7 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_token_nod
             if(node_index > 0)
                 node_index--;
             else {
-                fprintf(stderr, "ERROR: adoption agency algorithm; decrement node_index, node_index is null");
+                MyCORE_DEBUG_ERROR("Adoption agency algorithm; decrement node_index, node_index is null");
                 return false;
             }
             
@@ -1752,9 +1771,9 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_token_nod
             
             node = oel_list[node_index];
             
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
             if(node == NULL) {
-                MyHTML_DEBUG_ERROR("Adoption agency algorithm; Step 13.3; node is NULL");
+                MyCORE_DEBUG_ERROR("Adoption agency algorithm; Step 13.3; node is NULL");
             }
 #endif
             // step 14.4
@@ -1795,9 +1814,9 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_token_nod
             if(last == furthest_block) {
                 bookmark = afe_node_index + 1;
                 
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
                 if(bookmark >= tree->active_formatting->length) {
-                    MyHTML_DEBUG_ERROR("Adoption agency algorithm; Step 13.8; bookmark >= open_elements length");
+                    MyCORE_DEBUG_ERROR("Adoption agency algorithm; Step 13.8; bookmark >= open_elements length");
                 }
 #endif
             }
@@ -1846,9 +1865,9 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_token_nod
         if(afe_index < bookmark)
             bookmark--;
         
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(bookmark >= tree->active_formatting->length) {
-            MyHTML_DEBUG_ERROR("Adoption agency algorithm; Before Step 18; bookmark (" MyHTML_FMT_Z ") >= open_elements length", bookmark);
+            MyCORE_DEBUG_ERROR("Adoption agency algorithm; Before Step 18; bookmark (" MyCORE_FORMAT_Z ") >= open_elements length", bookmark);
         }
 #endif
         
@@ -1862,7 +1881,7 @@ bool myhtml_tree_adoption_agency_algorithm(myhtml_tree_t* tree, myhtml_token_nod
             myhtml_tree_list_insert_by_index(tree->open_elements, new_formatting_element, idx_furthest_block + 1);
         }
         else {
-            MyHTML_DEBUG_ERROR("Adoption agency algorithm; Step 19; can't find furthest_block in open elements");
+            MyCORE_DEBUG_ERROR("Adoption agency algorithm; Step 19; can't find furthest_block in open elements");
         }
     }
     
@@ -1881,9 +1900,9 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree
     myhtml_tree_node_t* adjusted_location;
     
     if(tree->foster_parenting) {
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(target == NULL) {
-            MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 2; target is NULL in return value! This IS very bad");
+            MyCORE_DEBUG_ERROR("Appropriate place inserting; Step 2; target is NULL in return value! This IS very bad");
         }
 #endif
         if(target->ns != MyHTML_NAMESPACE_HTML)
@@ -1932,9 +1951,9 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree
                     break;
                 }
                 
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
                 if(idx_table == 0) {
-                    MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 2.5; idx_table is 0");
+                    MyCORE_DEBUG_ERROR("Appropriate place inserting; Step 2.5; idx_table is 0");
                 }
 #endif
                 
@@ -1950,9 +1969,9 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting(myhtml_tree_t* tree
         }
     }
     else {
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(target == NULL) {
-            MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 3-5; target is NULL in return value! This IS very bad");
+            MyCORE_DEBUG_ERROR("Appropriate place inserting; Step 3-5; target is NULL in return value! This IS very bad");
         }
 #endif
         
@@ -1972,9 +1991,9 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting_in_tree(myhtml_tree
     myhtml_tree_node_t* adjusted_location;
     
     if(target->tree->foster_parenting) {
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(target == NULL) {
-            MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 2; target is NULL in return value! This IS very bad");
+            MyCORE_DEBUG_ERROR("Appropriate place inserting; Step 2; target is NULL in return value! This IS very bad");
         }
 #endif
         
@@ -2028,12 +2047,6 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting_in_tree(myhtml_tree
                     break;
                 }
                 
-#ifdef DEBUG_MODE
-                if(idx_table == 0) {
-                    MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 2.5; idx_table is 0");
-                }
-#endif
-                
                 // step 2.6-7
                 adjusted_location = target;
                 
@@ -2047,9 +2060,9 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting_in_tree(myhtml_tree
         }
     }
     else {
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
         if(target == NULL) {
-            MyHTML_DEBUG_ERROR("Appropriate place inserting; Step 3-5; target is NULL in return value! This IS very bad");
+            MyCORE_DEBUG_ERROR("Appropriate place inserting; Step 3-5; target is NULL in return value! This IS very bad");
         }
 #endif
         
@@ -2066,11 +2079,11 @@ myhtml_tree_node_t * myhtml_tree_appropriate_place_inserting_in_tree(myhtml_tree
 // stack of template insertion modes
 myhtml_tree_insertion_list_t * myhtml_tree_template_insertion_init(myhtml_tree_t* tree)
 {
-    myhtml_tree_insertion_list_t* list = myhtml_malloc(sizeof(myhtml_tree_insertion_list_t));
+    myhtml_tree_insertion_list_t* list = mycore_malloc(sizeof(myhtml_tree_insertion_list_t));
     
     list->length = 0;
     list->size = 1024;
-    list->list = (enum myhtml_insertion_mode*)myhtml_malloc(sizeof(enum myhtml_insertion_mode) * list->size);
+    list->list = (enum myhtml_insertion_mode*)mycore_malloc(sizeof(enum myhtml_insertion_mode) * list->size);
     
     tree->template_insertion = list;
     
@@ -2088,10 +2101,10 @@ myhtml_tree_insertion_list_t * myhtml_tree_template_insertion_destroy(myhtml_tre
         return NULL;
         
     if(tree->template_insertion->list)
-        myhtml_free(tree->template_insertion->list);
+        mycore_free(tree->template_insertion->list);
     
     if(tree->template_insertion)
-        myhtml_free(tree->template_insertion);
+        mycore_free(tree->template_insertion);
     
     return NULL;
 }
@@ -2103,7 +2116,7 @@ void myhtml_tree_template_insertion_append(myhtml_tree_t* tree, enum myhtml_inse
     if(list->length >= list->size) {
         list->size <<= 1;
         
-        enum myhtml_insertion_mode* tmp = (enum myhtml_insertion_mode*)myhtml_realloc(list->list,
+        enum myhtml_insertion_mode* tmp = (enum myhtml_insertion_mode*)mycore_realloc(list->list,
                                                                          sizeof(enum myhtml_insertion_mode) * list->size);
         
         if(tmp)
@@ -2119,9 +2132,9 @@ void myhtml_tree_template_insertion_pop(myhtml_tree_t* tree)
     if(tree->template_insertion->length)
         tree->template_insertion->length--;
 
-#ifdef DEBUG_MODE
+#ifdef MyCORE_BUILD_DEBUG
     if(tree->template_insertion->length == 0) {
-        MyHTML_DEBUG("Pop template insertion; length is 0");
+        MyCORE_DEBUG("Pop template insertion; length is 0");
     }
 #endif
 }
@@ -2131,122 +2144,14 @@ size_t myhtml_tree_template_insertion_length(myhtml_tree_t* tree)
     return tree->template_insertion->length;
 }
 
-void myhtml_tree_print_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out)
-{
-    if(node == NULL)
-        return;
-    
-    const myhtml_tag_context_t *ctx = myhtml_tag_get_by_id(tree->tags, node->tag_id);
-    
-    if(node->tag_id == MyHTML_TAG__TEXT ||
-       node->tag_id == MyHTML_TAG__COMMENT)
-    {
-        if(node->token)
-            fprintf(out, "<%.*s>: %.*s\n", (int)ctx->name_length, ctx->name,
-                    (int)node->token->str.length, node->token->str.data);
-        else
-            fprintf(out, "<%.*s>\n", (int)ctx->name_length, ctx->name);
-    }
-    else if(node->tag_id == MyHTML_TAG__DOCTYPE)
-    {
-        fprintf(out, "<!DOCTYPE");
-        
-        if(tree->doctype.attr_name) {
-            fprintf(out, " %s", tree->doctype.attr_name);
-        }
-        
-        if(tree->doctype.attr_public) {
-            fprintf(out, " %s", tree->doctype.attr_public);
-        }
-        
-        if(tree->doctype.attr_system) {
-            fprintf(out, " %s", tree->doctype.attr_system);
-        }
-        
-        fprintf(out, ">\n");
-    }
-    else
-    {
-        if(node->token && node->token->type & MyHTML_TOKEN_TYPE_CLOSE) {
-            fprintf(out, "</%.*s", (int)ctx->name_length, ctx->name);
-        }
-        else {
-            fprintf(out, "<%.*s", (int)ctx->name_length, ctx->name);
-        }
-        
-        if(node->ns != MyHTML_NAMESPACE_HTML) {
-            switch (node->ns) {
-                case MyHTML_NAMESPACE_SVG:
-                    fprintf(out, ":svg");
-                    break;
-                case MyHTML_NAMESPACE_MATHML:
-                    fprintf(out, ":math");
-                    break;
-                case MyHTML_NAMESPACE_XLINK:
-                    fprintf(out, ":xlink");
-                    break;
-                case MyHTML_NAMESPACE_XML:
-                    fprintf(out, ":xml");
-                    break;
-                case MyHTML_NAMESPACE_XMLNS:
-                    fprintf(out, ":xmlns");
-                    break;
-                default:
-                    break;
-            }
-        }
-        
-        if(node->token)
-            myhtml_token_print_attr(tree, node->token, out);
-        
-        fprintf(out, ">\n");
-    }
-}
-
-void _myhtml_tree_print_node_children(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
-{
-    if(node == NULL)
-        return;
-    
-    size_t i;
-    
-    while(node)
-    {
-        for(i = 0; i < inc; i++)
-            fprintf(out, "\t");
-        
-        myhtml_tree_print_node(tree, node, out);
-        _myhtml_tree_print_node_children(tree, node->child, out, (inc + 1));
-        
-        node = node->next;
-    }
-}
-
-void myhtml_tree_print_node_children(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
-{
-    if(node == NULL)
-        return;
-    
-    _myhtml_tree_print_node_children(tree, node->child, out, inc);
-}
-
-void myhtml_tree_print_by_node(myhtml_tree_t* tree, myhtml_tree_node_t* node, FILE* out, size_t inc)
-{
-    if(node == NULL)
-        return;
-    
-    myhtml_tree_print_node(tree, node, out);
-    myhtml_tree_print_node_children(tree, node, out, (inc + 1));
-}
-
 // token list
 myhtml_tree_token_list_t * myhtml_tree_token_list_init(void)
 {
-    myhtml_tree_token_list_t* list = myhtml_malloc(sizeof(myhtml_tree_token_list_t));
+    myhtml_tree_token_list_t* list = mycore_malloc(sizeof(myhtml_tree_token_list_t));
     
     list->length = 0;
     list->size = 4096;
-    list->list = (myhtml_token_node_t**)myhtml_malloc(sizeof(myhtml_token_node_t*) * list->size);
+    list->list = (myhtml_token_node_t**)mycore_malloc(sizeof(myhtml_token_node_t*) * list->size);
     
     return list;
 }
@@ -2262,10 +2167,10 @@ myhtml_tree_token_list_t * myhtml_tree_token_list_destroy(myhtml_tree_token_list
         return NULL;
     
     if(list->list)
-        myhtml_free(list->list);
+        mycore_free(list->list);
     
     if(destroy_self && list) {
-        myhtml_free(list);
+        mycore_free(list);
         return NULL;
     }
     
@@ -2277,7 +2182,7 @@ void myhtml_tree_token_list_append(myhtml_tree_token_list_t* list, myhtml_token_
     if(list->length >= list->size) {
         list->size <<= 1;
         
-        myhtml_token_node_t** tmp = (myhtml_token_node_t**)myhtml_realloc(list->list, sizeof(myhtml_token_node_t*) * list->size);
+        myhtml_token_node_t** tmp = (myhtml_token_node_t**)mycore_realloc(list->list, sizeof(myhtml_token_node_t*) * list->size);
         
         if(tmp)
             list->list = tmp;
@@ -2292,7 +2197,7 @@ void myhtml_tree_token_list_append_after_index(myhtml_tree_token_list_t* list, m
     if(list->length >= list->size) {
         list->size <<= 1;
         
-        myhtml_token_node_t** tmp = (myhtml_token_node_t**)myhtml_realloc(list->list, sizeof(myhtml_token_node_t*) * list->size);
+        myhtml_token_node_t** tmp = (myhtml_token_node_t**)mycore_realloc(list->list, sizeof(myhtml_token_node_t*) * list->size);
         
         if(tmp)
             list->list = tmp;
@@ -2313,7 +2218,7 @@ void myhtml_tree_token_list_append_after_index(myhtml_tree_token_list_t* list, m
 myhtml_token_node_t * myhtml_tree_token_list_current_node(myhtml_tree_token_list_t* list)
 {
     if(list->length == 0) {
-        MyHTML_DEBUG("Token list current node; length is 0");
+        MyCORE_DEBUG("Token list current node; length is 0");
         return NULL;
     }
     
@@ -2443,7 +2348,7 @@ bool myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_node
        node->tag_id == MyHTML_TAG_ANNOTATION_XML && node->token &&
        (node->token->type & MyHTML_TOKEN_TYPE_CLOSE) == 0)
     {
-        myhtml_token_node_wait_for_done(node->token);
+        myhtml_token_node_wait_for_done(tree->token, node->token);
         
         myhtml_token_attr_t* attr = myhtml_token_attr_match_case(tree->token, node->token,
                                                                  "encoding", 8, "text/html", 9);
@@ -2460,11 +2365,11 @@ bool myhtml_tree_is_html_integration_point(myhtml_tree_t* tree, myhtml_tree_node
 }
 
 // temp tag name
-myhtml_status_t myhtml_tree_temp_tag_name_init(myhtml_tree_temp_tag_name_t* temp_tag_name)
+mystatus_t myhtml_tree_temp_tag_name_init(myhtml_tree_temp_tag_name_t* temp_tag_name)
 {
     temp_tag_name->size   = 1024;
     temp_tag_name->length = 0;
-    temp_tag_name->data   = (char *)myhtml_malloc(temp_tag_name->size * sizeof(char));
+    temp_tag_name->data   = (char *)mycore_malloc(temp_tag_name->size * sizeof(char));
     
     if(temp_tag_name->data == NULL)
         return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
@@ -2483,23 +2388,23 @@ myhtml_tree_temp_tag_name_t * myhtml_tree_temp_tag_name_destroy(myhtml_tree_temp
         return NULL;
     
     if(temp_tag_name->data) {
-        myhtml_free(temp_tag_name->data);
+        mycore_free(temp_tag_name->data);
         temp_tag_name->data = NULL;
     }
     
     if(self_destroy) {
-        myhtml_free(temp_tag_name);
+        mycore_free(temp_tag_name);
         return NULL;
     }
     
     return temp_tag_name;
 }
 
-myhtml_status_t myhtml_tree_temp_tag_name_append_one(myhtml_tree_temp_tag_name_t* temp_tag_name, const char name)
+mystatus_t myhtml_tree_temp_tag_name_append_one(myhtml_tree_temp_tag_name_t* temp_tag_name, const char name)
 {
     if(temp_tag_name->length >= temp_tag_name->size) {
         size_t nsize = temp_tag_name->size << 1;
-        char *tmp = (char *)myhtml_realloc(temp_tag_name->data, nsize * sizeof(char));
+        char *tmp = (char *)mycore_realloc(temp_tag_name->data, nsize * sizeof(char));
         
         if(tmp) {
             temp_tag_name->size = nsize;
@@ -2515,14 +2420,14 @@ myhtml_status_t myhtml_tree_temp_tag_name_append_one(myhtml_tree_temp_tag_name_t
     return MyHTML_STATUS_OK;
 }
 
-myhtml_status_t myhtml_tree_temp_tag_name_append(myhtml_tree_temp_tag_name_t* temp_tag_name, const char* name, size_t name_len)
+mystatus_t myhtml_tree_temp_tag_name_append(myhtml_tree_temp_tag_name_t* temp_tag_name, const char* name, size_t name_len)
 {
     if(temp_tag_name->data == NULL || name_len == 0)
         return MyHTML_STATUS_OK;
     
     if((temp_tag_name->length + name_len) >= temp_tag_name->size) {
         size_t nsize = (temp_tag_name->size << 1) + name_len;
-        char *tmp = (char *)myhtml_realloc(temp_tag_name->data, nsize * sizeof(char));
+        char *tmp = (char *)mycore_realloc(temp_tag_name->data, nsize * sizeof(char));
         
         if(tmp) {
             temp_tag_name->size = nsize;
@@ -2540,20 +2445,19 @@ myhtml_status_t myhtml_tree_temp_tag_name_append(myhtml_tree_temp_tag_name_t* te
 
 void myhtml_tree_wait_for_last_done_token(myhtml_tree_t* tree, myhtml_token_node_t* token_for_wait)
 {
-#ifndef MyHTML_BUILD_WITHOUT_THREADS
+#ifndef MyCORE_BUILD_WITHOUT_THREADS
     
-    const struct timespec timeout = {0, 0};
-    while(tree->token_last_done != token_for_wait) {myhtml_thread_nanosleep(&timeout);}
+    while(tree->token_last_done != token_for_wait) {mythread_nanosleep_sleep(tree->myhtml->thread_stream->timespec);}
     
 #endif
 }
 
 /* special tonek list */
-myhtml_status_t myhtml_tree_special_list_init(myhtml_tree_special_token_list_t* special)
+mystatus_t myhtml_tree_special_list_init(myhtml_tree_special_token_list_t* special)
 {
     special->size   = 1024;
     special->length = 0;
-    special->list   = (myhtml_tree_special_token_t *)myhtml_malloc(special->size * sizeof(myhtml_tree_special_token_t));
+    special->list   = (myhtml_tree_special_token_t *)mycore_malloc(special->size * sizeof(myhtml_tree_special_token_t));
     
     if(special->list == NULL)
         return MyHTML_STATUS_ERROR_MEMORY_ALLOCATION;
@@ -2572,23 +2476,23 @@ myhtml_tree_special_token_list_t * myhtml_tree_special_list_destroy(myhtml_tree_
         return NULL;
     
     if(special->list) {
-        myhtml_free(special->list);
+        mycore_free(special->list);
         special->list = NULL;
     }
     
     if(self_destroy) {
-        myhtml_free(special);
+        mycore_free(special);
         return NULL;
     }
     
     return special;
 }
 
-myhtml_status_t myhtml_tree_special_list_append(myhtml_tree_special_token_list_t* special, myhtml_token_node_t *token, myhtml_namespace_t ns)
+mystatus_t myhtml_tree_special_list_append(myhtml_tree_special_token_list_t* special, myhtml_token_node_t *token, myhtml_namespace_t ns)
 {
     if(special->length >= special->size) {
         size_t nsize = special->size << 1;
-        myhtml_tree_special_token_t *tmp = (myhtml_tree_special_token_t *)myhtml_realloc(special->list, nsize * sizeof(myhtml_tree_special_token_t));
+        myhtml_tree_special_token_t *tmp = (myhtml_tree_special_token_t *)mycore_realloc(special->list, nsize * sizeof(myhtml_tree_special_token_t));
         
         if(tmp) {
             special->size = nsize;
@@ -2628,14 +2532,14 @@ myhtml_tree_special_token_t * myhtml_tree_special_list_get_last(myhtml_tree_spec
 }
 
 /* incoming buffer */
-myhtml_incoming_buffer_t * myhtml_tree_incoming_buffer_first(myhtml_tree_t *tree)
+mycore_incoming_buffer_t * myhtml_tree_incoming_buffer_first(myhtml_tree_t *tree)
 {
     return tree->incoming_buf_first;
 }
 
 const char * myhtml_tree_incomming_buffer_make_data(myhtml_tree_t *tree, size_t begin, size_t length)
 {
-    myhtml_incoming_buffer_t *buffer = myhtml_incoming_buffer_find_by_position(tree->incoming_buf_first, begin);
+    mycore_incoming_buffer_t *buffer = mycore_incoming_buffer_find_by_position(tree->incoming_buf_first, begin);
     size_t relative_begin = begin - buffer->offset;
     
     if((relative_begin + length) <= buffer->size) {

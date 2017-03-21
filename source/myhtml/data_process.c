@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015-2016 Alexander Borisov
+ Copyright (C) 2015-2017 Alexander Borisov
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -19,13 +19,13 @@
 */
 
 #include "myhtml/data_process.h"
-#include "myhtml/utils/resources.h"
+#include "mycore/utils/resources.h"
 
 #define MyHTML_DATA_PROCESS_APPEND_WITH_PREPROCESSING() \
 tmp_offset += myhtml_string_before_append_any_preprocessing(str, &data[tmp_offset], (offset - tmp_offset), \
                                                             proc_entry->tmp_str_pos_proc); \
 if(offset != tmp_offset) { \
-    if(proc_entry->encoding == MyHTML_ENCODING_UTF_8) \
+    if(proc_entry->encoding == MyENCODING_UTF_8) \
         proc_entry->tmp_str_pos_proc = myhtml_string_append_with_preprocessing(str, &data[tmp_offset], (offset - tmp_offset), \
                                                                                proc_entry->emit_null_char); \
     else { \
@@ -42,9 +42,9 @@ void myhtml_data_process_entry_clean(myhtml_data_process_entry_t* proc_entry)
     proc_entry->state = myhtml_data_process_state_data;
 }
 
-void myhtml_data_process_string_append_char(myhtml_string_t* str, const char sm)
+void myhtml_data_process_string_append_char(mycore_string_t* str, const char sm)
 {
-    MyHTML_STRING_REALLOC_IF_NEED(str, 2, 0);
+    MyCORE_STRING_REALLOC_IF_NEED(str, 2, 0);
     
     str->data[str->length] = sm;
     str->length++;
@@ -52,7 +52,7 @@ void myhtml_data_process_string_append_char(myhtml_string_t* str, const char sm)
     str->data[str->length] = '\0';
 }
 
-size_t myhtml_data_process_state_data(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size)
+size_t myhtml_data_process_state_data(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size)
 {
     size_t tmp_offset = offset;
     
@@ -63,7 +63,7 @@ size_t myhtml_data_process_state_data(myhtml_data_process_entry_t* proc_entry, m
             tmp_offset += myhtml_string_before_append_any_preprocessing(str, &data[tmp_offset], (offset - tmp_offset),
                                                                         proc_entry->tmp_str_pos_proc);
             if(offset != tmp_offset) {
-                if(proc_entry->encoding == MyHTML_ENCODING_UTF_8)
+                if(proc_entry->encoding == MyENCODING_UTF_8)
                     proc_entry->tmp_str_pos_proc = myhtml_string_append_with_preprocessing(str, &data[tmp_offset],
                                                                                            (offset - tmp_offset),
                                                                                            proc_entry->emit_null_char);
@@ -72,7 +72,7 @@ size_t myhtml_data_process_state_data(myhtml_data_process_entry_t* proc_entry, m
                     myhtml_string_append_chunk_with_convert_encoding_with_preprocessing(str, &proc_entry->res,
                                                                                         &data[tmp_offset], (offset - tmp_offset),
                                                                                         proc_entry->encoding, proc_entry->emit_null_char);
-                    myhtml_encoding_result_clean(&proc_entry->res);
+                    myencoding_result_clean(&proc_entry->res);
                 }
             }
             
@@ -93,7 +93,7 @@ size_t myhtml_data_process_state_data(myhtml_data_process_entry_t* proc_entry, m
     return offset;
 }
 
-size_t myhtml_data_process_state_ampersand(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size)
+size_t myhtml_data_process_state_ampersand(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size)
 {
     if(data[offset] == '#')
     {
@@ -133,7 +133,7 @@ size_t myhtml_data_process_state_ampersand(myhtml_data_process_entry_t* proc_ent
     return offset;
 }
 
-size_t myhtml_data_process_state_ampersand_data(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size)
+size_t myhtml_data_process_state_ampersand_data(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size)
 {
     size_t tmp_offset = offset;
     
@@ -147,7 +147,7 @@ size_t myhtml_data_process_state_ampersand_data(myhtml_data_process_entry_t* pro
         else {
             /* if current charef is atrribute */
             if(proc_entry->is_attributes &&
-               (data[offset] == '=' || myhtml_string_alphanumeric_character[ (unsigned char)data[offset] ] != 0xff))
+               (data[offset] == '=' || mycore_string_alphanumeric_character[ (unsigned char)data[offset] ] != 0xff))
             {
                 MyHTML_DATA_PROCESS_APPEND_WITH_PREPROCESSING()
                 
@@ -157,9 +157,9 @@ size_t myhtml_data_process_state_ampersand_data(myhtml_data_process_entry_t* pro
         
         if(current_entry->codepoints_len) {
             for (size_t i = 0; i < current_entry->codepoints_len; i++) {
-                MyHTML_STRING_REALLOC_IF_NEED(str, 5, 0);
+                MyCORE_STRING_REALLOC_IF_NEED(str, 5, 0);
                 
-                proc_entry->tmp_str_pos += myhtml_encoding_codepoint_to_ascii_utf_8(current_entry->codepoints[i], &str->data[proc_entry->tmp_str_pos]);
+                proc_entry->tmp_str_pos += myencoding_codepoint_to_ascii_utf_8(current_entry->codepoints[i], &str->data[proc_entry->tmp_str_pos]);
             }
             
             str->length = proc_entry->tmp_str_pos;
@@ -178,7 +178,7 @@ size_t myhtml_data_process_state_ampersand_data(myhtml_data_process_entry_t* pro
     return offset;
 }
 
-size_t myhtml_data_process_state_ampersand_hash(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size)
+size_t myhtml_data_process_state_ampersand_hash(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size)
 {
     if(data[offset] == 'x' || data[offset] == 'X') {
         myhtml_data_process_string_append_char(str, data[offset]);
@@ -192,14 +192,14 @@ size_t myhtml_data_process_state_ampersand_hash(myhtml_data_process_entry_t* pro
     return offset;
 }
 
-size_t myhtml_data_process_state_ampersand_hash_data(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size)
+size_t myhtml_data_process_state_ampersand_hash_data(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size)
 {
     const unsigned char *u_data = (const unsigned char*)data;
     size_t tmp_offset = offset;
     
     while(offset < size)
     {
-        if(myhtml_string_chars_num_map[ u_data[offset] ] == 0xff)
+        if(mycore_string_chars_num_map[ u_data[offset] ] == 0xff)
         {
             proc_entry->state = myhtml_data_process_state_data;
             
@@ -217,7 +217,7 @@ size_t myhtml_data_process_state_ampersand_hash_data(myhtml_data_process_entry_t
         }
         
         if(proc_entry->tmp_num <= 0x10FFFF) {
-            proc_entry->tmp_num = myhtml_string_chars_num_map[ u_data[offset] ] + proc_entry->tmp_num * 10;
+            proc_entry->tmp_num = mycore_string_chars_num_map[ u_data[offset] ] + proc_entry->tmp_num * 10;
         }
         
         offset++;
@@ -228,14 +228,14 @@ size_t myhtml_data_process_state_ampersand_hash_data(myhtml_data_process_entry_t
     return offset;
 }
 
-size_t myhtml_data_process_state_ampersand_hash_x_data(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t offset, size_t size)
+size_t myhtml_data_process_state_ampersand_hash_x_data(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t offset, size_t size)
 {
     unsigned const char *u_data = (unsigned const char*)data;
     size_t tmp_offset = offset;
     
     while(offset < size)
     {
-        if(myhtml_string_chars_hex_map[ u_data[offset] ] == 0xff)
+        if(mycore_string_chars_hex_map[ u_data[offset] ] == 0xff)
         {
             proc_entry->state = myhtml_data_process_state_data;
             
@@ -254,7 +254,7 @@ size_t myhtml_data_process_state_ampersand_hash_x_data(myhtml_data_process_entry
         
         if(proc_entry->tmp_num <= 0x10FFFF) {
             proc_entry->tmp_num <<= 4;
-            proc_entry->tmp_num |= myhtml_string_chars_hex_map[ u_data[offset] ];
+            proc_entry->tmp_num |= mycore_string_chars_hex_map[ u_data[offset] ];
         }
         
         offset++;
@@ -265,10 +265,10 @@ size_t myhtml_data_process_state_ampersand_hash_x_data(myhtml_data_process_entry
     return offset;
 }
 
-void myhtml_data_process_state_end(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str)
+void myhtml_data_process_state_end(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str)
 {
     /* 4 is max utf8 byte + \0 */
-    MyHTML_STRING_REALLOC_IF_NEED(str, 5, 0);
+    MyCORE_STRING_REALLOC_IF_NEED(str, 5, 0);
     
     if(proc_entry->tmp_num <= 0x9F)
         proc_entry->tmp_num = replacement_character[proc_entry->tmp_num];
@@ -278,12 +278,12 @@ void myhtml_data_process_state_end(myhtml_data_process_entry_t* proc_entry, myht
         proc_entry->tmp_num = replacement_character[0];
     
     str->length = proc_entry->tmp_str_pos +
-        myhtml_encoding_codepoint_to_ascii_utf_8(proc_entry->tmp_num, &str->data[proc_entry->tmp_str_pos]);
+        myencoding_codepoint_to_ascii_utf_8(proc_entry->tmp_num, &str->data[proc_entry->tmp_str_pos]);
     
     str->data[str->length] = '\0';
 }
 
-void myhtml_data_process(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str, const char* data, size_t size)
+void myhtml_data_process(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str, const char* data, size_t size)
 {
     size_t offset = 0;
     
@@ -292,16 +292,16 @@ void myhtml_data_process(myhtml_data_process_entry_t* proc_entry, myhtml_string_
     }
 }
 
-void myhtml_data_process_end(myhtml_data_process_entry_t* proc_entry, myhtml_string_t* str)
+void myhtml_data_process_end(myhtml_data_process_entry_t* proc_entry, mycore_string_t* str)
 {
     if(proc_entry->state == myhtml_data_process_state_ampersand_data && proc_entry->charef_res.last_entry)
     {
         const charef_entry_t *entry = proc_entry->charef_res.last_entry;
         
         for (size_t i = 0; i < entry->codepoints_len; i++) {
-            MyHTML_STRING_REALLOC_IF_NEED(str, 5, 0);
+            MyCORE_STRING_REALLOC_IF_NEED(str, 5, 0);
             
-            proc_entry->tmp_str_pos += myhtml_encoding_codepoint_to_ascii_utf_8(entry->codepoints[i], &str->data[proc_entry->tmp_str_pos]);
+            proc_entry->tmp_str_pos += myencoding_codepoint_to_ascii_utf_8(entry->codepoints[i], &str->data[proc_entry->tmp_str_pos]);
         }
         
         str->length = proc_entry->tmp_str_pos;
