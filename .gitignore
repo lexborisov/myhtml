@@ -5,9 +5,9 @@
 *.swo
 bin/*
 .tags*
-source/mycss/*
-source/myselectors/*
 docs/*
 *.dylib
 *.exe
 *~
+myhtml.pc
+uninstal.mk
