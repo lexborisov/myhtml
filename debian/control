@@ -1,0 +1,30 @@
+Source: libmyhtml
+Section: libs
+Priority: optional
+Maintainer: Alexander Fedyashov <a@fedyashov.com>
+Standards-Version: 3.9.8
+Vcs-Git: git://github.com/lexborisov/myhtml.git
+Vcs-Browser: https://github.com/lexborisov/myhtml
+Homepage: https://github.com/lexborisov/myhtml
+Build-Depends:
+ debhelper (>= 9),
+ cdbs
+
+Package: libmyhtml
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends}
+Description: Libav utility library
+ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.
+
+Package: libmyhtml-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libmyhtml (= ${binary:Version}),
+ ${misc:Depends}
+Description: Development files for libmyhtml
+ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.

@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+
+VERSION  := $(shell dpkg-parsechangelog|grep ^Version|awk '{print $$2}')
+UVERSION := $(shell echo $(VERSION)|sed 's/-[[:digit:]]\+$$//')
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+
+build/libmyhtml::
+	make shared
+
+install/libmyhtml::
+	install -m 0755 -d debian/libmyhtml/usr/lib/
+	mv $(CURDIR)/lib $(CURDIR)/debian/libmyhtml/usr/lib/
+
+	install -m 0755 -d debian/libmyhtml-dev/usr/include/
+	mv $(CURDIR)/include $(CURDIR)/debian/libmyhtml-dev/usr/include/
+
+clean::
+	rm -rf ./sources
+
+tarball: clean
+	tar --exclude=.git      \
+		--exclude=debian 	\
+		--exclude=devel		\
+		--exclude=examples	\
+		--exclude=source	\
+		--exclude=test      \
+		-czf ../libmyhtml_$(UVERSION).orig.tar.gz .
