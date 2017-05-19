@@ -47,7 +47,11 @@ static mcsync_status_t mcsync_static_atomic_unlock(void* spinlock)
 /* spinlock */
 void * mcsync_spin_create(void)
 {
+#ifndef MyCORE_MCSYNC_SPINLOCK_PRESENT
+    return mcsync_mutex_create();
+#else
     return mycore_calloc(1, sizeof(int));
+#endif
 }
 
 mcsync_status_t mcsync_spin_init(void* spinlock)
