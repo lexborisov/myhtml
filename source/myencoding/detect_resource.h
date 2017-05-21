@@ -533,6 +533,7 @@ static const myencoding_entry_name_index_t myencoding_entry_name_index_static_li
     {"UTF-8", 5},
     {"AUTO", 4},
     {"NOT-DETERMINED", 14},
+    {"NOT-DETERMINED", 14},
     {"UTF-16LE", 8},
     {"UTF-16BE", 8},
     {"X-USER-DEFINED", 14},
