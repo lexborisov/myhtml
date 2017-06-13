@@ -1,26 +1,25 @@
 language: c
-services:
-  - docker
-sudo: false
-
 compiler:
   - clang
   - gcc
 
+services:
+  - docker
+sudo: false
+
 env:
-  matrix:
-    - OS=el DIST=6
-    - OS=el DIST=7
-    - OS=fedora DIST=24
-    - OS=fedora DIST=25
-    - OS=ubuntu DIST=precise
-    - OS=ubuntu DIST=trusty
-    - OS=ubuntu DIST=xenial
-    - OS=ubuntu DIST=yakkety
-    - OS=ubuntu DIST=zesty
-    - OS=debian DIST=wheezy
-    - OS=debian DIST=jessie
-    - OS=debian DIST=stretch
+  - TARGET=test
+  - OS=el DIST=6
+  - OS=el DIST=7
+  - OS=fedora DIST=24
+  - OS=fedora DIST=25
+  - OS=ubuntu DIST=precise
+  - OS=ubuntu DIST=trusty
+  - OS=ubuntu DIST=xenial
+  - OS=ubuntu DIST=yakkety
+  - OS=debian DIST=wheezy
+  - OS=debian DIST=jessie
+  - OS=debian DIST=stretch
 
 matrix:
   exclude:
@@ -40,6 +39,8 @@ matrix:
       compiler: clang
     - env: OS=ubuntu DIST=yakkety
       compiler: clang
+    - env: OS=ubuntu DIST=zesty
+      compiler: clang
     - env: OS=debian DIST=wheezy
       compiler: clang
     - env: OS=debian DIST=jessie
@@ -50,9 +51,9 @@ matrix:
 install: false
 
 script:
-  - make -j2 && make clean
-  - if [ "$TRAVIS_BRANCH" == "master"] && [ -n "$TRAVIS_TAG" ]; then git clone https://github.com/packpack/packpack.git packpack; fi
-  - if [ "$TRAVIS_BRANCH" == "master"] && [ -n "$TRAVIS_TAG" ]; then VERSION=${TRAVIS_TAG:1} packpack/packpack; fi
+  - if [ "$TARGET" == "test" ]; then make -j2 && make clean; fi
+  - if [ -n "$TRAVIS_TAG" ] && [ -n "$OS" ]; then git clone https://github.com/packpack/packpack.git packpack; fi
+  - if [ -n "$TRAVIS_TAG" ] && [ -n "$OS" ]; then VERSION=${TRAVIS_TAG:1} packpack/packpack; fi
 
 deploy:
   provider     : packagecloud
@@ -61,7 +62,7 @@ deploy:
   token        : ${PACKAGECLOUD_TOKEN}
   dist         : ${OS}/${DIST}
   package_glob : build/*.{deb,rpm}
-  skip_cleanup : true
-  on           :
-    branch     : master
-    condition  : -n "${TRAVIS_TAG}"
+  skip_cleanup   : true
+  on             :
+    tags: true
+    condition    : -n "${OS}"
