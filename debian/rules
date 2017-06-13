@@ -10,10 +10,10 @@ build/libmyhtml::
 
 install/libmyhtml::
 	install -m 0755 -d debian/libmyhtml/usr/lib/
-	mv $(CURDIR)/lib $(CURDIR)/debian/libmyhtml/usr/lib/
+	mv $(CURDIR)/lib $(CURDIR)/debian/libmyhtml/usr/
 
 	install -m 0755 -d debian/libmyhtml-dev/usr/include/
-	mv $(CURDIR)/include $(CURDIR)/debian/libmyhtml-dev/usr/include/
+	mv $(CURDIR)/include $(CURDIR)/debian/libmyhtml-dev/usr/
 
 clean::
 	rm -rf ./sources
