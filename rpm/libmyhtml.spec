@@ -5,7 +5,6 @@ Summary: MyHTML is a fast HTML Parser implemented as a pure C99 library.
 License: LGPLv2.1
 URL: https://github.com/lexborisov/myhtml
 Source0: https://github.com/lexborisov/myhtml/archive/%{version}/v%{version}.tar.gz
-BuildArch: noarch
 BuildRequires: make, glibc-devel
 
 %description
@@ -28,21 +27,21 @@ make shared
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p %buildroot/include
-cp -r include %buildroot/include
-make install prefix=$RPM_BUILD_ROOT
+
+mkdir -p %buildroot/%{_usr}/include
+make install prefix=$RPM_BUILD_ROOT PROJECT_INSTALL_LIBRARY=%{_usr}/%{_lib} PROJECT_INSTALL_HEADER=%{_usr}/include
 
 %files
 %defattr(-,root,root,-)
-%{_libdir}/*.so.*
-%doc LICENCE README*
-%license LICENSE
+%{_libdir}/*.so
+%doc README.md
+%{!?_licensedir:%global license %doc}
 
 %files devel
 %defattr(-,root,root,-)
-%{_includedir}/%{name}
-%doc LICENCE README*
-%license LICENSE
+%{_includedir}
+%doc README.md
+%{!?_licensedir:%global license %doc}
 
 %changelog
 * Tue Mar 21 2017 Alexander Borisov <lex.borisov@gmail.com> 4.0.0-1
