@@ -750,6 +750,11 @@ size_t myencoding_prescan_stream_to_determine_encoding_get_attr(const unsigned c
 
 bool myencoding_prescan_stream_to_determine_encoding_check_meta(const unsigned char *udata, size_t *length, size_t data_size, myencoding_t *encoding, const char **found, size_t *found_lenght)
 {
+    if(found)
+        *found = NULL;
+    if(found_lenght)
+        *found_lenght = 0;
+    
     myencoding_detect_attr_t attr;
     
     bool got_pragma = false;
