@@ -1,5 +1,8 @@
 # MyHTML: Build and Installation
 
+## Linux Packages
+See all packages on https://packagecloud.io/Modest/myhtml
+
 ## GNU Make
 
 In root directory of project (`/`):
