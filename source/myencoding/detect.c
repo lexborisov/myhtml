@@ -408,7 +408,17 @@ const char * myencoding_name_by_id(myencoding_t encoding, size_t *length)
 */
 bool myencoding_extracting_character_encoding_from_charset(const char *data, size_t data_size, myencoding_t *encoding)
 {
+    return myencoding_extracting_character_encoding_from_charset_with_found(data, data_size, encoding, NULL, NULL);
+}
+
+bool myencoding_extracting_character_encoding_from_charset_with_found(const char *data, size_t data_size, myencoding_t *encoding, const char **found, size_t *found_lenght)
+{
     *encoding = MyENCODING_NOT_DETERMINED;
+    
+    if(found)
+        *found = NULL;
+    if(found_lenght)
+        *found_lenght = 0;
     
     /* 1 */
     size_t length = 0;
@@ -472,7 +482,14 @@ bool myencoding_extracting_character_encoding_from_charset(const char *data, siz
         
         while(length < data_size) {
             if(udata[length] == 0x22)
+            {
+                if(found)
+                    *found = &data[begin];
+                if(found_lenght)
+                    *found_lenght = (length - begin);
+                
                 return myencoding_by_name(&data[begin], (length - begin), encoding);
+            }
             
             length++;
         }
@@ -488,7 +505,14 @@ bool myencoding_extracting_character_encoding_from_charset(const char *data, siz
         
         while(length < data_size) {
             if(udata[length] == 0x27)
+            {
+                if(found)
+                    *found = &data[begin];
+                if(found_lenght)
+                    *found_lenght = (length - begin);
+                
                 return myencoding_by_name(&data[begin], (length - begin), encoding);
+            }
             
             length++;
         }
@@ -505,12 +529,23 @@ bool myencoding_extracting_character_encoding_from_charset(const char *data, siz
             
             while(length < data_size) {
                 /* SEMICOLON character (;) */
-                if(udata[length] == 0x3B) {
+                if(udata[length] == 0x3B)
+                {
+                    if(found)
+                        *found = &data[begin];
+                    if(found_lenght)
+                        *found_lenght = (length - begin);
+                    
                     return myencoding_by_name(&data[begin], (length - begin), encoding);
                 }
                 
                 length++;
             }
+            
+            if(found)
+                *found = &data[begin];
+            if(found_lenght)
+                *found_lenght = (length - begin);
             
             return myencoding_by_name(&data[begin], (length - begin), encoding);
         }
@@ -713,7 +748,7 @@ size_t myencoding_prescan_stream_to_determine_encoding_get_attr(const unsigned c
     return myencoding_prescan_stream_to_determine_encoding_get_attr_value(udata, length, data_size, attr, it_last);
 }
 
-bool myencoding_prescan_stream_to_determine_encoding_check_meta(const unsigned char *udata, size_t *length, size_t data_size, myencoding_t *encoding)
+bool myencoding_prescan_stream_to_determine_encoding_check_meta(const unsigned char *udata, size_t *length, size_t data_size, myencoding_t *encoding, const char **found, size_t *found_lenght)
 {
     myencoding_detect_attr_t attr;
     
@@ -753,7 +788,7 @@ bool myencoding_prescan_stream_to_determine_encoding_check_meta(const unsigned c
             if((is_exists & 2) == 0) {
                 is_exists |= 2;
                 
-                if(myencoding_extracting_character_encoding_from_charset((const char*)(&udata[ attr.value_begin ]), attr.value_length, encoding)) {
+                if(myencoding_extracting_character_encoding_from_charset_with_found((const char*)(&udata[ attr.value_begin ]), attr.value_length, encoding, found, found_lenght)) {
                     need_pragma = 2;
                 }
             }
@@ -763,6 +798,11 @@ bool myencoding_prescan_stream_to_determine_encoding_check_meta(const unsigned c
         {
             if((is_exists & 4) == 0) {
                 is_exists |= 4;
+                
+                if(found)
+                    *found = (const char*)(&udata[ attr.value_begin ]);
+                if(found_lenght)
+                    *found_lenght = attr.value_length;
                 
                 myencoding_by_name((const char*)(&udata[ attr.value_begin ]), attr.value_length, encoding);
                 need_pragma = 1;
@@ -894,6 +934,11 @@ size_t myencoding_prescan_stream_to_determine_encoding_skip_other(const unsigned
 
 myencoding_t myencoding_prescan_stream_to_determine_encoding(const char *data, size_t data_size)
 {
+    return myencoding_prescan_stream_to_determine_encoding_with_found(data, data_size, NULL, NULL);
+}
+
+myencoding_t myencoding_prescan_stream_to_determine_encoding_with_found(const char *data, size_t data_size, const char **found, size_t *found_lenght)
+{
     const unsigned char* udata = (const unsigned char*)data;
     myencoding_t encoding = MyENCODING_NOT_DETERMINED;
     
@@ -908,12 +953,12 @@ myencoding_t myencoding_prescan_stream_to_determine_encoding(const char *data, s
             i++;
             
             switch (data[i]) {
-                /*
-                  A sequence of bytes starting with:
-                  0x3C, 0x4D or 0x6D, 0x45 or 0x65, 0x54 or 0x74, 0x41 or 0x61, 
-                  and one of 0x09, 0x0A, 0x0C, 0x0D, 0x20, 0x2F 
-                  (case-insensitive ASCII '<meta' followed by a space or slash)
-                */
+                    /*
+                     A sequence of bytes starting with:
+                     0x3C, 0x4D or 0x6D, 0x45 or 0x65, 0x54 or 0x74, 0x41 or 0x61,
+                     and one of 0x09, 0x0A, 0x0C, 0x0D, 0x20, 0x2F
+                     (case-insensitive ASCII '<meta' followed by a space or slash)
+                     */
                 case 0x4D:
                 case 0x6D:
                     if(mycore_ustrcasecmp_without_checks_by_secondary((const unsigned char*)"meta", &udata[i])) {
@@ -924,7 +969,7 @@ myencoding_t myencoding_prescan_stream_to_determine_encoding(const char *data, s
                         {
                             i++;
                             
-                            if(myencoding_prescan_stream_to_determine_encoding_check_meta(udata, &i, data_size, &encoding))
+                            if(myencoding_prescan_stream_to_determine_encoding_check_meta(udata, &i, data_size, &encoding, found, found_lenght))
                                 return encoding;
                         }
                     }

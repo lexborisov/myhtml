@@ -1,3 +1,14 @@
+4.0.1
+===========
+June 16, 2017
+
+* Fix for creating a spinlock without support siplock https://github.com/lexborisov/myhtml/issues/103
+* Added two functions for detect encoding with returning found position ```myencoding_prescan_stream_to_determine_encoding_with_found``` and ```myencoding_extracting_character_encoding_from_charset_with_found``` https://github.com/lexborisov/myhtml/issues/107
+* Added automated package build and publicate on ```PackageCloud.io``` (```packagecloud.io/modest/myhtml```)
+* Minor bug fixes
+
+Special thanks for [Alexander Fedyashov](https://github.com/layershifter) for help with automated package build.
+
 4.0.0
 ===========
 March 21, 2017

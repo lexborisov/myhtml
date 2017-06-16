@@ -36,7 +36,7 @@
 
 #define MyHTML_VERSION_MAJOR 4
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 0
+#define MyHTML_VERSION_PATCH 1
 
 #define MyHTML_VERSION_STRING MyCORE_STR(MyHTML_VERSION_MAJOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_MINOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_PATCH)
 
@@ -1966,6 +1966,42 @@ myencoding_prescan_stream_to_determine_encoding(const char *data, size_t data_si
 bool
 myencoding_extracting_character_encoding_from_charset(const char *data, size_t data_size,
                                                            myencoding_t *encoding);
+
+/**
+ * Detect encoding in meta tag (<meta ...>) before start parsing and return found raw data
+ *
+ * See https://html.spec.whatwg.org/multipage/syntax.html#prescan-a-byte-stream-to-determine-its-encoding
+ *
+ * @param[in]  html data bytes
+ * @param[in]  html data length
+ * @param[out] return raw char data point for find encoding
+ * @param[out] return raw char length
+ *
+ * @return detected encoding if encoding found, otherwise MyENCODING_NOT_DETERMINED
+ */
+myencoding_t
+myencoding_prescan_stream_to_determine_encoding_with_found(const char *data, size_t data_size,
+                                                           const char **found, size_t *found_lenght);
+
+/**
+ * Extracting character encoding from string. Find "charset=" and see encoding. Return found raw data.
+ * For example: "text/html; charset=windows-1251". Return MyENCODING_WINDOWS_1251
+ *
+ *
+ * See https://html.spec.whatwg.org/multipage/infrastructure.html#algorithm-for-extracting-a-character-encoding-from-a-meta-element
+ *
+ * @param[in]  data
+ * @param[in]  data length
+ * @param[out] return encoding
+ * @param[out] return raw char data point for find encoding
+ * @param[out] return raw char length
+ *
+ * @return true if encoding found
+ */
+bool
+myencoding_extracting_character_encoding_from_charset_with_found(const char *data, size_t data_size,
+                                                                 myencoding_t *encoding,
+                                                                 const char **found, size_t *found_lenght);
 
 /***********************************************************************************
  *

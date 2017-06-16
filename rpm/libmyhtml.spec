@@ -1,5 +1,5 @@
 Name: libmyhtml
-Version: 4.0.0
+Version: 4.0.1
 Release: 1%{?dist}
 Summary: MyHTML is a fast HTML Parser implemented as a pure C99 library.
 License: LGPLv2.1
