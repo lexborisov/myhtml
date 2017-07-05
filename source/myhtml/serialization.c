@@ -58,6 +58,17 @@ mystatus_t myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node, my
 {
     myhtml_tree_node_t* node = scope_node;
     
+    /*
+     Document node it is a root node of tree, it is not a tag element.
+     
+     For HTML, the root element will always be <HTML> tag.
+     It is always present in the HTML document and it always a root of HTML document.
+     */
+    
+    if(scope_node && scope_node->tree && scope_node->tree->document == scope_node) {
+        node = scope_node->child;
+    }
+    
     while(node) {
         if(myhtml_serialization_node_callback(node, callback, ptr))
             return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;

@@ -100,35 +100,9 @@ int main(int argc, const char * argv[])
     mycore_string_raw_t str_raw;
     mycore_string_raw_clean_all(&str_raw);
     
-    myhtml_tree_node_t *document_child = myhtml_node_child(myhtml_tree_get_document(tree));
-    
-    /*
-       Document node it is a root node of tree, it is not a tag element.
-     
-       For HTML, the root element will always be <HTML> tag.
-       It is always present in the HTML document and it always a root of HTML document.
-     
-       We can simply output a tree without using a loop:
-          if(myhtml_serialization_tree_buffer(document_child, &str_raw)) {
-              printf("%s", str_raw.data);
-              mycore_string_raw_destroy(&str_raw, false);
-          }
-    
-       but we need to serialization <!DOCTYPE>, it can be presented in the HTML document or not.
-       for this we send all the children of Document node to myhtml_serialization_tree_buffer function
-     */
-    while(document_child)
-    {
-        if(myhtml_serialization_tree_buffer(document_child, &str_raw)) {
-            /* error, some error in serialization moment */
-            myhtml_tag_id_t tag_id = myhtml_node_tag_id(document_child);
-            const char *tag_name = myhtml_tag_name_by_id(tree, tag_id, NULL);
-            
-            fprintf(stderr, "Could not serialization tree for node: <%s>\n", tag_name);
-            exit(EXIT_FAILURE);
-        }
-        
-        document_child = myhtml_node_next(document_child);
+    if(myhtml_serialization_tree_buffer(myhtml_tree_get_document(tree), &str_raw)) {
+        fprintf(stderr, "Could not serialization for the tree\n");
+        exit(EXIT_FAILURE);
     }
     
     printf("%s", str_raw.data);

@@ -77,7 +77,9 @@ mystatus_t myhtml_tokenizer_chunk_process(myhtml_tree_t* tree, const char* html,
 #endif
     
     if(tree->current_qnode == NULL) {
-        myhtml_tokenizer_set_first_settings(tree, html, html_length);
+        mystatus_t status = myhtml_tokenizer_set_first_settings(tree, html, html_length);
+        if(status)
+            return status;
     }
     
     size_t offset = 0;
