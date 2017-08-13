@@ -896,9 +896,9 @@ size_t myencoding_prescan_stream_to_determine_encoding_skip_other(const unsigned
                 if(udata[length] != 0x3E) {
                     if(udata[(length - 1)] == 0x2D && udata[(length - 2)] == 0x2D)
                         return (length + 1);
-                    
-                    length++;
                 }
+                
+                length++;
             }
             
             return length;
