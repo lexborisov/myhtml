@@ -167,6 +167,8 @@ void myhtml_tree_clean(myhtml_tree_t* tree)
     
 #ifndef MyCORE_BUILD_WITHOUT_THREADS
     mythread_queue_list_entry_clean(tree->queue_entry);
+    mythread_queue_list_entry_make_batch(tree->myhtml->thread_batch, tree->queue_entry);
+    mythread_queue_list_entry_make_stream(tree->myhtml->thread_stream, tree->queue_entry);
 #endif /* MyCORE_BUILD_WITHOUT_THREADS */
     
     myhtml_token_clean(tree->token);
@@ -273,6 +275,8 @@ void myhtml_tree_clean_all(myhtml_tree_t* tree)
     
 #ifndef MyCORE_BUILD_WITHOUT_THREADS
     mythread_queue_list_entry_clean(tree->queue_entry);
+    mythread_queue_list_entry_make_batch(tree->myhtml->thread_batch, tree->queue_entry);
+    mythread_queue_list_entry_make_stream(tree->myhtml->thread_stream, tree->queue_entry);
 #endif
     
     tree->attr_current = myhtml_token_attr_create(tree->token, tree->token->mcasync_attr_id);

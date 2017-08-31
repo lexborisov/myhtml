@@ -108,8 +108,8 @@ void myhtml_token_clean_all(myhtml_token_t* token);
 myhtml_token_t * myhtml_token_destroy(myhtml_token_t* token);
 
 myhtml_tag_id_t myhtml_token_node_tag_id(myhtml_token_node_t *token_node);
-myhtml_position_t myhtml_token_node_raw_pasition(myhtml_token_node_t *token_node);
-myhtml_position_t myhtml_token_node_element_pasition(myhtml_token_node_t *token_node);
+myhtml_position_t myhtml_token_node_raw_position(myhtml_token_node_t *token_node);
+myhtml_position_t myhtml_token_node_element_position(myhtml_token_node_t *token_node);
 
 myhtml_tree_attr_t * myhtml_token_node_attribute_first(myhtml_token_node_t *token_node);
 myhtml_tree_attr_t * myhtml_token_node_attribute_last(myhtml_token_node_t *token_node);

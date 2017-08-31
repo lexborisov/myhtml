@@ -36,7 +36,7 @@
 
 #define MyHTML_VERSION_MAJOR 4
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 1
+#define MyHTML_VERSION_PATCH 2
 
 #define MyHTML_VERSION_STRING MyCORE_STR(MyHTML_VERSION_MAJOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_MINOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_PATCH)
 
@@ -1366,7 +1366,7 @@ myhtml_node_string(myhtml_tree_node_t *node);
  * @return myhtml_tree_node_t
  */
 myhtml_position_t
-myhtml_node_raw_pasition(myhtml_tree_node_t *node);
+myhtml_node_raw_position(myhtml_tree_node_t *node);
 
 /**
  * Get element position for Tree Node in Incoming Buffer
@@ -1378,7 +1378,7 @@ myhtml_node_raw_pasition(myhtml_tree_node_t *node);
  * @return myhtml_tree_node_t
  */
 myhtml_position_t
-myhtml_node_element_pasition(myhtml_tree_node_t *node);
+myhtml_node_element_position(myhtml_tree_node_t *node);
 
 /**
  * Get data value from tree node
@@ -1619,7 +1619,7 @@ myhtml_token_node_tag_id(myhtml_token_node_t *token_node);
  * @return myhtml_position_t
  */
 myhtml_position_t
-myhtml_token_node_raw_pasition(myhtml_token_node_t *token_node);
+myhtml_token_node_raw_position(myhtml_token_node_t *token_node);
 
 /**
  * Get element position for Token Node in Incoming Buffer
@@ -1631,7 +1631,7 @@ myhtml_token_node_raw_pasition(myhtml_token_node_t *token_node);
  * @return myhtml_position_t
  */
 myhtml_position_t
-myhtml_token_node_element_pasition(myhtml_token_node_t *token_node);
+myhtml_token_node_element_position(myhtml_token_node_t *token_node);
 
 /**
  * Get first attribute of a token node

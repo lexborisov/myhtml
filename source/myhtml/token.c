@@ -204,7 +204,7 @@ myhtml_tag_id_t myhtml_token_node_tag_id(myhtml_token_node_t *token_node)
     return token_node->tag_id;
 }
 
-myhtml_position_t myhtml_token_node_raw_pasition(myhtml_token_node_t *token_node)
+myhtml_position_t myhtml_token_node_raw_position(myhtml_token_node_t *token_node)
 {
     if(token_node)
         return (myhtml_position_t){token_node->raw_begin, token_node->raw_length};
@@ -212,7 +212,7 @@ myhtml_position_t myhtml_token_node_raw_pasition(myhtml_token_node_t *token_node
     return (myhtml_position_t){0, 0};
 }
 
-myhtml_position_t myhtml_token_node_element_pasition(myhtml_token_node_t *token_node)
+myhtml_position_t myhtml_token_node_element_position(myhtml_token_node_t *token_node)
 {
     if(token_node)
         return (myhtml_position_t){token_node->element_begin, token_node->element_length};

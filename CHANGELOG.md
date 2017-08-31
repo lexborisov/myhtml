@@ -1,3 +1,10 @@
+4.0.2
+===========
+NOW()
+
+* Grammar: change function name *_pasition* => *_position*
+* Fixed infiniti loop if html file is to big. Queue round not work properly - fixed. https://github.com/lexborisov/myhtml/issues/117
+
 4.0.1
 ===========
 June 16, 2017

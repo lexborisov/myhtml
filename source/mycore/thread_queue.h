@@ -84,7 +84,7 @@ mythread_queue_node_t * mythread_queue_get_current_node(mythread_queue_t* queue)
 mythread_queue_node_t * mythread_queue_node_malloc(mythread_t *mythread, mythread_queue_t* queue, mystatus_t *status);
 mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, mythread_queue_t* queue, size_t limit, mystatus_t *status);
 #ifndef MyCORE_BUILD_WITHOUT_THREADS
-mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, mythread_queue_list_entry_t *entry, mystatus_t *status);
+mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, mythread_queue_list_entry_t *entry);
 #endif
 
 #ifndef MyCORE_BUILD_WITHOUT_THREADS
@@ -100,7 +100,8 @@ mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t** mythre
 mythread_queue_list_entry_t * mythread_queue_list_entry_delete(mythread_t** mythread_list, size_t list_size, mythread_queue_list_t *queue_list, mythread_queue_list_entry_t *entry, bool destroy_queue);
 void mythread_queue_list_entry_clean(mythread_queue_list_entry_t *entry);
 void mythread_queue_list_entry_wait_for_done(mythread_t *mythread, mythread_queue_list_entry_t *entry);
-void mythread_queue_list_entry_make_batch(mythread_t* mythread, mythread_queue_list_entry_t* entry, size_t from, size_t length);
+void mythread_queue_list_entry_make_batch(mythread_t* mythread, mythread_queue_list_entry_t* entry);
+void mythread_queue_list_entry_make_stream(mythread_t* mythread, mythread_queue_list_entry_t* entry);
 #endif
 
 #ifdef __cplusplus

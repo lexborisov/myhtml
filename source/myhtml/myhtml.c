@@ -797,7 +797,7 @@ mycore_string_t * myhtml_node_string(myhtml_tree_node_t *node)
     return NULL;
 }
 
-myhtml_position_t myhtml_node_raw_pasition(myhtml_tree_node_t *node)
+myhtml_position_t myhtml_node_raw_position(myhtml_tree_node_t *node)
 {
     if(node && node->token)
         return (myhtml_position_t){node->token->raw_begin, node->token->raw_length};
@@ -805,7 +805,7 @@ myhtml_position_t myhtml_node_raw_pasition(myhtml_tree_node_t *node)
     return (myhtml_position_t){0, 0};
 }
 
-myhtml_position_t myhtml_node_element_pasition(myhtml_tree_node_t *node)
+myhtml_position_t myhtml_node_element_position(myhtml_tree_node_t *node)
 {
     if(node && node->token)
         return (myhtml_position_t){node->token->element_begin, node->token->element_length};
@@ -1517,8 +1517,14 @@ mystatus_t myhtml_queue_add(myhtml_tree_t *tree, size_t begin, myhtml_token_node
     else {
         if(qnode)
             qnode->args = token;
-            
-        tree->current_qnode = mythread_queue_node_malloc_round(tree->myhtml->thread_stream, tree->queue_entry, NULL);
+        
+        tree->current_qnode = mythread_queue_node_malloc_round(tree->myhtml->thread_stream, tree->queue_entry);
+        
+        /* we have a clean queue list */
+        if(tree->queue_entry->queue->nodes_length == 0) {
+            mythread_queue_list_entry_make_batch(tree->myhtml->thread_batch, tree->queue_entry);
+            mythread_queue_list_entry_make_stream(tree->myhtml->thread_stream, tree->queue_entry);
+        }
     }
     
 #else

@@ -137,8 +137,8 @@ void * colorize_callback_before_token_done(myhtml_tree_t* tree, myhtml_token_nod
 {
     mycore_incoming_buffer_t *inc_buf = myhtml_tree_incoming_buffer_first(tree);
     
-    myhtml_position_t token_pos = myhtml_token_node_raw_pasition(token);
-    myhtml_position_t token_element_pos = myhtml_token_node_element_pasition(token);
+    myhtml_position_t token_pos = myhtml_token_node_raw_position(token);
+    myhtml_position_t token_element_pos = myhtml_token_node_element_position(token);
     
     size_t last_pos = token_pos.begin + token_pos.length;
     

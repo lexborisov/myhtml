@@ -212,7 +212,7 @@ mythread_queue_node_t * mythread_queue_node_malloc_limit(mythread_t *mythread, m
 }
 
 #ifndef MyCORE_BUILD_WITHOUT_THREADS
-mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, mythread_queue_list_entry_t *entry, mystatus_t *status)
+mythread_queue_node_t * mythread_queue_node_malloc_round(mythread_t *mythread, mythread_queue_list_entry_t *entry)
 {
     mythread_queue_t* queue = entry->queue;
     
@@ -352,9 +352,10 @@ mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t** mythre
     entry->queue = queue;
     
     for(size_t i = 0; i < list_size; i++) {
-        if(mythread_list[i]->type == MyTHREAD_TYPE_BATCH) {
-            mythread_queue_list_entry_make_batch(mythread_list[i], entry, mythread_list[i]->id_increase, mythread_list[i]->entries_length);
-        }
+        if(mythread_list[i]->type == MyTHREAD_TYPE_BATCH)
+            mythread_queue_list_entry_make_batch(mythread_list[i], entry);
+        else
+            mythread_queue_list_entry_make_stream(mythread_list[i], entry);
         
         if(mythread_list[i])
             mythread_suspend(mythread_list[i]);
@@ -424,10 +425,6 @@ void mythread_queue_list_entry_clean(mythread_queue_list_entry_t *entry)
         return;
     
     mythread_queue_clean(entry->queue);
-    
-    for (size_t i = 0; i < entry->thread_param_size; i++) {
-        memset(&entry->thread_param[i], 0, sizeof(mythread_queue_thread_param_t));
-    }
 }
 
 void mythread_queue_list_entry_wait_for_done(mythread_t* mythread, mythread_queue_list_entry_t *entry)
@@ -454,12 +451,25 @@ bool mythread_queue_list_entry_see_for_done(mythread_queue_list_entry_t *entry)
     return true;
 }
 
-void mythread_queue_list_entry_make_batch(mythread_t* mythread, mythread_queue_list_entry_t* entry, size_t from, size_t count)
+void mythread_queue_list_entry_make_batch(mythread_t* mythread, mythread_queue_list_entry_t* entry)
 {
+    if(entry == NULL)
+        return;
+    
     size_t i = 0;
-    while(from <= count) {
+    for(size_t from = mythread->id_increase; from <= mythread->entries_length; from++) {
         entry->thread_param[from].use = i;
-        i++; from++;
+        i++;
+    }
+}
+
+void mythread_queue_list_entry_make_stream(mythread_t* mythread, mythread_queue_list_entry_t* entry)
+{
+    if(entry == NULL)
+        return;
+    
+    for(size_t from = mythread->id_increase; from <= mythread->entries_length; from++) {
+        entry->thread_param[from].use = 0;
     }
 }
 
@@ -527,7 +537,7 @@ void * mythread_function_queue_batch(void *arg)
         while(entry)
         {
             mythread_queue_thread_param_t *thread_param = &entry->thread_param[ thread_id ];
-        
+            
             if(thread_param->use < entry->queue->nodes_uses)
             {
                 size_t pos = thread_param->use / entry->queue->nodes_size;
