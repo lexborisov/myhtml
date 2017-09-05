@@ -5,7 +5,6 @@ subdir('mycore')
 subdir('myencoding')
 subdir('myhtml')
 
-
 inc_libh = include_directories ('.')
 inc_libh_dep = declare_dependency (include_directories : inc_libh)
 

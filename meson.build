@@ -12,4 +12,21 @@ thread_dep = dependency('threads')
 inc_rooth = include_directories ('.')
 inc_rooth_dep = declare_dependency (include_directories : inc_rooth)
 
+conf = configuration_data()
+conf.set('prefix', get_option('prefix'))
+conf.set('exec_prefix', get_option('prefix'))
+conf.set('libdir', get_option ('libdir'))
+conf.set('includedir', get_option ('includedir'))
+conf.set('libname', PROJECT_NAME)
+conf.set('description', 'HTML parser by https://html.spec.whatwg.org/multipage/')
+conf.set('version', PROJECT_VERSION)
+conf.set('cflags', '-I${includedir}/@0@-@1@'.format (PROJECT_NAME, API_VERSION))
+
+configure_file(input : 'myhtml.pc.in',
+	output : 'myhtml-@0@.pc'.format(API_VERSION),
+	configuration : conf,
+	install : true,
+	install_dir : join_paths (get_option ('libdir'),'pkgconfig')
+	)
+
 subdir('source')
