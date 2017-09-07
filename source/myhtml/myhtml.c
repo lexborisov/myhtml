@@ -757,6 +757,37 @@ bool myhtml_node_is_close_self(myhtml_tree_node_t *node)
     return false;
 }
 
+bool myhtml_node_is_void_element(myhtml_tree_node_t *node)
+{
+    // http://w3c.github.io/html-reference/syntax.html#void-elements
+    switch (node->tag_id)
+    {
+        case MyHTML_TAG_AREA:
+        case MyHTML_TAG_BASE:
+        case MyHTML_TAG_BR:
+        case MyHTML_TAG_COL:
+        case MyHTML_TAG_COMMAND:
+        case MyHTML_TAG_EMBED:
+        case MyHTML_TAG_HR:
+        case MyHTML_TAG_IMG:
+        case MyHTML_TAG_INPUT:
+        case MyHTML_TAG_KEYGEN:
+        case MyHTML_TAG_LINK:
+        case MyHTML_TAG_META:
+        case MyHTML_TAG_PARAM:
+        case MyHTML_TAG_SOURCE:
+        case MyHTML_TAG_TRACK:
+        case MyHTML_TAG_WBR:
+        {
+            return true;
+        }
+        default:
+        {
+            return false;
+        }
+    }
+}
+
 myhtml_tree_attr_t * myhtml_node_attribute_first(myhtml_tree_node_t *node)
 {
     if(node->token)
