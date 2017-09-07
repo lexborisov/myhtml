@@ -1316,6 +1316,16 @@ bool
 myhtml_node_is_close_self(myhtml_tree_node_t *node);
 
 /**
+ * Node is a void element?
+ *
+ * @param[in] myhtml_tree_node_t*
+ *
+ * @return true or false (1 or 0)
+ */
+bool
+myhtml_node_is_void_element(myhtml_tree_node_t *node);
+
+/**
  * Get first attribute of a node
  *
  * @param[in] myhtml_tree_node_t*
