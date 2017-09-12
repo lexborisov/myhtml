@@ -11,3 +11,5 @@ docs/*
 *~
 myhtml.pc
 uninstal.mk
+.vscode
+build
