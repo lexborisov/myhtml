@@ -21,3 +21,4 @@ endif (WIN32)
 
 # ---[ Create dynamic library
 add_library(myhtml SHARED ${MYHTML_SOURCES} ${MYHTML_HEADERS})
+add_library(myhtml_static STATIC ${MYHTML_SOURCES} ${MYHTML_HEADERS})
