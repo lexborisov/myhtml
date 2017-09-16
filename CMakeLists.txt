@@ -40,9 +40,9 @@ file(GLOB_RECURSE MYHTML_SOURCES ${MODULES_PATH})
 
 # ---[ Include port based on OS
 if (WIN32)
-    file(GLOB_RECURSE MYHTML_SOURCES_PORT ../source/myport/windows_nt/*.c)
+    file(GLOB_RECURSE MYHTML_SOURCES_PORT ./source/myport/windows_nt/*.c)
 else ()
-    file(GLOB_RECURSE MYHTML_SOURCES_PORT ../source/myport/posix/*.c)
+    file(GLOB_RECURSE MYHTML_SOURCES_PORT ./source/myport/posix/*.c)
 endif (WIN32)
 
 # export MYHTML_INCLUDE_DIRS and STXXLMYHTML_LIBRARIES to global CACHE
