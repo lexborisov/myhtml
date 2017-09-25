@@ -428,7 +428,7 @@ char * mchar_async_malloc(mchar_async_t *mchar_async, size_t node_idx, size_t si
             
             if(calc_size) {
                 char *tmp = &chunk->begin[(chunk->length + sizeof(size_t))];
-                *(size_t*)(&chunk->begin[chunk->length]) = calc_size;
+                memcpy(&chunk->begin[chunk->length], &calc_size, sizeof(size_t));
                 
                 chunk->length = chunk->size;
                 
@@ -452,7 +452,7 @@ char * mchar_async_malloc(mchar_async_t *mchar_async, size_t node_idx, size_t si
     }
     
     char *tmp = &chunk->begin[(chunk->length + sizeof(size_t))];
-    *((size_t*)(&chunk->begin[chunk->length])) = size;
+    memcpy(&chunk->begin[chunk->length], &size, sizeof(size_t));
     
     chunk->length = chunk->length + size + sizeof(size_t);
     
@@ -464,7 +464,8 @@ char * mchar_async_realloc(mchar_async_t *mchar_async, size_t node_idx, char *da
     if(data == NULL)
         return NULL;
     
-    size_t curr_size = *((size_t*)(data - sizeof(size_t)));
+    size_t curr_size;
+    memcpy(&curr_size, (data - sizeof(size_t)), sizeof(size_t));
     
     if(curr_size >= new_size)
         return data;
@@ -478,7 +479,7 @@ char * mchar_async_realloc(mchar_async_t *mchar_async, size_t node_idx, char *da
         
         if(next_size <= node->chunk->size) {
             /* it`s Magic */
-            *((size_t*)(&node->chunk->begin[ ((node->chunk->length - curr_size) - sizeof(size_t)) ])) = new_size;
+            memcpy(&node->chunk->begin[ ((node->chunk->length - curr_size) - sizeof(size_t)) ], &new_size, sizeof(size_t));
             
             node->chunk->length = next_size;
             
@@ -510,16 +511,18 @@ char * mchar_async_crop_first_chars(mchar_async_t *mchar_async, size_t node_idx,
     if(data == NULL)
         return NULL;
     
-    size_t curr_size = *((size_t*)(data - sizeof(size_t)));
+    size_t curr_size;
+    memcpy(&curr_size, (data - sizeof(size_t)), sizeof(size_t));
     
     char *tmp_old = data;
     data = &data[crop_len];
     
-    *((size_t*)(data - sizeof(size_t))) = curr_size - crop_len;
+    curr_size -= crop_len;
+    memcpy((data - sizeof(size_t)), &curr_size, sizeof(size_t));
     
     if((crop_len + 4) > sizeof(size_t)) {
         crop_len = crop_len - sizeof(size_t);
-        *((size_t*)(tmp_old - sizeof(size_t))) = crop_len;
+        memcpy((tmp_old - sizeof(size_t)), &crop_len, sizeof(size_t));
         
         mchar_async_node_t *node = &mchar_async->nodes[node_idx];
         mchar_async_cache_add(&node->cache, tmp_old, crop_len);
@@ -533,10 +536,13 @@ char * mchar_async_crop_first_chars_without_cache(char *data, size_t crop_len)
     if(data == NULL)
         return NULL;
     
-    size_t curr_size = *((size_t*)(data - sizeof(size_t)));
+    size_t curr_size;
+    memcpy(&curr_size, (data - sizeof(size_t)), sizeof(size_t));
+    
     data = &data[crop_len];
     
-    *((size_t*)(data - sizeof(size_t))) = curr_size - crop_len;
+    curr_size -= crop_len;
+    memcpy((data - sizeof(size_t)), &curr_size, sizeof(size_t));
     
     return data;
 }
