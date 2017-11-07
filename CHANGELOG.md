@@ -3,7 +3,7 @@
 November 07, 2017
 
 * Grammar: change function name *_pasition* => *_position*
-* Fixed infiniti loop if html file is to big. Queue round not work properly - fixed. https://github.com/lexborisov/myhtml/issues/117
+* Fixed infinite loop if html file is to big. Queue round not work properly - fixed. https://github.com/lexborisov/myhtml/issues/117
 * Append new function ```myhtml_node_is_void_element``` for check to see if we are dealing with a void element. https://github.com/lexborisov/myhtml/pull/119
 * Potential loss of the pointer on systems other than x86, x86_64 (Misaligned Integer Pointer)
 
