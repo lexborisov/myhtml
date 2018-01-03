@@ -916,7 +916,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                     // step 1
                     myhtml_tree_node_t* form_node = myhtml_tree_element_in_scope(tree, MyHTML_TAG_FORM, MyHTML_NAMESPACE_HTML, MyHTML_TAG_CATEGORIES_SCOPE);
                     
-                    if(form_node) {
+                    if(form_node == NULL) {
                         // parse error
                         /* %EXTERNAL% VALIDATOR:RULES TOKEN STATUS:ELEMENT_OPEN_NOT_FOUND ACTION:IGNORE LEVEL:ERROR */
                         
