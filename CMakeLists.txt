@@ -115,9 +115,9 @@ endif()
 ################
 ## ARGS
 #########################
-option(PROJECT_BUILD_SHARED "Build shared library" ON)
-option(PROJECT_BUILD_STATIC "Build static library" ON)
-option(PROJECT_INSTALL_HEADER "Install header files" ON)
+option(MyHTML_BUILD_SHARED "Build shared library" ON)
+option(MyHTML_BUILD_STATIC "Build static library" ON)
+option(MyHTML_INSTALL_HEADER "Install header files" ON)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROJECT_OPTIMIZATION_LEVEL}")
 
@@ -185,13 +185,13 @@ set(MYHTML_LIBRARIES myhtml CACHE STRING "Libraries to link for Myhtml")
 ################
 ## Create static/dynamic library
 #########################
-if(PROJECT_BUILD_SHARED)
+if(MyHTML_BUILD_SHARED)
     add_library(${PROJECT_LIB_NAME} SHARED ${PROJECT_SOURCES} ${PROJECT_SOURCES_PORT})
     set_target_properties(${PROJECT_LIB_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_LIB_NAME})
     set_target_properties(${PROJECT_LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
 endif()
 
-if(PROJECT_BUILD_STATIC)
+if(MyHTML_BUILD_STATIC)
     add_library(${PROJECT_LIB_NAME_STATIC} STATIC ${PROJECT_SOURCES} ${PROJECT_SOURCES_PORT})
     set_target_properties(${PROJECT_LIB_NAME_STATIC} PROPERTIES OUTPUT_NAME ${PROJECT_LIB_NAME_STATIC})
     set_target_properties(${PROJECT_LIB_NAME_STATIC} PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
@@ -200,17 +200,17 @@ endif()
 ################
 ## install
 #########################
-if(PROJECT_INSTALL_HEADER)
+if(MyHTML_INSTALL_HEADER)
     install(DIRECTORY "${PROJECT_DIR_API_HEADER}" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
 endif()
 
-if(PROJECT_BUILD_SHARED)
+if(MyHTML_BUILD_SHARED)
     install(TARGETS ${PROJECT_LIB_NAME}
     RUNTIME DESTINATION "${PROJECT_INSTALL_DLL_EXE_DIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endif()
 
-if(PROJECT_BUILD_STATIC)
+if(MyHTML_BUILD_STATIC)
     install(TARGETS ${PROJECT_LIB_NAME_STATIC}
     RUNTIME DESTINATION "${PROJECT_INSTALL_DLL_EXE_DIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
