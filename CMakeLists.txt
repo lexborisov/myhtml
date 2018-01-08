@@ -201,7 +201,12 @@ endif()
 ## install
 #########################
 if(MyHTML_INSTALL_HEADER)
-    install(DIRECTORY "${PROJECT_DIR_API_HEADER}" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
+    file(GLOB PROJECT_HEADER_DIRS "${PROJECT_DIR_API_HEADER}/*")
+    foreach(ITEM ${PROJECT_HEADER_DIRS})                                                                                                                                                
+        if(IS_DIRECTORY "${ITEM}")
+            install(DIRECTORY "${ITEM}" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
+        endif()
+    endforeach()
 endif()
 
 if(MyHTML_BUILD_SHARED)
