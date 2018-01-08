@@ -44,6 +44,7 @@ make install prefix=$RPM_BUILD_ROOT PROJECT_INSTALL_LIBRARY=%{_usr}/%{_lib} PROJ
 %{!?_licensedir:%global license %doc}
 
 %changelog
-* Please, see https://github.com/lexborisov/myhtml/blob/master/CHANGELOG.md
+* Mon Jan 08 2018 Alexander Borisov <lex.borisov@gmail.com> 4.0.3-1
+- Please, see https://github.com/lexborisov/myhtml/blob/master/CHANGELOG.md
 * Tue Mar 21 2017 Alexander Borisov <lex.borisov@gmail.com> 4.0.0-1
 - Initial release
