@@ -1887,7 +1887,7 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 }
                 
                 myhtml_tree_node_t* current_node = myhtml_tree_current_node(tree);
-                if(current_node->tag_id != MyHTML_TAG_RTC || current_node->tag_id != MyHTML_TAG_RUBY) {
+                if(current_node->tag_id != MyHTML_TAG_RTC && current_node->tag_id != MyHTML_TAG_RUBY) {
                     // parse error
                     /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED STATUS:ELEMENT_NO_EXPECTED LEVEL:ERROR */
                     /* %EXTERNAL% VALIDATOR:RULES HAVE_NEED_ADD HAVE:current_node->token NEED:NULL HAVE_TAG_ID:current_node->tag_id HAVE_NS:current_node->ns NEED_TAG_ID:MyHTML_TAG_RTC NEED_NS:MyHTML_NAMESPACE_HTML */

@@ -1,5 +1,5 @@
 Name: libmyhtml
-Version: 4.0.1
+Version: 4.0.3
 Release: 1%{?dist}
 Summary: MyHTML is a fast HTML Parser implemented as a pure C99 library.
 License: LGPLv2.1
@@ -44,5 +44,6 @@ make install prefix=$RPM_BUILD_ROOT PROJECT_INSTALL_LIBRARY=%{_usr}/%{_lib} PROJ
 %{!?_licensedir:%global license %doc}
 
 %changelog
+* Please, see https://github.com/lexborisov/myhtml/blob/master/CHANGELOG.md
 * Tue Mar 21 2017 Alexander Borisov <lex.borisov@gmail.com> 4.0.0-1
 - Initial release

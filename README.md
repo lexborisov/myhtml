@@ -13,7 +13,7 @@ This is one of module of the [Modest] project.
 
 ## Now
 
-The current version is 4.0.2. [Last stable version](https://github.com/lexborisov/myhtml/releases/latest)
+The current version is 4.0.3. [Last stable version](https://github.com/lexborisov/myhtml/releases/latest)
 
 See [Releases](https://github.com/lexborisov/myhtml/releases)
 
@@ -134,7 +134,7 @@ Alexander Borisov <lex.borisov@gmail.com>
 
 ## COPYRIGHT AND LICENSE
 
-Copyright (C) 2015-2017 Alexander Borisov
+Copyright (C) 2015-2018 Alexander Borisov
 
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
 

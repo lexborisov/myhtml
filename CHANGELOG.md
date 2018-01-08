@@ -1,3 +1,12 @@
+4.0.3
+===========
+January 08, 2018
+
+* Updated ```CMakeLists.txt``` for cmake build. Added support for create Visual Studio Solution and the creation of packages for Linux systems. https://github.com/lexborisov/myhtml/issues/116
+* Fixed segfault if we have </form> but not have a opening <form>. https://github.com/lexborisov/myhtml/issues/124
+* Fix cmake install path. https://github.com/lexborisov/myhtml/issues/126
+* Minor bug fixes
+
 4.0.2
 ===========
 November 07, 2017
