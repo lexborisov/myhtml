@@ -3,6 +3,26 @@ cmake_minimum_required (VERSION 3.0)
 project(myhtml)
 
 ################
+## options
+#########################
+option(MyHTML_BUILD_WITHOUT_THREADS "Build without POSIX Threads" OFF)
+option(MyCORE_BUILD_WITHOUT_THREADS "Build MyCORE without POSIX Threads" OFF)
+option(MyHTML_BUILD_SHARED "Build shared library" ON)
+option(MyHTML_BUILD_STATIC "Build static library" ON)
+option(MyHTML_INSTALL_HEADER "Install header files" ON)
+
+################
+## dependencies
+#########################
+if(NOT MyHTML_BUILD_WITHOUT_THREADS)
+    set(CMAKE_THREAD_PREFER_PTHREAD 1)
+    find_package(Threads REQUIRED)
+    if(NOT CMAKE_USE_PTHREADS_INIT)
+        message(FATAL_ERROR "Could NOT find pthreads (missing: CMAKE_USE_PTHREADS_INIT)")
+    endif()
+endif()
+
+################
 ## version and path
 #########################
 set(PROJECT_NAME "myhtml")
@@ -108,10 +128,6 @@ if(NOT DEFINED PROJECT_OPTIMIZATION_LEVEL)
 set(PROJECT_OPTIMIZATION_LEVEL "-O2")
 endif()
 
-if(NOT DEFINED MyCORE_BUILD_WITHOUT_THREADS)
-  set(MyCORE_BUILD_WITHOUT_THREADS "NO")
-endif()
-
 ################
 ## ARGS
 #########################
@@ -140,13 +156,9 @@ else()
   if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-D_POSIX_C_SOURCE=199309L)
   endif()
-  
-  if(MyHTML_BUILD_WITHOUT_THREADS STREQUAL "NO")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
-  endif()
 endif()
 
-if(MyCORE_BUILD_WITHOUT_THREADS STREQUAL "YES")
+if(MyCORE_BUILD_WITHOUT_THREADS)
   message(STATUS "Build without POSIX Threads")
   add_definitions(-DMyCORE_BUILD_WITHOUT_THREADS)
 else()
@@ -187,12 +199,14 @@ set(MYHTML_LIBRARIES myhtml CACHE STRING "Libraries to link for Myhtml")
 #########################
 if(MyHTML_BUILD_SHARED)
     add_library(${PROJECT_LIB_NAME} SHARED ${PROJECT_SOURCES} ${PROJECT_SOURCES_PORT})
+    target_link_libraries(${PROJECT_LIB_NAME} ${CMAKE_THREAD_LIBS_INIT})
     set_target_properties(${PROJECT_LIB_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_LIB_NAME})
     set_target_properties(${PROJECT_LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
 endif()
 
 if(MyHTML_BUILD_STATIC)
     add_library(${PROJECT_LIB_NAME_STATIC} STATIC ${PROJECT_SOURCES} ${PROJECT_SOURCES_PORT})
+    target_link_libraries(${PROJECT_LIB_NAME_STATIC} ${CMAKE_THREAD_LIBS_INIT})
     set_target_properties(${PROJECT_LIB_NAME_STATIC} PROPERTIES OUTPUT_NAME ${PROJECT_LIB_NAME_STATIC})
     set_target_properties(${PROJECT_LIB_NAME_STATIC} PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
 endif()
