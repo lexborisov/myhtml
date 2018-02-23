@@ -84,6 +84,7 @@ None
 - [Perl 5] module
 - [Perl 6] module
 - [Crystal] binding
+- [Elixir/Erlang] binding
 
 ## Examples
 
@@ -159,6 +160,7 @@ See the [LICENSE] file.
 [Perl 5]: https://metacpan.org/release/HTML-MyHTML
 [Perl 6]: https://github.com/MadcapJake/p6-MyHTML
 [Crystal]: https://github.com/kostya/myhtml
+[Elixir/Erlang]: https://github.com/Overbryd/myhtmlex
 [Introduction]: http://lexborisov.github.io/myhtml/
 [Article with charts]: http://lexborisov.github.io/benchmark-html-persers/
 [Benchmark code]: https://github.com/lexborisov/benchmark-html-persers/tree/master
