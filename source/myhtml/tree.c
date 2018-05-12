@@ -516,7 +516,8 @@ myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_node_t* node)
 {
     myhtml_tree_node_t* new_node = myhtml_tree_node_create(node->tree);
     
-    myhtml_token_node_wait_for_done(node->tree->token, node->token);
+    if(node->token)
+        myhtml_token_node_wait_for_done(node->tree->token, node->token);
     
     new_node->token        = myhtml_token_node_clone(node->tree->token, node->token,
                                                      node->tree->mcasync_rules_token_id,
