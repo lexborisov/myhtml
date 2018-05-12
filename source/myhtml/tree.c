@@ -524,7 +524,9 @@ myhtml_tree_node_t * myhtml_tree_node_clone(myhtml_tree_node_t* node)
                                                      node->tree->mcasync_rules_attr_id);
     new_node->tag_id       = node->tag_id;
     new_node->ns           = node->ns;
-    new_node->token->type |= MyHTML_TOKEN_TYPE_DONE;
+    
+    if(new_node->token)
+        new_node->token->type |= MyHTML_TOKEN_TYPE_DONE;
     
     return new_node;
 }
