@@ -285,7 +285,13 @@ myhtml_token_node_t * myhtml_token_node_clone(myhtml_token_t* token, myhtml_toke
     new_node->element_begin  = node->element_begin;
     new_node->element_length = node->element_length;
     
-    mycore_string_init(tree->mchar, tree->mchar_node_id, &new_node->str, node->str.size);
+    if(node->str.length) {
+        mycore_string_init(tree->mchar, tree->mchar_node_id, &new_node->str, node->str.length + 1);
+        mycore_string_append(&new_node->str, node->str.data, node->str.length);
+    } else {
+        mycore_string_clean_all(&new_node->str);
+    }
+    
     myhtml_token_node_attr_copy(token, node, new_node, attr_thread_idx);
     
     return new_node;
