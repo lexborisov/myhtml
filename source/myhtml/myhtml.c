@@ -626,6 +626,8 @@ mycore_string_t * myhtml_node_text_set(myhtml_tree_node_t *node, const char* tex
         
         if(node->token == NULL)
             return NULL;
+     
+        node->token->type |= MyHTML_TOKEN_TYPE_DONE;
     }
     
     if(node->token->str.data == NULL) {
@@ -668,6 +670,8 @@ mycore_string_t * myhtml_node_text_set_with_charef(myhtml_tree_node_t *node, con
         
         if(node->token == NULL)
             return NULL;
+        
+        node->token->type |= MyHTML_TOKEN_TYPE_DONE;
     }
     
     if(node->token->str.data == NULL) {
@@ -1389,6 +1393,8 @@ myhtml_tree_attr_t * myhtml_attribute_add(myhtml_tree_node_t *node, const char *
         
         if(node->token == NULL)
             return NULL;
+        
+        node->token->type |= MyHTML_TOKEN_TYPE_DONE;
     }
     
     return myhtml_token_node_attr_append_with_convert_encoding(tree->token, node->token, key, key_len,
