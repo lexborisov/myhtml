@@ -429,6 +429,9 @@ myhtml_collection_t * myhtml_get_nodes_by_tag_id_in_scope(myhtml_tree_t* tree, m
 myhtml_collection_t * myhtml_get_nodes_by_name_in_scope(myhtml_tree_t* tree, myhtml_collection_t *collection, myhtml_tree_node_t *node, const char* html, size_t length, mystatus_t *status)
 {
     const myhtml_tag_context_t *tag_ctx = myhtml_tag_get_by_name(tree->tags, html, length);
+    if(tag_ctx == NULL) {
+        return NULL;
+    }
     return myhtml_get_nodes_by_tag_id_in_scope(tree, collection, node, tag_ctx->id, status);
 }
 
