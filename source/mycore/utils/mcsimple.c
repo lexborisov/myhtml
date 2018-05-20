@@ -119,7 +119,12 @@ void * mcsimple_malloc(mcsimple_t *mcsimple)
 void * mcsimple_get_by_absolute_position(mcsimple_t *mcsimple, size_t pos)
 {
     pos *= mcsimple->struct_size;
-    return &mcsimple->list[ (pos / mcsimple->list_size) ][ (pos % mcsimple->list_size) ];
+    
+    size_t list_index = pos / mcsimple->list_size;
+    if(list_index >= mcsimple->list_pos_length_used)
+        return NULL;
+    
+    return &mcsimple->list[list_index][ (pos % mcsimple->list_size) ];
 }
 
 
