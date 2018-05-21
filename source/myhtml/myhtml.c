@@ -969,7 +969,7 @@ bool myhtml_get_nodes_by_attribute_value_recursion_end(mycore_string_t* str, con
     if(str->length < value_len)
         return false;
     
-    return mycore_strncmp(&str->data[ (str->length - (str->length - value_len)) ], value, value_len) == 0;
+    return mycore_strncmp(&str->data[ (str->length - value_len) ], value, value_len) == 0;
 }
 
 bool myhtml_get_nodes_by_attribute_value_recursion_contain(mycore_string_t* str, const char* value, size_t value_len)
@@ -1049,7 +1049,7 @@ bool myhtml_get_nodes_by_attribute_value_recursion_end_i(mycore_string_t* str, c
     if(str->length < value_len)
         return false;
     
-    return mycore_strncasecmp(&str->data[ (str->length - (str->length - value_len)) ], value, value_len) == 0;
+    return mycore_strncasecmp(&str->data[ (str->length - value_len) ], value, value_len) == 0;
 }
 
 bool myhtml_get_nodes_by_attribute_value_recursion_contain_i(mycore_string_t* str, const char* value, size_t value_len)
