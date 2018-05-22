@@ -253,22 +253,46 @@ mystatus_t myhtml_serialization_attributes(myhtml_tree_t* tree, myhtml_tree_attr
  */
 mystatus_t myhtml_serialization_node_append_close(myhtml_tree_node_t* node, mycore_callback_serialize_f callback, void* ptr)
 {
-    if(node->tag_id != MyHTML_TAG__TEXT &&
-       node->tag_id != MyHTML_TAG__COMMENT &&
-       node->tag_id != MyHTML_TAG__DOCTYPE)
-    {
-        size_t length;
-        const char *tag = myhtml_tag_name_by_id(node->tree, node->tag_id, &length);
+    switch (node->tag_id) {
+        case MyHTML_TAG__TEXT:
+        case MyHTML_TAG__COMMENT:
+        case MyHTML_TAG__DOCTYPE:
+            return MyCORE_STATUS_OK;
         
-        if(callback("</", 2, ptr))
-            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
-        
-        if(callback(tag, length, ptr))
-            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
-        
-        if(callback(">", 1, ptr))
-            return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+        // https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments
+        case MyHTML_TAG_AREA:
+        case MyHTML_TAG_BASE:
+        case MyHTML_TAG_BGSOUND:
+        case MyHTML_TAG_BR:
+        case MyHTML_TAG_COL:
+        case MyHTML_TAG_EMBED:
+        case MyHTML_TAG_FRAME:
+        case MyHTML_TAG_HR:
+        case MyHTML_TAG_IMG:
+        case MyHTML_TAG_INPUT:
+        case MyHTML_TAG_KEYGEN:
+        case MyHTML_TAG_LINK:
+        case MyHTML_TAG_META:
+        case MyHTML_TAG_PARAM:
+        case MyHTML_TAG_SOURCE:
+        case MyHTML_TAG_TRACK:
+        case MyHTML_TAG_WBR:
+            if(node->ns == MyHTML_NAMESPACE_HTML)
+                return MyCORE_STATUS_OK;
+            break;
     }
+    
+    size_t length;
+    const char *tag = myhtml_tag_name_by_id(node->tree, node->tag_id, &length);
+    
+    if(callback("</", 2, ptr))
+        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+    
+    if(callback(tag, length, ptr))
+        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+    
+    if(callback(">", 1, ptr))
+        return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
     
     return MyCORE_STATUS_OK;
 }
