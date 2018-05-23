@@ -81,7 +81,8 @@ None
 
 ## External Bindings and Wrappers
 
-- [Perl 5] module
+- Perl 5 [HTML::MyHTML] module
+- Perl 5 [HTML5::DOM] module (DOM with CSS selectors)
 - [Perl 6] module
 - [Crystal] binding
 - [Elixir/Erlang] binding
@@ -157,7 +158,8 @@ See the [LICENSE] file.
 [commoncrawl.org]: http://commoncrawl.org/
 [MyCSS]: https://github.com/lexborisov/mycss
 [CHANGELOG.md]: https://github.com/lexborisov/myhtml/blob/master/CHANGELOG.md
-[Perl 5]: https://metacpan.org/release/HTML-MyHTML
+[HTML::MyHTML]: https://metacpan.org/release/HTML-MyHTML
+[HTML5::DOM]: https://github.com/Azq2/perl-html5-dom
 [Perl 6]: https://github.com/MadcapJake/p6-MyHTML
 [Crystal]: https://github.com/kostya/myhtml
 [Elixir/Erlang]: https://github.com/Overbryd/myhtmlex
