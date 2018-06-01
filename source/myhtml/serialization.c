@@ -140,7 +140,7 @@ mystatus_t myhtml_serialization_node_callback(myhtml_tree_node_t* node, mycore_c
             if(node->token) {
                 myhtml_tree_attr_t* attr = node->token->attr_first;
                 
-                if(attr->key.data && attr->key.length) {
+                if(attr && attr->key.data && attr->key.length) {
                     if(callback(" ", 1, ptr))
                         return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
                     
