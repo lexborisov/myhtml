@@ -146,6 +146,35 @@ mystatus_t myhtml_serialization_node_callback(myhtml_tree_node_t* node, mycore_c
                 if(attr && attr->key.data && attr->key.length) {
                     if(callback(attr->key.data, attr->key.length, ptr))
                         return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                        
+                    attr = attr->next;
+                    
+                    if(attr && attr->value.length == 6) {
+                        if(strcasecmp(attr->value.data, "SYSTEM") == 0) {
+                            if(callback(" SYSTEM", 7, ptr))
+                                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                        } else if(strcasecmp(attr->value.data, "PUBLIC") == 0) {
+                            if(callback(" PUBLIC", 7, ptr))
+                                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                        }
+                        
+                        attr = attr->next;
+                        
+                        while (attr) {
+                            if(callback(" \"", 2, ptr))
+                                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                            
+                            if(attr->value.data && attr->value.length) {
+                                if(callback(attr->value.data, attr->value.length, ptr))
+                                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                            }
+                            
+                            if(callback("\"", 1, ptr))
+                                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                            
+                            attr = attr->next;
+                        }
+                    }
                 }
             }
             
