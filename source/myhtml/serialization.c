@@ -150,10 +150,10 @@ mystatus_t myhtml_serialization_node_callback(myhtml_tree_node_t* node, mycore_c
                     attr = attr->next;
                     
                     if(attr && attr->value.length == 6) {
-                        if(strcasecmp(attr->value.data, "SYSTEM") == 0) {
+                        if(mycore_strcasecmp(attr->value.data, "SYSTEM") == 0) {
                             if(callback(" SYSTEM", 7, ptr))
                                 return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
-                        } else if(strcasecmp(attr->value.data, "PUBLIC") == 0) {
+                        } else if(mycore_strcasecmp(attr->value.data, "PUBLIC") == 0) {
                             if(callback(" PUBLIC", 7, ptr))
                                 return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
                         }
