@@ -146,33 +146,48 @@ mystatus_t myhtml_serialization_node_callback(myhtml_tree_node_t* node, mycore_c
                 if(attr && attr->key.data && attr->key.length) {
                     if(callback(attr->key.data, attr->key.length, ptr))
                         return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
-                        
+                    
                     attr = attr->next;
                     
-                    if(attr && attr->value.length == 6) {
-                        if(mycore_strcasecmp(attr->value.data, "SYSTEM") == 0) {
-                            if(callback(" SYSTEM", 7, ptr))
+                    if (attr) {
+                        myhtml_tree_attr_t *system_id = NULL, *public_id = NULL;
+                        
+                        if (attr->value.length == 6) {
+                            if (mycore_strcasecmp(attr->value.data, "SYSTEM") == 0) {
+                                system_id = attr->next;
+                            } else if (mycore_strcasecmp(attr->value.data, "PUBLIC") == 0) {
+                                public_id = attr->next;
+                                system_id = public_id ? public_id->next : NULL;
+                            }
+                        }
+                        
+                        if(public_id && public_id->value.length > 0) {
+                            if(callback(" PUBLIC \"", 9, ptr))
                                 return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
-                        } else if(mycore_strcasecmp(attr->value.data, "PUBLIC") == 0) {
-                            if(callback(" PUBLIC", 7, ptr))
+                            
+                            if(callback(public_id->value.data, public_id->value.length, ptr))
+                                return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                            
+                            if(callback("\"", 1, ptr))
                                 return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
                         }
                         
-                        attr = attr->next;
-                        
-                        while (attr) {
+                        if(system_id && system_id->value.length > 0) {
+                            if(!public_id || public_id->value.length == 0) {
+                                if(callback(" SYSTEM", 7, ptr))
+                                    return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
+                            }
+                            
                             if(callback(" \"", 2, ptr))
                                 return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
                             
-                            if(attr->value.data && attr->value.length) {
-                                if(callback(attr->value.data, attr->value.length, ptr))
+                            if(system_id->value.data && system_id->value.length) {
+                                if(callback(system_id->value.data, system_id->value.length, ptr))
                                     return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
                             }
                             
                             if(callback("\"", 1, ptr))
                                 return MyCORE_STATUS_ERROR_MEMORY_ALLOCATION;
-                            
-                            attr = attr->next;
                         }
                     }
                 }
