@@ -140,14 +140,14 @@ const charef_entry_t * myhtml_charef_find_by_pos(size_t pos, const char *begin, 
     
     result->is_done = 1;
     
-    if(named_character_references[pos].codepoints_len)
+    if(named_character_references[pos].next == 0 && named_character_references[pos].codepoints_len)
         return &named_character_references[pos];
     else if(result->last_entry) {
         *offset = result->last_offset;
         return result->last_entry;
     }
     
-    return &named_character_references[pos];
+    return &named_character_references[0];
 }
 
 
