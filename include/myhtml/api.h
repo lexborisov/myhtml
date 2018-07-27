@@ -1991,7 +1991,7 @@ myencoding_extracting_character_encoding_from_charset(const char *data, size_t d
  */
 myencoding_t
 myencoding_prescan_stream_to_determine_encoding_with_found(const char *data, size_t data_size,
-                                                           const char **found, size_t *found_lenght);
+                                                           const char **found, size_t *found_length);
 
 /**
  * Extracting character encoding from string. Find "charset=" and see encoding. Return found raw data.
@@ -2011,7 +2011,7 @@ myencoding_prescan_stream_to_determine_encoding_with_found(const char *data, siz
 bool
 myencoding_extracting_character_encoding_from_charset_with_found(const char *data, size_t data_size,
                                                                  myencoding_t *encoding,
-                                                                 const char **found, size_t *found_lenght);
+                                                                 const char **found, size_t *found_length);
 
 /***********************************************************************************
  *

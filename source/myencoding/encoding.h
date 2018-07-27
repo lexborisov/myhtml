@@ -153,8 +153,8 @@ const char * myencoding_name_by_id(myencoding_t encoding, size_t *length);
 bool myencoding_extracting_character_encoding_from_charset(const char *data, size_t data_size, myencoding_t *encoding);
 myencoding_t myencoding_prescan_stream_to_determine_encoding(const char *data, size_t data_size);
 
-bool myencoding_extracting_character_encoding_from_charset_with_found(const char *data, size_t data_size, myencoding_t *encoding, const char **found, size_t *found_lenght);
-myencoding_t myencoding_prescan_stream_to_determine_encoding_with_found(const char *data, size_t data_size, const char **found, size_t *found_lenght);
+bool myencoding_extracting_character_encoding_from_charset_with_found(const char *data, size_t data_size, myencoding_t *encoding, const char **found, size_t *found_length);
+myencoding_t myencoding_prescan_stream_to_determine_encoding_with_found(const char *data, size_t data_size, const char **found, size_t *found_length);
 
 #ifdef __cplusplus
 } /* extern "C" */
