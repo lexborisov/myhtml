@@ -104,7 +104,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
     {
         if(myhtml_whithspace(html[html_offset], ==, ||))
         {
-            if((html_offset - token_node->str.length) != 6) {
+            if(((html_offset + tree->global_offset) - token_node->str.length) != 6) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
                 html_offset++;
                 break;
@@ -121,10 +121,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
                     return 0;
                 }
                 
-                token_node->raw_begin     = tmp_size;
-                token_node->raw_length    = 6;
-                token_node->tag_id   = MyHTML_TAG_SCRIPT;
-                token_node->type          = MyHTML_TOKEN_TYPE_CLOSE;
+                token_node->raw_begin = tmp_size;
+                token_node->raw_length = 6;
+                token_node->tag_id = MyHTML_TAG_SCRIPT;
+                token_node->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
@@ -137,7 +137,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
         }
         else if(html[html_offset] == '/')
         {
-            if((html_offset - token_node->str.length) != 6) {
+            if(((html_offset + tree->global_offset) - token_node->str.length) != 6) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
                 html_offset++;
                 break;
@@ -154,10 +154,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
                     return 0;
                 }
                 
-                token_node->raw_begin   = tmp_size;
-                token_node->raw_length  = 6;
+                token_node->raw_begin = tmp_size;
+                token_node->raw_length = 6;
                 token_node->tag_id = MyHTML_TAG_SCRIPT;
-                token_node->type        = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
+                token_node->type = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
                 
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
@@ -170,7 +170,7 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
         }
         else if(html[html_offset] == '>')
         {
-            if((html_offset - token_node->str.length) != 6) {
+            if(((html_offset + tree->global_offset) - token_node->str.length) != 6) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA;
                 html_offset++;
                 break;
@@ -187,10 +187,10 @@ size_t myhtml_tokenizer_state_script_data_end_tag_name(myhtml_tree_t* tree, myht
                     return 0;
                 }
                 
-                token_node->raw_begin   = tmp_size;
-                token_node->raw_length  = 6;
+                token_node->raw_begin = tmp_size;
+                token_node->raw_length = 6;
                 token_node->tag_id = MyHTML_TAG_SCRIPT;
-                token_node->type        = MyHTML_TOKEN_TYPE_CLOSE;
+                token_node->type  = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 html_offset++;
                 
@@ -280,7 +280,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
     {
         if(myhtml_whithspace(html[html_offset], ==, ||))
         {
-            if((html_offset - token_node->str.length) != 6) {
+            if(((html_offset + tree->global_offset) - token_node->str.length) != 6) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
                 break;
@@ -297,10 +297,10 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                     return 0;
                 }
                 
-                token_node->raw_begin   = tmp_size;
-                token_node->raw_length  = 6;
+                token_node->raw_begin = tmp_size;
+                token_node->raw_length = 6;
                 token_node->tag_id = MyHTML_TAG_SCRIPT;
-                token_node->type        = MyHTML_TOKEN_TYPE_CLOSE;
+                token_node->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
@@ -313,7 +313,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         }
         else if(html[html_offset] == '/')
         {
-            if((html_offset - token_node->str.length) != 6) {
+            if(((html_offset + tree->global_offset) - token_node->str.length) != 6) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
                 break;
@@ -330,10 +330,10 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                     return 0;
                 }
                 
-                token_node->raw_begin   = tmp_size;
-                token_node->raw_length  = 6;
+                token_node->raw_begin = tmp_size;
+                token_node->raw_length = 6;
                 token_node->tag_id = MyHTML_TAG_SCRIPT;
-                token_node->type        = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
+                token_node->type = MyHTML_TOKEN_TYPE_CLOSE|MyHTML_TOKEN_TYPE_CLOSE_SELF;
                 
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_BEFORE_ATTRIBUTE_NAME;
             }
@@ -346,7 +346,7 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
         }
         else if(html[html_offset] == '>')
         {
-            if((html_offset - token_node->str.length) != 6) {
+            if(((html_offset + tree->global_offset) - token_node->str.length) != 6) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
                 break;
@@ -363,10 +363,10 @@ size_t myhtml_tokenizer_state_script_data_escaped_end_tag_name(myhtml_tree_t* tr
                     return 0;
                 }
                 
-                token_node->raw_begin   = tmp_size;
-                token_node->raw_length  = 6;
+                token_node->raw_begin = tmp_size;
+                token_node->raw_length = 6;
                 token_node->tag_id = MyHTML_TAG_SCRIPT;
-                token_node->type        = MyHTML_TOKEN_TYPE_CLOSE;
+                token_node->type = MyHTML_TOKEN_TYPE_CLOSE;
                 
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_DATA;
                 
@@ -446,7 +446,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_start(myhtml_tree_t* tre
     {
         if(myhtml_whithspace(html[html_offset], ==, ||) || html[html_offset] == '/' || html[html_offset] == '>')
         {
-            if((html_offset - token_node->str.length) != 6) {
+            if(((html_offset + tree->global_offset) - token_node->str.length) != 6) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_ESCAPED;
                 html_offset++;
                 break;
@@ -564,7 +564,7 @@ size_t myhtml_tokenizer_state_script_data_double_escape_end(myhtml_tree_t* tree,
     {
         if(myhtml_whithspace(html[html_offset], ==, ||) || html[html_offset] == '/' || html[html_offset] == '>')
         {
-            if((html_offset - token_node->str.length) != 6) {
+            if(((html_offset + tree->global_offset) - token_node->str.length) != 6) {
                 myhtml_tokenizer_state_set(tree) = MyHTML_TOKENIZER_STATE_SCRIPT_DATA_DOUBLE_ESCAPED;
                 html_offset++;
                 break;
