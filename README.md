@@ -6,8 +6,7 @@
 
 MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.
 
-* Mailing List: [https://groups.google.com/forum/#!forum/modest-engine](https://groups.google.com/forum/#!forum/modest-engine)
-* IRC: [#modest-engine on `irc.freenode.net <http://freenode.net>`](http://webchat.freenode.net?channels=%23modest-engine)
+* IRC: [#lexbor on `irc.freenode.net <http://freenode.net>`](http://webchat.freenode.net?channels=%23lexbor)
 
 This is one of module of the [Modest] project.
 
