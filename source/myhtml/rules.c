@@ -3885,8 +3885,11 @@ bool myhtml_rules_check_for_first_newline(myhtml_tree_t* tree, myhtml_token_node
 bool myhtml_rules_tree_dispatcher(myhtml_tree_t* tree, myhtml_token_node_t* token)
 {
     // for textarea && pre && listen
-    if(myhtml_rules_check_for_first_newline(tree, token))
+    if(myhtml_rules_check_for_first_newline(tree, token)) {
+        tree->token_last_done = token;
+        
         return false;
+    }
     
     if(tree->state_of_builder != MyHTML_TOKENIZER_STATE_DATA)
         tree->state_of_builder = MyHTML_TOKENIZER_STATE_DATA;
