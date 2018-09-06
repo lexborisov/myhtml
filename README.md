@@ -12,7 +12,7 @@ This is one of module of the [Modest] project.
 
 ## Now
 
-The current version is 4.0.4. [Last stable version](https://github.com/lexborisov/myhtml/releases/latest)
+The current version is 4.0.5. [Last stable version](https://github.com/lexborisov/myhtml/releases/latest)
 
 See [Releases](https://github.com/lexborisov/myhtml/releases)
 

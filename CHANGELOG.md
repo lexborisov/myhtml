@@ -1,3 +1,16 @@
+4.0.5
+===========
+September 06, 2018
+
+* Fixed parsing problem for PRE element with CDATA in thread and single mode. https://github.com/lexborisov/myhtml/issues/156
+* Fixed the problem of parsing chunks when there was a script tag. https://github.com/lexborisov/myhtml/issues/154
+* Fixed parsing entity. In very rare cases there were wrong parsing. https://github.com/lexborisov/myhtml/commit/541219bc5241e1b89e7d75c040c94766eff4e95c
+* Fixed segfault if doctype hasn't attribute. https://github.com/lexborisov/myhtml/pull/151
+* Append link to Perl 5 wrapper module.
+* Minor bug fixes
+
+Special thanks to [Kirill Zhumarin](https://github.com/Azq2) for PRs.
+
 4.0.4
 ===========
 January 08, 2018
