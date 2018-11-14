@@ -131,10 +131,6 @@ endif()
 ################
 ## ARGS
 #########################
-option(MyHTML_BUILD_SHARED "Build shared library" ON)
-option(MyHTML_BUILD_STATIC "Build static library" ON)
-option(MyHTML_INSTALL_HEADER "Install header files" ON)
-
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${PROJECT_OPTIMIZATION_LEVEL}")
 
 if (!UNIX AND WIN32)
