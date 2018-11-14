@@ -125,7 +125,11 @@ mystatus_t myhtml_init(myhtml_t* myhtml, enum myhtml_options opt, size_t thread_
 #else /* if undef MyCORE_BUILD_WITHOUT_THREADS */
     if(status)
         return status;
-    
+
+    if(thread_count == 0) {
+        thread_count = 1;
+    }
+
     switch (opt) {
         case MyHTML_OPTIONS_PARSE_MODE_SINGLE:
             if((status = myhtml_create_stream_and_batch(myhtml, 0, 0)))
