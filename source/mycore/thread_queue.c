@@ -352,13 +352,14 @@ mythread_queue_list_entry_t * mythread_queue_list_entry_push(mythread_t** mythre
     entry->queue = queue;
     
     for(size_t i = 0; i < list_size; i++) {
-        if(mythread_list[i]->type == MyTHREAD_TYPE_BATCH)
-            mythread_queue_list_entry_make_batch(mythread_list[i], entry);
-        else
-            mythread_queue_list_entry_make_stream(mythread_list[i], entry);
-        
-        if(mythread_list[i])
+        if(mythread_list[i]) {
+            if(mythread_list[i]->type == MyTHREAD_TYPE_BATCH)
+                mythread_queue_list_entry_make_batch(mythread_list[i], entry);
+            else
+                mythread_queue_list_entry_make_stream(mythread_list[i], entry);
+            
             mythread_suspend(mythread_list[i]);
+        }
     }
     
     if(queue_list->first) {
@@ -453,11 +454,11 @@ bool mythread_queue_list_entry_see_for_done(mythread_queue_list_entry_t *entry)
 
 void mythread_queue_list_entry_make_batch(mythread_t* mythread, mythread_queue_list_entry_t* entry)
 {
-    if(entry == NULL)
+    if(entry == NULL || mythread == NULL)
         return;
     
     size_t i = 0;
-    for(size_t from = mythread->id_increase; from <= mythread->entries_length; from++) {
+    for(size_t from = mythread->id_increase; from < mythread->entries_length; from++) {
         entry->thread_param[from].use = i;
         i++;
     }
@@ -465,10 +466,10 @@ void mythread_queue_list_entry_make_batch(mythread_t* mythread, mythread_queue_l
 
 void mythread_queue_list_entry_make_stream(mythread_t* mythread, mythread_queue_list_entry_t* entry)
 {
-    if(entry == NULL)
+    if(entry == NULL || mythread == NULL)
         return;
     
-    for(size_t from = mythread->id_increase; from <= mythread->entries_length; from++) {
+    for(size_t from = mythread->id_increase; from < mythread->entries_length; from++) {
         entry->thread_param[from].use = 0;
     }
 }
