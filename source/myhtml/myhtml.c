@@ -872,40 +872,47 @@ myhtml_tree_t * myhtml_node_tree(myhtml_tree_node_t *node)
 
 mystatus_t myhtml_get_nodes_by_attribute_key_recursion(myhtml_tree_node_t* node, myhtml_collection_t* collection, const char* key, size_t key_len)
 {
-    while(node)
-    {
+    myhtml_tree_node_t *root = node;
+
+    while(node != NULL) {
         if(node->token && node->token->attr_first) {
             myhtml_tree_attr_t* attr = node->token->attr_first;
-            
+
             while(attr) {
                 mycore_string_t* str_key = &attr->key;
-                
+
                 if(str_key->length == key_len && mycore_strncasecmp(str_key->data, key, key_len) == 0) {
                     collection->list[ collection->length ] = node;
-                    
+
                     collection->length++;
                     if(collection->length >= collection->size) {
                         mystatus_t status = myhtml_collection_check_size(collection, 1024, 0);
-                        
+
                         if(status)
                             return status;
                     }
                 }
-                
+
                 attr = attr->next;
             }
         }
-        
-        if(node->child) {
-            mystatus_t status = myhtml_get_nodes_by_attribute_key_recursion(node->child, collection, key, key_len);
-            
-            if(status)
-                return status;
+
+        if(node->child != NULL) {
+            node = node->child;
         }
-        
-        node = node->next;
+        else {
+            while(node->next == NULL) {
+                node = node->parent;
+
+                if(node == root) {
+                    return MyHTML_STATUS_OK;
+                }
+            }
+
+            node = node->next;
+        }
     }
-    
+
     return MyHTML_STATUS_OK;
 }
 
@@ -1091,24 +1098,25 @@ bool myhtml_get_nodes_by_attribute_value_recursion_hyphen_separated_i(mycore_str
 
 /* find by attribute value; basic functions */
 mystatus_t myhtml_get_nodes_by_attribute_value_recursion(myhtml_tree_node_t* node, myhtml_collection_t* collection,
-                                                              myhtml_attribute_value_find_f func_eq,
-                                                              const char* value, size_t value_len)
+                                                         myhtml_attribute_value_find_f func_eq,
+                                                         const char* value, size_t value_len)
 {
-    while(node)
-    {
+    myhtml_tree_node_t *root = node;
+    
+    while(node != NULL) {
         if(node->token && node->token->attr_first) {
             myhtml_tree_attr_t* attr = node->token->attr_first;
-            
+
             while(attr) {
                 mycore_string_t* str = &attr->value;
-                
+
                 if(func_eq(str, value, value_len)) {
                     collection->list[ collection->length ] = node;
-                    
+
                     collection->length++;
                     if(collection->length >= collection->size) {
                         mystatus_t status = myhtml_collection_check_size(collection, 1024, 0);
-                        
+
                         if(status)
                             return status;
                     }
@@ -1117,64 +1125,77 @@ mystatus_t myhtml_get_nodes_by_attribute_value_recursion(myhtml_tree_node_t* nod
                 attr = attr->next;
             }
         }
-        
-        if(node->child) {
-            mystatus_t status = myhtml_get_nodes_by_attribute_value_recursion(node->child, collection, func_eq, value, value_len);
-            
-            if(status)
-                return status;
+
+        if(node->child != NULL) {
+            node = node->child;
         }
-        
-        node = node->next;
+        else {
+            while(node->next == NULL) {
+                node = node->parent;
+
+                if(node == root) {
+                    return MyHTML_STATUS_OK;
+                }
+            }
+
+            node = node->next;
+        }
     }
-    
+
     return MyHTML_STATUS_OK;
 }
 
+/* TODO: need to rename function. Remove recursion word */
 mystatus_t myhtml_get_nodes_by_attribute_value_recursion_by_key(myhtml_tree_node_t* node, myhtml_collection_t* collection,
-                                                                     myhtml_attribute_value_find_f func_eq,
-                                                                     const char* key, size_t key_len,
-                                                                     const char* value, size_t value_len)
+                                                                myhtml_attribute_value_find_f func_eq,
+                                                                const char* key, size_t key_len,
+                                                                const char* value, size_t value_len)
 {
-    while(node)
-    {
+    myhtml_tree_node_t *root = node;
+    
+    while(node != NULL) {
         if(node->token && node->token->attr_first) {
             myhtml_tree_attr_t* attr = node->token->attr_first;
-            
+
             while(attr) {
                 mycore_string_t* str_key = &attr->key;
                 mycore_string_t* str = &attr->value;
-                
+
                 if(str_key->length == key_len && mycore_strncasecmp(str_key->data, key, key_len) == 0)
                 {
                     if(func_eq(str, value, value_len)) {
                         collection->list[ collection->length ] = node;
-                        
+
                         collection->length++;
                         if(collection->length >= collection->size) {
                             mystatus_t status = myhtml_collection_check_size(collection, 1024, 0);
-                            
+
                             if(status)
                                 return status;
                         }
                     }
                 }
-                
+
                 attr = attr->next;
             }
         }
-        
-        if(node->child) {
-            mystatus_t status = myhtml_get_nodes_by_attribute_value_recursion_by_key(node->child, collection, func_eq,
-                                                                                          key, key_len, value, value_len);
-            
-            if(status)
-                return status;
+
+        if(node->child != NULL) {
+            node = node->child;
         }
-        
-        node = node->next;
+        else {
+            while(node->next == NULL) {
+                node = node->parent;
+                
+                if(node == root) {
+                    return MyHTML_STATUS_OK;
+                }
+            }
+            
+            node = node->next;
+        }
     }
-    
+
     return MyHTML_STATUS_OK;
 }
 
