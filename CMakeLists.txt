@@ -113,10 +113,6 @@ endif()
 ################
 ## lib param
 #########################
-if(POLICY CMP0042)
-cmake_policy(SET CMP0042 OLD)
-endif()
-
 set(PROJECT_LIB_NAME "${PROJECT_NAME}")
 set(PROJECT_LIB_NAME_STATIC "${PROJECT_NAME}_static")
 
