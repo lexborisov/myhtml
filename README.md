@@ -85,6 +85,7 @@ None
 - [Perl 6] module
 - [Crystal] binding
 - [Elixir/Erlang] binding
+- [Swift wrapper](https://github.com/adtrevor/MyHTML)
 
 ## Examples
 
