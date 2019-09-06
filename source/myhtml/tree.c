@@ -453,16 +453,16 @@ myhtml_tree_node_t * myhtml_tree_node_remove(myhtml_tree_node_t* node)
     
     if(node->prev) {
         node->prev->next = node->next;
-        node->prev = NULL;
-    } else if(node->parent)
+        
+    } else if(node->parent) {
         node->parent->child = node->next;
-    
-    node->parent = NULL;
-    
-    if(node->next)
-        node->next = NULL;
+    }
     
     myhtml_tree_node_callback_remove(node->tree, node);
+    
+    node->next = NULL;
+    node->prev = NULL;
+    node->parent = NULL;
     
     return node;
 }
