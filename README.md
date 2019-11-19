@@ -1,20 +1,16 @@
 # MyHTML — a pure C HTML parser
 
 [![Build Status](https://travis-ci.org/lexborisov/myhtml.svg?branch=master)](https://travis-ci.org/lexborisov/myhtml)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=L59E49K2NVUHE)
-<a href="https://packagecloud.io/"><img alt="Private Maven, RPM, DEB, PyPi and RubyGem Repository | packagecloud" height="46" src="https://packagecloud.io/images/packagecloud-badge.png" width="158" /></a>
 
 MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library with no outside dependencies.
 
-* IRC: [#lexbor on `irc.freenode.net <http://freenode.net>`](http://webchat.freenode.net?channels=%23lexbor)
-
-This is one of module of the [Modest] project.
-
 ## Now
 
-The current version is 4.0.5. [Last stable version](https://github.com/lexborisov/myhtml/releases/latest)
+### Important announcement!
 
-See [Releases](https://github.com/lexborisov/myhtml/releases)
+Please, **use HTML parser** from the **[Lexbor project](https://github.com/lexbor/lexbor)**. HTML parser in the Lexbor project is stable and has more features, and — yes — very fast.
+
+This repository will go into **read-only** mode in **2020-05-01**.
 
 ## Features
 
