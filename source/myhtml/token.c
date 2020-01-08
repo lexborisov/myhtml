@@ -227,7 +227,7 @@ myhtml_tree_attr_t * myhtml_token_node_attribute_first(myhtml_token_node_t *toke
 
 myhtml_tree_attr_t * myhtml_token_node_attribute_last(myhtml_token_node_t *token_node)
 {
-    return token_node->attr_first;
+    return token_node->attr_last;
 }
 
 const char * myhtml_token_node_text(myhtml_token_node_t *token_node, size_t *length)
