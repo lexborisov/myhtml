@@ -5,7 +5,6 @@ compiler:
 
 services:
   - docker
-sudo: false
 
 env:
   - TARGET=test
@@ -48,7 +47,7 @@ matrix:
     - env: OS=debian DIST=stretch
       compiler: clang
 
-install: false
+install: skip 
 
 script:
   - if [ "$TARGET" == "test" ]; then make -j2 && make clean; fi
