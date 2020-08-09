@@ -36,7 +36,7 @@
 
 #define MyHTML_VERSION_MAJOR 4
 #define MyHTML_VERSION_MINOR 0
-#define MyHTML_VERSION_PATCH 5
+#define MyHTML_VERSION_PATCH 6
 
 #define MyHTML_VERSION_STRING MyCORE_STR(MyHTML_VERSION_MAJOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_MINOR) MyCORE_STR(.) MyCORE_STR(MyHTML_VERSION_PATCH)
 
@@ -1158,6 +1158,28 @@ myhtml_node_last_child(myhtml_tree_node_t *node);
 myhtml_tree_node_t*
 myhtml_node_create(myhtml_tree_t* tree, myhtml_tag_id_t tag_id,
                    enum myhtml_namespace ns);
+
+/**
+ * Cloning a node
+ *
+ * @param[in] the tree into which the cloned node will be inserted. myhtml_tree_t*
+ * @param[in] cloning node
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t *
+myhtml_node_clone(myhtml_tree_t* dest_tree, myhtml_tree_node_t* src);
+
+/**
+ * Cloning a node with all children
+ *
+ * @param[in] the tree into which the cloned node will be inserted. myhtml_tree_t*
+ * @param[in] cloning node
+ *
+ * @return myhtml_tree_node_t* if successful, otherwise a NULL value
+ */
+myhtml_tree_node_t *
+myhtml_node_clone_deep(myhtml_tree_t* dest_tree, myhtml_tree_node_t* src);
 
 /**
  * Release allocated resources
