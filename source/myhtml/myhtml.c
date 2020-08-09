@@ -1657,6 +1657,82 @@ myhtml_version_t myhtml_version(void)
     return (myhtml_version_t){MyHTML_VERSION_MAJOR, MyHTML_VERSION_MINOR, MyHTML_VERSION_PATCH};
 }
 
+myhtml_tree_node_t * myhtml_node_clone(myhtml_tree_t* dest_tree, myhtml_tree_node_t* src)
+{
+    myhtml_tag_id_t tag_id;
+    const myhtml_tag_context_t* tag_to, * tag_from;
+    myhtml_tree_node_t* new_node = myhtml_tree_node_create(dest_tree);
 
+    tag_id = src->tag_id;
 
+    if (tag_id >= MyHTML_TAG_LAST_ENTRY) {
+        tag_to = myhtml_tag_get_by_id(dest_tree->tags, src->tag_id);
+        tag_from = myhtml_tag_get_by_id(src->tree->tags, src->tag_id);
 
+        if (tag_to == NULL
+            || tag_to->name_length != tag_from->name_length
+            || mycore_strncmp(tag_to->name, tag_from->name, tag_from->name_length) != 0)
+        {
+            tag_id = myhtml_tag_add(dest_tree->tags, tag_from->name, tag_from->name_length,
+                                    MyHTML_TOKENIZER_STATE_DATA, true);
+        }
+    }
+
+    new_node->token        = myhtml_token_node_clone(dest_tree->token, src->token,
+                                                     dest_tree->mcasync_rules_token_id,
+                                                     dest_tree->mcasync_rules_attr_id);
+    new_node->tag_id        = tag_id;
+    new_node->ns            = src->ns;
+
+    if(new_node->token) {
+        new_node->token->tag_id = tag_id;
+        new_node->token->type |= MyHTML_TOKEN_TYPE_DONE;
+    }
+
+    return new_node;
+}
+
+myhtml_tree_node_t * myhtml_node_clone_deep(myhtml_tree_t* dest_tree, myhtml_tree_node_t* src)
+{
+    myhtml_tree_node_t* cloned, *root, *node;
+    myhtml_tree_node_t* scope_node = src;
+
+    if(scope_node && scope_node->tree && scope_node->tree->document == scope_node) {
+        src = scope_node->child;
+    }
+
+    root = node = myhtml_node_clone(dest_tree, src);
+    if (root == NULL) {
+        return NULL;
+    }
+
+    src = src->child;
+
+    while(src != NULL) {
+        cloned = myhtml_node_clone(dest_tree, src);
+        if (cloned == NULL) {
+            return NULL;
+        }
+
+        myhtml_tree_node_add_child(node, cloned);
+
+        if(src->child) {
+            src = src->child;
+            node = cloned;
+        }
+        else {
+            while(src != scope_node && src->next == NULL) {
+                node = node->parent;
+                src = src->parent;
+            }
+
+            if(src == scope_node) {
+                break;
+            }
+
+            src = src->next;
+        }
+    }
+
+    return root;
+}
