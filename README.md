@@ -8,9 +8,7 @@ MyHTML is a fast HTML Parser using Threads implemented as a pure C99 library wit
 
 ### Important announcement!
 
-Please, **use HTML parser** from the **[Lexbor project](https://github.com/lexbor/lexbor)**. HTML parser in the Lexbor project is stable and have more features, and — yes — very fast.
-
-This repository will go into **read-only** mode in **2020-05-01**.
+Please use the HTML parser from the [Lexbor project](https://github.com/lexbor/lexbor). It is stable, has more features, and — yes — it's very fast.
 
 ## Features
 
