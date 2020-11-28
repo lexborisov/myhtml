@@ -36,7 +36,7 @@ mystatus_t myhtml_serialization_node_buffer(myhtml_tree_node_t* node, mycore_str
 mystatus_t myhtml_serialization_tree_callback(myhtml_tree_node_t* scope_node, mycore_callback_serialize_f callback, void* ptr);
 mystatus_t myhtml_serialization_node_callback(myhtml_tree_node_t* node, mycore_callback_serialize_f callback, void* ptr);
 
-// in versuon 1.0.3 this is in public api.
+// in version 1.0.3 this is in public api.
 // Need to set deprecated?
 mystatus_t myhtml_serialization(myhtml_tree_node_t* scope_node, mycore_string_raw_t* str);
 mystatus_t myhtml_serialization_node(myhtml_tree_node_t* node, mycore_string_raw_t* str);
