@@ -1135,7 +1135,11 @@ bool myhtml_insertion_mode_in_body(myhtml_tree_t* tree, myhtml_token_node_t* tok
                 
                 myhtml_tree_active_formatting_reconstruction(tree);
                 
-                token->type = MyHTML_TOKEN_TYPE_OPEN;
+                if (token->type & MyHTML_TOKEN_TYPE_DONE) {
+                    token->type = MyHTML_TOKEN_TYPE_OPEN | MyHTML_TOKEN_TYPE_DONE;
+                } else {
+                    token->type = MyHTML_TOKEN_TYPE_OPEN;
+                }
                 
                 myhtml_tree_node_insert_html_element(tree, token);
                 myhtml_tree_open_elements_pop(tree);
