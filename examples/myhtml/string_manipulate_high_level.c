@@ -77,6 +77,15 @@ int main(int argc, const char * argv[])
     // print tree
     myhtml_serialization_tree_callback(myhtml_tree_get_node_html(tree), serialization_callback, NULL);
     
+    if (collection) {
+        if (collection->list) {
+            free(collection->list);
+            collection->list = NULL;
+        }
+        free(collection);
+        collection = NULL;
+    }
+
     // release resources
     myhtml_tree_destroy(tree);
     myhtml_destroy(myhtml);
